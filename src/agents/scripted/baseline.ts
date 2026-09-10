@@ -1,14 +1,16 @@
+import type { SessionObservation } from '../../runtime/session.js';
+import type { Agent, PolicyId } from '../contract.js';
 // 可解释的脚本对照组。不是大模型，不读取种子、RNG 或未来天气。
-export function chooseAction(observation, policy = 'subsistence') {
-  const o = observation;
-  const byId = id => o.actions.find(a => a.id === id);
-  const legal = id => byId(id)?.enabled;
-  const tech = id => o.technologies.find(t => t.id === id);
-  const mastered = id => o.person.mastered.includes(id);
+export function chooseAction(observation: SessionObservation, policy: PolicyId = 'subsistence'): string | null {
+  const o = observation.game;
+  const byId = (id: string) => o.actions.find(a => a.id === id);
+  const legal = (id: string) => byId(id)?.enabled;
+  const tech = (id: string) => o.technologies.find(t => t.id === id);
+  const mastered = (id: string) => o.person.mastered.includes(id);
   if (legal('handover')) return 'handover';
   if (!o.actions.some(a => a.enabled)) return null;
 
-  function acquire(id) {
+  function acquire(id: string): string | null {
     const action = byId(id);
     if (action?.enabled) return id;
     if (action && o.ap >= action.ap) {
@@ -26,7 +28,7 @@ export function chooseAction(observation, policy = 'subsistence') {
   }
   if (legal('cultivate') && ((o.harvest.food >= 2 && o.family.food <= o.parameters.foodPerTurn + 3) || o.family.project)) return 'cultivate';
 
-  function learn(id) {
+  function learn(id: string): string | null {
     const node = tech(id);
     if (!node || node.mastered) return null;
     for (const parent of node.prerequisites) {
@@ -45,7 +47,7 @@ export function chooseAction(observation, policy = 'subsistence') {
       const difference = samples.reduce((sum, sample) => sum + sample.candidate - sample.control, 0);
       return acquire(`release:${difference > 0 ? 'adopt' : 'keep'}`);
     }
-    if (missing === 'water-plan' && !(o.family.channel?.durability > 0)) return acquire(o.family.channel ? 'repair-channel' : 'build-channel');
+    if (missing === 'water-plan' && !((o.family.channel?.durability ?? 0) > 0)) return acquire(o.family.channel ? 'repair-channel' : 'build-channel');
     return missing ? acquire(`practice:${id}:${missing}`) : null;
   }
 
@@ -74,4 +76,11 @@ export function chooseAction(observation, policy = 'subsistence') {
   }
   if (legal('cultivate') && o.harvest.food > 0 && o.family.food < 10) return 'cultivate';
   return legal('work') ? 'work' : 'end-turn';
+}
+
+export function scriptedAgent(id: PolicyId): Agent {
+  return { id, kind: 'scripted', decide(observation) {
+    const actionId = chooseAction(observation, id);
+    return actionId ? { revision: observation.revision, actionId, reason: `scripted:${id}` } : null;
+  } };
 }

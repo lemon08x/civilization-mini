@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "agriculture-baseline",
+  "seeds": [7, 17],
+  "scenarios": ["river", "dry"],
+  "agents": ["subsistence", "irrigation", "seed", "legacy"],
+  "variants": [{ "id": "baseline", "parameters": {} }],
+  "maxActions": 1500,
+  "decisionTimeoutMs": 30000
+}

@@ -2,3 +2,5 @@ node_modules/
 runs/
 reports/
 *.tmp
+dist/
+artifacts/

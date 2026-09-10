@@ -1,54 +1,52 @@
-import { applyAction, createGame, exportGame, importGame, metrics, observe } from '/src/engine.mjs';
-import { chooseAction } from '/src/policies.mjs';
-import { POLICY_NAMES } from '/src/rules.mjs';
-
-const KEY = 'civilization-mini.rules-lab.v1';
-const $ = id => document.getElementById(id);
-const escape = text => String(text).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
-let state = createGame({ seed: 17 });
+import { createSession, submitCommand, observeSession } from '../../src/runtime/session.js';
+import { importLegacy, replayRecord } from '../../src/runtime/replay.js';
+import type { Session, ImplementationIdentity } from '../../src/runtime/records.js';
+import { validateRuleset } from '../../src/game/ruleset.js';
+import { chooseAction } from '../../src/agents/scripted/baseline.js';
+import { POLICY_NAMES } from '../../src/agents/contract.js';
+import type { PolicyId } from '../../src/agents/contract.js';
+import { boardView } from './view.js';
+import type { BoardView } from './view.js';
+const KEY = 'civilization-mini.rules-lab.v2', OLD_KEY = 'civilization-mini.rules-lab.v1';
+const $ = (id: string) => document.getElementById(id) as HTMLInputElement;
+const escape = (text: unknown) => String(text).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]!);
+const implementation: ImplementationIdentity = await (await fetch('/implementation.json')).json();
+const ruleset = validateRuleset(await (await fetch('/rulesets/traditional-agriculture.v1.json')).json());
+const fresh = (seed=17, scenarioId='river') => createSession({runId: crypto.randomUUID(), ruleset, implementation, seed, scenarioId});
+let state: Session = await fresh();
 let group = '生活', showUnavailable = false, policy = 'legacy', busy = false, loadFailed = false;
-
-function error(message) { $('error').textContent = message; $('error').hidden = !message; }
+let storageRaw = localStorage.getItem(KEY);
+function error(message: string) { $('error').textContent = message; $('error').hidden = !message; }
 try {
-  const raw = localStorage.getItem(KEY);
-  if (raw) state = importGame(JSON.parse(raw));
-} catch (failure) {
-  loadFailed = true;
-  error(`原存档未覆盖：${failure.message}。可导入有效存档，或开启新实验（旧原文会先备份）。`);
+  if (storageRaw) state = await replayRecord(JSON.parse(storageRaw), implementation);
+  else { const old = localStorage.getItem(OLD_KEY); if (old) { state = await importLegacy(JSON.parse(old), ruleset, implementation, crypto.randomUUID()); storageRaw = JSON.stringify(state.record); localStorage.setItem(KEY, storageRaw); } }
+} catch (failure) { loadFailed = true; error('原存档未覆盖：' + (failure as Error).message); }
+function commit(next: Session, backup=false) {
+  if (localStorage.getItem(KEY) !== storageRaw) throw new Error('另一页面已更新存档，请刷新后继续');
+  if (backup && storageRaw) localStorage.setItem(KEY + '.backup.' + Date.now(), storageRaw);
+  const raw = JSON.stringify(next.record);
+  localStorage.setItem(KEY, raw); storageRaw = raw; state = next; loadFailed=false; error(''); render();
 }
-
-function commit(next, backup = false) {
-  if (backup) {
-    const raw = localStorage.getItem(KEY);
-    if (raw) localStorage.setItem(`${KEY}.backup.${Date.now()}`, raw);
-  }
-  // 先保存，后更新界面；配额异常不会让内存先推进。
-  localStorage.setItem(KEY, JSON.stringify(exportGame(next)));
-  state = next; loadFailed = false; error(''); render();
+async function act(id: string, revision: number) {
+  if (busy || loadFailed) return; busy=true;
+  try { commit((await submitCommand(state, {commandId: state.record.manifest.runId + ':' + revision, expectedRevision: revision, actionId:id})).session); }
+  catch(failure) { render(); error((failure as Error).message); } finally {busy=false;}
 }
-
-function act(id, revision) {
-  if (busy || loadFailed) return;
-  busy = true;
-  try { commit(applyAction(state, id, revision)); } catch (failure) { render(); error(failure.message); }
-  finally { busy = false; }
-}
-
-function techCard(tech, o) {
+function techCard(tech: BoardView["technologies"][number], o: BoardView) {
   const status = tech.mastered ? '已掌握' : tech.studied || tech.practicesDone.length ? '学习中' : tech.prerequisites.every(id => o.person.mastered.includes(id)) ? '可学习' : '缺少前置';
-  const names = ids => ids.map(id => o.technologies.find(t => t.id === id)?.name ?? id).join('、');
+  const names = (ids: string[]) => ids.map(id => o.technologies.find(t => t.id === id)?.name ?? id).join('、');
   const action = o.actions.find(a => a.id === `study:${tech.id}`);
   return `<div class="tech ${tech.mastered ? 'mastered' : tech.studied ? 'learning' : ''}"><h3>${escape(tech.name)}<span>${status}</span></h3><p>社会基础：${escape(tech.world)}</p><p>前置：${escape(names(tech.prerequisites) || '无')}</p><p>学习 ${tech.studied}/${tech.required} · 实践 ${tech.practicesDone.length}/${tech.practices.length}</p><p class="benefit">${escape(tech.benefit)}</p>${tech.archived ? '<p>▣ 家族有完整材料</p>' : ''}${tech.heirMastered ? '<p>● 后辈已掌握</p>' : tech.heirStudied ? `<p>后辈学习 ${tech.heirStudied} 次</p>` : ''}${action?.enabled ? `<button data-action="${escape(action.id)}">学习 · ${action.ap} 行动${action.money ? ` / ${action.money} 钱财` : ''}</button>` : ''}</div>`;
 }
 
 function render() {
-  const o = observe(state);
-  const names = ids => ids.map(id => o.technologies.find(t => t.id === id)?.name ?? id).join('、') || '尚无';
-  $('scenario').value = state.scenario;
-  $('seed').value = state.config.seed;
+  const o = boardView(state);
+  const names = (ids: string[]) => ids.map(id => o.technologies.find(t => t.id === id)?.name ?? id).join('、') || '尚无';
+  $('scenario').value = state.record.manifest.scenarioId;
+  $('seed').value = String(state.record.manifest.seed);
   const actions = o.actions.filter(a => a.group === group && a.id !== 'end-turn' && a.id !== 'handover' && (showUnavailable || a.enabled));
   const end = ['complete', 'ended'].includes(o.status);
-  const results = metrics(state);
+  const results = o.results;
   $('app').innerHTML = `
     <section class="status" aria-label="当前局面">
       <div class="counter primary"><small>${escape(o.scenario.name)} · ${escape(o.world.weatherName)}</small><strong>第 ${o.clock.generation} 代 / 第 ${o.clock.turn} 季</strong></div>
@@ -78,29 +76,28 @@ function render() {
       ${techCard(o.technologies[0], o)}<div class="tree-columns">${['灌溉', '种源'].map(branch => `<div><div class="branch-title">${branch}</div>${o.technologies.filter(t => t.branch === branch).map((t, i) => `${i ? '<div class="connector">↓</div>' : ''}${techCard(t, o)}`).join('')}</div>`).join('')}</div></div></section>
       <section class="panel"><div class="panel-head"><h2>规则账本</h2><small>可重放 · 可追溯</small></div><div class="panel-body"><details><summary>最近 ${o.recentLog.length} 次行动</summary>${o.recentLog.map(entry => `<div class="trace"><strong>#${entry.revision} · ${escape(entry.actionId)}</strong>${entry.feedback.map(line => `<p>${escape(line)}</p>`).join('')}</div>`).join('')}</details><details><summary>当前实验参数</summary><table><tbody>${Object.entries(o.parameters).map(([key, value]) => `<tr><td>${escape(key)}</td><td>${value}</td></tr>`).join('')}</tbody></table></details><details><summary>已完成的世代</summary>${o.history.map(h => `<p>第 ${h.generation} 代：${escape(names(h.mastered))}；教会后辈：${escape(names(h.heir))}</p>`).join('') || '<p>尚无。</p>'}</details></div></section>
     </div></div>`;
-  const revision = state.revision;
-  document.querySelectorAll('[data-action]').forEach(button => button.addEventListener('click', () => act(button.dataset.action, revision), { once: true }));
-  document.querySelectorAll('[data-group]').forEach(button => button.addEventListener('click', () => { group = button.dataset.group; render(); }));
-  $('unavailable')?.addEventListener('change', event => { showUnavailable = event.target.checked; render(); });
-  $('policy')?.addEventListener('change', event => { policy = event.target.value; });
-  $('policy-step')?.addEventListener('click', () => { const id = chooseAction(observe(state), policy); if (id) act(id, revision); });
+  const revision = state.record.entries.length;
+  document.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(button => button.addEventListener('click', () => void act(button.dataset.action!, revision), { once: true }));
+  document.querySelectorAll<HTMLButtonElement>('[data-group]').forEach(button => button.addEventListener('click', () => { group = button.dataset.group!; render(); }));
+  $('unavailable')?.addEventListener('change', event => { showUnavailable = (event.target as HTMLInputElement).checked; render(); });
+  $('policy')?.addEventListener('change', event => { policy = (event.target as HTMLSelectElement).value; });
+  $('policy-step')?.addEventListener('click', () => { const id = chooseAction(observeSession(state), policy as PolicyId); if (id) void act(id, revision); });
 }
 
-function download(name, value) {
-  const url = URL.createObjectURL(new Blob([JSON.stringify(value, null, 2)], { type: 'application/json' }));
-  const link = document.createElement('a'); link.href = url; link.download = name; link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+function download(name: string, value: unknown) {
+  const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)], {type:'application/json'}));
+  const link=document.createElement('a'); link.href=url; link.download=name; link.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-$('new-game').addEventListener('click', () => {
-  try { commit(createGame({ seed: Number($('seed').value), scenario: $('scenario').value }), true); } catch (failure) { error(failure.message); }
+$('new-game').addEventListener('click', async()=>{
+  if(busy) return; busy=true;
+  try {commit(await fresh(Number($('seed').value),$('scenario').value),true);} catch(failure){error((failure as Error).message);} finally {busy=false;}
 });
-$('export').addEventListener('click', () => download(`rules-lab-${state.config.seed}-r${state.revision}.json`, exportGame(state)));
-$('observation').addEventListener('click', () => download(`observation-r${state.revision}.json`, observe(state)));
-$('import').addEventListener('change', async event => {
-  const file = event.target.files[0];
-  if (!file) return;
-  try { if (file.size > 5_000_000) throw new Error('存档文件超过 5 MB'); commit(importGame(JSON.parse(await file.text())), true); }
-  catch (failure) { error(`导入失败，原实验保留：${failure.message}`); }
-  finally { event.target.value = ''; }
+$('export').addEventListener('click',()=>download('rules-lab.json',state.record));
+$('observation').addEventListener('click',()=>download('observation.json',observeSession(state)));
+$('import').addEventListener('change',async()=>{
+ const file=$('import').files?.[0]; if(!file || busy)return; busy=true;
+ try {if(file.size>5000000)throw new Error('存档文件超过 5 MB'); const raw=JSON.parse(await file.text()); commit(raw.formatVersion===1 ? await importLegacy(raw,ruleset,implementation,crypto.randomUUID()) : await replayRecord(raw,implementation),true);}
+ catch(failure){error('导入失败，原实验保留：'+(failure as Error).message);} finally {busy=false;$('import').value='';}
 });
 render();
+

@@ -1,63 +1,46 @@
 # Civilization Mini · 世代规则预研
 
-先把规则做成一套能手动走、能重放、能让 AI 操作的桌游式实验，再决定正式游戏的实现。
+独立的桌游规则实验项目。先验证普通人的生活、学习与代际传承，再开发正式游戏；不依赖 Cocos，不修改 ../remake。
 
-这是独立于 `../remake` 的预研项目。首版不是完整游戏，也不是已平衡的科技树：只检验一个农业地区中的世界过程、个人学习、家庭资产、持续项目和真实传承。旧项目与存档不迁移、不修改。
+现有规则保持 v0.1.0：两个环境、七个农业节点、两代经营窗口。工程版本为 v0.2.0，四个脚本策略不是大模型，尚未接入付费 API 或后台循环。
 
-## 已有内容
+## 运行
 
-- 一张可操作的浏览器规则桌：状态筹码、行动卡、科技分支、家庭资产、试验记录与行动账本。
-- 一个纯 JavaScript 确定性结算器；网页、命令行、脚本和大模型使用同一套行动规则。
-- 河渠／缺水两个环境，灌溉与种源两条分支，7 个个人节点，两代经营窗口。
-- 4 个可解释脚本对照策略；它们不是大模型 AI。
-- 面向 AI 的 JSON 观察与行动接口、可重放存档、版本检查、过期命令保护。
-- 小批量配对实验：基线与候选参数使用相同场景、种子和策略，分别记录结果、动作轨迹与可重放存档。
-
-没有接入付费模型、自动常驻循环、远程服务或正式游戏框架。大模型代理已经可以通过 CLI 逐步操作；后续再按需要接 API，不把规则正确性绑定到某个模型供应商。
-
-## 开始使用
-
-需要 Node.js 22 或以上，无第三方依赖，不必先安装 npm 包。
+需要 Node.js 24+。
 
 ```powershell
-cd C:\Users\94202\Desktop\daily\civilizationMini
+npm ci
+npm run build
 npm start
 ```
 
-打开 <http://127.0.0.1:4317>。服务器只监听本机。可以自己点行动，也可以让某个脚本策略走一步。每步自动保存；开启新实验或导入前，会另存旧原文备份。
+打开 http://127.0.0.1:4317。点选行动自动保存，反馈显示在页面顶部。浏览器 v1 存档首次读取后迁移到 v2 新键，保留旧原文；新建和导入会备份现存 v2。
 
 ```powershell
+npm run lab -- new --run demo --seed 17 --scenario river
+node scripts/player.mjs observe --run demo
+node scripts/player.mjs act --run demo --revision 0 --action study:observation
+npm run lab -- import --run imported --file runs/manual.json
 npm test
-npm run simulate
 npm run simulate -- --candidate experiments/cheaper-learning.json
 ```
 
-默认每批使用 2 个种子 × 2 个场景 × 4 个策略；增加候选参数组后共 32 个短实验。每次结果保存在独立 `reports/时间戳/`，不会覆盖之前的结果。输出 `report.md`、`summary.json`、每局 replay 与 trace。未提供 candidate 时只跑基线。
+代码修改后先重新 build。CLI 按 run ID 操作，拒绝原地覆盖已有实验。新运行保存至 artifacts/runs；对照报告、完整规则和轨迹保存至 artifacts/experiments。默认批次 16 局，带一个候选为 32 局，不会自动采纳候选。
 
-## 先阅读什么
+## 项目职责
 
-1. [预研问题与阶段门槛](docs/RESEARCH.md)：哪些规则先固定，哪些应当通过实验完善。
-2. [当前桌游规则](docs/RULEBOOK.md)：对象、季节、行动、产出、技艺与传承的确切定义。
-3. [AI 操作与改进协议](docs/AI_PROTOCOL.md)：AI 能看什么、怎样行动、怎样提议参数改动。
-4. [首次实验发现](docs/INITIAL_FINDINGS.md)：当前模型暴露的问题，以及尚未采纳的候选参数。
-
-本次原始报告：`reports/initial-comparison/report.md`。报告属于可再生成的实验产物，重要发现另行写入研究记录。
-
-## 文件职责
-
-| 位置 | 职责 |
+| 目录 | 职责 |
 | --- | --- |
-| `src/rules.mjs` | 节点、时代技术条件、场景、参数及边界校验 |
-| `src/engine.mjs` | 唯一状态转换与结算入口；观察、存档重放、指标 |
-| `src/policies.mjs` | 只读取玩家观察的脚本基线 |
-| `web/` | 薄的规则桌面，不自行计算生产与成长 |
-| `scripts/cli.mjs` | 顺序操作一个实验文件，向大模型提供 JSON 接口 |
-| `scripts/experiment.mjs` | 小批量同条件对照、轨迹与报告 |
-| `experiments/` | 独立候选参数，不直接修改基线 |
-| `test/` | 因果关系、交接、恢复和少量完整流程验证 |
+| src/game | 状态、行动、生产/学习/项目/时间/传承系统、玩家观察；唯一规则结算 |
+| src/runtime | 命令执行、完整记录、指纹、重放、旧存档迁移与文件保存 |
+| src/agents | 代理协议、脚本基线、可注入模型调用的 JSON 适配器 |
+| src/research | 有界实验调度、事件指标、同条件比较 |
+| apps/cli、apps/board | 命令行与浏览器入口 |
+| rulesets | 冻结规则、科技节点、场景、参数边界 |
+| experiments | 候选参数与实验计划 |
+| tests | 重构前独立基准及运行保护验证 |
+| artifacts | 生成记录和报告，不作为规则来源 |
 
-## 当前边界
+详见 [架构与演进约束](docs/ARCHITECTURE.md)、[桌游规则](docs/RULEBOOK.md)、[AI 协议](docs/AI_PROTOCOL.md)、[预研问题](docs/RESEARCH.md)。历史研究结论保留在 [首次发现](docs/INITIAL_FINDINGS.md)。
 
-每代八季是为了快速比较传承而设的实验窗口，不是人物从出生到死亡的年表。后辈默认已经成年；尚未模拟出生、寿命、完整历史、土地交易、信贷、人口、动态市场和生物遗传。种源试验只比较两种预设的地方种源，不宣称完成了现实中的新品种育种。
-
-首次实验已发现固定工资与无限市场会削弱技术投资的经济意义。当前数值保留为基线，下一步先研究世界条件，而不是急于扩大科技树。
+重构前源码可从 Git 标签 baseline/rules-lab-0.1.0 查阅；原 runs/ 与 reports/ 保留。不要用新实现直接解释不同指纹的 v2 存档，需对应版本或显式迁移。

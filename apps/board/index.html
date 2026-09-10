@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>世代 · 规则实验桌</title>
-  <link rel="stylesheet" href="/web/style.css">
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <header class="masthead">
@@ -18,6 +18,6 @@
     <div class="tools"><button id="export">导出可重放存档</button><label class="file-button">导入存档<input id="import" type="file" accept=".json,application/json" hidden></label><button id="observation">导出 AI 可见观察</button></div>
     <p>结果由固定规则结算；脚本或 AI 只能选择行动。存档只保存在本机浏览器，命令行实验使用独立文件。</p>
   </footer>
-  <script type="module" src="/web/app.mjs"></script>
+  <script type="module" src="/modules/apps/board/app.js"></script>
 </body>
 </html>
