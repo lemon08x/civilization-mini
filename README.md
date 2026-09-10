@@ -43,4 +43,4 @@ npm run simulate -- --candidate experiments/cheaper-learning.json
 
 详见 [架构与演进约束](docs/ARCHITECTURE.md)、[桌游规则](docs/RULEBOOK.md)、[AI 协议](docs/AI_PROTOCOL.md)、[预研问题](docs/RESEARCH.md)。历史研究结论保留在 [首次发现](docs/INITIAL_FINDINGS.md)。
 
-重构前源码可从 Git 标签 baseline/rules-lab-0.1.0 查阅；原 runs/ 与 reports/ 保留。不要用新实现直接解释不同指纹的 v2 存档，需对应版本或显式迁移。
+当前修改统一保存在 main，不保留额外备份分支、标签或 ZIP 文件。重构前源码仍可从 Git 历史提交 2f0ffbf 查阅；原 runs/ 与 reports/ 保留。不要用新实现直接解释不同指纹的 v2 存档，需对应版本或显式迁移。

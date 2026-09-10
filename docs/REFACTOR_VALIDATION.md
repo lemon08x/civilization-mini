@@ -10,4 +10,4 @@
 - 本地 HTTP 冒烟验证 27 项页面资源和完整浏览器模块依赖图可访问，不包含 Node 专用依赖；文件存储模块不可通过服务器访问。
 - 实际浏览器点击试玩未完成：CUA 工具报 `unsupported Codex auth method: apikey`。HTTP 检查和类型检查不替代点击、刷新与导入的真实浏览器验证。
 
-原代码保存于 Git 标签 `baseline/rules-lab-0.1.0`，完整备份位于 `../civilizationMini.backups/before-refactor-20260910-163015.zip`。旧 `runs/`、`reports/` 保留。旧引擎、旧入口与其测试已由新模块和基准检查替代，可从标签查看。
+重构结果已合并至 `main`。按用户要求，重构分支、备份标签和 ZIP 文件已删除；原代码仍可从 Git 历史提交 `2f0ffbf` 查看。旧 `runs/`、`reports/` 保留。旧引擎、旧入口与其测试已由新模块和基准检查替代。
