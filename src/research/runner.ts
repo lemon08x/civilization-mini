@@ -39,7 +39,7 @@ export async function runExperiment(spec: ExperimentSpec, rules: Ruleset, implem
   validateExperiment(spec, rules, agents);
   const results: RunResult[] = [];
   for (const variant of spec.variants) for (const scenario of spec.scenarios) for (const agentId of spec.agents) for (const seed of spec.seeds) {
-    const agent = agents[agentId], runId = `${variant.id}-${scenario}-${agentId}-${seed}`;
+    const agent = agents[agentId], runId = `run-${String(results.length + 1).padStart(4, '0')}`;
     let session = await createSession({ runId, ruleset: resolveRuleset(rules, variant.parameters), implementation, seed, scenarioId: scenario, agent: { kind: agent.kind, name: agent.id } });
     while (!['complete', 'ended'].includes(session.state.status)) {
       if (session.record.entries.length >= spec.maxActions) throw new Error(`实验 ${runId} 达到行动上限`);

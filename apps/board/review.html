@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>规则与实验审阅 · 世代</title><link rel="stylesheet" href="/review.css"></head>
+<body>
+<header><div><p class="eyebrow">CIVILIZATION MINI / RESEARCH DESK</p><h1>规则与实验审阅</h1><p>看清现在的规则，追溯每一次建议与取舍。</p></div><div class="tools"><a href="/">返回游戏</a><button id="refresh">刷新记录</button></div></header>
+<div id="identity" class="identity">正在读取当前规则与已有实验…</div>
+<nav aria-label="审阅栏目"><button data-tab="rules" class="selected">规则总览</button><button data-tab="technology">科技关系</button><button data-tab="parameters">参数与权限</button><button data-tab="research">实验与提案</button></nav>
+<nav aria-label="研究框架"><button data-tab="framework">跨领域框架与研究问题</button></nav>
+<main id="review" aria-live="polite"></main>
+<dialog id="source"><form method="dialog"><button>关闭原始文件</button></form><h2 id="source-title"></h2><pre id="source-text"></pre></dialog>
+<footer>只读审阅 · 不修改规则或存档 · 不启动模拟 · 提案状态来自独立记录，模拟结果不会自动变成已采纳修改。</footer>
+<script type="module" src="/modules/apps/board/review.js"></script>
+</body></html>

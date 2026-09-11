@@ -1,8 +1,8 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { resolveRuleset, isRecord } from '../../src/game/ruleset.js';
-import { createSession, observeSession, submitCommand } from '../../src/runtime/session.js';
-import { importLegacy, replayRecord } from '../../src/runtime/replay.js';
+import { createSession, observeSession } from '../../src/runtime/session.js';
+import { importLegacy, importRecord } from '../../src/runtime/replay.js';
 import { FileRunStore } from '../../src/runtime/file-store.js';
 import { metrics } from '../../src/research/metrics.js';
 import { POLICIES } from '../../src/agents/contract.js';
@@ -23,17 +23,21 @@ function options(args: string[]): Record<string, string> {
 try {
   const [command = 'help', ...args] = process.argv.slice(2), opts = options(args);
   if (command === 'help') {
-    console.log(`世代规则预研 v0.2 — 所有局面通过运行环境执行
-  npm run lab -- new --run demo --seed 17 --scenario river
+    console.log(`世代规则预研 v0.5 — 默认社会传承规则 0.4.0
+  npm run lab -- new --run demo --seed 17 --scenario woodland
+  npm run lab -- new --run old-demo --rules legacy --scenario river
   npm run lab -- observe --run demo
   npm run lab -- act --run demo --revision 0 --action study:observation
   npm run lab -- metrics --run demo
   npm run lab -- export --run demo
   npm run lab -- import --run imported --file runs/manual.json
-  npm run simulate -- --candidate experiments/cheaper-learning.json
+  npm run simulate -- --candidate experiments/storage-capacity.json
+  npm run simulate -- --rules legacy --spec experiments/plans/agriculture-v1.json
 运行产物只写 artifacts/。旧 --file 存档请显式 import，不原地覆盖。`);
   } else {
-    const { implementation, base } = await loadContext();
+    const context = await loadContext();
+    if (opts.rules && !['legacy', 'production', 'feedback', 'society'].includes(opts.rules)) throw new Error('--rules 只支持 legacy / production / feedback / society');
+    const { implementation, legacyBase } = context, base = opts.rules === 'legacy' ? legacyBase : opts.rules === 'production' ? context.productionBase : opts.rules === 'feedback' ? context.feedbackBase : context.base;
     const store = new FileRunStore(join(projectRoot, 'artifacts/runs'), implementation);
     if (command === 'simulate') {
       const raw = await readJson(opts.spec ? resolve(opts.spec) : join(projectRoot, 'experiments/plans/default.json'));
@@ -65,18 +69,14 @@ try {
       if (!opts.run) throw new Error('请指定 --run；旧文件先使用 import --run 新ID --file 原路径');
       if (command === 'new') {
         const overrides = opts.params ? await readJson(resolve(opts.params)) : {};
-        const session = await createSession({ runId: opts.run, ruleset: resolveRuleset(base, overrides), implementation, seed: Number(opts.seed ?? 1), scenarioId: opts.scenario ?? 'river' });
+        const session = await createSession({ runId: opts.run, ruleset: resolveRuleset(base, overrides), implementation, seed: Number(opts.seed ?? 1), scenarioId: opts.scenario ?? (base.production ? 'woodland' : 'river') });
         await store.create(session); console.log(JSON.stringify(observeSession(session), null, 2));
       } else if (command === 'import') {
         if (!opts.file) throw new Error('import 需要 --file');
         const raw = await readJson(resolve(opts.file));
         let session;
-        if (isRecord(raw) && raw.format === 'civilization-mini-replay') session = await importLegacy(raw, base, implementation, opts.run);
-        else {
-          const imported = await replayRecord(raw, implementation);
-          session = await createSession({ ...imported.record.manifest, runId: opts.run });
-          for (const entry of imported.record.entries) session = (await submitCommand(session, entry.command)).session;
-        }
+        if (isRecord(raw) && raw.format === 'civilization-mini-replay') session = await importLegacy(raw, legacyBase, implementation, opts.run);
+        else session = await importRecord(raw, implementation, opts.run);
         await store.create(session); console.log(JSON.stringify(observeSession(session), null, 2));
       } else if (command === 'act') {
         if (!opts.action || opts.revision === undefined) throw new Error('act 需要 --action 和 --revision');

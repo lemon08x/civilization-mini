@@ -14,6 +14,13 @@ export function reportMarkdown(results: RunResult[]): string {
     '| 参数组 | 场景 | 玩家 | 控制器 | 种子 | 状态 | 钱财 | 口粮 | 缺粮 | 学会数 | 继承数 | 试验样本 |',
     '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |',
     ...results.map(r => `| ${r.variant} | ${r.scenario} | ${r.agent} | ${r.controller} | ${r.seed} | ${r.metrics.status} | ${r.metrics.money} | ${r.metrics.food} | ${r.metrics.foodShortfall} | ${r.metrics.learnedNodes.length} | ${r.metrics.inheritedNodes.reduce((n, g) => n + g.nodes.length, 0)} | ${r.metrics.samples} |`), '',
+    ...(results.some(r => r.metrics.production) ? [
+      '## 通用生产过程', '',
+      '| 运行 | 参数组 | 场景 / 脚本 | 耕作次数 | 采食 | 损耗 | 木容器 / 陶器 / 工具产量 | 手工交换收入 | 配置储存 | 做工 / 买粮次数 |',
+      '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |',
+      ...results.map(r => { const p = r.metrics.production!; return `| ${r.runId} | ${r.variant} | ${r.scenario} / ${r.agent} | ${p.cultivateActions} | ${p.gatheredFood} | ${p.spoiledFood} | ${p.craftedWoodenware} / ${p.craftedPottery} / ${p.craftedTools} | ${p.craftEarnings} | ${p.installedStorage} | ${p.workActions} / ${p.buyFoodActions} |`; }), '',
+      '采食、工艺产出、损耗与收入由事件累计；仓库存量另存 metrics.json。run ID 不编码玩家不可见的种子或参数组。', '',
+    ] : []),
     '## 配对变化', '',
     ...compareRuns(results).map(r => `- ${r.candidate} 对 ${r.baseline}：钱财 ${r.money >= 0 ? '+' : ''}${r.money}，缺粮 ${r.foodShortfall}，学会数 ${r.learnedNodes}，继承数 ${r.inheritedNodes}。`), '',
     '不计算统一胜利分。先看对应轨迹，再区分参数、世界机制与代理策略的问题；需要采纳时再做少量留出检查和人工试玩。',

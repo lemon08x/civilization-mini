@@ -2,19 +2,33 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, resolve, sep } from 'node:path';
 import { loadContext, projectRoot } from '../cli/context.js';
+import { loadResearchIndex, parameterRows, readReviewFile } from './review-data.js';
+import { fingerprint } from '../../src/runtime/records.js';
 
-await loadContext();
+const context = await loadContext();
 const port = Number(process.env.PORT ?? 4317);
 const types: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
 const server = http.createServer(async (req, res) => {
   if (!['GET', 'HEAD'].includes(req.method ?? '')) { res.writeHead(405); res.end(); return; }
   try {
-    const path = decodeURIComponent(new URL(req.url ?? '/', 'http://127.0.0.1').pathname);
+    const url = new URL(req.url ?? '/', 'http://127.0.0.1');
+    const path = decodeURIComponent(url.pathname);
+    if (path === '/review-data') {
+      const research = await loadResearchIndex(projectRoot, context.base);
+      const body = JSON.stringify({ ...research, rules: context.base, implementation: context.implementation, rulesFingerprint: await fingerprint(context.base), parameters: parameterRows(context.base) });
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(req.method === 'HEAD' ? undefined : body); return;
+    }
+    if (path === '/review-file') {
+      const body = await readReviewFile(projectRoot, url.searchParams.get('path') ?? '');
+      res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(req.method === 'HEAD' ? undefined : body); return;
+    }
     let absolute: string;
     if (path === '/') absolute = join(projectRoot, 'apps/board/index.html');
+    else if (path === '/review') absolute = join(projectRoot, 'apps/board/review.html');
+    else if (path === '/review.css') absolute = join(projectRoot, 'apps/board/review.css');
     else if (path === '/style.css') absolute = join(projectRoot, 'apps/board/style.css');
     else if (path === '/implementation.json') absolute = join(projectRoot, 'dist/implementation.json');
-    else if (path === '/rulesets/traditional-agriculture.v1.json') absolute = join(projectRoot, 'rulesets/traditional-agriculture.v1.json');
+    else if (['/rulesets/traditional-agriculture.v1.json', '/rulesets/shared-production.v2.json', '/rulesets/technology-feedback.v3.json', '/rulesets/social-inheritance.v4.json'].includes(path)) absolute = join(projectRoot, path.slice(1));
     else if (path.startsWith('/modules/') && path.endsWith('.js')) {
       const root = join(projectRoot, 'dist');
       absolute = resolve(root, path.slice('/modules/'.length));

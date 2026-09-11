@@ -1,3 +1,5 @@
+import type { ProductionState } from './production.js';
+import type { SocietyState } from './society.js';
 export type Weather = 'dry' | 'normal' | 'wet';
 export type GameStatus = 'active' | 'handover' | 'complete' | 'ended';
 export interface Clock { generation: number; turn: number; absoluteTurn: number }
@@ -55,6 +57,8 @@ export interface GameState {
   projects: Record<string, TrialProject>;
   knowledge: { archives: string[]; reportIds: string[] };
   randomState: number;
+  production?: ProductionState;
+  society?: SocietyState;
 }
 
 export function activePerson(state: GameState): Person { return state.persons[state.household.activePersonId]; }

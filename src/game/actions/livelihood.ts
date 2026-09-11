@@ -21,9 +21,9 @@ export function livelihoodActions(state: GameState, rules: Ruleset): ActionDefin
       if (draft.location.weather === 'dry') addUnique(activePerson(draft).insights, 'observation');
       events.push({ type: 'harvest', food: result.food, drawn: result.drawn, deficit: result.deficit, channelExhausted: asset?.durability === 0 });
     }),
-    defineAction(state, 'work', '为邻里做工', '生活', {}, [], `收入 ${p.workIncome} 钱财。`, (draft, events) => { draft.household.money += p.workIncome; events.push({ type: 'income', source: 'work', amount: p.workIncome }); }),
-    defineAction(state, 'buy-food', '买入 2 口粮', '生活', { money: 2 * p.foodPrice }, [], '用于家庭生活或实践；交易也占用行动点。', (draft, events) => { draft.household.food += 2; events.push({ type: 'food-purchased', amount: 2 }); }),
-    defineAction(state, 'sell-food', '卖出 2 口粮', '生活', { food: 2 }, [], `收入 ${p.foodPrice} 钱财；不能买卖套利。`, (draft, events) => { draft.household.money += p.foodPrice; events.push({ type: 'income', source: 'sale', amount: p.foodPrice }); }),
+    defineAction(state, 'work', '为邻里做工', '生活', {}, state.production?.market.jobs === 0 ? ['本季岗位已用完'] : [], `收入 ${p.workIncome} 钱财。${state.production ? `本季剩余岗位 ${state.production.market.jobs}。` : ''}`, (draft, events) => { if (draft.production) draft.production.market.jobs--; draft.household.money += p.workIncome; events.push({ type: 'income', source: 'work', amount: p.workIncome }); }),
+    defineAction(state, 'buy-food', '买入 2 口粮', '生活', { money: 2 * p.foodPrice }, state.production && state.production.market.food < 2 ? ['当地可售粮食不足'] : [], `用于家庭生活或实践；交易也占用行动点。${state.production ? `当前市场余粮 ${state.production.market.food}。` : ''}`, (draft, events) => { if (draft.production) draft.production.market.food -= 2; draft.household.food += 2; events.push({ type: 'food-purchased', amount: 2 }); }),
+    defineAction(state, 'sell-food', '卖出 2 口粮', '生活', { food: 2 }, state.production && state.production.market.food + 2 > rules.scenarios[state.location.id].production!.market.food ? ['当地粮食收购容量已满'] : [], `收入 ${p.foodPrice} 钱财；不能买卖套利。`, (draft, events) => { if (draft.production) draft.production.market.food += 2; draft.household.money += p.foodPrice; events.push({ type: 'income', source: 'sale', amount: p.foodPrice }); }),
     defineAction(state, 'build-channel', '建设家用引水渠', '设施', { ap: 2, money: p.channelCost }, [
       ...(!has(activePerson(state), 'ditch') ? ['需要掌握渠道布局'] : []), ...(canal ? ['渠道已经存在，请维修'] : []),
     ], `建成后耐用 ${p.channelDurability} 次实际引水；缺水时耕作自动使用。`, (draft, events) => {

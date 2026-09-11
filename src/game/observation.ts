@@ -4,6 +4,8 @@ import type { Ruleset } from './ruleset.js';
 import { accessible, has, studyRequired } from './systems/learning.js';
 import { harvestPreview } from './systems/production.js';
 import { getAvailableActions } from './game.js';
+import { gatherPreview, spoilagePreview, storageCapacity, technologyOutcomes } from './systems/crafts.js';
+import { contractBlocker } from './systems/society.js';
 
 export function personView(person: Person): Omit<Person, 'id'> {
   return { name: person.name, mastered: [...person.mastered], learning: { ...person.learning }, practices: [...person.practices], insights: [...person.insights] };
@@ -23,7 +25,10 @@ export function getObservation(state: GameState, rules: Ruleset) {
     person: personView(person), heir: personView(child),
     family: { food: family.food, money: family.money, hardship: family.hardship, channel: canal ? { durability: canal.durability } : null, archives: [...state.knowledge.archives], stock: seedValue(stock(state)), candidate: family.candidateId ? seedValue(stock(state, family.candidateId)) : null, project: projectView(project(state)), reports: state.knowledge.reportIds.map(id => projectView(state.projects[id])!) },
     harvest: harvestPreview(state, rules),
-    technologies: rules.technologies.map(tech => ({ ...structuredClone(tech), unlocked: state.world.technologies.includes(tech.world), accessible: accessible(state, tech), mastered: has(person, tech.id), studied: person.learning[tech.id] ?? 0, required: studyRequired(rules, person, tech), practicesDone: tech.practices.filter(tag => person.practices.includes(tag)), archived: state.knowledge.archives.includes(tech.id), heirMastered: has(child, tech.id), heirStudied: child.learning[tech.id] ?? 0 })),
+    ...(state.society ? { society: { ...structuredClone(state.society), parameters: structuredClone(rules.socialInheritance!), contractsView: (['woodenware', 'pottery'] as const).map(material => ({ material, ...structuredClone(state.society!.contracts[material]), reason: contractBlocker(state, rules, material) })) } } : {}),
+    ...(rules.technologyFeedback ? { technologyOutcomes: technologyOutcomes(state, rules) } : {}),
+    ...(state.production ? { production: { ...structuredClone(state.production), parameters: structuredClone(rules.production!.parameters), environment: structuredClone(rules.scenarios[state.location.id].production!), storageCapacity: storageCapacity(state, rules), spoilageAfterConsumption: spoilagePreview(state, rules), gathering: { food: gatherPreview(state, rules, 'food'), wood: gatherPreview(state, rules, 'wood'), clay: gatherPreview(state, rules, 'clay') } } } : {}),
+    technologies: rules.technologies.map(tech => ({ ...structuredClone(tech), unlocked: state.world.technologies.includes(tech.world), accessible: accessible(state, tech), mastered: has(person, tech.id), studied: person.learning[tech.id] ?? 0, required: studyRequired(rules, person, tech, state.knowledge.archives), practicesDone: tech.practices.filter(tag => person.practices.includes(tag)), archived: state.knowledge.archives.includes(tech.id), heirMastered: has(child, tech.id), heirStudied: child.learning[tech.id] ?? 0 })),
     actions: getAvailableActions(state, rules),
   };
 }

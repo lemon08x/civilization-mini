@@ -5,6 +5,6 @@ export interface Agent {
   readonly kind: 'scripted' | 'llm';
   decide(observation: SessionObservation): AgentDecision | null | Promise<AgentDecision | null>;
 }
-export const POLICY_NAMES = { subsistence: '维持生活', irrigation: '水利投资', seed: '种源试验', legacy: '培养后代' };
+export const POLICY_NAMES = { subsistence: '农业生活', irrigation: '水利投资', seed: '种源试验', legacy: '培养后代', woodworker: '木作家庭（不耕作）', potter: '陶作家庭（不耕作）', mixed: '混合谋生' };
 export type PolicyId = keyof typeof POLICY_NAMES;
 export const POLICIES = Object.keys(POLICY_NAMES) as PolicyId[];

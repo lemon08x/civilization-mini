@@ -2,6 +2,8 @@ import { activePerson, heir, project, seedValue } from '../model/state.js';
 import type { GameState } from '../model/state.js';
 import type { Ruleset } from '../ruleset.js';
 import type { GameEvent } from '../model/events.js';
+import { renewLocalSupply, spoilFood } from './crafts.js';
+import { settleSociety } from './society.js';
 
 function random(state: GameState): number {
   let x = state.randomState;
@@ -19,14 +21,17 @@ export function newSeason(state: GameState, rules: Ruleset, events: GameEvent[])
   state.ap = rules.parameters.actionsPerTurn;
   state.location.season = { cultivated: false, usedChannel: false, trialSample: false };
   events.push({ type: 'season-started', clock: { ...state.clock }, weather });
+  renewLocalSupply(state, rules, events);
 }
 export function finishSeason(state: GameState, rules: Ruleset, events: GameEvent[]): void {
+  settleSociety(state, rules, events);
   const p = rules.parameters, family = state.household;
   const consumed = Math.min(family.food, p.foodPerTurn);
   family.food -= consumed;
   const missing = p.foodPerTurn - consumed;
   family.hardship = missing ? family.hardship + 1 : 0;
   events.push({ type: 'season-settled', consumed, missing, hardship: family.hardship });
+  spoilFood(state, rules, events);
   if (family.hardship >= p.hardshipLimit) { state.status = 'ended'; events.push({ type: 'experiment-ended', reason: 'hardship' }); return; }
   if (state.clock.turn >= p.turnsPerGeneration) {
     const trial = project(state);
@@ -35,6 +40,7 @@ export function finishSeason(state: GameState, rules: Ruleset, events: GameEvent
       generation: state.clock.generation, food: family.food, money: family.money,
       mastered: [...activePerson(state).mastered], heir: [...heir(state).mastered], archives: [...state.knowledge.archives],
       project: trial ? { started: trial.started, control: seedValue(trial.control), candidate: seedValue(trial.candidate), samples: structuredClone(trial.samples) } : null,
+      ...(state.production ? { production: structuredClone(state.production) } : {}),
     } });
     state.status = final ? 'complete' : 'handover';
     return;

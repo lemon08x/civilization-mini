@@ -1,6 +1,6 @@
 {
   "name": "civilization-mini-rules-lab",
-  "version": "0.2.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "description": "普通人跨代生活的桌游式规则预研；确定性模拟器与 AI 行动接口",
@@ -13,6 +13,7 @@
     "start": "npm run build && node dist/apps/board/server.js",
     "lab": "node dist/apps/cli/main.js",
     "simulate": "node dist/apps/cli/main.js simulate",
+    "research:audit": "node scripts/research-audit.mjs",
     "test": "npm run build && node --test dist/tests/*.test.js"
   },
   "devDependencies": {

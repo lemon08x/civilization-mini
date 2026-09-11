@@ -1,3 +1,4 @@
+import type { ProductionParameters, ProductionRules, ProductionScenario } from './model/production.js';
 export interface Parameters {
   actionsPerTurn: number; turnsPerGeneration: number; generations: number;
   initialFood: number; initialMoney: number; foodPerTurn: number; workIncome: number;
@@ -5,10 +6,12 @@ export interface Parameters {
   repairCost: number; trialCost: number; trialSeasons: number; trialLandCost: number;
   archiveCost: number; studyCost: number; trainingCost: number; studyMultiplier: number; hardshipLimit: number;
 }
-export interface Scenario { id: string; name: string; text: string; drought: number; wet: number; water: number }
+export interface Scenario { id: string; name: string; text: string; drought: number; wet: number; water: number; production?: ProductionScenario }
 export interface Technology {
   id: string; name: string; branch: string; world: string; prerequisites: string[];
   study: number; practices: string[]; benefit: string; insight: string | null; practiceText: string;
+  prerequisiteAny?: string[];
+  helpfulPrerequisites?: string[];
 }
 export interface Ruleset {
   schemaVersion: 1;
@@ -20,6 +23,9 @@ export interface Ruleset {
   technologies: Technology[];
   worldTechnologies: string[];
   practiceNames: Record<string, string>;
+  production?: ProductionRules;
+  technologyFeedback?: { buildActions: number; workbenchWood: number; kilnWood: number; kilnClay: number };
+  socialInheritance?: { wage: number; goodsCapacity: number; archiveDiscount: number };
 }
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -36,6 +42,12 @@ export function deepFreeze<T>(value: T): T {
 const parameterKeys = ['actionsPerTurn', 'turnsPerGeneration', 'generations', 'initialFood', 'initialMoney', 'foodPerTurn', 'workIncome', 'foodPrice', 'cropPotential', 'channelCost', 'channelDurability', 'repairCost', 'trialCost', 'trialSeasons', 'trialLandCost', 'archiveCost', 'studyCost', 'trainingCost', 'studyMultiplier', 'hardshipLimit'];
 export function validateRuleset(value: unknown): Ruleset {
   if (!isRecord(value) || value.schemaVersion !== 1 || typeof value.id !== 'string' || typeof value.rulesVersion !== 'string' || !isRecord(value.parameters) || !isRecord(value.parameterBounds) || !isRecord(value.scenarios) || !Array.isArray(value.technologies) || !strings(value.worldTechnologies) || !isRecord(value.practiceNames)) throw new Error('规则配置格式不完整');
+  if (!['0.1.0', '0.2.0', '0.3.0', '0.4.0'].includes(value.rulesVersion) || (value.rulesVersion !== '0.1.0') !== (value.production !== undefined)) throw new Error('规则版本与生产机制不匹配');
+  if (value.rulesVersion !== '0.1.0' && !isRecord(value.production)) throw new Error('新规则必须提供完整生产配置');
+  if (['0.3.0', '0.4.0'].includes(value.rulesVersion) !== (value.technologyFeedback !== undefined)) throw new Error('科技反馈机制与规则版本不匹配');
+  if ((value.rulesVersion === '0.4.0') !== (value.socialInheritance !== undefined)) throw new Error('社会传承机制与规则版本不匹配');
+  if (value.socialInheritance !== undefined && (!isRecord(value.socialInheritance) || !integerFields(value.socialInheritance, ['wage', 'goodsCapacity', 'archiveDiscount']) || Object.values(value.socialInheritance).some(n => (n as number) < 1))) throw new Error('社会传承配置无效');
+  if (value.technologyFeedback !== undefined && (!isRecord(value.technologyFeedback) || !integerFields(value.technologyFeedback, ['buildActions', 'workbenchWood', 'kilnWood', 'kilnClay']) || Object.values(value.technologyFeedback).some(n => (n as number) < 1) || (value.technologyFeedback.buildActions as number) > (value.parameters.actionsPerTurn as number))) throw new Error('科技反馈设施配置无效');
   if (Object.keys(value.parameters).length !== parameterKeys.length || Object.keys(value.parameterBounds).length !== parameterKeys.length) throw new Error('规则参数集合不匹配');
   for (const key of parameterKeys) {
     const bound = value.parameterBounds[key], number = value.parameters[key];
@@ -56,13 +68,16 @@ export function validateRuleset(value: unknown): Ruleset {
   // 当前规则实现只支持这些领域方法；新增因果机制需代码版本，而非注入脚本。
   for (const id of ['observation', 'survey', 'ditch', 'allocation', 'selection', 'trial', 'stabilize']) if (!ids.has(id)) throw new Error(`缺少规则实现需要的节点：${id}`);
   const rules = structuredClone(value) as unknown as Ruleset;
+  if (rules.production) validateProduction(rules);
+  else if (rules.technologies.some(t => t.prerequisiteAny || t.helpfulPrerequisites) || Object.values(rules.scenarios).some(s => s.production)) throw new Error('旧规则不能注入新生产机制');
   const visiting = new Set<string>(), visited = new Set<string>();
   function visit(id: string): void {
     if (visiting.has(id)) throw new Error(`前置成环：${id}`);
     if (visited.has(id)) return;
     const node = rules.technologies.find(n => n.id === id);
     if (!node) throw new Error(`前置不存在：${id}`);
-    visiting.add(id); node.prerequisites.forEach(visit); visiting.delete(id); visited.add(id);
+    for (const optional of [node.prerequisiteAny, node.helpfulPrerequisites]) if (optional !== undefined && (!strings(optional) || !optional.length || new Set(optional).size !== optional.length)) throw new Error('知识依赖列表无效');
+    visiting.add(id); [...node.prerequisites, ...(node.prerequisiteAny ?? []), ...(node.helpfulPrerequisites ?? [])].forEach(visit); visiting.delete(id); visited.add(id);
   }
   rules.technologies.forEach(n => visit(n.id));
   return deepFreeze(rules);
@@ -70,11 +85,40 @@ export function validateRuleset(value: unknown): Ruleset {
 export function resolveRuleset(base: Ruleset, overrides: unknown = {}): Ruleset {
   if (!isRecord(overrides)) throw new Error('候选参数必须是 JSON 对象');
   const parameters = { ...base.parameters };
+  const production = base.production ? structuredClone(base.production) : undefined;
   for (const [key, value] of Object.entries(overrides)) {
+    if (production && key.startsWith('production.')) {
+      const name = key.slice('production.'.length) as keyof ProductionParameters;
+      if (!Object.hasOwn(production.parameterBounds, name)) throw new Error(`未知参数：${key}`);
+      const [min, max] = production.parameterBounds[name];
+      if (!Number.isInteger(value) || (value as number) < min || (value as number) > max) throw new Error(`参数超出范围：${key}`);
+      production.parameters[name] = value as number;
+      continue;
+    }
     if (!Object.hasOwn(base.parameterBounds, key)) throw new Error(`未知参数：${key}`);
     const [min, max] = base.parameterBounds[key as keyof Parameters];
     if (!Number.isInteger(value) || (value as number) < min || (value as number) > max) throw new Error(`参数超出范围：${key}`);
     parameters[key as keyof Parameters] = value as number;
   }
-  return validateRuleset({ ...base, parameters });
+  return validateRuleset({ ...base, parameters, ...(production ? { production } : {}) });
+}
+
+const productionKeys = ['gatherFood', 'gatherWood', 'gatherClay', 'baseStorage', 'woodenStorage', 'potteryStorage', 'spoilDivisor', 'toolDurability', 'toolBonus', 'woodRecipeCost', 'potteryClayCost', 'potteryFuelCost', 'woodenwarePrice', 'potteryPrice', 'methodPrice'];
+function integerFields(value: unknown, keys: string[]): boolean {
+  return isRecord(value) && Object.keys(value).length === keys.length && keys.every(key => Number.isInteger(value[key]) && (value[key] as number) >= 0 && (value[key] as number) <= 100);
+}
+function validateProduction(rules: Ruleset): void {
+  const p = rules.production!;
+  if (!isRecord(p) || !integerFields(p.parameters, productionKeys) || !isRecord(p.parameterBounds) || Object.keys(p.parameterBounds).length !== productionKeys.length) throw new Error('生产参数集合无效');
+  for (const key of productionKeys as (keyof ProductionParameters)[]) {
+    const range = p.parameterBounds[key], value = p.parameters[key];
+    if (!Array.isArray(range) || range.length !== 2 || !range.every(Number.isInteger) || range[0] < 1 || range[1] > 100 || range[0] > range[1] || value < range[0] || value > range[1]) throw new Error(`生产参数边界无效：${key}`);
+  }
+  for (const id of ['resource-observation', 'woodworking', 'controlled-fire', 'pottery', 'storage']) if (!rules.technologies.some(t => t.id === id)) throw new Error(`缺少生产节点：${id}`);
+  for (const scenario of Object.values(rules.scenarios)) {
+    const s = scenario.production;
+    if (!isRecord(s) || !integerFields(s.stocks, ['wildFood', 'timber', 'clay']) || !integerFields(s.recovery, ['wildFood', 'timber']) || !integerFields(s.market, ['food', 'jobs', 'woodenware', 'pottery', 'methods']) || !strings(s.teachers) || !strings(s.imports)) throw new Error(`场景生产条件无效：${scenario.id}`);
+    if (s.recovery.wildFood > s.stocks.wildFood || s.recovery.timber > s.stocks.timber) throw new Error('资源恢复超过容量');
+    for (const id of [...s.teachers, ...s.imports]) if (!rules.technologies.some(t => t.id === id)) throw new Error(`未知教学来源：${id}`);
+  }
 }

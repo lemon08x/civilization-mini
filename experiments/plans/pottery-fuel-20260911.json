@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "pottery-fuel-20260911",
+  "seeds": [
+    17
+  ],
+  "scenarios": [
+    "woodland",
+    "clay-valley"
+  ],
+  "agents": [
+    "potter",
+    "mixed"
+  ],
+  "variants": [
+    {
+      "id": "baseline",
+      "parameters": {}
+    }
+  ],
+  "maxActions": 60,
+  "decisionTimeoutMs": 30000
+}

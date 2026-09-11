@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "example-proposal",
+  "title": "示例：请填写实际研究问题",
+  "kind": "parameter",
+  "status": "pending_validation",
+  "origin": "请填写研究者或真实模型信息",
+  "question": "在哪个场景和阶段发现什么问题？",
+  "hypothesis": "修改为何可能有效？",
+  "counterEvidence": "什么结果会推翻假设？",
+  "baseVersion": "0.4.0",
+  "targetVersion": null,
+  "experiments": [],
+  "evidence": [],
+  "changes": [
+    {
+      "subject": "基础储存容量（仅演示）",
+      "before": 2,
+      "after": 3,
+      "configPath": "production.parameters.baseStorage"
+    }
+  ],
+  "result": "尚未验证；这不是实际提案。",
+  "sideEffects": "需要验证容器价值是否被削弱。",
+  "decision": "待验证，不采纳。",
+  "adoptedVersion": null
+}

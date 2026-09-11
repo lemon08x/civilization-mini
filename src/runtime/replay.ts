@@ -42,3 +42,21 @@ export async function importLegacy(value: unknown, base: Ruleset, implementation
   }
   return session;
 }
+
+// 显式复制迁移：先以冻结身份核对旧命令、事件和每个快照，仍保留旧农业规则。
+export const FROZEN_AGRICULTURE_IMPLEMENTATION: ImplementationIdentity = {
+  version: '0.2.0', codeFingerprint: '65650731a61bc387b3bc94a85f87d9db548cb8b3e93de3ccd8752f3cee48b7ee',
+};
+export async function importRecord(value: unknown, implementation: ImplementationIdentity, runId: string): Promise<Session> {
+  if (!isRecord(value) || !isRecord(value.manifest)) throw new Error('存档清单无效');
+  const previous = value.manifest.implementation;
+  let verified: Session;
+  if (canonical(previous) === canonical(implementation)) verified = await replayRecord(value, implementation);
+  else {
+    if (canonical(previous) !== canonical(FROZEN_AGRICULTURE_IMPLEMENTATION) || await fingerprint(value.manifest.ruleset) !== 'f44b18f47ae16ab9e58e1d8916e04db6a78524fac65e9f63992b600ea977ea0c') throw new Error('没有此历史实现与参数组的迁移方案；请使用对应版本，原档保留');
+    verified = await replayRecord(value, FROZEN_AGRICULTURE_IMPLEMENTATION);
+  }
+  let session = await createSession({ ...verified.record.manifest, implementation, runId });
+  for (const entry of verified.record.entries) session = (await submitCommand(session, entry.command)).session;
+  return session;
+}

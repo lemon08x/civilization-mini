@@ -11,7 +11,7 @@ import { resolveRuleset } from '../src/game/ruleset.js';
 import { collectStatistics, metrics } from '../src/research/metrics.js';
 import type { Session } from '../src/runtime/records.js';
 
-const { base, implementation } = await loadContext();
+const { legacyBase: base, implementation } = await loadContext();
 const fixture = JSON.parse(await readFile(join(projectRoot, 'tests/fixtures/legacy-v1.json'), 'utf8')) as { cases: { name: string; replay: {config: {seed: number; scenario: string; overrides: object}; commands: {revision: number; actionId: string}[]}; snapshots: unknown[] }[] };
 const fresh = () => createSession({runId:'test', ruleset:base, implementation, seed:17, scenarioId:'river'});
 function projection(session: Session) {

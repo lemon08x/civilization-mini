@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "origin": "根据已有开发提案与报告整理；模拟控制器为脚本基线，并非大模型自动提案",
+  "counterEvidence": "若改善仅来自策略偏好或挤占其他路线，不能证明机制普遍有效。",
+  "id": "storage-capacity",
+  "title": "基础储存容量 2 → 4",
+  "kind": "parameter",
+  "status": "deferred",
+  "question": "开局粮食损耗是否挤占学习与制作行动？",
+  "hypothesis": "提高基础保护容量可以减少损耗，并腾出学习和制作机会。",
+  "baseVersion": "0.2.0",
+  "targetVersion": null,
+  "experiments": [
+    "production-baseline-2026-09-10T09-50-50-025Z-276a9148"
+  ],
+  "evidence": [
+    "experiments/storage-hypothesis.md",
+    "docs/PRODUCTION_VALIDATION.md"
+  ],
+  "changes": [
+    {
+      "subject": "基础储存容量",
+      "before": 2,
+      "after": 4,
+      "configPath": "production.parameters.baseStorage"
+    }
+  ],
+  "result": "16 局配对中损耗降低，但学会、继承节点和工艺产量没有增加。",
+  "sideEffects": "可能削弱容器价值；河谷混合脚本手工收入由 21 降为 18。",
+  "decision": "暂不采纳；保留基础容量 2。",
+  "adoptedVersion": null
+}

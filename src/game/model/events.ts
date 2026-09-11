@@ -1,5 +1,6 @@
 import type { ActionCost, GameAction } from './action.js';
 import type { Clock, TrialSample, Weather } from './state.js';
+import type { ProductionState, Recipe } from './production.js';
 
 export interface GenerationFacts {
   generation: number;
@@ -9,8 +10,25 @@ export interface GenerationFacts {
   heir: string[];
   archives: string[];
   project: { started: number; control: { name: string; potential: number; tolerance: number }; candidate: { name: string; potential: number; tolerance: number }; samples: TrialSample[] } | null;
+  production?: ProductionState;
 }
 export type GameEvent =
+  | { type: 'social-taught'; nodeId: string; completed: boolean }
+  | { type: 'contract-changed'; material: 'woodenware' | 'pottery'; active: boolean }
+  | { type: 'contract-started'; material: 'woodenware' | 'pottery'; wage: number; wood: number; clay: number }
+  | { type: 'contract-sold'; material: 'woodenware' | 'pottery'; amount: number; earnings: number }
+  | { type: 'contract-waiting'; material: 'woodenware' | 'pottery'; reason: string }
+  | { type: 'public-used'; material: 'woodenware' | 'pottery'; amount: number }
+  | { type: 'public-purchased'; material: 'woodenware' | 'pottery'; price: number }
+  | { type: 'resource-gathered'; resource: 'food' | 'wood' | 'clay'; amount: number; remaining: number; toolUsed: boolean }
+  | { type: 'local-supply'; stocks: ProductionState['stocks']; market: ProductionState['market'] }
+  | { type: 'workshop-built'; material: 'woodenware' | 'pottery' }
+  | { type: 'craft-started'; recipe: Recipe; started: number; batch?: true }
+  | { type: 'craft-completed'; recipe: Recipe; amount: number; batch?: true }
+  | { type: 'storage-installed'; material: 'woodenware' | 'pottery'; capacity: number }
+  | { type: 'food-spoiled'; amount: number; protected: number }
+  | { type: 'goods-sold'; material: 'woodenware' | 'pottery'; amount: number; earnings: number }
+  | { type: 'method-acquired'; nodeId: string }
   | { type: 'action-paid'; action: GameAction; cost: ActionCost }
   | { type: 'harvest'; food: number; drawn: number; deficit: number; channelExhausted: boolean }
   | { type: 'income'; source: 'work' | 'sale'; amount: number }
