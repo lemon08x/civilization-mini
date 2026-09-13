@@ -30,6 +30,6 @@ check.mjs 在实现指纹不匹配时记录 verified:false 后继续，末尾 ve
 
 ## 后续修复（用户授权后，2026-09-11）
 
-上述三处报告/提案问题已修正；原版本另存 experiments/history/study-multiplier-20260911-before-correction/。校验脚本现在遇到指纹不匹配即抛错并非零退出，空目录也拒绝出具报告；只有全部记录通过后才独占创建输出。未改写既有 research-evidence.json、逐局记录或其指纹。
+上述三处报告/提案问题已修正；原版本的本地备份已于 2026-09-13 清理，可从 Git 提交 `324ffcf` 的 experiments/history/study-multiplier-20260911-before-correction/ 查阅。校验脚本现在遇到指纹不匹配即抛错并非零退出，空目录也拒绝出具报告；只有全部记录通过后才独占创建输出。未改写既有 research-evidence.json、逐局记录或其指纹。
 
 新增三项进程级检查覆盖混合指纹失败、空目录失败、成功写出及拒绝覆盖；收尾 npm test 共48项通过。原始8份逐局文件的 SHA-256 与既有证据逐一核对未变。本次修复没有新模拟批次，没有改动默认参数、规则版本或领域实现指纹。上文问题描述保留为修复前审阅历史。

@@ -4,3 +4,9 @@ reports/
 *.tmp
 dist/
 artifacts/
+
+# Local observations and disposable tool caches
+.grok-obs.json
+.cache/
+coverage/
+*.tsbuildinfo

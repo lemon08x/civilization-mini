@@ -4,7 +4,7 @@
   "title": "理论学习倍率 1 → 2：掌握仍发生，传承被挤占",
   "kind": "parameter",
   "status": "rejected",
-  "origin": "Grok 4.6 研究判断；8 局行动均为 scripted 脚本基线，无独立 xAI/付费 API 调用，不是 Grok 玩家测试；Codex 后续复核修订报告口径与材料解释，原始提案保存在 experiments/history/study-multiplier-20260911-before-correction/",
+  "origin": "Grok 4.6 研究判断；8 局行动均为 scripted 脚本基线，无独立 xAI/付费 API 调用，不是 Grok 玩家测试；Codex 后续复核修订报告口径与材料解释，原始提案本地备份已于 2026-09-13 清理，可从 Git 提交 324ffcf 的 experiments/history/study-multiplier-20260911-before-correction/ 查阅",
   "question": "在 studyMultiplier 已处于合法下界时，提高到 2 是否改变木作/陶作的掌握、实际产品与传承，还是被实践与生活成本挡住？",
   "hypothesis": "脚本会执行 study 与 teach。倍率 2 增加理论次数，推迟掌握并挤占教导与制作；若只增加学习次数而掌握/产品/继承不变，则理论倍率不是结果瓶颈。提高倍率不是更好的设计，只做敏感性检查。",
   "counterEvidence": "若掌握、完工与继承完全不变，则不敏感；若新增缺粮或丢失基线已有掌握/继承，则候选有害，应停止。敏感性本身不是把默认值改为 2 的理由。",

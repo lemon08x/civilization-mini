@@ -2,7 +2,7 @@
 
 2026-09-11。研究者为 Grok 4.6（本编程工具会话，无独立 xAI API 调用）。玩家控制器全部是 scripted 脚本基线，不是 Grok 逐步扮演玩家。
 
-2026-09-11 经 Codex 复核修订：补足黏土分配因果、统一制作行动口径并澄清教导次数。修订前文件保存在 [历史副本](history/study-multiplier-20260911-before-correction/study-multiplier-20260911-analysis.md)。原实验、指标、指纹与拒绝候选的决定保持不变；本次没有重新模拟或生成新的实验结果。
+2026-09-11 经 Codex 复核修订：补足黏土分配因果、统一制作行动口径并澄清教导次数。修订前文件的本地备份已于 2026-09-13 清理，可从 Git 提交 `324ffcf` 的 `experiments/history/study-multiplier-20260911-before-correction/` 查阅。原实验、指标、指纹与拒绝候选的决定保持不变；本次没有重新模拟或生成新的实验结果。
 
 运行前登记：[假设与停止条件](study-multiplier-20260911-hypothesis.md)。默认 `studyMultiplier` 1，唯一候选 2，均在白名单 1—3。规则 0.4.0 / 工程 0.5.0，领域指纹 `c6eebe3cee29218d696f6e502d993e67de0176a53ec42bdaa3b93064de5ab5a1`。基线规则指纹 `e03d04ec6d579247e8d58b92cfc00cdd14d999c6f112db3103f8797712eab0f5`；候选指纹 `3a14e6954c87ae740326590df92bd92354c9f6b45fa219fb71b7d77d677e4f5d`。
 

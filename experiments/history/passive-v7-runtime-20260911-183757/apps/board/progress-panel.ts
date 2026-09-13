@@ -1,5 +1,0 @@
-import type { BoardView } from './view.js';
-export function progressPanel(o:BoardView):string {
- if(o.rulesVersion!=='0.7.0')return '';
- return `<section class="panel"><div class="panel-head"><h2>家业进展</h2><small>储备 · 熟练生产 · 家族接续</small></div><div class="panel-body"><p>现有口粮可支付约<strong>${Math.floor(o.family.food/o.parameters.foodPerTurn)}</strong>季生活（未计损耗与加工）。${o.production?.storage.woodenware||o.production?.storage.pottery?'已配置储存：可选择一次购买4粮，减少补给行动。':'配置储存后开放集中购粮，口粮不会自动增加。'}</p><p>基础制作每次完工获得2经验；熟练等级门槛为1、4、9…经验。木作1级后普通木制品1行动完成；陶器仍需跨季。留存家族方法后可合并教学与实践，支付练习材料，后辈保留有限熟练经验。</p><p>渠道不必学完整条链再建：满足前置，学过渠道布局且有指导来源即可付费建设，并取得渠道实践。精密制造可专精陶作，机械和实验器具可外购。</p><small>本版需新开局；此前浏览器存档保留在原存储键中，未转换或覆盖。</small></div></section>`;
-}

@@ -43,5 +43,5 @@
 - 现行规则：`rulesets/passive-investment.v8.json`；候选副本：`experiments/passive-investment.v8.json`；提案：`experiments/proposals/passive-investment-v8.proposal.json`。新增机制字段不自动加入AI参数覆盖白名单。
 - 默认网页与CLI新局使用0.8.0；CLI `--rules investment` 显式选择新版，`--rules pacing` 保持0.7.0。框架0.5.0仅更新对应规则版本，没有把规划科技变成可玩内容。
 - 浏览器新键 `civilization-mini.rules-lab.v9`，此前v8及更早键保留、不读取后强制转换。本版需新开局。未改写旧实验、用户存档或指纹。
-- 旧版完整运行环境保存于 `experiments/history/passive-v7-runtime-20260911-183757/{dist,rulesets,apps}`。如需继续旧浏览器存档，在该目录运行 `node dist/apps/board/server.js` 并使用原端口/来源；先停止占用原端口的新版服务。不要同时在同一来源混用两版页面。
+- 2026-09-13 已移除旧版本地运行环境备份；已跟踪的网页源码及规则副本可从 Git 提交 `324ffcf` 查阅，被忽略的 dist 不在该提交中。旧存档保留，继续旧局仍需要身份匹配的原实现。
 - 旧存档必须交由其匹配的实现及规则严格重放；不伪造新指纹，不自动迁移。历史报告只代表其记录内指纹的实现。

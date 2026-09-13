@@ -7,7 +7,6 @@ import type { Subject } from '../model/economy.js';
 import { ALL_GOODS as GOODS,ALL_PRODUCTS as PRODUCTS,ALL_PROCESSES as PROCESSES,SUBJECT_NAMES } from './economy-catalog.js';
 
 export const SHOP_GOODS=['food','wheat','flour','soy','seedWheat','seedSoy','seedFlax','compost','wood','clay','ore','iron','flax','straw','fiber','oil','ceramics','brick','seal','shaft','valve'];
-export const SHOP_DEVICES=PRODUCTS.filter(p=>!['F04','F05'].includes(p.id));
 const BASIC=['food','wheat','flour','soy','seedWheat','seedSoy','seedFlax','wood','clay','ore','flax','straw'];
 export function salePrice(s:GameState,id:string):number{return s.economy?.shop&&id==='flour'?1:GOODS[id].price;}
 export function shopEvent(events:GameEvent[],operation:string,target:string,detail:string,money=0,amount=1){events.push({type:'shop',operation,target,detail,money,amount});}

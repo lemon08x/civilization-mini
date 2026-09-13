@@ -40,4 +40,3 @@ export function getObservation(state: GameState, rules: Ruleset) {
     actions: getAvailableActions(state, rules),
   };
 }
-export type GameObservation = ReturnType<typeof getObservation>;
