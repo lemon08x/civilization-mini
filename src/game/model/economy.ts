@@ -1,3 +1,6 @@
+import type { IndustryState } from './industry.js';
+import type { BranchState } from './branches.js';
+import type { ExpeditionState } from './expedition.js';
 import type { TowerState } from './tower.js';
 import type { WorkshopState } from './workshop.js';
 import type { OperationsState } from './operations.js';
@@ -10,6 +13,10 @@ export type Work = 'polymer'|'wire'|'coil'|'cable'|'fuel'|'nutrient'|'battery'|'
 export interface Worker {kind:WorkerKind;experience:number;job:Work;active:boolean;project:{good:string;amount:number;started:number}|null;}
 export interface Field {crop:Crop|null;planted:number;moisture:number;growth:number;stress:number;fertility:number;lastCrop:Crop|null;tended:number;composted:boolean;bonus:number;duration:number;}
 export interface EconomyState {
+  branches?:BranchState;
+  industry?:IndustryState;
+  lineage?:true;
+  expeditions?:ExpeditionState;
   modern?: {power:number;stored:number;enabled:string[];operated:Record<string,number>;services:Record<string,number>;cropBonus:number};
   tower?: TowerState;
   workshops?: WorkshopState;

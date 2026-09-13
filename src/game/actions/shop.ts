@@ -10,13 +10,13 @@ export function shopActions(s:GameState,r:Ruleset):ActionDefinition[]{
  const e=s.economy!,sh=e.shop!,out:ActionDefinition[]=[];
  const add=(op:string,target:string,label:string,cost:Parameters<typeof defineAction>[4],blockers:string[],description:string,execute:ActionDefinition['execute'])=>out.push(defineAction(s,`economy:${op}:${target}`,label,'商城',cost,blockers,description,execute));
  const quote=cartQuote(s,r);
- const final=s.clock.generation>=r.parameters.generations&&s.clock.turn>=r.parameters.turnsPerGeneration;
+ const final=!r.civilization&&s.clock.generation>=r.parameters.generations&&s.clock.turn>=r.parameters.turnsPerGeneration;
  for(const item of shopCatalog(s,r)){
   const quantity=sh.cart[item.id]??0;
   add('cartadd',item.id,'加入'+item.name,{ap:0},[...(item.owned?['已拥有、在制或待交付']:[]),...(quantity>=item.stock?['已达到可购买库存']:[]),...(quote.weight+item.weight>r.shop!.transport?['整单超过单季最大运输容量']:[])],'只编辑采购清单；结账时按当时价格、库存和资金重新核验。',(draft,events)=>{draft.economy!.shop!.cart[item.id]=quantity+1;shopEvent(events,'cart',item.id,'已加入'+item.name);});
   add('cartremove',item.id,'移除一份'+item.name,{ap:0},quantity<1?['清单中没有此商品']:[],'移除一份，未付款。',(draft,events)=>{const c=draft.economy!.shop!.cart;if(quantity===1)delete c[item.id];else c[item.id]=quantity-1;shopEvent(events,'cart',item.id,'已移除'+item.name);});
  }
- add('clearcart','all','清空采购清单',{ap:0},quote.lines.length?[]:['清单为空'],'清单不保留价格或占用库存。',(draft,events)=>{draft.economy!.shop!.cart={};shopEvent(events,'cart','all','采购清单已清空');});
+ add('clearcart','all','清空采购清单',{ap:0},Object.keys(sh.cart).length?[]:['清单为空'],'清单不保留价格或占用库存。',(draft,events)=>{draft.economy!.shop!.cart={};shopEvent(events,'cart','all','采购清单已清空');});
  add('checkout','cart','确认整单采购',{money:quote.total},quote.blockers,`合计${quote.total}钱、${quote.weight}运输容量，付款后剩${quote.remainingMoney}钱。现货立即交付，订货下一季开始交付；所有材料和食品都占运输额度。`,(draft,events)=>{
   const shop=draft.economy!.shop!;shop.transport-=quote.weight;
   for(const {item,quantity}of quote.lines){

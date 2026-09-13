@@ -23,7 +23,7 @@ function options(args: string[]): Record<string, string> {
 try {
   const [command = 'help', ...args] = process.argv.slice(2), opts = options(args);
   if (command === 'help') {
-    console.log(`世代规则预研 — 文明试炼规则0.13.0
+    console.log(`世代规则预研 — 三类升级树规则0.19.0
   npm run lab -- new --run demo --seed 17 --scenario woodland
   npm run lab -- new --run farm --rules economy --scenario river
   npm run lab -- observe --run demo
@@ -69,7 +69,7 @@ try {
       if (!opts.run) throw new Error('请指定 --run');
       if (command === 'new') {
         const overrides = opts.params ? await readJson(resolve(opts.params)) : {};
-        const session = await createSession({ runId: opts.run, ruleset: resolveRuleset(base, overrides), implementation, seed: Number(opts.seed ?? 1), scenarioId: opts.scenario ?? (base.modern?'canyon':base.production ? 'woodland' : 'river') });
+        const session = await createSession({ runId: opts.run, ruleset: resolveRuleset(base, overrides), implementation, seed: Number(opts.seed ?? 1), scenarioId: opts.scenario ?? (base.civilization?'river':base.modern?'canyon':base.production ? 'woodland' : 'river') });
         await store.create(session); console.log(JSON.stringify(observeSession(session), null, 2));
       } else if (command === 'import') {
         if (!opts.file) throw new Error('import 需要 --file');

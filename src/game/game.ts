@@ -1,3 +1,7 @@
+import {recordProducts} from './systems/industry-products.js';
+import { recordBranchWork } from './systems/branches.js';
+import { initializeLife } from './systems/life.js';
+import { initialExpeditions,recordExpeditionEvidence } from './systems/expedition.js';
 import { initializeModern } from './systems/modern.js';
 import { initialTower,recordTowerEvidence } from './systems/tower.js';
 import { initialWorkshops } from './systems/workshop.js';
@@ -42,7 +46,11 @@ export function createInitialState(rules: Ruleset, seed: number, scenarioId: str
   if(rules.development)state.development=initialDevelopment();
   if(rules.productNetwork)state.productNetwork=initialProductNetwork();
   if(rules.economy){state.economy=initialEconomy();if(rules.tower)state.economy.tower=initialTower();if(rules.workshops)state.economy.workshops=initialWorkshops();if(rules.shop)state.economy.shop=initialShop();if(rules.operations)state.economy.operations=initialOperations();state.world.era="学科与生产组织的形成";delete state.society;delete state.development;delete state.productNetwork;}
-  if(rules.modern&&!state.economy?.modern)initializeModern(state);
+  if(rules.modern&&!state.economy?.modern)initializeModern(state,!!rules.civilization);
+  if(rules.civilization){state.economy!.expeditions=initialExpeditions(!!rules.householdLineage);if(rules.householdLineage)state.economy!.lineage=true;}
+  if(rules.branches){state.economy!.branches={learned:{[state.household.activePersonId]:['A0'],[state.household.heirId]:['A0']},archives:[],protocols:[],channels:[],delivered:[]};state.economy!.knowledge={};state.economy!.notes={};delete state.economy!.expeditions;delete state.economy!.workshops;}
+  if(rules.industry)state.economy!.industry={rules:structuredClone(rules.industry),products:{},commissioned:[],instances:{},workers:{}};
+  if(rules.life)initializeLife(state,rules.life);
   newSeason(state, rules, []);
   return deepFreeze(state);
 }
@@ -54,16 +62,20 @@ export function transition(state: GameState, action: GameAction, rules: Ruleset)
   const definition = actionDefinitions(state, rules).find(def => def.offer.id === id);
   if (!definition?.offer.enabled) throw new Error(definition?.offer.reason || '此状态下不存在该行动');
   const next = structuredClone(state), events: GameEvent[] = [];
-  const { ap, money, food, materials } = definition.offer;
+  const { ap, time, energy, money, food, materials } = definition.offer;
+  if(next.life){next.life.timeRemaining-=time??0;activePerson(next).vitality!.energy-=energy??0;}
   next.ap -= ap; next.household.money -= money; next.household.food -= food;
   if (materials) for (const [material, amount] of Object.entries(materials)) next.production!.inventory[material as Material] -= amount;
-  events.push({ type: 'action-paid', action: structuredClone(definition.offer.action), cost: { ap, money, food, ...(materials ? { materials: { ...materials } } : {}) } });
+  events.push({ type: 'action-paid', action: structuredClone(definition.offer.action), cost: { ap, ...(next.life?{time,energy}:{}), money, food, ...(materials ? { materials: { ...materials } } : {}) } });
   definition.execute(next, events);
+  recordProducts(next,events);
   recordProjectEvidence(next,events);
   recordTowerEvidence(next,events);
+  recordExpeditionEvidence(next,events);
   developFromEvents(next,events,rules);
   masterAvailable(next, activePerson(next), rules, events);
   if (rules.socialInheritance) masterAvailable(next, heir(next), rules, events);
-  if (action.type !== 'handover' && (action.type === 'end-turn' || action.type==='economy'&&action.operation==='end' || next.ap === 0)) finishSeason(next, rules, events);
+  if (action.type !== 'handover' && (action.type === 'end-turn' || action.type==='economy'&&action.operation==='end' || (next.life?next.life.timeRemaining===0:next.ap === 0))) finishSeason(next, rules, events);
+  recordBranchWork(next,events);
   return { state: deepFreeze(next), events: deepFreeze(events) };
 }

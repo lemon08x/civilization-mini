@@ -1,12 +1,14 @@
 import type { GameState } from '../model/state.js';
 import type { GameEvent } from '../model/events.js';
 import { SUBJECTS } from '../model/economy.js';
+import {branchHas} from './branches.js';
 import { amount,equipped,consumeEquipment,changeGoods,level,organizationLevel } from './economy.js';
 import { ALL_PRODUCTS } from './economy-catalog.js';
 
-export function initializeModern(s:GameState):void {
+export function initializeModern(s:GameState,agriculture=false):void {
  const e=s.economy!;
  e.modern={power:0,stored:0,enabled:[],operated:{},services:{},cropBonus:0};
+ if(agriculture){e.knowledge[s.household.activePersonId]={agronomy:1};e.knowledge[s.household.heirId]={agronomy:1};e.notes={agronomy:1};s.world.era='农业聚落：生产、分工与文明成长';return;}
  // 新场景是已有早期工业基础的家业，不把现代工艺免费赋给人物。
  const foundation=Object.fromEntries(SUBJECTS.map(k=>[k,6]));
  e.knowledge[s.household.activePersonId]={...foundation};e.knowledge[s.household.heirId]={...foundation};e.notes={...foundation};
@@ -29,6 +31,7 @@ export const GENERATORS=['E01','E02','E03'];
 export const SERVICES=['N08','N10','S08','U08M','U09M'];
 export function generateModern(s:GameState,events:GameEvent[]):void {
  const m=s.economy?.modern;if(!m||s.economy!.operations?.paused)return;
+ if(s.economy?.branches&&!branchHas(s,'L6'))return;
  for(const id of GENERATORS){
   if(!m.enabled.includes(id)||m.operated[id]===s.clock.absoluteTurn||!equipped(s,id))continue;
   if(id==='E01'&&s.location.water<1||id==='E02'&&amount(s,'fuel')<1){modernEvent(events,id,'发电待命：缺水或精炼燃料');continue;}
@@ -47,6 +50,7 @@ export function generateModern(s:GameState,events:GameEvent[]):void {
 }
 export function serveModern(s:GameState,events:GameEvent[]):void {
  const m=s.economy?.modern;if(!m||s.economy!.operations?.paused)return;
+ if(s.economy?.branches&&!branchHas(s,'L6'))return;
  for(const id of SERVICES){
   if(!m.enabled.includes(id)||modernOnline(s,id)||!equipped(s,id))continue;
   if(id==='N10'&&(!modernOnline(s,'N08')||organizationLevel(s)<10||level(s,'mechanics')<10))continue;

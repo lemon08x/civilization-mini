@@ -1,3 +1,4 @@
+import { lifeView } from './systems/life.js';
 import { economyView } from './systems/economy.js';
 import { technologyVictory } from './systems/investment.js';
 import { productNetworkView } from './systems/product-network.js';
@@ -11,7 +12,7 @@ import { gatherPreview, spoilagePreview, storageCapacity, technologyOutcomes } f
 import { contractBlocker } from './systems/society.js';
 import { developmentView } from './systems/development.js';
 
-export function personView(person: Person): Omit<Person, 'id'> {
+export function personView(person: Person): Omit<Person, 'id' | 'vitality'> {
   return { name: person.name, mastered: [...person.mastered], learning: { ...person.learning }, practices: [...person.practices], insights: [...person.insights] };
 }
 export function projectView(trial: TrialProject | null) {
@@ -27,6 +28,7 @@ export function getObservation(state: GameState, rules: Ruleset) {
     status: state.status,
     scenario: { id: scenario.id, name: scenario.name, description: scenario.text },
     clock: { ...state.clock, generations: rules.parameters.generations, turnsPerGeneration: rules.parameters.turnsPerGeneration },
+    ...(state.life?{life:{timeRemaining:state.life.timeRemaining,timePerSeason:state.life.rules.timePerSeason,calendar:{year:Math.floor((state.clock.absoluteTurn-1)/4)+1,season:['春','夏','秋','冬'][(state.clock.absoluteTurn-1)%4]},person:lifeView(person)!,heir:family.heirId!==family.activePersonId?lifeView(child):null,adultYears:state.life.rules.adultYears,pendingRetirement:!!state.life.pendingRetirement}}:{}),
     ap: state.ap, parameters: structuredClone(rules.parameters),
     world: { ...structuredClone(state.world), teachers: [...state.location.teachers], weather: state.location.weather, rain: state.location.rain, water: state.location.water, weatherName: { dry: '干旱', normal: '平水', wet: '丰水' }[state.location.weather] },
     person: personView(person), heir: personView(child),

@@ -1,0 +1,6925 @@
+{
+  "runId": "pt-20260913-170310-1828-g02",
+  "revision": 24,
+  "game": {
+    "economy": {
+      "knowledge": {},
+      "evidence": {},
+      "notes": {},
+      "goods": {
+        "wood": 1,
+        "clay": 2,
+        "seedWheat": 0,
+        "seedSoy": 0,
+        "seedFlax": 0,
+        "wheat": 3,
+        "straw": 2
+      },
+      "equipment": {},
+      "workers": {
+        "farmer": {
+          "kind": "farmer",
+          "experience": 6,
+          "job": "wheat",
+          "active": true,
+          "project": null
+        },
+        "artisan": {
+          "kind": "artisan",
+          "experience": 4,
+          "job": "rest",
+          "active": false,
+          "project": null
+        }
+      },
+      "field": {
+        "crop": "wheat",
+        "planted": 6,
+        "moisture": 0,
+        "growth": 1,
+        "stress": 1,
+        "fertility": 1,
+        "lastCrop": "wheat",
+        "tended": 0,
+        "composted": false,
+        "bonus": 0,
+        "duration": 2
+      },
+      "project": null,
+      "market": 4,
+      "recruitment": 1,
+      "industrySupply": 4,
+      "regional": {
+        "iron": false,
+        "fiber": false,
+        "teaching": {}
+      },
+      "published": {},
+      "ironBatches": 0,
+      "fiberBatches": 0,
+      "poweredTurn": 0,
+      "equipmentUsed": {},
+      "shop": {
+        "cart": {},
+        "stock": {
+          "good-food": 8,
+          "good-wheat": 8,
+          "good-flour": 8,
+          "good-seedWheat": 8,
+          "good-wood": 8,
+          "good-clay": 8,
+          "good-iron": 2,
+          "good-fiber": 8,
+          "good-oil": 8,
+          "good-ceramics": 8,
+          "good-seal": 8,
+          "good-shaft": 8,
+          "good-valve": 8,
+          "device-W01": 1,
+          "device-W03": 1,
+          "device-P01": 1,
+          "device-P03": 1,
+          "device-T01": 1,
+          "device-T03": 1,
+          "device-S01": 1,
+          "device-S02": 1,
+          "device-U01": 1,
+          "device-U06": 1,
+          "device-U08": 1,
+          "asset-granary": 1
+        },
+        "transport": 12,
+        "orders": [],
+        "books": [],
+        "assets": [],
+        "produced": {
+          "wheat": 1
+        },
+        "seededTurn": 0
+      },
+      "operations": {
+        "paused": false,
+        "food": true,
+        "foodReserved": 4,
+        "farm": "wheat",
+        "production": null,
+        "supplies": false,
+        "sales": true,
+        "maintenance": false,
+        "charter": false,
+        "mine": false,
+        "steam": false,
+        "projects": {},
+        "activeProject": null,
+        "notice": []
+      },
+      "modern": {
+        "power": 0,
+        "stored": 0,
+        "enabled": [],
+        "operated": {},
+        "services": {},
+        "cropBonus": 0
+      },
+      "branches": {
+        "learned": {
+          "person:1": [
+            "A0",
+            "O0",
+            "M0",
+            "L0",
+            "O1",
+            "O2",
+            "M1",
+            "L1"
+          ],
+          "person:2": [
+            "A0"
+          ]
+        },
+        "archives": [],
+        "protocols": [],
+        "channels": [],
+        "delivered": []
+      },
+      "branchView": {
+        "nodes": [
+          {
+            "id": "A0",
+            "name": "基础栽培",
+            "subject": "agronomy",
+            "parents": [],
+            "sample": {},
+            "benefit": "小麦播种、照料、收获；开局已会",
+            "known": true,
+            "heirKnown": true,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "A1",
+            "name": "田间水分管理",
+            "subject": "agronomy",
+            "parents": [
+              "A0"
+            ],
+            "sample": {
+              "wood": 1,
+              "clay": 1
+            },
+            "benefit": "配置自动灌溉与田间排水",
+            "known": false,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "M0",
+            "name": "材料识别",
+            "subject": "materials",
+            "parents": [],
+            "sample": {
+              "wood": 1
+            },
+            "benefit": "认识材料用途，选择储存、成形或绝缘分支",
+            "known": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "M1",
+            "name": "成形与连接",
+            "subject": "materials",
+            "parents": [
+              "M0"
+            ],
+            "sample": {
+              "wood": 1
+            },
+            "benefit": "锻打工具与部件连接",
+            "known": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "M2",
+            "name": "密封工艺",
+            "subject": "materials",
+            "parents": [
+              "M1"
+            ],
+            "sample": {
+              "fiber": 1,
+              "oil": 1
+            },
+            "benefit": "制作密封件，配合阀门与泵",
+            "known": false,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "M3",
+            "name": "食品储存",
+            "subject": "materials",
+            "parents": [
+              "M0"
+            ],
+            "sample": {
+              "wood": 1
+            },
+            "benefit": "基础容器保护更多口粮",
+            "known": false,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "M4",
+            "name": "电工绝缘",
+            "subject": "materials",
+            "parents": [
+              "M0"
+            ],
+            "sample": {
+              "wood": 1,
+              "clay": 1
+            },
+            "benefit": "认识绝缘，联络电工材料商",
+            "known": false,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "M5",
+            "name": "导线与绕组工艺",
+            "subject": "materials",
+            "parents": [
+              "M4"
+            ],
+            "sample": {
+              "copper": 1,
+              "polymer": 1
+            },
+            "benefit": "制作导线、电缆与线圈",
+            "known": false,
+            "heirKnown": false,
+            "archived": false,
+            "missing": [
+              "需掌握电工绝缘"
+            ]
+          },
+          {
+            "id": "L0",
+            "name": "受力与运动基础",
+            "subject": "mechanics",
+            "parents": [],
+            "sample": {
+              "wood": 1
+            },
+            "benefit": "简单提水器，机械与电磁共同基础",
+            "known": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "L1",
+            "name": "机械传动",
+            "subject": "mechanics",
+            "parents": [
+              "L0"
+            ],
+            "sample": {
+              "wood": 1
+            },
+            "benefit": "传动轴、手摇传动与磨粮",
+            "known": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "L2",
+            "name": "压力与流体",
+            "subject": "mechanics",
+            "parents": [
+              "L0"
+            ],
+            "sample": {
+              "clay": 1
+            },
+            "benefit": "阀门与流体基础，不必先学机械传动",
+            "known": false,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "L3",
+            "name": "泵与供水",
+            "subject": "mechanics",
+            "parents": [
+              "L2"
+            ],
+            "sample": {
+              "wood": 1
+            },
+            "benefit": "制造活塞泵，配合田间知识自动灌溉",
+            "known": false,
+            "heirKnown": false,
+            "archived": false,
+            "missing": [
+              "需掌握压力与流体"
+            ]
+          },
+          {
+            "id": "L4",
+            "name": "水力动力",
+            "subject": "mechanics",
+            "parents": [
+              "L1"
+            ],
+            "sample": {
+              "wood": 1
+            },
+            "benefit": "水轮动力，先改善机械加工",
+            "known": false,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "L5",
+            "name": "电磁转换基础",
+            "subject": "mechanics",
+            "parents": [
+              "L0"
+            ],
+            "sample": {
+              "copper": 1
+            },
+            "benefit": "利用购入样品学习电磁，不要求先造发电机",
+            "known": false,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "L6",
+            "name": "发电机系统",
+            "subject": "mechanics",
+            "parents": [
+              "L5"
+            ],
+            "sample": {
+              "copper": 1,
+              "iron": 1
+            },
+            "benefit": "与传动和绕组工艺共同制造发电机",
+            "known": false,
+            "heirKnown": false,
+            "archived": false,
+            "missing": [
+              "需掌握电磁转换基础"
+            ]
+          },
+          {
+            "id": "L7",
+            "name": "基础配电",
+            "subject": "mechanics",
+            "parents": [
+              "L6"
+            ],
+            "sample": {
+              "wire": 1
+            },
+            "benefit": "接入本地加工负载；不要求区域输电副本",
+            "known": false,
+            "heirKnown": false,
+            "archived": false,
+            "missing": [
+              "需掌握发电机系统"
+            ]
+          },
+          {
+            "id": "O0",
+            "name": "劳动分工",
+            "subject": "organization",
+            "parents": [],
+            "sample": {},
+            "benefit": "招聘与供粮安排",
+            "known": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "O1",
+            "name": "生产工序",
+            "subject": "organization",
+            "parents": [
+              "O0"
+            ],
+            "sample": {
+              "wood": 1
+            },
+            "benefit": "工匠持续生产与农业托管",
+            "known": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "O2",
+            "name": "采购与交付",
+            "subject": "organization",
+            "parents": [
+              "O1"
+            ],
+            "sample": {},
+            "benefit": "自动补货、销售、维护和经营契约",
+            "known": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          }
+        ],
+        "paths": [
+          {
+            "id": "farm",
+            "name": "稳定农业与自动灌溉",
+            "nodes": [
+              "A0",
+              "A1",
+              "M0",
+              "M1",
+              "M2",
+              "M3",
+              "L0",
+              "L2",
+              "L3"
+            ],
+            "products": [
+              "S01",
+              "W03"
+            ],
+            "description": "先储粮，再做密封与泵；持续消耗真实水源、木材和设备耐用。",
+            "learned": 4
+          },
+          {
+            "id": "workshop",
+            "name": "机械加工与销售",
+            "nodes": [
+              "M0",
+              "M1",
+              "L0",
+              "L1",
+              "O0",
+              "O1",
+              "O2"
+            ],
+            "products": [
+              "T03"
+            ],
+            "description": "试制轴、首次交付、雇员工序、补货销售；收益取决于真实收支。",
+            "learned": 7
+          },
+          {
+            "id": "electric",
+            "name": "水力发电与基本电工",
+            "nodes": [
+              "L0",
+              "L1",
+              "L4",
+              "L5",
+              "L6",
+              "L7",
+              "M0",
+              "M1",
+              "M4",
+              "M5"
+            ],
+            "products": [
+              "P03",
+              "E01"
+            ],
+            "description": "水力机械先有收益，再做导线、线圈、发电与本地加工；化工半成品可采购。",
+            "learned": 4
+          }
+        ],
+        "channels": [],
+        "protocols": [],
+        "delivered": [],
+        "products": {
+          "W01": [
+            "L0"
+          ],
+          "S01": [
+            "M3"
+          ],
+          "T03": [
+            "M1"
+          ],
+          "W03": [
+            "L3",
+            "M2"
+          ],
+          "P01": [
+            "L1",
+            "M1"
+          ],
+          "P03": [
+            "L4",
+            "L1",
+            "M1"
+          ],
+          "U06": [
+            "L1",
+            "M1"
+          ],
+          "E01": [
+            "L6",
+            "L1",
+            "L4",
+            "M1",
+            "M5"
+          ],
+          "U08": [
+            "A1",
+            "M1"
+          ],
+          "S02": [
+            "M2",
+            "M3"
+          ],
+          "T01": [
+            "M1"
+          ],
+          "U01": [
+            "A0",
+            "L0",
+            "M1"
+          ]
+        },
+        "processes": {
+          "seal": [
+            "M2"
+          ],
+          "shaft": [
+            "L1",
+            "M1"
+          ],
+          "valve": [
+            "L2",
+            "M1",
+            "M2"
+          ],
+          "wire": [
+            "M5"
+          ],
+          "coil": [
+            "M5",
+            "M1"
+          ],
+          "cable": [
+            "M5"
+          ],
+          "mill": [
+            "L1",
+            "M1"
+          ]
+        }
+      },
+      "marketView": {
+        "catalog": [
+          {
+            "id": "good-food",
+            "target": "food",
+            "kind": "goods",
+            "name": "即食口粮",
+            "category": "物资",
+            "price": 1,
+            "weight": 1,
+            "local": true,
+            "effect": "即食生活补给；与市场购粮共用库存",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 4
+          },
+          {
+            "id": "good-wheat",
+            "target": "wheat",
+            "kind": "goods",
+            "name": "小麦",
+            "category": "物资",
+            "price": 2,
+            "weight": 1,
+            "local": true,
+            "effect": "1份生活口粮，或磨成面粉",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-flour",
+            "target": "flour",
+            "kind": "goods",
+            "name": "面粉",
+            "category": "物资",
+            "price": 2,
+            "weight": 1,
+            "local": true,
+            "effect": "1份生活口粮；按与小麦相同的食用份额定价",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-seedWheat",
+            "target": "seedWheat",
+            "kind": "goods",
+            "name": "小麦种子",
+            "category": "物资",
+            "price": 2,
+            "weight": 1,
+            "local": true,
+            "effect": "播种小麦；需基础栽培",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-wood",
+            "target": "wood",
+            "kind": "goods",
+            "name": "木材",
+            "category": "物资",
+            "price": 2,
+            "weight": 1,
+            "local": true,
+            "effect": "设备、部件与燃料",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-clay",
+            "target": "clay",
+            "kind": "goods",
+            "name": "黏土",
+            "category": "物资",
+            "price": 2,
+            "weight": 1,
+            "local": true,
+            "effect": "建窑、烧陶和烧砖",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-iron",
+            "target": "iron",
+            "kind": "goods",
+            "name": "铁料",
+            "category": "物资",
+            "price": 7,
+            "weight": 1,
+            "local": false,
+            "effect": "直接进入工具和机械部件配方",
+            "condition": "基础原料商少量铁料；交付传动轴后可签稳定供货",
+            "owned": false,
+            "stock": 2
+          },
+          {
+            "id": "good-fiber",
+            "target": "fiber",
+            "kind": "goods",
+            "name": "亚麻纤维",
+            "category": "物资",
+            "price": 6,
+            "weight": 1,
+            "local": false,
+            "effect": "密封件与绳索原料",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-oil",
+            "target": "oil",
+            "kind": "goods",
+            "name": "植物油",
+            "category": "物资",
+            "price": 6,
+            "weight": 1,
+            "local": false,
+            "effect": "密封件原料，当前不作为食品",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-ceramics",
+            "target": "ceramics",
+            "kind": "goods",
+            "name": "陶质构件",
+            "category": "物资",
+            "price": 7,
+            "weight": 1,
+            "local": false,
+            "effect": "容器、磨粮及其他设备的构件",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-seal",
+            "target": "seal",
+            "kind": "goods",
+            "name": "密封件",
+            "category": "物资",
+            "price": 7,
+            "weight": 1,
+            "local": false,
+            "effect": "泵、阀门和密闭容器的部件",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-shaft",
+            "target": "shaft",
+            "kind": "goods",
+            "name": "传动轴",
+            "category": "物资",
+            "price": 9,
+            "weight": 1,
+            "local": false,
+            "effect": "动力、播种与脱粒设备的部件",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-valve",
+            "target": "valve",
+            "kind": "goods",
+            "name": "阀门",
+            "category": "物资",
+            "price": 10,
+            "weight": 1,
+            "local": false,
+            "effect": "活塞泵部件",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "device-W01",
+            "target": "W01",
+            "kind": "device",
+            "name": "提水辘轳",
+            "category": "设备",
+            "price": 10,
+            "weight": 4,
+            "local": true,
+            "effect": "田间管理从1公共水取得2点供水；每次扣1耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-W03",
+            "target": "W03",
+            "kind": "device",
+            "name": "活塞泵",
+            "category": "设备",
+            "price": 35,
+            "weight": 4,
+            "local": false,
+            "effect": "有作物且缺水时每季自动抽取1公共水灌溉，消耗1木材和1耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-P01",
+            "target": "P01",
+            "kind": "device",
+            "name": "手摇传动装置",
+            "category": "设备",
+            "price": 22,
+            "weight": 4,
+            "local": false,
+            "effect": "纤维和绳索加工一次处理双份，原料产出均翻倍，每批扣1耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-P03",
+            "target": "P03",
+            "kind": "device",
+            "name": "水轮动力装置",
+            "category": "设备",
+            "price": 30,
+            "weight": 4,
+            "local": false,
+            "effect": "有公共水时，磨粮、脱粒、榨油可免个人行动；每季限一批，仍扣原料与耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-T01",
+            "target": "T01",
+            "kind": "device",
+            "name": "切削工具组",
+            "category": "设备",
+            "price": 12,
+            "weight": 4,
+            "local": true,
+            "effect": "采木多取1木材，扣当地库存与1耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-T03",
+            "target": "T03",
+            "kind": "device",
+            "name": "锻打工具组",
+            "category": "设备",
+            "price": 24,
+            "weight": 4,
+            "local": false,
+            "effect": "开放传动轴、阀门制造，每批扣1耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-S01",
+            "target": "S01",
+            "kind": "device",
+            "name": "基础容器",
+            "category": "设备",
+            "price": 8,
+            "weight": 4,
+            "local": true,
+            "effect": "食品保护容量从4增至8，不产生额外食物。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-S02",
+            "target": "S02",
+            "kind": "device",
+            "name": "密闭容器",
+            "category": "设备",
+            "price": 20,
+            "weight": 4,
+            "local": false,
+            "effect": "食品保护容量增至14，不与基础容器重复叠加。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-U01",
+            "target": "U01",
+            "kind": "device",
+            "name": "翻土犁",
+            "category": "设备",
+            "price": 16,
+            "weight": 4,
+            "local": true,
+            "effect": "播种时本茬潜在收成+1，扣1耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-U06",
+            "target": "U06",
+            "kind": "device",
+            "name": "磨粮装置",
+            "category": "设备",
+            "price": 18,
+            "weight": 4,
+            "local": false,
+            "effect": "2小麦加工为3面粉，每批扣1耐用度，不与脱粒重复结算。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-U08",
+            "target": "U08",
+            "kind": "device",
+            "name": "排水设施",
+            "category": "设备",
+            "price": 16,
+            "weight": 4,
+            "local": false,
+            "effect": "丰水季自动免除在田作物积水胁迫，每次扣1耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "asset-granary",
+            "target": "granary",
+            "kind": "asset",
+            "name": "家庭粮仓",
+            "category": "家庭资产",
+            "price": 32,
+            "weight": 4,
+            "local": false,
+            "effect": "食品保护容量提高至30，与容器取较大值，永久跨代保留",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          }
+        ],
+        "quote": {
+          "lines": [],
+          "total": 0,
+          "weight": 0,
+          "remainingMoney": 2,
+          "blockers": [
+            "采购清单为空"
+          ]
+        },
+        "transport": 12,
+        "orders": [],
+        "assets": [],
+        "books": [],
+        "repairPrices": {
+          "W01": 5,
+          "W03": 16,
+          "P01": 9,
+          "P03": 13,
+          "T01": 6,
+          "T03": 10,
+          "S01": 4,
+          "S02": 8,
+          "U01": 8,
+          "U06": 7,
+          "U08": 6,
+          "E01": 22
+        }
+      },
+      "operationsView": {
+        "paused": false,
+        "food": true,
+        "foodReserved": 4,
+        "farm": "wheat",
+        "production": null,
+        "supplies": false,
+        "sales": true,
+        "maintenance": false,
+        "charter": false,
+        "mine": false,
+        "steam": false,
+        "projects": {},
+        "activeProject": null,
+        "notice": [],
+        "foodTarget": 4,
+        "parameters": {
+          "foodTarget": 4,
+          "inputBatches": 2,
+          "cashReserve": 4,
+          "outputReserve": 2,
+          "repairThreshold": 1,
+          "commissionSeasons": 3,
+          "requiredAchievements": 2,
+          "projectFee": 4,
+          "mineYield": 2,
+          "steamFuel": 2
+        },
+        "organization": 3,
+        "stage": "委托经营",
+        "projectsCatalog": [],
+        "completed": [],
+        "recipes": [
+          {
+            "id": "seal",
+            "name": "制作密封件",
+            "outputs": {
+              "seal": 2
+            }
+          },
+          {
+            "id": "shaft",
+            "name": "制造传动轴",
+            "equipment": "T03",
+            "outputs": {
+              "shaft": 2
+            }
+          },
+          {
+            "id": "valve",
+            "name": "制造阀门",
+            "equipment": "T03",
+            "outputs": {
+              "valve": 1
+            }
+          },
+          {
+            "id": "mill",
+            "name": "磨粮",
+            "equipment": "U06",
+            "outputs": {
+              "flour": 3
+            }
+          },
+          {
+            "id": "wire",
+            "name": "制造绝缘铜线",
+            "outputs": {
+              "wire": 2
+            }
+          },
+          {
+            "id": "coil",
+            "name": "绕制电机线圈",
+            "equipment": "T03",
+            "outputs": {
+              "coil": 1
+            }
+          },
+          {
+            "id": "cable",
+            "name": "制造输电电缆",
+            "outputs": {
+              "cable": 1
+            }
+          }
+        ]
+      },
+      "foodTotal": 3,
+      "storage": 4,
+      "harvest": 6,
+      "disciplines": [],
+      "staff": [
+        {
+          "kind": "farmer",
+          "experience": 6,
+          "job": "wheat",
+          "active": true,
+          "project": null,
+          "name": "熟练农工",
+          "jobName": "小麦种植",
+          "wage": 2,
+          "blockers": [
+            "本季水分充足，等待作物生长"
+          ]
+        },
+        {
+          "kind": "artisan",
+          "experience": 4,
+          "job": "rest",
+          "active": false,
+          "project": null,
+          "name": "熟练工匠",
+          "jobName": "暂停",
+          "wage": 2,
+          "blockers": [
+            "合同已暂停"
+          ]
+        }
+      ],
+      "products": [
+        {
+          "id": "W01",
+          "name": "提水辘轳",
+          "category": "供水与排水",
+          "effect": "田间管理从1公共水取得2点供水；每次扣1耐用度。",
+          "requires": {},
+          "inputs": {
+            "wood": 3
+          },
+          "from": []
+        },
+        {
+          "id": "W03",
+          "name": "活塞泵",
+          "category": "供水与排水",
+          "effect": "有作物且缺水时每季自动抽取1公共水灌溉，消耗1木材和1耐用度。",
+          "requires": {},
+          "inputs": {
+            "iron": 2,
+            "valve": 1,
+            "seal": 1
+          },
+          "from": [
+            "W01"
+          ]
+        },
+        {
+          "id": "P01",
+          "name": "手摇传动装置",
+          "category": "生产动力",
+          "effect": "纤维和绳索加工一次处理双份，原料产出均翻倍，每批扣1耐用度。",
+          "requires": {},
+          "inputs": {
+            "wood": 3,
+            "shaft": 1
+          },
+          "from": []
+        },
+        {
+          "id": "P03",
+          "name": "水轮动力装置",
+          "category": "生产动力",
+          "effect": "有公共水时，磨粮、脱粒、榨油可免个人行动；每季限一批，仍扣原料与耐用度。",
+          "requires": {},
+          "inputs": {
+            "wood": 4,
+            "iron": 1,
+            "shaft": 1
+          },
+          "from": [
+            "P01"
+          ]
+        },
+        {
+          "id": "T01",
+          "name": "切削工具组",
+          "category": "加工工具",
+          "effect": "采木多取1木材，扣当地库存与1耐用度。",
+          "requires": {},
+          "inputs": {
+            "wood": 1,
+            "iron": 1
+          },
+          "from": []
+        },
+        {
+          "id": "T03",
+          "name": "锻打工具组",
+          "category": "加工工具",
+          "effect": "开放传动轴、阀门制造，每批扣1耐用度。",
+          "requires": {},
+          "inputs": {
+            "wood": 2,
+            "iron": 2
+          },
+          "from": []
+        },
+        {
+          "id": "S01",
+          "name": "基础容器",
+          "category": "储存与防护",
+          "effect": "食品保护容量从4增至8，不产生额外食物。",
+          "requires": {},
+          "inputs": {
+            "wood": 2
+          },
+          "from": []
+        },
+        {
+          "id": "S02",
+          "name": "密闭容器",
+          "category": "储存与防护",
+          "effect": "食品保护容量增至14，不与基础容器重复叠加。",
+          "requires": {},
+          "inputs": {
+            "ceramics": 1,
+            "seal": 1
+          },
+          "from": [
+            "S01"
+          ]
+        },
+        {
+          "id": "U01",
+          "name": "翻土犁",
+          "category": "农业作业",
+          "effect": "播种时本茬潜在收成+1，扣1耐用度。",
+          "requires": {},
+          "inputs": {
+            "wood": 3,
+            "iron": 1
+          },
+          "from": []
+        },
+        {
+          "id": "U06",
+          "name": "磨粮装置",
+          "category": "农业作业",
+          "effect": "2小麦加工为3面粉，每批扣1耐用度，不与脱粒重复结算。",
+          "requires": {},
+          "inputs": {
+            "wood": 2,
+            "ceramics": 1
+          },
+          "from": [
+            "U05"
+          ]
+        },
+        {
+          "id": "U08",
+          "name": "排水设施",
+          "category": "农业作业",
+          "effect": "丰水季自动免除在田作物积水胁迫，每次扣1耐用度。",
+          "requires": {},
+          "inputs": {
+            "wood": 2,
+            "clay": 2
+          },
+          "from": []
+        },
+        {
+          "id": "E01",
+          "name": "水力发电机组",
+          "category": "电力与储能",
+          "effect": "开启供能后每季最多一次，消耗1公共水和1耐用，产生6电。",
+          "requires": {},
+          "inputs": {
+            "coil": 2,
+            "shaft": 1,
+            "ceramics": 2
+          },
+          "from": [
+            "P03"
+          ]
+        }
+      ],
+      "processes": [
+        {
+          "id": "seal",
+          "name": "制作密封件",
+          "inputs": {
+            "fiber": 1,
+            "oil": 1
+          },
+          "outputs": {
+            "seal": 2
+          },
+          "requires": {},
+          "wait": 0
+        },
+        {
+          "id": "shaft",
+          "name": "制造传动轴",
+          "inputs": {
+            "wood": 2,
+            "iron": 1
+          },
+          "outputs": {
+            "shaft": 2
+          },
+          "requires": {},
+          "equipment": "T03",
+          "wait": 0
+        },
+        {
+          "id": "valve",
+          "name": "制造阀门",
+          "inputs": {
+            "iron": 1,
+            "seal": 1
+          },
+          "outputs": {
+            "valve": 1
+          },
+          "requires": {},
+          "equipment": "T03",
+          "wait": 0
+        },
+        {
+          "id": "mill",
+          "name": "磨粮",
+          "inputs": {
+            "wheat": 2
+          },
+          "outputs": {
+            "flour": 3
+          },
+          "requires": {},
+          "equipment": "U06",
+          "wait": 0
+        },
+        {
+          "id": "wire",
+          "name": "制造绝缘铜线",
+          "inputs": {
+            "copper": 1,
+            "polymer": 1
+          },
+          "outputs": {
+            "wire": 2
+          },
+          "requires": {},
+          "wait": 0
+        },
+        {
+          "id": "coil",
+          "name": "绕制电机线圈",
+          "inputs": {
+            "wire": 2,
+            "iron": 1
+          },
+          "outputs": {
+            "coil": 1
+          },
+          "requires": {},
+          "equipment": "T03",
+          "wait": 0
+        },
+        {
+          "id": "cable",
+          "name": "制造输电电缆",
+          "inputs": {
+            "wire": 2,
+            "seal": 1
+          },
+          "outputs": {
+            "cable": 1
+          },
+          "requires": {},
+          "wait": 0
+        }
+      ],
+      "crops": {
+        "wheat": {
+          "name": "小麦",
+          "seed": "seedWheat",
+          "duration": 2,
+          "yield": 6,
+          "straw": 2,
+          "level": 1
+        },
+        "soy": {
+          "name": "大豆",
+          "seed": "seedSoy",
+          "duration": 2,
+          "yield": 4,
+          "straw": 1,
+          "level": 2
+        },
+        "flax": {
+          "name": "亚麻",
+          "seed": "seedFlax",
+          "duration": 3,
+          "yield": 5,
+          "straw": 1,
+          "level": 2
+        }
+      },
+      "goodsCatalog": {
+        "wood": {
+          "name": "木材",
+          "price": 1,
+          "food": 0
+        },
+        "clay": {
+          "name": "黏土",
+          "price": 1,
+          "food": 0
+        },
+        "ore": {
+          "name": "矿料",
+          "price": 2,
+          "food": 0
+        },
+        "iron": {
+          "name": "铁料",
+          "price": 5,
+          "food": 0
+        },
+        "wheat": {
+          "name": "小麦",
+          "price": 1,
+          "food": 1
+        },
+        "soy": {
+          "name": "大豆",
+          "price": 2,
+          "food": 1
+        },
+        "flax": {
+          "name": "亚麻茎",
+          "price": 2,
+          "food": 0
+        },
+        "straw": {
+          "name": "秸秆",
+          "price": 1,
+          "food": 0
+        },
+        "flour": {
+          "name": "面粉",
+          "price": 2,
+          "food": 1
+        },
+        "oil": {
+          "name": "植物油",
+          "price": 4,
+          "food": 0
+        },
+        "fiber": {
+          "name": "亚麻纤维",
+          "price": 4,
+          "food": 0
+        },
+        "rope": {
+          "name": "绳索",
+          "price": 6,
+          "food": 0
+        },
+        "compost": {
+          "name": "腐熟堆肥",
+          "price": 2,
+          "food": 0
+        },
+        "ceramics": {
+          "name": "陶质构件",
+          "price": 5,
+          "food": 0
+        },
+        "brick": {
+          "name": "耐火砖",
+          "price": 4,
+          "food": 0
+        },
+        "seal": {
+          "name": "密封件",
+          "price": 5,
+          "food": 0
+        },
+        "valve": {
+          "name": "阀门",
+          "price": 8,
+          "food": 0
+        },
+        "shaft": {
+          "name": "传动轴",
+          "price": 7,
+          "food": 0
+        },
+        "spring": {
+          "name": "弹簧",
+          "price": 8,
+          "food": 0
+        },
+        "solution": {
+          "name": "提纯溶液",
+          "price": 6,
+          "food": 0
+        },
+        "seedWheat": {
+          "name": "小麦种子",
+          "price": 1,
+          "food": 0
+        },
+        "seedSoy": {
+          "name": "大豆种子",
+          "price": 2,
+          "food": 0
+        },
+        "seedFlax": {
+          "name": "亚麻种子",
+          "price": 2,
+          "food": 0
+        },
+        "copper": {
+          "name": "铜料",
+          "price": 3,
+          "food": 0
+        },
+        "feedstock": {
+          "name": "化工原料",
+          "price": 3,
+          "food": 0
+        },
+        "mineral": {
+          "name": "矿质肥料原料",
+          "price": 2,
+          "food": 0
+        },
+        "silica": {
+          "name": "石英原料",
+          "price": 2,
+          "food": 0
+        },
+        "polymer": {
+          "name": "绝缘聚合物",
+          "price": 5,
+          "food": 0
+        },
+        "wire": {
+          "name": "绝缘铜线",
+          "price": 6,
+          "food": 0
+        },
+        "coil": {
+          "name": "电机线圈",
+          "price": 9,
+          "food": 0
+        },
+        "cable": {
+          "name": "输电电缆",
+          "price": 9,
+          "food": 0
+        },
+        "fuel": {
+          "name": "精炼燃料",
+          "price": 5,
+          "food": 0
+        },
+        "nutrient": {
+          "name": "配方肥料",
+          "price": 4,
+          "food": 0
+        },
+        "battery": {
+          "name": "蓄电池单元",
+          "price": 8,
+          "food": 0
+        },
+        "silicon": {
+          "name": "高纯硅",
+          "price": 7,
+          "food": 0
+        },
+        "circuit": {
+          "name": "电子电路",
+          "price": 12,
+          "food": 0
+        },
+        "controller": {
+          "name": "数字控制器",
+          "price": 16,
+          "food": 0
+        },
+        "composite": {
+          "name": "复合结构件",
+          "price": 10,
+          "food": 0
+        }
+      },
+      "parameters": {
+        "wage": 1,
+        "hireCost": 2,
+        "durability": 12
+      }
+    },
+    "rulesVersion": "0.18.0",
+    "victory": {
+      "mastered": [
+        "A0",
+        "O0",
+        "M0",
+        "L0",
+        "O1",
+        "O2",
+        "M1",
+        "L1"
+      ],
+      "total": 19,
+      "required": 19,
+      "achievements": [],
+      "requiredAchievements": 0,
+      "percent": 42,
+      "targetPercent": 100,
+      "achieved": false,
+      "won": false
+    },
+    "status": "active",
+    "scenario": {
+      "id": "clay-valley",
+      "name": "黏土河谷",
+      "description": "从相同农业基础开始，水源、天气与当地原料决定经营取舍。"
+    },
+    "clock": {
+      "generation": 1,
+      "turn": 7,
+      "absoluteTurn": 7,
+      "generations": 3,
+      "turnsPerGeneration": 16
+    },
+    "life": {
+      "timeRemaining": 12,
+      "timePerSeason": 12,
+      "calendar": {
+        "year": 2,
+        "season": "秋"
+      },
+      "person": {
+        "ageYears": 41,
+        "ageQuarter": 2,
+        "health": 100,
+        "energy": 5,
+        "maxEnergy": 8,
+        "alive": true,
+        "talent": {
+          "name": "善组织",
+          "effect": "招聘、采购与建立经营安排少用1时间"
+        }
+      },
+      "heir": {
+        "ageYears": 17,
+        "ageQuarter": 2,
+        "health": 100,
+        "energy": 8,
+        "maxEnergy": 8,
+        "alive": true,
+        "talent": {
+          "name": "健壮",
+          "effect": "亲自体力劳动少消耗1精力"
+        }
+      },
+      "adultYears": 18,
+      "pendingRetirement": false
+    },
+    "ap": 0,
+    "parameters": {
+      "actionsPerTurn": 3,
+      "turnsPerGeneration": 16,
+      "generations": 3,
+      "initialFood": 6,
+      "initialMoney": 8,
+      "foodPerTurn": 2,
+      "workIncome": 2,
+      "foodPrice": 1,
+      "cropPotential": 4,
+      "channelCost": 3,
+      "channelDurability": 3,
+      "repairCost": 1,
+      "trialCost": 2,
+      "trialSeasons": 2,
+      "trialLandCost": 1,
+      "archiveCost": 1,
+      "studyCost": 0,
+      "trainingCost": 1,
+      "studyMultiplier": 1,
+      "hardshipLimit": 3
+    },
+    "world": {
+      "era": "农业聚落：生产、分工与文明成长",
+      "technologies": [
+        "学科知识"
+      ],
+      "teachers": [
+        "L01",
+        "L02",
+        "L03",
+        "L04",
+        "L05",
+        "L06",
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06",
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "A01",
+        "A02",
+        "A03",
+        "A04",
+        "A05",
+        "A06",
+        "O01",
+        "O02",
+        "O03",
+        "O04",
+        "O05",
+        "O06"
+      ],
+      "weather": "normal",
+      "rain": 2,
+      "water": 2,
+      "weatherName": "平水"
+    },
+    "person": {
+      "name": "本代经营者",
+      "mastered": [],
+      "learning": {},
+      "practices": [],
+      "insights": []
+    },
+    "heir": {
+      "name": "成长中的后辈",
+      "mastered": [],
+      "learning": {},
+      "practices": [],
+      "insights": []
+    },
+    "family": {
+      "food": 0,
+      "money": 2,
+      "hardship": 0,
+      "channel": null,
+      "archives": [],
+      "stock": {
+        "name": "普通地方种源",
+        "potential": 4,
+        "tolerance": 0
+      },
+      "candidate": null,
+      "project": null,
+      "reports": []
+    },
+    "harvest": {
+      "gross": 4,
+      "food": 4,
+      "drawn": 0,
+      "deficit": 0,
+      "landCost": 0
+    },
+    "production": {
+      "inventory": {
+        "wood": 0,
+        "clay": 0,
+        "woodenware": 0,
+        "pottery": 0
+      },
+      "stocks": {
+        "wildFood": 3,
+        "timber": 4,
+        "clay": 20
+      },
+      "market": {
+        "food": 4,
+        "jobs": 1,
+        "woodenware": 2,
+        "pottery": 2,
+        "methods": 1
+      },
+      "toolDurability": 0,
+      "storage": {
+        "woodenware": false,
+        "pottery": false
+      },
+      "project": null,
+      "workshops": {
+        "woodenware": false,
+        "pottery": false
+      },
+      "parameters": {
+        "gatherFood": 2,
+        "gatherWood": 2,
+        "gatherClay": 2,
+        "baseStorage": 2,
+        "woodenStorage": 4,
+        "potteryStorage": 6,
+        "spoilDivisor": 2,
+        "toolDurability": 4,
+        "toolBonus": 1,
+        "woodRecipeCost": 2,
+        "potteryClayCost": 2,
+        "potteryFuelCost": 2,
+        "woodenwarePrice": 4,
+        "potteryPrice": 3,
+        "methodPrice": 2
+      },
+      "environment": {
+        "stocks": {
+          "wildFood": 3,
+          "timber": 5,
+          "clay": 20
+        },
+        "recovery": {
+          "wildFood": 1,
+          "timber": 1
+        },
+        "market": {
+          "food": 8,
+          "jobs": 1,
+          "woodenware": 2,
+          "pottery": 2,
+          "methods": 1
+        },
+        "teachers": [
+          "L01",
+          "L02",
+          "L03",
+          "L04",
+          "L05",
+          "L06",
+          "H01",
+          "H02",
+          "H03",
+          "H04",
+          "H05",
+          "H06",
+          "C01",
+          "C02",
+          "C03",
+          "C04",
+          "C05",
+          "C06",
+          "M01",
+          "M02",
+          "M03",
+          "M04",
+          "M05",
+          "M06",
+          "A01",
+          "A02",
+          "A03",
+          "A04",
+          "A05",
+          "A06",
+          "O01",
+          "O02",
+          "O03",
+          "O04",
+          "O05",
+          "O06"
+        ],
+        "imports": []
+      },
+      "storageCapacity": 2,
+      "spoilageAfterConsumption": 0,
+      "gathering": {
+        "food": 2,
+        "wood": 2,
+        "clay": 2
+      }
+    },
+    "technologies": [],
+    "actions": [
+      {
+        "id": "economy:rest:self",
+        "action": {
+          "type": "economy",
+          "operation": "rest",
+          "target": "self"
+        },
+        "label": "休息",
+        "group": "身体",
+        "ap": 0,
+        "time": 4,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "用4时间恢复5精力，不超过健康决定的上限。"
+      },
+      {
+        "id": "economy:care:self",
+        "action": {
+          "type": "economy",
+          "operation": "care",
+          "target": "self"
+        },
+        "label": "营养疗养",
+        "group": "身体",
+        "ap": 0,
+        "time": 4,
+        "energy": 1,
+        "money": 2,
+        "food": 0,
+        "enabled": false,
+        "reason": "健康已达到当前年龄上限",
+        "description": "用4时间、1精力、2钱购买营养照护，恢复8健康；不能逆转衰老。"
+      },
+      {
+        "id": "economy:retire:family",
+        "action": {
+          "type": "economy",
+          "operation": "retire",
+          "target": "family"
+        },
+        "label": "安排季末交接",
+        "group": "身体",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "后辈须存活并满18岁，当前17岁",
+        "description": "本季正常结算后交给成年后辈；不会额外生成一季时间或自动复制个人知识。"
+      },
+      {
+        "id": "economy:branchlearn:A0",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "A0"
+        },
+        "label": "学习：基础栽培",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "已经掌握",
+        "description": "小麦播种、照料、收获；开局已会。通过地方入门指导与实物练习学习；样品：无。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:A0",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "A0"
+        },
+        "label": "留存：基础栽培",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:A0",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "A0"
+        },
+        "label": "教导：基础栽培",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "后辈已经掌握",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:A1",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "A1"
+        },
+        "label": "学习：田间水分管理",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "配置自动灌溉与田间排水。通过地方入门指导与实物练习学习；样品：wood×1、clay×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:A1",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "A1"
+        },
+        "label": "留存：田间水分管理",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握田间水分管理",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:A1",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "A1"
+        },
+        "label": "教导：田间水分管理",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握田间水分管理",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:M0",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "M0"
+        },
+        "label": "学习：材料识别",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "已经掌握",
+        "description": "认识材料用途，选择储存、成形或绝缘分支。通过地方入门指导与实物练习学习；样品：wood×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:M0",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "M0"
+        },
+        "label": "留存：材料识别",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:M0",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "M0"
+        },
+        "label": "教导：材料识别",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:M1",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "M1"
+        },
+        "label": "学习：成形与连接",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "已经掌握",
+        "description": "锻打工具与部件连接。通过地方入门指导与实物练习学习；样品：wood×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:M1",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "M1"
+        },
+        "label": "留存：成形与连接",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:M1",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "M1"
+        },
+        "label": "教导：成形与连接",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握材料识别",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:M2",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "M2"
+        },
+        "label": "学习：密封工艺",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1亚麻纤维；需1植物油",
+        "description": "制作密封件，配合阀门与泵。通过地方入门指导与实物练习学习；样品：fiber×1、oil×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:M2",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "M2"
+        },
+        "label": "留存：密封工艺",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握密封工艺",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:M2",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "M2"
+        },
+        "label": "教导：密封工艺",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握密封工艺；需掌握成形与连接",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:M3",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "M3"
+        },
+        "label": "学习：食品储存",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "基础容器保护更多口粮。通过地方入门指导与实物练习学习；样品：wood×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:M3",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "M3"
+        },
+        "label": "留存：食品储存",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握食品储存",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:M3",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "M3"
+        },
+        "label": "教导：食品储存",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握食品储存；需掌握材料识别",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:M4",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "M4"
+        },
+        "label": "学习：电工绝缘",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "认识绝缘，联络电工材料商。通过地方入门指导与实物练习学习；样品：wood×1、clay×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:M4",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "M4"
+        },
+        "label": "留存：电工绝缘",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握电工绝缘",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:M4",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "M4"
+        },
+        "label": "教导：电工绝缘",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握电工绝缘；需掌握材料识别",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:M5",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "M5"
+        },
+        "label": "学习：导线与绕组工艺",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握电工绝缘；需1铜料；需1绝缘聚合物",
+        "description": "制作导线、电缆与线圈。通过地方入门指导与实物练习学习；样品：copper×1、polymer×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:M5",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "M5"
+        },
+        "label": "留存：导线与绕组工艺",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握导线与绕组工艺",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:M5",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "M5"
+        },
+        "label": "教导：导线与绕组工艺",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握导线与绕组工艺；需掌握电工绝缘",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:L0",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "L0"
+        },
+        "label": "学习：受力与运动基础",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "已经掌握",
+        "description": "简单提水器，机械与电磁共同基础。通过地方入门指导与实物练习学习；样品：wood×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:L0",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "L0"
+        },
+        "label": "留存：受力与运动基础",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:L0",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "L0"
+        },
+        "label": "教导：受力与运动基础",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:L1",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "L1"
+        },
+        "label": "学习：机械传动",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "已经掌握",
+        "description": "传动轴、手摇传动与磨粮。通过地方入门指导与实物练习学习；样品：wood×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:L1",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "L1"
+        },
+        "label": "留存：机械传动",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:L1",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "L1"
+        },
+        "label": "教导：机械传动",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握受力与运动基础",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:L2",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "L2"
+        },
+        "label": "学习：压力与流体",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "阀门与流体基础，不必先学机械传动。通过地方入门指导与实物练习学习；样品：clay×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:L2",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "L2"
+        },
+        "label": "留存：压力与流体",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握压力与流体",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:L2",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "L2"
+        },
+        "label": "教导：压力与流体",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握压力与流体；需掌握受力与运动基础",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:L3",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "L3"
+        },
+        "label": "学习：泵与供水",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握压力与流体",
+        "description": "制造活塞泵，配合田间知识自动灌溉。通过地方入门指导与实物练习学习；样品：wood×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:L3",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "L3"
+        },
+        "label": "留存：泵与供水",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握泵与供水",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:L3",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "L3"
+        },
+        "label": "教导：泵与供水",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握泵与供水；需掌握压力与流体",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:L4",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "L4"
+        },
+        "label": "学习：水力动力",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "水轮动力，先改善机械加工。通过地方入门指导与实物练习学习；样品：wood×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:L4",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "L4"
+        },
+        "label": "留存：水力动力",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握水力动力",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:L4",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "L4"
+        },
+        "label": "教导：水力动力",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握水力动力；需掌握机械传动",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:L5",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "L5"
+        },
+        "label": "学习：电磁转换基础",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1铜料",
+        "description": "利用购入样品学习电磁，不要求先造发电机。通过地方入门指导与实物练习学习；样品：copper×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:L5",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "L5"
+        },
+        "label": "留存：电磁转换基础",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握电磁转换基础",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:L5",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "L5"
+        },
+        "label": "教导：电磁转换基础",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握电磁转换基础；需掌握受力与运动基础",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:L6",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "L6"
+        },
+        "label": "学习：发电机系统",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握电磁转换基础；需1铜料；需1铁料",
+        "description": "与传动和绕组工艺共同制造发电机。通过地方入门指导与实物练习学习；样品：copper×1、iron×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:L6",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "L6"
+        },
+        "label": "留存：发电机系统",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握发电机系统",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:L6",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "L6"
+        },
+        "label": "教导：发电机系统",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握发电机系统；需掌握电磁转换基础",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:L7",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "L7"
+        },
+        "label": "学习：基础配电",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握发电机系统；需1绝缘铜线",
+        "description": "接入本地加工负载；不要求区域输电副本。通过地方入门指导与实物练习学习；样品：wire×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:L7",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "L7"
+        },
+        "label": "留存：基础配电",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握基础配电",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:L7",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "L7"
+        },
+        "label": "教导：基础配电",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握基础配电；需掌握发电机系统",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:O0",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "O0"
+        },
+        "label": "学习：劳动分工",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "已经掌握",
+        "description": "招聘与供粮安排。通过地方入门指导与实物练习学习；样品：无。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:O0",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "O0"
+        },
+        "label": "留存：劳动分工",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:O0",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "O0"
+        },
+        "label": "教导：劳动分工",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:O1",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "O1"
+        },
+        "label": "学习：生产工序",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "已经掌握",
+        "description": "工匠持续生产与农业托管。通过地方入门指导与实物练习学习；样品：wood×1。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:O1",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "O1"
+        },
+        "label": "留存：生产工序",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:O1",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "O1"
+        },
+        "label": "教导：生产工序",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握劳动分工",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:branchlearn:O2",
+        "action": {
+          "type": "economy",
+          "operation": "branchlearn",
+          "target": "O2"
+        },
+        "label": "学习：采购与交付",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "已经掌握",
+        "description": "自动补货、销售、维护和经营契约。通过地方入门指导与实物练习学习；样品：无。天赋影响时间精力报价。"
+      },
+      {
+        "id": "economy:brancharchive:O2",
+        "action": {
+          "type": "economy",
+          "operation": "brancharchive",
+          "target": "O2"
+        },
+        "label": "留存：采购与交付",
+        "group": "分支",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "保留学习来源，后辈仍须投入时间学习，不自动复制个人理解。"
+      },
+      {
+        "id": "economy:branchteach:O2",
+        "action": {
+          "type": "economy",
+          "operation": "branchteach",
+          "target": "O2"
+        },
+        "label": "教导：采购与交付",
+        "group": "分支",
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握生产工序",
+        "description": "一次教导一个有前置基础的节点；不复制整棵树。"
+      },
+      {
+        "id": "economy:channel:electric",
+        "action": {
+          "type": "economy",
+          "operation": "channel",
+          "target": "electric"
+        },
+        "label": "联络电工材料商",
+        "group": "渠道",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 4,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握电工绝缘；钱财不足",
+        "description": "支付4钱渠道服务费，材料另行按价购买并受库存、运输与到货限制。下季更新供应，不赠送启动材料。"
+      },
+      {
+        "id": "economy:channel:metal",
+        "action": {
+          "type": "economy",
+          "operation": "channel",
+          "target": "metal"
+        },
+        "label": "签订稳定金属供货",
+        "group": "渠道",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 3,
+        "food": 0,
+        "enabled": false,
+        "reason": "先完成一次真实传动轴交付；钱财不足",
+        "description": "支付3钱渠道服务费，材料另行按价购买并受库存、运输与到货限制。下季更新供应，不赠送启动材料。"
+      },
+      {
+        "id": "economy:utility:E01-on",
+        "action": {
+          "type": "economy",
+          "operation": "utility",
+          "target": "E01-on"
+        },
+        "label": "启用水力发电机组",
+        "group": "能源",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需可用设备；需掌握发电机系统",
+        "description": "设备按真实原料、电力与耐用运行；启停本身不产生电。"
+      },
+      {
+        "id": "economy:utility:E01-off",
+        "action": {
+          "type": "economy",
+          "operation": "utility",
+          "target": "E01-off"
+        },
+        "label": "停用水力发电机组",
+        "group": "能源",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "已是当前安排",
+        "description": "设备按真实原料、电力与耐用运行；启停本身不产生电。"
+      },
+      {
+        "id": "economy:energize:now",
+        "action": {
+          "type": "economy",
+          "operation": "energize",
+          "target": "now"
+        },
+        "label": "执行本季供能与服务",
+        "group": "能源",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握发电机系统",
+        "description": "按水电、燃料、光伏、储能、通信、控制、冷库、温室、传感顺序运行；发电每设备每季最多一次。季末也自动尝试。"
+      },
+      {
+        "id": "economy:gather:wood",
+        "action": {
+          "type": "economy",
+          "operation": "gather",
+          "target": "wood"
+        },
+        "label": "采集木材",
+        "group": "生活",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "取得2，真实扣当地库存。"
+      },
+      {
+        "id": "economy:gather:clay",
+        "action": {
+          "type": "economy",
+          "operation": "gather",
+          "target": "clay"
+        },
+        "label": "采集黏土",
+        "group": "生活",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "取得2，真实扣当地库存。"
+      },
+      {
+        "id": "economy:gather:food",
+        "action": {
+          "type": "economy",
+          "operation": "gather",
+          "target": "food"
+        },
+        "label": "采集食物",
+        "group": "生活",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "取得2，真实扣当地库存。"
+      },
+      {
+        "id": "economy:work:local",
+        "action": {
+          "type": "economy",
+          "operation": "work",
+          "target": "local"
+        },
+        "label": "临时做工",
+        "group": "生活",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "相应时间与精力赚2钱，扣1当地岗位。"
+      },
+      {
+        "id": "economy:sell:wood",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "wood"
+        },
+        "label": "交付木材",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "交付1件得1钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:wood",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "wood"
+        },
+        "label": "交付木材并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "交付1件得1钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:clay",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "clay"
+        },
+        "label": "交付黏土",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "交付1件得1钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:clay",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "clay"
+        },
+        "label": "交付黏土并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "交付1件得1钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:ore",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "ore"
+        },
+        "label": "交付矿料",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1矿料",
+        "description": "交付1件得2钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:ore",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "ore"
+        },
+        "label": "交付矿料并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1矿料",
+        "description": "交付1件得2钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:iron",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "iron"
+        },
+        "label": "交付铁料",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1铁料",
+        "description": "交付1件得5钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:iron",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "iron"
+        },
+        "label": "交付铁料并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1铁料",
+        "description": "交付1件得5钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:wheat",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "wheat"
+        },
+        "label": "交付小麦",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "交付1件得1钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:wheat",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "wheat"
+        },
+        "label": "交付小麦并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "交付1件得1钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:soy",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "soy"
+        },
+        "label": "交付大豆",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1大豆",
+        "description": "交付1件得2钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:soy",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "soy"
+        },
+        "label": "交付大豆并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1大豆",
+        "description": "交付1件得2钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:flax",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "flax"
+        },
+        "label": "交付亚麻茎",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1亚麻茎",
+        "description": "交付1件得2钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:flax",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "flax"
+        },
+        "label": "交付亚麻茎并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1亚麻茎",
+        "description": "交付1件得2钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:straw",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "straw"
+        },
+        "label": "交付秸秆",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "交付1件得1钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:straw",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "straw"
+        },
+        "label": "交付秸秆并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "交付1件得1钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:flour",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "flour"
+        },
+        "label": "交付面粉",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1面粉",
+        "description": "交付1件得1钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:flour",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "flour"
+        },
+        "label": "交付面粉并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1面粉",
+        "description": "交付1件得1钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:oil",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "oil"
+        },
+        "label": "交付植物油",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1植物油",
+        "description": "交付1件得4钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:oil",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "oil"
+        },
+        "label": "交付植物油并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1植物油",
+        "description": "交付1件得4钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:fiber",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "fiber"
+        },
+        "label": "交付亚麻纤维",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1亚麻纤维",
+        "description": "交付1件得4钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:fiber",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "fiber"
+        },
+        "label": "交付亚麻纤维并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1亚麻纤维",
+        "description": "交付1件得4钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:rope",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "rope"
+        },
+        "label": "交付绳索",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1绳索",
+        "description": "交付1件得6钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:rope",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "rope"
+        },
+        "label": "交付绳索并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1绳索",
+        "description": "交付1件得6钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:compost",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "compost"
+        },
+        "label": "交付腐熟堆肥",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1腐熟堆肥",
+        "description": "交付1件得2钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:compost",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "compost"
+        },
+        "label": "交付腐熟堆肥并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1腐熟堆肥",
+        "description": "交付1件得2钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:ceramics",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "ceramics"
+        },
+        "label": "交付陶质构件",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1陶质构件",
+        "description": "交付1件得5钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:ceramics",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "ceramics"
+        },
+        "label": "交付陶质构件并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1陶质构件",
+        "description": "交付1件得5钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:brick",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "brick"
+        },
+        "label": "交付耐火砖",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1耐火砖",
+        "description": "交付1件得4钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:brick",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "brick"
+        },
+        "label": "交付耐火砖并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1耐火砖",
+        "description": "交付1件得4钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:seal",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "seal"
+        },
+        "label": "交付密封件",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1密封件",
+        "description": "交付1件得5钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:seal",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "seal"
+        },
+        "label": "交付密封件并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1密封件",
+        "description": "交付1件得5钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:valve",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "valve"
+        },
+        "label": "交付阀门",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1阀门",
+        "description": "交付1件得8钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:valve",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "valve"
+        },
+        "label": "交付阀门并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1阀门",
+        "description": "交付1件得8钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:shaft",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "shaft"
+        },
+        "label": "交付传动轴",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1传动轴",
+        "description": "交付1件得7钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:shaft",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "shaft"
+        },
+        "label": "交付传动轴并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1传动轴",
+        "description": "交付1件得7钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:spring",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "spring"
+        },
+        "label": "交付弹簧",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1弹簧",
+        "description": "交付1件得8钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:spring",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "spring"
+        },
+        "label": "交付弹簧并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1弹簧",
+        "description": "交付1件得8钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:solution",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "solution"
+        },
+        "label": "交付提纯溶液",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1提纯溶液",
+        "description": "交付1件得6钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:solution",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "solution"
+        },
+        "label": "交付提纯溶液并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1提纯溶液",
+        "description": "交付1件得6钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:seedWheat",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "seedWheat"
+        },
+        "label": "交付小麦种子",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1小麦种子",
+        "description": "交付1件得1钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:seedWheat",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "seedWheat"
+        },
+        "label": "交付小麦种子并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1小麦种子",
+        "description": "交付1件得1钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:seedSoy",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "seedSoy"
+        },
+        "label": "交付大豆种子",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1大豆种子",
+        "description": "交付1件得2钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:seedSoy",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "seedSoy"
+        },
+        "label": "交付大豆种子并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1大豆种子",
+        "description": "交付1件得2钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:seedFlax",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "seedFlax"
+        },
+        "label": "交付亚麻种子",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1亚麻种子",
+        "description": "交付1件得2钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:seedFlax",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "seedFlax"
+        },
+        "label": "交付亚麻种子并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1亚麻种子",
+        "description": "交付1件得2钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:copper",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "copper"
+        },
+        "label": "交付铜料",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1铜料",
+        "description": "交付1件得3钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:copper",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "copper"
+        },
+        "label": "交付铜料并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1铜料",
+        "description": "交付1件得3钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:feedstock",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "feedstock"
+        },
+        "label": "交付化工原料",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1化工原料",
+        "description": "交付1件得3钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:feedstock",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "feedstock"
+        },
+        "label": "交付化工原料并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1化工原料",
+        "description": "交付1件得3钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:mineral",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "mineral"
+        },
+        "label": "交付矿质肥料原料",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1矿质肥料原料",
+        "description": "交付1件得2钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:mineral",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "mineral"
+        },
+        "label": "交付矿质肥料原料并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1矿质肥料原料",
+        "description": "交付1件得2钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:silica",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "silica"
+        },
+        "label": "交付石英原料",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1石英原料",
+        "description": "交付1件得2钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:silica",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "silica"
+        },
+        "label": "交付石英原料并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1石英原料",
+        "description": "交付1件得2钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:polymer",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "polymer"
+        },
+        "label": "交付绝缘聚合物",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1绝缘聚合物",
+        "description": "交付1件得5钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:polymer",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "polymer"
+        },
+        "label": "交付绝缘聚合物并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1绝缘聚合物",
+        "description": "交付1件得5钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:wire",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "wire"
+        },
+        "label": "交付绝缘铜线",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1绝缘铜线",
+        "description": "交付1件得6钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:wire",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "wire"
+        },
+        "label": "交付绝缘铜线并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1绝缘铜线",
+        "description": "交付1件得6钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:coil",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "coil"
+        },
+        "label": "交付电机线圈",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1电机线圈",
+        "description": "交付1件得9钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:coil",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "coil"
+        },
+        "label": "交付电机线圈并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1电机线圈",
+        "description": "交付1件得9钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:cable",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "cable"
+        },
+        "label": "交付输电电缆",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1输电电缆",
+        "description": "交付1件得9钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:cable",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "cable"
+        },
+        "label": "交付输电电缆并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1输电电缆",
+        "description": "交付1件得9钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:fuel",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "fuel"
+        },
+        "label": "交付精炼燃料",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1精炼燃料",
+        "description": "交付1件得5钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:fuel",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "fuel"
+        },
+        "label": "交付精炼燃料并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1精炼燃料",
+        "description": "交付1件得5钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:nutrient",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "nutrient"
+        },
+        "label": "交付配方肥料",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1配方肥料",
+        "description": "交付1件得4钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:nutrient",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "nutrient"
+        },
+        "label": "交付配方肥料并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1配方肥料",
+        "description": "交付1件得4钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:battery",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "battery"
+        },
+        "label": "交付蓄电池单元",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1蓄电池单元",
+        "description": "交付1件得8钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:battery",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "battery"
+        },
+        "label": "交付蓄电池单元并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1蓄电池单元",
+        "description": "交付1件得8钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:silicon",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "silicon"
+        },
+        "label": "交付高纯硅",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1高纯硅",
+        "description": "交付1件得7钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:silicon",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "silicon"
+        },
+        "label": "交付高纯硅并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1高纯硅",
+        "description": "交付1件得7钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:circuit",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "circuit"
+        },
+        "label": "交付电子电路",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1电子电路",
+        "description": "交付1件得12钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:circuit",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "circuit"
+        },
+        "label": "交付电子电路并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1电子电路",
+        "description": "交付1件得12钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:controller",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "controller"
+        },
+        "label": "交付数字控制器",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1数字控制器",
+        "description": "交付1件得16钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:controller",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "controller"
+        },
+        "label": "交付数字控制器并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1数字控制器",
+        "description": "交付1件得16钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sell:composite",
+        "action": {
+          "type": "economy",
+          "operation": "sell",
+          "target": "composite"
+        },
+        "label": "交付复合结构件",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1复合结构件",
+        "description": "交付1件得10钱；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:sellfood:composite",
+        "action": {
+          "type": "economy",
+          "operation": "sellfood",
+          "target": "composite"
+        },
+        "label": "交付复合结构件并购粮",
+        "group": "交换",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1复合结构件",
+        "description": "交付1件得10钱，同时花2钱买2粮；商品、钱款、订单和粮源真实扣减。"
+      },
+      {
+        "id": "economy:farm:wheat",
+        "action": {
+          "type": "economy",
+          "operation": "farm",
+          "target": "wheat"
+        },
+        "label": "管理／收获小麦",
+        "group": "农业",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "本季水分充足，等待作物生长",
+        "description": "空田播种；生长期缺水时灌溉；成熟后收获。只有一块家庭田，个人与雇工共用。"
+      },
+      {
+        "id": "economy:build:W01",
+        "action": {
+          "type": "economy",
+          "operation": "build",
+          "target": "W01"
+        },
+        "label": "制造并安装提水辘轳",
+        "group": "产品",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需3木材",
+        "description": "田间管理从1公共水取得2点供水；每次扣1耐用度。 消耗3木材；安装即具备能力，可传给后代。"
+      },
+      {
+        "id": "economy:build:W03",
+        "action": {
+          "type": "economy",
+          "operation": "build",
+          "target": "W03"
+        },
+        "label": "制造并安装活塞泵",
+        "group": "产品",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需2铁料；需1阀门；需1密封件；需掌握泵与供水；需掌握密封工艺",
+        "description": "有作物且缺水时每季自动抽取1公共水灌溉，消耗1木材和1耐用度。 消耗2铁料、1阀门、1密封件；安装即具备能力，可传给后代。"
+      },
+      {
+        "id": "economy:build:P01",
+        "action": {
+          "type": "economy",
+          "operation": "build",
+          "target": "P01"
+        },
+        "label": "制造并安装手摇传动装置",
+        "group": "产品",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需3木材；需1传动轴",
+        "description": "纤维和绳索加工一次处理双份，原料产出均翻倍，每批扣1耐用度。 消耗3木材、1传动轴；安装即具备能力，可传给后代。"
+      },
+      {
+        "id": "economy:build:P03",
+        "action": {
+          "type": "economy",
+          "operation": "build",
+          "target": "P03"
+        },
+        "label": "制造并安装水轮动力装置",
+        "group": "产品",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需4木材；需1铁料；需1传动轴；需掌握水力动力",
+        "description": "有公共水时，磨粮、脱粒、榨油可节省个人投入；每季限一批，仍扣原料与耐用度。 消耗4木材、1铁料、1传动轴；安装即具备能力，可传给后代。"
+      },
+      {
+        "id": "economy:build:T01",
+        "action": {
+          "type": "economy",
+          "operation": "build",
+          "target": "T01"
+        },
+        "label": "制造并安装切削工具组",
+        "group": "产品",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1铁料",
+        "description": "采木多取1木材，扣当地库存与1耐用度。 消耗1木材、1铁料；安装即具备能力，可传给后代。"
+      },
+      {
+        "id": "economy:build:T03",
+        "action": {
+          "type": "economy",
+          "operation": "build",
+          "target": "T03"
+        },
+        "label": "制造并安装锻打工具组",
+        "group": "产品",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需2木材；需2铁料",
+        "description": "开放传动轴、阀门制造，每批扣1耐用度。 消耗2木材、2铁料；安装即具备能力，可传给后代。"
+      },
+      {
+        "id": "economy:build:S01",
+        "action": {
+          "type": "economy",
+          "operation": "build",
+          "target": "S01"
+        },
+        "label": "制造并安装基础容器",
+        "group": "产品",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需2木材；需掌握食品储存",
+        "description": "食品保护容量从4增至8，不产生额外食物。 消耗2木材；安装即具备能力，可传给后代。"
+      },
+      {
+        "id": "economy:build:S02",
+        "action": {
+          "type": "economy",
+          "operation": "build",
+          "target": "S02"
+        },
+        "label": "制造并安装密闭容器",
+        "group": "产品",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需1陶质构件；需1密封件；需掌握密封工艺；需掌握食品储存",
+        "description": "食品保护容量增至14，不与基础容器重复叠加。 消耗1陶质构件、1密封件；安装即具备能力，可传给后代。"
+      },
+      {
+        "id": "economy:build:U01",
+        "action": {
+          "type": "economy",
+          "operation": "build",
+          "target": "U01"
+        },
+        "label": "制造并安装翻土犁",
+        "group": "产品",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需3木材；需1铁料",
+        "description": "播种时本茬潜在收成+1，扣1耐用度。 消耗3木材、1铁料；安装即具备能力，可传给后代。"
+      },
+      {
+        "id": "economy:build:U06",
+        "action": {
+          "type": "economy",
+          "operation": "build",
+          "target": "U06"
+        },
+        "label": "制造并安装磨粮装置",
+        "group": "产品",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需2木材；需1陶质构件",
+        "description": "2小麦加工为3面粉，每批扣1耐用度，不与脱粒重复结算。 消耗2木材、1陶质构件；安装即具备能力，可传给后代。"
+      },
+      {
+        "id": "economy:build:U08",
+        "action": {
+          "type": "economy",
+          "operation": "build",
+          "target": "U08"
+        },
+        "label": "制造并安装排水设施",
+        "group": "产品",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需2木材；需掌握田间水分管理",
+        "description": "丰水季自动免除在田作物积水胁迫，每次扣1耐用度。 消耗2木材、2黏土；安装即具备能力，可传给后代。"
+      },
+      {
+        "id": "economy:build:E01",
+        "action": {
+          "type": "economy",
+          "operation": "build",
+          "target": "E01"
+        },
+        "label": "制造并安装水力发电机组",
+        "group": "产品",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需2电机线圈；需1传动轴；需2陶质构件；需掌握发电机系统；需掌握水力动力；需掌握导线与绕组工艺",
+        "description": "开启供能后每季最多一次，消耗1公共水和1耐用，产生6电。 消耗2电机线圈、1传动轴、2陶质构件；安装即具备能力，可传给后代。"
+      },
+      {
+        "id": "economy:process:seal",
+        "action": {
+          "type": "economy",
+          "operation": "process",
+          "target": "seal"
+        },
+        "label": "制作密封件",
+        "group": "生产",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握密封工艺；需1亚麻纤维；需1植物油；需掌握密封工艺",
+        "description": "当次加工完成。投入产出见配方。"
+      },
+      {
+        "id": "economy:process:shaft",
+        "action": {
+          "type": "economy",
+          "operation": "process",
+          "target": "shaft"
+        },
+        "label": "制造传动轴",
+        "group": "生产",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需2木材；需1铁料；需可用锻打工具组",
+        "description": "当次加工完成。投入产出见配方。"
+      },
+      {
+        "id": "economy:process:valve",
+        "action": {
+          "type": "economy",
+          "operation": "process",
+          "target": "valve"
+        },
+        "label": "制造阀门",
+        "group": "生产",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握压力与流体；需掌握密封工艺；需1铁料；需1密封件；需可用锻打工具组；需掌握压力与流体；需掌握密封工艺",
+        "description": "当次加工完成。投入产出见配方。"
+      },
+      {
+        "id": "economy:process:mill",
+        "action": {
+          "type": "economy",
+          "operation": "process",
+          "target": "mill"
+        },
+        "label": "磨粮",
+        "group": "生产",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需可用磨粮装置",
+        "description": "当次加工完成。投入产出见配方。"
+      },
+      {
+        "id": "economy:process:wire",
+        "action": {
+          "type": "economy",
+          "operation": "process",
+          "target": "wire"
+        },
+        "label": "制造绝缘铜线",
+        "group": "生产",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握导线与绕组工艺；需1铜料；需1绝缘聚合物；需掌握导线与绕组工艺",
+        "description": "当次加工完成。投入产出见配方。"
+      },
+      {
+        "id": "economy:process:coil",
+        "action": {
+          "type": "economy",
+          "operation": "process",
+          "target": "coil"
+        },
+        "label": "绕制电机线圈",
+        "group": "生产",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握导线与绕组工艺；需2绝缘铜线；需1铁料；需可用锻打工具组；需掌握导线与绕组工艺",
+        "description": "当次加工完成。投入产出见配方。"
+      },
+      {
+        "id": "economy:process:cable",
+        "action": {
+          "type": "economy",
+          "operation": "process",
+          "target": "cable"
+        },
+        "label": "制造输电电缆",
+        "group": "生产",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "需掌握导线与绕组工艺；需2绝缘铜线；需1密封件；需掌握导线与绕组工艺",
+        "description": "当次加工完成。投入产出见配方。"
+      },
+      {
+        "id": "economy:finish:project",
+        "action": {
+          "type": "economy",
+          "operation": "finish",
+          "target": "project"
+        },
+        "label": "完成本人在制项目",
+        "group": "生产",
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "没有本人在制项目",
+        "description": "完成已付料的在制品，后辈也可接续。"
+      },
+      {
+        "id": "economy:hire:laborer",
+        "action": {
+          "type": "economy",
+          "operation": "hire",
+          "target": "laborer"
+        },
+        "label": "雇佣普通雇工",
+        "group": "雇佣",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 2,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "招募费2钱，之后按实际工作季支付工资；无任务、缺料、设备占用时待命不收费。熟练人员可使用其专业工艺，不赠送本人技能。"
+      },
+      {
+        "id": "economy:assign:laborer-wheat",
+        "action": {
+          "type": "economy",
+          "operation": "assign",
+          "target": "laborer-wheat"
+        },
+        "label": "普通雇工：小麦种植",
+        "group": "雇佣",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚未招募",
+        "description": "安排后每季尝试一次工作；工资与条件在季末重新检查。暂停不会清除经验或在制品。"
+      },
+      {
+        "id": "economy:pause:laborer",
+        "action": {
+          "type": "economy",
+          "operation": "pause",
+          "target": "laborer"
+        },
+        "label": "暂停／恢复普通雇工",
+        "group": "雇佣",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先招募并安排任务",
+        "description": "保留合同、经验与在制品；暂停期间不工作、不扣工资。"
+      },
+      {
+        "id": "economy:hire:farmer",
+        "action": {
+          "type": "economy",
+          "operation": "hire",
+          "target": "farmer"
+        },
+        "label": "雇佣熟练农工",
+        "group": "雇佣",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 2,
+        "food": 0,
+        "enabled": false,
+        "reason": "已雇有此岗位",
+        "description": "招募费2钱，之后按实际工作季支付工资；无任务、缺料、设备占用时待命不收费。熟练人员可使用其专业工艺，不赠送本人技能。"
+      },
+      {
+        "id": "economy:assign:farmer-wheat",
+        "action": {
+          "type": "economy",
+          "operation": "assign",
+          "target": "farmer-wheat"
+        },
+        "label": "熟练农工：小麦种植",
+        "group": "雇佣",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "已安排此任务",
+        "description": "安排后每季尝试一次工作；工资与条件在季末重新检查。暂停不会清除经验或在制品。"
+      },
+      {
+        "id": "economy:pause:farmer",
+        "action": {
+          "type": "economy",
+          "operation": "pause",
+          "target": "farmer"
+        },
+        "label": "暂停／恢复熟练农工",
+        "group": "雇佣",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "保留合同、经验与在制品；暂停期间不工作、不扣工资。"
+      },
+      {
+        "id": "economy:hire:artisan",
+        "action": {
+          "type": "economy",
+          "operation": "hire",
+          "target": "artisan"
+        },
+        "label": "雇佣熟练工匠",
+        "group": "雇佣",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 2,
+        "food": 0,
+        "enabled": false,
+        "reason": "已雇有此岗位",
+        "description": "招募费2钱，之后按实际工作季支付工资；无任务、缺料、设备占用时待命不收费。熟练人员可使用其专业工艺，不赠送本人技能。"
+      },
+      {
+        "id": "economy:pause:artisan",
+        "action": {
+          "type": "economy",
+          "operation": "pause",
+          "target": "artisan"
+        },
+        "label": "暂停／恢复熟练工匠",
+        "group": "雇佣",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先招募并安排任务",
+        "description": "保留合同、经验与在制品；暂停期间不工作、不扣工资。"
+      },
+      {
+        "id": "economy:assign:manager-wheat",
+        "action": {
+          "type": "economy",
+          "operation": "assign",
+          "target": "manager-wheat"
+        },
+        "label": "生产负责人：小麦种植",
+        "group": "雇佣",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚未招募",
+        "description": "安排后每季尝试一次工作；工资与条件在季末重新检查。暂停不会清除经验或在制品。"
+      },
+      {
+        "id": "economy:pause:manager",
+        "action": {
+          "type": "economy",
+          "operation": "pause",
+          "target": "manager"
+        },
+        "label": "暂停／恢复生产负责人",
+        "group": "雇佣",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先招募并安排任务",
+        "description": "保留合同、经验与在制品；暂停期间不工作、不扣工资。"
+      },
+      {
+        "id": "economy:end:season",
+        "action": {
+          "type": "economy",
+          "operation": "end",
+          "target": "season"
+        },
+        "label": "结束本季",
+        "group": "回合",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "雇佣与田间先结算，再支付2粮生活；现有可食储备3。"
+      },
+      {
+        "id": "economy:resumeplans:family",
+        "action": {
+          "type": "economy",
+          "operation": "resumeplans",
+          "target": "family"
+        },
+        "label": "接续家族经营安排",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "经营安排未暂停",
+        "description": "恢复保存的供粮、农业、生产、补货与维护配置。订立家族契约可让未来换代自动接续。"
+      },
+      {
+        "id": "economy:foodplan:on",
+        "action": {
+          "type": "economy",
+          "operation": "foodplan",
+          "target": "on"
+        },
+        "label": "签订长期供粮协议",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "已经是此安排",
+        "description": "季末按需购入至4份可食储备，按普通粮价付费、不花行动；每季先从市场预留供应，缺钱才停供。"
+      },
+      {
+        "id": "economy:supplyplan:on",
+        "action": {
+          "type": "economy",
+          "operation": "supplyplan",
+          "target": "on"
+        },
+        "label": "开启自动补货",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只为当前农业与生产计划补足2批原料，计入待到货；保留生活、工资与4钱底线，使用同一市场库存和运输。"
+      },
+      {
+        "id": "economy:salesplan:on",
+        "action": {
+          "type": "economy",
+          "operation": "salesplan",
+          "target": "on"
+        },
+        "label": "开启自动交付",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "已经是此安排",
+        "description": "按季出售超过2份的工业余货，食品额外保留生活储备；与手动交付共享订单额度。"
+      },
+      {
+        "id": "economy:careplan:on",
+        "action": {
+          "type": "economy",
+          "operation": "careplan",
+          "target": "on"
+        },
+        "label": "开启委托维护",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "设备耐用≤1且未在制时自动付费送修，停机一季；生活与工资优先。"
+      },
+      {
+        "id": "economy:foodplan:off",
+        "action": {
+          "type": "economy",
+          "operation": "foodplan",
+          "target": "off"
+        },
+        "label": "暂停供粮协议",
+        "group": "经营",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "季末按需购入至4份可食储备，按普通粮价付费、不花行动；每季先从市场预留供应，缺钱才停供。"
+      },
+      {
+        "id": "economy:supplyplan:off",
+        "action": {
+          "type": "economy",
+          "operation": "supplyplan",
+          "target": "off"
+        },
+        "label": "暂停自动补货",
+        "group": "经营",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "已经是此安排",
+        "description": "只为当前农业与生产计划补足2批原料，计入待到货；保留生活、工资与4钱底线，使用同一市场库存和运输。"
+      },
+      {
+        "id": "economy:salesplan:off",
+        "action": {
+          "type": "economy",
+          "operation": "salesplan",
+          "target": "off"
+        },
+        "label": "暂停自动交付",
+        "group": "经营",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "按季出售超过2份的工业余货，食品额外保留生活储备；与手动交付共享订单额度。"
+      },
+      {
+        "id": "economy:careplan:off",
+        "action": {
+          "type": "economy",
+          "operation": "careplan",
+          "target": "off"
+        },
+        "label": "暂停委托维护",
+        "group": "经营",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "已经是此安排",
+        "description": "设备耐用≤1且未在制时自动付费送修，停机一季；生活与工资优先。"
+      },
+      {
+        "id": "economy:farmplan:wheat",
+        "action": {
+          "type": "economy",
+          "operation": "farmplan",
+          "target": "wheat"
+        },
+        "label": "托管：小麦",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "已经是此安排",
+        "description": "由熟练农工按季播种、照料、收获并留种；低肥力时用库存堆肥。需补货、供粮或维修时可另外签约。选择轮作将在空田时切换作物，不铲除在田作物。"
+      },
+      {
+        "id": "economy:farmplan:off",
+        "action": {
+          "type": "economy",
+          "operation": "farmplan",
+          "target": "off"
+        },
+        "label": "暂停农业托管",
+        "group": "经营",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "由熟练农工按季播种、照料、收获并留种；低肥力时用库存堆肥。需补货、供粮或维修时可另外签约。选择轮作将在空田时切换作物，不铲除在田作物。"
+      },
+      {
+        "id": "economy:productionplan:seal-stock",
+        "action": {
+          "type": "economy",
+          "operation": "productionplan",
+          "target": "seal-stock"
+        },
+        "label": "制作密封件 · 备货后停产",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先亲自完成一次seal试制，留存工艺规程",
+        "description": "工匠每季执行一项工序，跨季项目自动完成；产物达到储备目标自动待命。工资、材料和设备仍真实消耗。"
+      },
+      {
+        "id": "economy:productionplan:seal-sell",
+        "action": {
+          "type": "economy",
+          "operation": "productionplan",
+          "target": "seal-sell"
+        },
+        "label": "制作密封件 · 持续生产",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先亲自完成一次seal试制，留存工艺规程",
+        "description": "工匠每季执行一项工序，跨季项目自动完成；持续生产，可开启自动交付。工资、材料和设备仍真实消耗。"
+      },
+      {
+        "id": "economy:productionplan:shaft-stock",
+        "action": {
+          "type": "economy",
+          "operation": "productionplan",
+          "target": "shaft-stock"
+        },
+        "label": "制造传动轴 · 备货后停产",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先取得锻打工具组；先亲自完成一次shaft试制，留存工艺规程",
+        "description": "工匠每季执行一项工序，跨季项目自动完成；产物达到储备目标自动待命。工资、材料和设备仍真实消耗。"
+      },
+      {
+        "id": "economy:productionplan:shaft-sell",
+        "action": {
+          "type": "economy",
+          "operation": "productionplan",
+          "target": "shaft-sell"
+        },
+        "label": "制造传动轴 · 持续生产",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先取得锻打工具组；先亲自完成一次shaft试制，留存工艺规程",
+        "description": "工匠每季执行一项工序，跨季项目自动完成；持续生产，可开启自动交付。工资、材料和设备仍真实消耗。"
+      },
+      {
+        "id": "economy:productionplan:valve-stock",
+        "action": {
+          "type": "economy",
+          "operation": "productionplan",
+          "target": "valve-stock"
+        },
+        "label": "制造阀门 · 备货后停产",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先取得锻打工具组；先亲自完成一次valve试制，留存工艺规程",
+        "description": "工匠每季执行一项工序，跨季项目自动完成；产物达到储备目标自动待命。工资、材料和设备仍真实消耗。"
+      },
+      {
+        "id": "economy:productionplan:valve-sell",
+        "action": {
+          "type": "economy",
+          "operation": "productionplan",
+          "target": "valve-sell"
+        },
+        "label": "制造阀门 · 持续生产",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先取得锻打工具组；先亲自完成一次valve试制，留存工艺规程",
+        "description": "工匠每季执行一项工序，跨季项目自动完成；持续生产，可开启自动交付。工资、材料和设备仍真实消耗。"
+      },
+      {
+        "id": "economy:productionplan:mill-stock",
+        "action": {
+          "type": "economy",
+          "operation": "productionplan",
+          "target": "mill-stock"
+        },
+        "label": "磨粮 · 备货后停产",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先取得磨粮装置；先亲自完成一次mill试制，留存工艺规程",
+        "description": "工匠每季执行一项工序，跨季项目自动完成；产物达到储备目标自动待命。工资、材料和设备仍真实消耗。"
+      },
+      {
+        "id": "economy:productionplan:mill-sell",
+        "action": {
+          "type": "economy",
+          "operation": "productionplan",
+          "target": "mill-sell"
+        },
+        "label": "磨粮 · 持续生产",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先取得磨粮装置；先亲自完成一次mill试制，留存工艺规程",
+        "description": "工匠每季执行一项工序，跨季项目自动完成；持续生产，可开启自动交付。工资、材料和设备仍真实消耗。"
+      },
+      {
+        "id": "economy:productionplan:wire-stock",
+        "action": {
+          "type": "economy",
+          "operation": "productionplan",
+          "target": "wire-stock"
+        },
+        "label": "制造绝缘铜线 · 备货后停产",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先亲自完成一次wire试制，留存工艺规程",
+        "description": "工匠每季执行一项工序，跨季项目自动完成；产物达到储备目标自动待命。工资、材料和设备仍真实消耗。"
+      },
+      {
+        "id": "economy:productionplan:wire-sell",
+        "action": {
+          "type": "economy",
+          "operation": "productionplan",
+          "target": "wire-sell"
+        },
+        "label": "制造绝缘铜线 · 持续生产",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先亲自完成一次wire试制，留存工艺规程",
+        "description": "工匠每季执行一项工序，跨季项目自动完成；持续生产，可开启自动交付。工资、材料和设备仍真实消耗。"
+      },
+      {
+        "id": "economy:productionplan:coil-stock",
+        "action": {
+          "type": "economy",
+          "operation": "productionplan",
+          "target": "coil-stock"
+        },
+        "label": "绕制电机线圈 · 备货后停产",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先取得锻打工具组；先亲自完成一次coil试制，留存工艺规程",
+        "description": "工匠每季执行一项工序，跨季项目自动完成；产物达到储备目标自动待命。工资、材料和设备仍真实消耗。"
+      },
+      {
+        "id": "economy:productionplan:coil-sell",
+        "action": {
+          "type": "economy",
+          "operation": "productionplan",
+          "target": "coil-sell"
+        },
+        "label": "绕制电机线圈 · 持续生产",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先取得锻打工具组；先亲自完成一次coil试制，留存工艺规程",
+        "description": "工匠每季执行一项工序，跨季项目自动完成；持续生产，可开启自动交付。工资、材料和设备仍真实消耗。"
+      },
+      {
+        "id": "economy:productionplan:cable-stock",
+        "action": {
+          "type": "economy",
+          "operation": "productionplan",
+          "target": "cable-stock"
+        },
+        "label": "制造输电电缆 · 备货后停产",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先亲自完成一次cable试制，留存工艺规程",
+        "description": "工匠每季执行一项工序，跨季项目自动完成；产物达到储备目标自动待命。工资、材料和设备仍真实消耗。"
+      },
+      {
+        "id": "economy:productionplan:cable-sell",
+        "action": {
+          "type": "economy",
+          "operation": "productionplan",
+          "target": "cable-sell"
+        },
+        "label": "制造输电电缆 · 持续生产",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "先亲自完成一次cable试制，留存工艺规程",
+        "description": "工匠每季执行一项工序，跨季项目自动完成；持续生产，可开启自动交付。工资、材料和设备仍真实消耗。"
+      },
+      {
+        "id": "economy:productionplan:off",
+        "action": {
+          "type": "economy",
+          "operation": "productionplan",
+          "target": "off"
+        },
+        "label": "暂停生产计划",
+        "group": "经营",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "没有运行中的生产计划",
+        "description": "暂停并保留员工经验与在制项目，恢复时须接续原项目。"
+      },
+      {
+        "id": "economy:charter:family",
+        "action": {
+          "type": "economy",
+          "operation": "charter",
+          "target": "family"
+        },
+        "label": "订立家族经营契约",
+        "group": "经营",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 4,
+        "food": 0,
+        "enabled": false,
+        "reason": "钱财不足",
+        "description": "换代后保留供粮、农业、生产、补货、交付、维护安排及雇员运行状态；不复制个人理论。"
+      },
+      {
+        "id": "economy:cartadd:good-food",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "good-food"
+        },
+        "label": "加入即食口粮",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:good-food",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "good-food"
+        },
+        "label": "移除一份即食口粮",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:good-wheat",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "good-wheat"
+        },
+        "label": "加入小麦",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:good-wheat",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "good-wheat"
+        },
+        "label": "移除一份小麦",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:good-flour",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "good-flour"
+        },
+        "label": "加入面粉",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:good-flour",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "good-flour"
+        },
+        "label": "移除一份面粉",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:good-seedWheat",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "good-seedWheat"
+        },
+        "label": "加入小麦种子",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:good-seedWheat",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "good-seedWheat"
+        },
+        "label": "移除一份小麦种子",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:good-wood",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "good-wood"
+        },
+        "label": "加入木材",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:good-wood",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "good-wood"
+        },
+        "label": "移除一份木材",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:good-clay",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "good-clay"
+        },
+        "label": "加入黏土",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:good-clay",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "good-clay"
+        },
+        "label": "移除一份黏土",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:good-iron",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "good-iron"
+        },
+        "label": "加入铁料",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:good-iron",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "good-iron"
+        },
+        "label": "移除一份铁料",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:good-fiber",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "good-fiber"
+        },
+        "label": "加入亚麻纤维",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:good-fiber",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "good-fiber"
+        },
+        "label": "移除一份亚麻纤维",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:good-oil",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "good-oil"
+        },
+        "label": "加入植物油",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:good-oil",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "good-oil"
+        },
+        "label": "移除一份植物油",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:good-ceramics",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "good-ceramics"
+        },
+        "label": "加入陶质构件",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:good-ceramics",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "good-ceramics"
+        },
+        "label": "移除一份陶质构件",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:good-seal",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "good-seal"
+        },
+        "label": "加入密封件",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:good-seal",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "good-seal"
+        },
+        "label": "移除一份密封件",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:good-shaft",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "good-shaft"
+        },
+        "label": "加入传动轴",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:good-shaft",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "good-shaft"
+        },
+        "label": "移除一份传动轴",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:good-valve",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "good-valve"
+        },
+        "label": "加入阀门",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:good-valve",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "good-valve"
+        },
+        "label": "移除一份阀门",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:device-W01",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "device-W01"
+        },
+        "label": "加入提水辘轳",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:device-W01",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "device-W01"
+        },
+        "label": "移除一份提水辘轳",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:device-W03",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "device-W03"
+        },
+        "label": "加入活塞泵",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:device-W03",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "device-W03"
+        },
+        "label": "移除一份活塞泵",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:device-P01",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "device-P01"
+        },
+        "label": "加入手摇传动装置",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:device-P01",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "device-P01"
+        },
+        "label": "移除一份手摇传动装置",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:device-P03",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "device-P03"
+        },
+        "label": "加入水轮动力装置",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:device-P03",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "device-P03"
+        },
+        "label": "移除一份水轮动力装置",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:device-T01",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "device-T01"
+        },
+        "label": "加入切削工具组",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:device-T01",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "device-T01"
+        },
+        "label": "移除一份切削工具组",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:device-T03",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "device-T03"
+        },
+        "label": "加入锻打工具组",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:device-T03",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "device-T03"
+        },
+        "label": "移除一份锻打工具组",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:device-S01",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "device-S01"
+        },
+        "label": "加入基础容器",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:device-S01",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "device-S01"
+        },
+        "label": "移除一份基础容器",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:device-S02",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "device-S02"
+        },
+        "label": "加入密闭容器",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:device-S02",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "device-S02"
+        },
+        "label": "移除一份密闭容器",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:device-U01",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "device-U01"
+        },
+        "label": "加入翻土犁",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:device-U01",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "device-U01"
+        },
+        "label": "移除一份翻土犁",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:device-U06",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "device-U06"
+        },
+        "label": "加入磨粮装置",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:device-U06",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "device-U06"
+        },
+        "label": "移除一份磨粮装置",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:device-U08",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "device-U08"
+        },
+        "label": "加入排水设施",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:device-U08",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "device-U08"
+        },
+        "label": "移除一份排水设施",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:cartadd:asset-granary",
+        "action": {
+          "type": "economy",
+          "operation": "cartadd",
+          "target": "asset-granary"
+        },
+        "label": "加入家庭粮仓",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": true,
+        "reason": "",
+        "description": "只编辑采购清单；结账时按当时价格、库存和资金重新核验。"
+      },
+      {
+        "id": "economy:cartremove:asset-granary",
+        "action": {
+          "type": "economy",
+          "operation": "cartremove",
+          "target": "asset-granary"
+        },
+        "label": "移除一份家庭粮仓",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单中没有此商品",
+        "description": "移除一份，未付款。"
+      },
+      {
+        "id": "economy:clearcart:all",
+        "action": {
+          "type": "economy",
+          "operation": "clearcart",
+          "target": "all"
+        },
+        "label": "清空采购清单",
+        "group": "商城",
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "清单为空",
+        "description": "清单不保留价格或占用库存。"
+      },
+      {
+        "id": "economy:checkout:cart",
+        "action": {
+          "type": "economy",
+          "operation": "checkout",
+          "target": "cart"
+        },
+        "label": "确认整单采购",
+        "group": "商城",
+        "ap": 0,
+        "time": 1,
+        "energy": 1,
+        "money": 0,
+        "food": 0,
+        "enabled": false,
+        "reason": "采购清单为空",
+        "description": "合计0钱、0运输容量，付款后剩2钱。现货立即交付，订货下一季开始交付；所有材料和食品都占运输额度。"
+      },
+      {
+        "id": "economy:repair:W01",
+        "action": {
+          "type": "economy",
+          "operation": "repair",
+          "target": "W01"
+        },
+        "label": "维修提水辘轳",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 5,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚无设备；钱财不足",
+        "description": "支付后本季停机，下一季开始恢复满耐用度；不增加理论或产出。"
+      },
+      {
+        "id": "economy:repair:W03",
+        "action": {
+          "type": "economy",
+          "operation": "repair",
+          "target": "W03"
+        },
+        "label": "维修活塞泵",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 16,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚无设备；钱财不足",
+        "description": "支付后本季停机，下一季开始恢复满耐用度；不增加理论或产出。"
+      },
+      {
+        "id": "economy:repair:P01",
+        "action": {
+          "type": "economy",
+          "operation": "repair",
+          "target": "P01"
+        },
+        "label": "维修手摇传动装置",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 9,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚无设备；钱财不足",
+        "description": "支付后本季停机，下一季开始恢复满耐用度；不增加理论或产出。"
+      },
+      {
+        "id": "economy:repair:P03",
+        "action": {
+          "type": "economy",
+          "operation": "repair",
+          "target": "P03"
+        },
+        "label": "维修水轮动力装置",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 13,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚无设备；钱财不足",
+        "description": "支付后本季停机，下一季开始恢复满耐用度；不增加理论或产出。"
+      },
+      {
+        "id": "economy:repair:T01",
+        "action": {
+          "type": "economy",
+          "operation": "repair",
+          "target": "T01"
+        },
+        "label": "维修切削工具组",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 6,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚无设备；钱财不足",
+        "description": "支付后本季停机，下一季开始恢复满耐用度；不增加理论或产出。"
+      },
+      {
+        "id": "economy:repair:T03",
+        "action": {
+          "type": "economy",
+          "operation": "repair",
+          "target": "T03"
+        },
+        "label": "维修锻打工具组",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 10,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚无设备；钱财不足",
+        "description": "支付后本季停机，下一季开始恢复满耐用度；不增加理论或产出。"
+      },
+      {
+        "id": "economy:repair:S01",
+        "action": {
+          "type": "economy",
+          "operation": "repair",
+          "target": "S01"
+        },
+        "label": "维修基础容器",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 4,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚无设备；钱财不足",
+        "description": "支付后本季停机，下一季开始恢复满耐用度；不增加理论或产出。"
+      },
+      {
+        "id": "economy:repair:S02",
+        "action": {
+          "type": "economy",
+          "operation": "repair",
+          "target": "S02"
+        },
+        "label": "维修密闭容器",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 8,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚无设备；钱财不足",
+        "description": "支付后本季停机，下一季开始恢复满耐用度；不增加理论或产出。"
+      },
+      {
+        "id": "economy:repair:U01",
+        "action": {
+          "type": "economy",
+          "operation": "repair",
+          "target": "U01"
+        },
+        "label": "维修翻土犁",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 8,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚无设备；钱财不足",
+        "description": "支付后本季停机，下一季开始恢复满耐用度；不增加理论或产出。"
+      },
+      {
+        "id": "economy:repair:U06",
+        "action": {
+          "type": "economy",
+          "operation": "repair",
+          "target": "U06"
+        },
+        "label": "维修磨粮装置",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 7,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚无设备；钱财不足",
+        "description": "支付后本季停机，下一季开始恢复满耐用度；不增加理论或产出。"
+      },
+      {
+        "id": "economy:repair:U08",
+        "action": {
+          "type": "economy",
+          "operation": "repair",
+          "target": "U08"
+        },
+        "label": "维修排水设施",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 6,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚无设备；钱财不足",
+        "description": "支付后本季停机，下一季开始恢复满耐用度；不增加理论或产出。"
+      },
+      {
+        "id": "economy:repair:E01",
+        "action": {
+          "type": "economy",
+          "operation": "repair",
+          "target": "E01"
+        },
+        "label": "维修水力发电机组",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 22,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚无设备；钱财不足",
+        "description": "支付后本季停机，下一季开始恢复满耐用度；不增加理论或产出。"
+      },
+      {
+        "id": "economy:paidtrain:laborer",
+        "action": {
+          "type": "economy",
+          "operation": "paidtrain",
+          "target": "laborer"
+        },
+        "label": "委托培训普通雇工",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 4,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚未招募；钱财不足",
+        "description": "本季停止工作、不扣工资；下一季开始经验+2，上限8。培训不要求本人组织4阶。"
+      },
+      {
+        "id": "economy:paidtrain:farmer",
+        "action": {
+          "type": "economy",
+          "operation": "paidtrain",
+          "target": "farmer"
+        },
+        "label": "委托培训熟练农工",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 4,
+        "food": 0,
+        "enabled": false,
+        "reason": "钱财不足",
+        "description": "本季停止工作、不扣工资；下一季开始经验+2，上限8。培训不要求本人组织4阶。"
+      },
+      {
+        "id": "economy:paidtrain:artisan",
+        "action": {
+          "type": "economy",
+          "operation": "paidtrain",
+          "target": "artisan"
+        },
+        "label": "委托培训熟练工匠",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 4,
+        "food": 0,
+        "enabled": false,
+        "reason": "钱财不足",
+        "description": "本季停止工作、不扣工资；下一季开始经验+2，上限8。培训不要求本人组织4阶。"
+      },
+      {
+        "id": "economy:paidtrain:manager",
+        "action": {
+          "type": "economy",
+          "operation": "paidtrain",
+          "target": "manager"
+        },
+        "label": "委托培训生产负责人",
+        "group": "商城",
+        "ap": 0,
+        "time": 2,
+        "energy": 1,
+        "money": 4,
+        "food": 0,
+        "enabled": false,
+        "reason": "尚未招募；钱财不足",
+        "description": "本季停止工作、不扣工资；下一季开始经验+2，上限8。培训不要求本人组织4阶。"
+      }
+    ]
+  },
+  "recentEvents": [
+    {
+      "type": "action-paid",
+      "action": {
+        "type": "economy",
+        "operation": "rest",
+        "target": "self"
+      },
+      "cost": {
+        "ap": 0,
+        "time": 4,
+        "energy": 0,
+        "money": 0,
+        "food": 0
+      }
+    },
+    {
+      "type": "life",
+      "personId": "person:1",
+      "operation": "rest",
+      "detail": "休息恢复3精力"
+    },
+    {
+      "type": "action-paid",
+      "action": {
+        "type": "economy",
+        "operation": "gather",
+        "target": "wood"
+      },
+      "cost": {
+        "ap": 0,
+        "time": 4,
+        "energy": 4,
+        "money": 0,
+        "food": 0
+      }
+    },
+    {
+      "type": "economy-goods",
+      "source": "当地采集",
+      "changes": {
+        "wood": 2
+      }
+    },
+    {
+      "type": "resource-gathered",
+      "resource": "wood",
+      "amount": 2,
+      "remaining": 3,
+      "toolUsed": false
+    },
+    {
+      "type": "action-paid",
+      "action": {
+        "type": "economy",
+        "operation": "branchlearn",
+        "target": "L1"
+      },
+      "cost": {
+        "ap": 0,
+        "time": 4,
+        "energy": 2,
+        "money": 0,
+        "food": 0
+      }
+    },
+    {
+      "type": "economy-goods",
+      "source": "学习样品",
+      "changes": {
+        "wood": -1
+      }
+    },
+    {
+      "type": "branch",
+      "operation": "learned",
+      "node": "L1",
+      "detail": "掌握机械传动"
+    },
+    {
+      "type": "economy-goods",
+      "source": "熟练农工播种",
+      "changes": {
+        "seedWheat": -1
+      }
+    },
+    {
+      "type": "economy-farm",
+      "operation": "sow",
+      "crop": "wheat",
+      "actor": "熟练农工",
+      "amount": 0
+    },
+    {
+      "type": "economy-worker",
+      "worker": "farmer",
+      "operation": "worked",
+      "money": 2,
+      "detail": "小麦种植"
+    },
+    {
+      "type": "economy-crop-growth",
+      "crop": "wheat",
+      "growth": 1,
+      "stress": 1
+    },
+    {
+      "type": "economy-goods",
+      "source": "家庭生活取粮",
+      "changes": {
+        "wheat": -1
+      }
+    },
+    {
+      "type": "season-settled",
+      "consumed": 2,
+      "missing": 0,
+      "hardship": 0
+    },
+    {
+      "type": "life",
+      "personId": "person:1",
+      "operation": "season",
+      "detail": "本代经营者：41岁，健康100，精力5/8"
+    },
+    {
+      "type": "life",
+      "personId": "person:2",
+      "operation": "season",
+      "detail": "成长中的后辈：17岁，健康100，精力8/8"
+    },
+    {
+      "type": "season-started",
+      "clock": {
+        "generation": 1,
+        "turn": 7,
+        "absoluteTurn": 7
+      },
+      "weather": "normal"
+    },
+    {
+      "type": "local-supply",
+      "stocks": {
+        "wildFood": 3,
+        "timber": 4,
+        "clay": 20
+      },
+      "market": {
+        "food": 8,
+        "jobs": 1,
+        "woodenware": 2,
+        "pottery": 2,
+        "methods": 1
+      }
+    },
+    {
+      "type": "operations",
+      "operation": "reserved",
+      "target": "food",
+      "detail": "供粮协议预留4份市场口粮，按实际配送付费",
+      "amount": 4,
+      "money": 0
+    }
+  ]
+}

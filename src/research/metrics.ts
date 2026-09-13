@@ -26,12 +26,27 @@ export function collectStatistics(record: RunRecord) {
 export function metrics(record: RunRecord, state: GameState) {
   const { stats, history } = collectStatistics(record);
   return { status: state.status, completedGenerations: history.length, food: state.household.food, money: state.household.money, foodProduced: stats.foodProduced, foodShortfall: stats.shortfall, waterUsed: stats.waterUsed,
+    ...(record.manifest.ruleset.life?{life:lifeStatistics(record)}:{}),
     ...(state.economy?.tower?{tower:towerStatistics(record)}:{}),
     ...(state.economy?{economy:{goods:structuredClone(state.economy.goods),workers:structuredClone(state.economy.workers),regional:structuredClone(state.economy.regional),equipment:structuredClone(state.economy.equipment)}}:{}),
     learnedNodes: [...new Set(stats.learned.map(x => x.id))], lastPersonMastered: [...activePerson(state).mastered], inheritedNodes: stats.inherited.map(x => ({ generation: x.generation, nodes: [...x.mastered] })), archivedNodes: [...state.knowledge.archives], samples: stats.researchSamples, studyActions: stats.studyActions, teachingActions: stats.teachingActions, commands: record.entries.length,
     ...(state.productNetwork ? { productNetwork: productNetworkMetrics(record), productAssets: structuredClone(state.productNetwork) } : {}),
     ...(state.development ? { development: developmentMetrics(record), developmentAssets: { goods: structuredClone(state.development!.goods), designs: structuredClone(state.development!.designs), project: structuredClone(state.development!.project), fieldDurability: state.development!.fieldDurability, labDurability: state.development!.labDurability } } : {}),
     ...(record.manifest.ruleset.production ? { production: productionMetrics(record), inventory: structuredClone(state.production!.inventory), storage: { ...state.production!.storage }, toolDurability: state.production!.toolDurability } : {}) };
+}
+
+function lifeStatistics(record:RunRecord) {
+  const result={timeSpent:0,energySpent:0,rests:0,care:0,births:0,deaths:0};
+  for(const entry of record.entries)for(const event of entry.events){
+    if(event.type==='action-paid'){result.timeSpent+=event.cost.time??0;result.energySpent+=event.cost.energy??0;}
+    if(event.type==='life'){
+      if(event.operation==='rest')result.rests++;
+      if(event.operation==='care')result.care++;
+      if(event.operation==='birth')result.births++;
+      if(event.operation==='death')result.deaths++;
+    }
+  }
+  return result;
 }
 
 function towerStatistics(record:RunRecord){

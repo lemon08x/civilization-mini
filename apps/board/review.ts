@@ -1,3 +1,4 @@
+import {branchCatalog} from './branch-view.js';
 import {disciplineCatalog,productCatalog,economyRulesPage} from './economy-view.js';
 import { productPage } from './product-view.js';
 import { playerRulesPage } from './player-rules.js';
@@ -19,7 +20,7 @@ type ProductRoute={selected:string;category:string;plans:boolean;local:boolean;c
 const productHistory:ProductRoute[]=[];
 function rememberProduct(){const g=document.querySelector('.product-network');productHistory.push({selected:selectedProduct,category:productCategory,plans:productPlans,local:productLocal,cycle:productCycle,left:g?.scrollLeft??0,top:g?.scrollTop??0});}
 function frameworkPage(): string {
-  if(data!.rules.economy)return disciplineCatalog();
+  if(data!.rules.economy)return data!.rules.branches?branchCatalog():disciplineCatalog();
   const f = data!.framework;
   if (!f) return '<p class="notice">框架不可读取，请查看读取提示。</p>';
   const n = f.nodes.find(n=>n.id===frameworkNode) ?? f.nodes[0];
@@ -39,11 +40,11 @@ function currentValue(path: string): unknown { let value: unknown = data!.rules;
 
 function rulesPage(): string {
   const r = data!.rules;
-  if(r.economy)return economyRulesPage();
+  if(r.economy)return r.branches?branchCatalog():economyRulesPage();
   return playerRulesPage(r) + `<details><summary>规则来源与版本（查阅）</summary>
     <section class="card section-gap"><h2>规则来源与版本</h2><p>以下文档按增量组成现行规则；原始配置记录精确参数与科技定义。旧报告只说明其运行时的版本。</p><div class="sources">${source('docs/DESIGN_DIRECTION.md','设计方向')}${source('docs/RULEBOOK_V2.md','生产基础')}${source('docs/TECHNOLOGY_FEEDBACK_V3.md','科技成果')}${source('docs/SOCIAL_INHERITANCE_V4.md','社会传承与迁移')}${source('docs/CRAFT_SCIENCE_V5.md','持续成长与工业科学')}${source('docs/PRODUCT_NETWORK_V6.md','产品网络与高级能力')}${source('docs/LIFE_CHRONICLE.md','经历与传承：不设人生总分')}${source(r.passiveInvestment?'rulesets/passive-investment.v8.json':r.householdProgress?'rulesets/household-progress.v7.json':r.productNetwork?'rulesets/product-network.v6.json':r.development?'rulesets/craft-science.v5.json':'rulesets/social-inheritance.v4.json','当前完整规则')}</div><details><summary>旧版规则（查看，不切换当前游戏）</summary><div class="sources">${source('rulesets/traditional-agriculture.v1.json','0.1.0 农业')}${source('rulesets/shared-production.v2.json','0.2.0 生产')}${source('rulesets/technology-feedback.v3.json','0.3.0 科技反馈')}</div></details></section></details>`;
 }
-function techPage(): string { return data!.rules.economy?disciplineCatalog():logicPage(data!.rules, selectedTech,techSearch); }
+function techPage(): string { return data!.rules.economy?(data!.rules.branches?branchCatalog():disciplineCatalog()):logicPage(data!.rules, selectedTech,techSearch); }
 function parametersPage(): string {
   const rows = data!.parameters.filter(p => (scope === 'all' || (scope === 'editable') === p.editable) && `${p.key} ${parameterNames[p.key.split('.').at(-1)!]}`.toLowerCase().includes(query.toLowerCase()));
   return `<section class="card"><h2>谁能改，什么时候改？</h2><div class="table-wrap"><table><tr><th>角色</th><th>权限</th></tr><tr><td>玩家代理</td><td>仅观察与选择合法行动；不能修改规则、资源或未来天气。</td></tr><tr><td>参数对照实验</td><td>开局前覆盖白名单参数，受整数范围与跨字段约束检查；本局运行中固定。</td></tr><tr><td>研究与开发</td><td>可另提机制/科技结构变更；需版本、验证与迁移方案，不自动采纳。</td></tr></table></div><p class="muted">配置里有数字不等于候选入口允许修改。下面的权限来自当前代码支持的参数集合。给代理完整 shell/编辑权限时，项目约定本身不是安全隔离。</p></section>
@@ -79,7 +80,7 @@ function render() {
   if (!data) return;
   const researchTools=document.querySelector<HTMLDetailsElement>('.research-tools');if(researchTools&&['parameters','research','framework'].includes(tab))researchTools.open=true;
   $('identity').innerHTML = `当前默认规则 <strong>${esc(data.rules.rulesVersion)}</strong> · 实现 ${esc(data.implementation.version)} · ${data.rules.technologies.length} 科技节点 · ${data.experiments.length} 份实验 · ${data.proposals.length} 个提案<details><summary>当前指纹</summary><div class="mono">规则 ${esc(data.rulesFingerprint)}<br>实现 ${esc(data.implementation.codeFingerprint)}</div></details>`;
-  $('review').innerHTML = data.issues.map(i=>`<p class="notice">读取提示：${esc(i)}</p>`).join('') + ({ rules: rulesPage, technology: techPage, products: ()=>data!.rules.economy?productCatalog():productPage(data!.rules,selectedProduct,productCategory,productPlans,productLocal,productHistory.length>0,productSearch,productCycle), parameters: parametersPage, research: researchPage, framework: frameworkPage }[tab] ?? rulesPage)();
+  $('review').innerHTML = data.issues.map(i=>`<p class="notice">读取提示：${esc(i)}</p>`).join('') + ({ rules: rulesPage, technology: techPage, products: ()=>data!.rules.economy?(data!.rules.branches?branchCatalog(true):productCatalog()):productPage(data!.rules,selectedProduct,productCategory,productPlans,productLocal,productHistory.length>0,productSearch,productCycle), parameters: parametersPage, research: researchPage, framework: frameworkPage }[tab] ?? rulesPage)();
   document.querySelectorAll<HTMLButtonElement>('[data-knowledge]').forEach(b=>b.addEventListener('click',()=>{frameworkNode=b.dataset.knowledge!;render();document.querySelector('.knowledge-detail')?.scrollIntoView({block:'start'});}));
   document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach(b=>b.classList.toggle('selected', b.dataset.tab===tab));
   document.querySelectorAll<HTMLElement>('[data-tech]').forEach(b=> { const select=()=>{const graph=document.querySelector('.tech-network');const left=graph?.scrollLeft??0,top=graph?.scrollTop??0;selectedTech=b.dataset.tech!;render();const next=document.querySelector('.tech-network');if(next){next.scrollLeft=left;next.scrollTop=top;if(!b.closest('svg'))document.querySelector<SVGElement>(`svg [data-tech="${selectedTech}"]`)?.scrollIntoView({block:'nearest',inline:'nearest'});}}; b.addEventListener('click',select);b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select();}}); });

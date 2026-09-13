@@ -1,3 +1,7 @@
+import { installedIn,settleIndustry,industryView } from './industry.js';
+import {productNeeds} from './industry-products.js';
+import {branchHas,branchProcessNeeds,branchView} from './branches.js';
+import { expeditionView } from './expedition.js';
 import { modernOnline,usePower } from './modern.js';
 import { topicsFor,productsFor,processesFor,goodsFor } from './economy-catalog.js';
 import { towerView } from './tower.js';
@@ -27,9 +31,10 @@ export function changeGoods(s:GameState,goods:Record<string,number>,sign:number,
   for(const[id,n]of Object.entries(goods)){const next=amount(s,id)+n*sign;if(next<0)throw new Error('实物不足：'+id);s.economy!.goods[id]=next;}
   events.push({type:'economy-goods',source,changes:Object.fromEntries(Object.entries(goods).map(([id,n])=>[id,n*sign]))});
 }
-export function requirements(s:GameState,needs:Partial<Record<Subject,number>>):string[]{return Object.entries(needs).filter(([d,n])=>level(s,d as Subject)<n).map(([d,n])=>`需${SUBJECT_NAMES[d as Subject]}第${n}阶`);}
+export function requirements(s:GameState,needs:Partial<Record<Subject,number>>):string[]{if(s.economy?.branches)return [];return Object.entries(needs).filter(([d,n])=>level(s,d as Subject)<n).map(([d,n])=>`需${SUBJECT_NAMES[d as Subject]}第${n}阶`);}
 export function missingGoods(s:GameState,needs:Record<string,number>):string[]{return Object.entries(needs).filter(([id,n])=>amount(s,id)<n).map(([id,n])=>`需${n}${GOODS[id]?.name??id}`);}
 export function recordEvidence(s:GameState,subject:Subject,events:GameEvent[],source:string):void{
+  if(s.economy?.branches)return;
   const n=level(s,subject)+1;if(n>(s.economy?.modern?10:6))return;const t=TOPICS.find(t=>t.subject===subject&&t.level===n)!;
   const list=s.economy!.evidence[s.household.activePersonId]??=[];
   if(!list.includes(t.id)){list.push(t.id);events.push({type:'economy-evidence',topic:t.id,source});}
@@ -41,6 +46,7 @@ export function fieldYield(s:GameState):number{
 }
 export function farmBlocker(s:GameState,crop:Crop,worker?:Worker):string[]{
   const f=s.economy!.field;
+  if(s.economy!.branches&&(crop!=='wheat'||!branchHas(s,'A0')&&!worker))return ['需掌握基础栽培；本试点只含小麦种植'];
   if(!f.crop){
     if(worker?.kind==='laborer'&&worker.experience<8)return ['普通雇工只能照料和收获，播种需要本人或熟练农工'];
     return [...(worker?[]:requirements(s,{agronomy:CROPS[crop].level})),...missingGoods(s,{[CROPS[crop].seed]:1})];
@@ -83,8 +89,8 @@ export function processBlockers(s:GameState,p:ProcessSpec,worker?:Worker):string
   const activeProjects=[e.project,...Object.values(e.workers).map(w=>w?.project)].filter(Boolean);
   const busy=p.equipment&&activeProjects.some(x=>PROCESSES.find(p=>p.id===x!.good)?.equipment===p.equipment);
   const power=(p.power??0)*processMultiplier(s,p,worker)+(!p.wait&&assemblyReady(s,worker)?1:0);
-  return [...(worker&& !Object.values(p.requires).some(n=>n>6)?[]:requirements(s,p.requires)),...(power>(e.modern?.power??0)?['电力不足：本批需要'+power+'电']:[]),...missingGoods(s,processInputs(s,p,worker)),
-    ...(p.equipment&&!equipped(s,p.equipment)?['需可用'+PRODUCTS.find(x=>x.id===p.equipment)!.name]:[]),
+  return [...(e.industry?productNeeds(s,p.id):e.branches?branchProcessNeeds(s,p.id,!!worker):worker&& !Object.values(p.requires).some(n=>n>6)?[]:requirements(s,p.requires)),...(power>(e.modern?.power??0)?['电力不足：本批需要'+power+'电']:[]),...missingGoods(s,processInputs(s,p,worker)),
+    ...(p.equipment&&installedIn(s,p.equipment)?['设备已安装在系统中，先暂停并拆出']:[]),...(p.equipment&&!equipped(s,p.equipment)?['需可用'+PRODUCTS.find(x=>x.id===p.equipment)!.name]:[]),
     ...(busy||p.equipment&&e.equipmentUsed[p.equipment]===s.clock.absoluteTurn?['对应设备本季或在制工序占用']:[]),
     ...(!worker&&e.project?['先完成本人在制项目']:[])];
 }
@@ -114,7 +120,7 @@ export function finishProcess(s:GameState,events:GameEvent[],worker?:Worker):voi
   completeProcess(s,p,project.amount,events,worker?WORKER_NAMES[worker.kind]:'本人');
   if(worker)worker.project=null;else s.economy!.project=null;
 }
-export function organizationLevel(s:GameState):number{return Math.max(level(s,'organization'),s.economy!.notes.organization??0);}
+export function organizationLevel(s:GameState):number{if(s.economy?.branches)return branchHas(s,'O2')?3:branchHas(s,'O1')?2:branchHas(s,'O0')?1:0;return Math.max(level(s,'organization'),s.economy!.notes.organization??0);}
 export function wage(_s:GameState,rules:Ruleset,w:Worker):number{return rules.economy!.wage+(w.kind==='laborer'?0:w.kind==='manager'?2:1)+(w.experience>=8?1:0);}
 export function workerBlocker(s:GameState,w:Worker):string[]{
   if(servicePending(s,'training',w.kind))return ['委托培训中，本季不工作、不扣工资'];
@@ -127,12 +133,12 @@ export function foodStock(s:GameState):number{return s.household.food+['flour','
 export function storage(s:GameState):number{return s.economy!.shop?.assets.includes('granary')?Math.max(equipped(s,'S02')?14:equipped(s,'S01')?8:4,s.economy!.shopGranaryCapacity??0):equipped(s,'S02')?14:equipped(s,'S01')?8:4;}
 export function settleEconomy(s:GameState,rules:Ruleset,events:GameEvent[]):void{
   const e=s.economy!,f=e.field;
-  if(f.crop&&s.location.rain+f.moisture<2&&equipped(s,'W03')&&s.location.water>0&&amount(s,'wood')>0){
+  if(!e.industry&&f.crop&&(!e.branches||branchHas(s,'A1'))&&s.location.rain+f.moisture<2&&equipped(s,'W03')&&s.location.water>0&&amount(s,'wood')>0){
     changeGoods(s,{wood:1},-1,events,'活塞泵自动灌溉');s.location.water--;f.moisture+=2;consumeEquipment(s,'W03',events);if(e.operations)e.equipmentUsed.W03=s.clock.absoluteTurn;
     events.push({type:'economy-farm',operation:'pump',crop:f.crop,actor:'活塞泵',amount:1});
   }
   // 固定结算次序可观察。同一设备、地块不能因多人或自动化重复获得产出。
-  for(const kind of ['laborer','farmer','artisan','manager'] as WorkerKind[]){
+  for(const kind of (e.industry?[]:['laborer','farmer','artisan','manager']) as WorkerKind[]){
     const w=e.workers[kind];if(!w?.active)continue;
     const cost=wage(s,rules,w),blockers=[...workerBlocker(s,w),...planBlocker(s,w,rules)];
     if(s.household.money<cost||blockers.length){events.push({type:'economy-worker',worker:kind,operation:'waiting',money:0,detail:s.household.money<cost?'工资不足':blockers.join('；')});continue;}
@@ -146,6 +152,7 @@ export function settleEconomy(s:GameState,rules:Ruleset,events:GameEvent[]):void
         events.push({type:'economy-trade',good:id,operation:'sell',amount:1,money:revenue});events.push({type:'economy-worker',worker:kind,operation:'share',money:1,detail:'合作收益分成'});}
     }
   }
+  settleIndustry(s,events);
   if(f.crop&&f.growth<f.duration){
     if(!modernOnline(s,'U08M')&&s.location.rain+f.moisture<2)f.stress++;
     if(!modernOnline(s,'U08M')&&s.location.rain>=3){if(equipped(s,'U08'))consumeEquipment(s,'U08',events);else f.stress++;}
@@ -169,8 +176,8 @@ export function spoilEconomy(s:GameState,events:GameEvent[]):void{
 }
 export function economyView(s:GameState,rules:Ruleset){
   const e=s.economy!;
-  return {...structuredClone(e),...(e.tower?{towerView:towerView(s,rules)}:{}),...(e.workshops?{workshopView:workshopView(s,rules)}:{}),...(e.shop?{marketView:shopView(s,rules)}:{}),...(e.operations?{operationsView:operationsView(s,rules)}:{}),foodTotal:foodStock(s),storage:modernOnline(s,'S08')?Math.max(30,storage(s)):storage(s),harvest:fieldYield(s),
-    disciplines:SUBJECTS.map(subject=>({subject,name:SUBJECT_NAMES[subject],level:level(s,subject),heirLevel:level(s,subject,s.household.heirId),notes:e.notes[subject]??0,
+  return {...structuredClone(e),...(e.industry?{industryView:industryView(s)}:{}),...(e.branches?{branchView:branchView(s)}:{}),...(e.expeditions?{expeditionView:expeditionView(s)}:{}),...(e.tower?{towerView:towerView(s,rules)}:{}),...(e.workshops?{workshopView:workshopView(s,rules)}:{}),...(e.shop?{marketView:shopView(s,rules)}:{}),...(e.operations?{operationsView:operationsView(s,rules)}:{}),foodTotal:foodStock(s),storage:modernOnline(s,'S08')?Math.max(30,storage(s)):storage(s),harvest:fieldYield(s),
+    disciplines:(e.branches?[]:SUBJECTS).map(subject=>({subject,name:SUBJECT_NAMES[subject],level:level(s,subject),heirLevel:level(s,subject,s.household.heirId),notes:e.notes[subject]??0,
       topics:topicsFor(s).filter(t=>t.subject===subject).map(t=>({...t,known:level(s,subject)>=t.level,evidence:(e.evidence[s.household.activePersonId]??[]).includes(t.id)}))})),
     staff:Object.values(e.workers).map(w=>({...structuredClone(w!),name:WORKER_NAMES[w!.kind],jobName:JOB_NAMES[w!.job],wage:wage(s,rules,w!),blockers:[...workerBlocker(s,w!),...planBlocker(s,w!,rules)]})),
     products:productsFor(s).map(p=>e.shop&&p.id==='U02'?{...p,effect:'每季一次本人播种免行动，仍扣种子与耐用度；雇工工资不减免'}:p),processes:processesFor(s),crops:CROPS,goodsCatalog:goodsFor(s),parameters:structuredClone(rules.economy!)};

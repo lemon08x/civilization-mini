@@ -1,3 +1,4 @@
+import {BRANCH_PRODUCTS,BRANCH_PROCESSES} from '../model/branches.js';
 import { MODERN_TOPICS,MODERN_GOODS,MODERN_PRODUCTS,MODERN_PROCESSES } from './modern-catalog.js';
 import type { GameState } from '../model/state.js';
 import type { Subject, Crop, WorkerKind } from '../model/economy.js';
@@ -73,7 +74,7 @@ export const ALL_GOODS={...GOODS,...MODERN_GOODS};
 export const ALL_PRODUCTS=[...PRODUCTS,...MODERN_PRODUCTS];
 export const ALL_PROCESSES=[...PROCESSES,...MODERN_PROCESSES];
 export const ALL_JOB_NAMES:Record<string,string>={...JOB_NAMES,...Object.fromEntries(MODERN_PROCESSES.map(p=>[p.id,p.name]))};
-export const topicsFor=(s:GameState)=>s.economy?.modern?ALL_TOPICS:TOPICS;
-export const productsFor=(s:GameState)=>s.economy?.modern?ALL_PRODUCTS:PRODUCTS;
-export const processesFor=(s:GameState)=>s.economy?.modern?ALL_PROCESSES:PROCESSES;
+export const topicsFor=(s:GameState)=>s.economy?.branches?[]:s.economy?.modern?ALL_TOPICS:TOPICS;
+export const productsFor=(s:GameState)=>s.economy?.branches?ALL_PRODUCTS.filter(p=>BRANCH_PRODUCTS[p.id]).map(p=>({...p,requires:{}})):s.economy?.modern?ALL_PRODUCTS:PRODUCTS;
+export const processesFor=(s:GameState)=>s.economy?.branches?ALL_PROCESSES.filter(p=>BRANCH_PROCESSES[p.id]).map(p=>({...p,requires:{}})):s.economy?.modern?ALL_PROCESSES:PROCESSES;
 export const goodsFor=(s:GameState)=>s.economy?.modern?ALL_GOODS:GOODS;

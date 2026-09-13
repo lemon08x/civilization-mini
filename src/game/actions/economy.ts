@@ -1,3 +1,5 @@
+import {branchHas} from '../systems/branches.js';
+import { expeditionActions } from './expedition.js';
 import { modernActions } from './modern.js';
 import { usePower } from '../systems/modern.js';
 import { topicsFor,productsFor,processesFor,goodsFor } from '../systems/economy-catalog.js';
@@ -35,7 +37,7 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
         recordEvidence(draft,t.subject,events,t.name+'固定对照');
       });
   }
-  for(const subject of SUBJECTS){
+  for(const subject of (e.branches?[]:SUBJECTS)){
     const n=level(s,subject),child=level(s,subject,s.household.heirId);
     add('archive',subject,'留存：'+SUBJECT_NAMES[subject],'传承',{},[...(n<1?['尚未掌握']:[]),...((e.notes[subject]??0)>=n?['家族记录已完整']:[])],'保存本人的当前学科进展，后辈可据此学习。'+(e.shop?.assets.includes('library')?'家学书室同时教导后辈下一课题，上限为本人水平。':'设备和记录不会自动复制个人理解。'),(draft,events)=>{draft.economy!.notes[subject]=n;if(e.shop?.assets.includes('library')&&child<n){(draft.economy!.knowledge[draft.household.heirId]??={})[subject]=child+1;events.push({type:'economy-learned',subject,level:child+1,personId:draft.household.heirId,source:'teach'});}events.push({type:'economy-knowledge',operation:'archive',subject,level:n});});
     add('teach',subject,'教导后辈：'+SUBJECT_NAMES[subject],'传承',{},[...(child>=n?['后辈已达到本人理解水平']:[])],'1行动传授下一阶理解，上限为本人已掌握进展；不复制制造实践。',(draft,events)=>{
@@ -84,7 +86,7 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
   }
   for(const recipe of processesFor(s)){
     const steam=steamReady(s,rules)&&['mill','thresh','oil'].includes(recipe.id)&&((e.goods.wood??0)>=(recipe.inputs.wood??0)+rules.operations!.steamFuel);
-    const electric=!!e.modern&&e.modern.power>=1&&['mill','thresh','oil'].includes(recipe.id);
+    const electric=(!e.branches||branchHas(s,'L7'))&&!!e.modern&&e.modern.power>=1&&['mill','thresh','oil'].includes(recipe.id);
     const powered=electric||['mill','thresh','oil'].includes(recipe.id)&&(steam||equipped(s,'P03')&&s.location.water>0&&e.poweredTurn!==s.clock.absoluteTurn);
     add('process',recipe.id,recipe.name,'生产',{ap:powered?0:1},processBlockers(s,recipe),`${recipe.wait?'开工后跨季完成':'当次加工完成'}。${electric?'电力提供免行动加工，消耗1电。':steam?'蒸汽提供本季一次免行动加工，消耗燃料。':powered?'水轮提供本季一次免行动加工，扣1公共水与1耐用度。':''}投入产出见配方。`,(draft,events)=>{
       if(electric)usePower(draft,1,events,'电动食品加工');else if(steam)useSteam(draft,rules,events);else if(powered){draft.location.water--;draft.economy!.poweredTurn=draft.clock.absoluteTurn;consumeEquipment(draft,'P03',events);}runProcess(draft,recipe,events,undefined,rules);
@@ -96,6 +98,7 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
     const worker=e.workers[kind],required=kind==='laborer'?1:kind==='manager'?5:2;
     add('hire',kind,'雇佣'+WORKER_NAMES[kind],'雇佣',{money:p.hireCost},[...(org<required?[`需生产组织第${required}阶或家族记录`]:[]),...(worker?['已雇有此岗位']:[]),...(Object.keys(e.workers).length>=capacity?['达到当前组织人数上限']:[]),...(e.recruitment<1?['本季招募机会用完']:[])],
       `招募费${p.hireCost}钱，之后按实际工作季支付工资；无任务、缺料、设备占用时待命不收费。熟练人员可使用其专业工艺，不赠送本人技能。`,(draft,events)=>{
+        if(draft.economy!.industry){const r=draft.economy!.industry!.rules;draft.economy!.industry!.workers[kind]={timeRemaining:r.workerTime,energy:r.workerEnergy};}
         draft.economy!.recruitment--;draft.economy!.workers[kind]={kind,experience:kind==='laborer'?0:4,job:'rest',active:false,project:null};
         events.push({type:'economy-worker',worker:kind,operation:'hire',money:p.hireCost,detail:'招募完成，需安排任务'});recordEvidence(draft,'organization',events,'建立雇佣关系');
       });
@@ -108,5 +111,5 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
   add('end','season','结束本季','回合',{ap:0},[],`雇佣与田间先结算，再支付${rules.parameters.foodPerTurn}粮生活；现有可食储备${foodStock(s)}。`,()=>{});
   if(e.operations)out.push(...operationsActions(s,rules));
   if(e.shop)out.push(...shopActions(s,rules));
-  return [...out,...workshopActions(s,rules),...towerActions(s,rules)];
+  return [...out,...expeditionActions(s,rules),...workshopActions(s,rules),...towerActions(s,rules)];
 }

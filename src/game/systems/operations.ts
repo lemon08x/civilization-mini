@@ -73,7 +73,7 @@ function purchaseInputs(s:GameState,r:Ruleset,events:GameEvent[]){
   const pending=sh.orders.filter(x=>x.kind==='goods'&&x.target===id).reduce((n,x)=>n+x.amount,0);
   const missing=Math.max(0,target-amount(s,id)-pending);if(!missing)continue;
   const item=catalog.find(x=>x.kind==='goods'&&x.target===id);if(!item)continue;
-  if(!item.local&&s.clock.generation===r.parameters.generations&&s.clock.turn===r.parameters.turnsPerGeneration)continue;
+  if(!item.local&&!r.civilization&&s.clock.generation===r.parameters.generations&&s.clock.turn===r.parameters.turnsPerGeneration)continue;
   const n=Math.min(missing,item.stock,sh.transport,Math.max(0,Math.floor((s.household.money-obligations(s,r))/item.price)));
   if(!n){alert(s,events,id,'自动补货等待：'+item.name+'（检查周转金、库存和运输）');continue;}
   const money=n*item.price;s.household.money-=money;sh.stock[item.id]-=n;sh.transport-=n;
@@ -83,7 +83,7 @@ function purchaseInputs(s:GameState,r:Ruleset,events:GameEvent[]){
  }
 }
 function autoCare(s:GameState,r:Ruleset,events:GameEvent[]){
- const e=s.economy!,o=e.operations!;if(!o.maintenance||s.clock.generation===r.parameters.generations&&s.clock.turn===r.parameters.turnsPerGeneration)return;
+ const e=s.economy!,o=e.operations!;if(!o.maintenance||!r.civilization&&s.clock.generation===r.parameters.generations&&s.clock.turn===r.parameters.turnsPerGeneration)return;
  for(const [id,n]of Object.entries(e.equipment)){
   if(n>r.operations!.repairThreshold||deviceReserved(s,id)||e.equipmentUsed[id]===s.clock.absoluteTurn)continue;
   const cost=repairPrice(s,r,id);if(s.household.money-cost<obligations(s,r)){alert(s,events,id,'维护待命：'+PRODUCTS.find(p=>p.id===id)!.name+'缺周转金');continue;}
@@ -136,7 +136,7 @@ export function advanceProjects(s:GameState,r:Ruleset,events:GameEvent[]):void{
 export function steamReady(s:GameState,r:Ruleset):boolean{return !!s.economy?.operations?.steam&&!s.economy.operations.paused&&completed(s,'steam')&&s.economy!.poweredTurn!==s.clock.absoluteTurn&&amount(s,'wood')>=r.operations!.steamFuel;}
 export function useSteam(s:GameState,r:Ruleset,events:GameEvent[]):void{changeGoods(s,{wood:r.operations!.steamFuel},-1,events,'蒸汽供能');s.economy!.poweredTurn=s.clock.absoluteTurn;opEvent(events,'powered','steam','燃料供能已生效，本季动力额度用尽',1);}
 export function handoverOperations(s:GameState,events:GameEvent[]):void{const o=s.economy?.operations;if(!o||o.charter)return;for(const w of Object.values(s.economy!.workers))if(w)w.active=false;o.paused=true;o.foodReserved=0;opEvent(events,'paused','family','经营安排已保存但暂停；后辈可用一次接续行动恢复，家族契约可免去此操作');}
-export function operationsView(s:GameState,r:Ruleset){const o=s.economy!.operations!;return {...structuredClone(o),foodTarget:foodTarget(s,r),parameters:r.operations!,organization:organizationLevel(s),stage:completed(s,'steam')?'燃料动力':completed(s,'mine')?'资源开拓':completed(s,'mechanical')?'地区工业':completed(s,'food')?'生活保障':o.food||o.farm||o.production?'委托经营':'亲自谋生',projectsCatalog:REGIONAL_PROJECTS.map(p=>({...p,test:p.id==='steam'?`每个验证季用空闲热处理炉、${r.operations!.steamFuel}木材、1弹簧、1阀门，完成一次压力配套试验`:p.test,blockers:projectBlockers(s,p.id),state:o.projects[p.id]?.stage??'available',progress:o.projects[p.id]?.progress??0})),completed:Object.entries(o.projects).filter(([,p])=>p?.stage==='complete').map(([id])=>id),recipes:processesFor(s).map(p=>({id:p.id,name:p.name,equipment:p.equipment,outputs:p.outputs}))};}
+export function operationsView(s:GameState,r:Ruleset){const o=s.economy!.operations!;return {...structuredClone(o),foodTarget:foodTarget(s,r),parameters:r.operations!,organization:organizationLevel(s),stage:completed(s,'steam')?'燃料动力':completed(s,'mine')?'资源开拓':completed(s,'mechanical')?'地区工业':completed(s,'food')?'生活保障':o.food||o.farm||o.production?'委托经营':'亲自谋生',projectsCatalog:(s.economy!.branches?[]:REGIONAL_PROJECTS).map(p=>({...p,test:p.id==='steam'?`每个验证季用空闲热处理炉、${r.operations!.steamFuel}木材、1弹簧、1阀门，完成一次压力配套试验`:p.test,blockers:projectBlockers(s,p.id),state:o.projects[p.id]?.stage??'available',progress:o.projects[p.id]?.progress??0})),completed:Object.entries(o.projects).filter(([,p])=>p?.stage==='complete').map(([id])=>id),recipes:processesFor(s).map(p=>({id:p.id,name:p.name,equipment:p.equipment,outputs:p.outputs}))};}
 
 export function recordProjectEvidence(s:GameState,events:GameEvent[]):void{
  const o=s.economy?.operations;if(!o?.activeProject)return;const id=o.activeProject;

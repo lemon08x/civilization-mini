@@ -6,7 +6,9 @@ import type { DevelopmentState } from './development.js';
 export type Weather = 'dry' | 'normal' | 'wet';
 export type GameStatus = 'active' | 'handover' | 'complete' | 'ended';
 export interface Clock { generation: number; turn: number; absoluteTurn: number }
+import type { LifeRules, Vitality } from './life.js';
 export interface Person {
+  vitality?: Vitality;
   id: string;
   name: string;
   mastered: string[];
@@ -33,6 +35,7 @@ export interface GameState {
   clock: Clock;
   status: GameStatus;
   ap: number;
+  life?: {rules: LifeRules; timeRemaining: number; pendingRetirement?: boolean};
   world: { era: string; technologies: string[] };
   location: {
     id: string;
