@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "product-tree-page",
+  "title": "独立产品树与研究工具收纳",
+  "kind": "interface",
+  "status": "accepted",
+  "origin": "用户要求评估参数与权限入口，并增加涵盖食品、药品、铜铁、工具与知识成果的产品树。",
+  "question": "如何展示产品体系而不混淆科技点和未实现机制？",
+  "hypothesis": "独立产品页按用途分组，以状态和虚线隔离规划，将制造条件与用途放在节点详情。",
+  "counterEvidence": "药品、冶金与数学物理知识成果仍仅为规划，尚不能用于游玩或模拟。",
+  "baseVersion": "0.6.0",
+  "targetVersion": "0.6.0",
+  "adoptedVersion": "0.6.0",
+  "experiments": [],
+  "evidence": [
+    "docs/PRODUCT_TREE.md"
+  ],
+  "changes": [
+    {
+      "subject": "导航",
+      "before": "参数与权限占据主导航",
+      "after": "主导航为规则、科技、产品，调参与实验收进研究工具"
+    },
+    {
+      "subject": "产品展示",
+      "before": "缺少独立产品页",
+      "after": "22个现行节点及21个明确标记的规划节点，支持分类、隐藏规划与详情跳转"
+    }
+  ],
+  "result": "64项测试及短时网页交互检查通过，无新平衡模拟。",
+  "sideEffects": "规划关系是待检验假设，未建立药品、金属或数学物理的新结算。",
+  "decision": "采纳界面组织与规划展示；机制与参数后续独立提案，不自动生效。"
+}

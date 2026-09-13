@@ -1,0 +1,5407 @@
+{
+  "format": "civilization-mini-run",
+  "formatVersion": 2,
+  "manifest": {
+    "runId": "economy-industry-self",
+    "implementation": {
+      "version": "0.10.0",
+      "codeFingerprint": "187223efc77e15007a3cda39324b63523c22b979e3dc56d03cfd9bbd051d26ae"
+    },
+    "ruleset": {
+      "schemaVersion": 1,
+      "id": "discipline-economy",
+      "rulesVersion": "0.9.0",
+      "parameters": {
+        "actionsPerTurn": 3,
+        "turnsPerGeneration": 16,
+        "generations": 3,
+        "initialFood": 6,
+        "initialMoney": 8,
+        "foodPerTurn": 2,
+        "workIncome": 2,
+        "foodPrice": 1,
+        "cropPotential": 4,
+        "channelCost": 3,
+        "channelDurability": 3,
+        "repairCost": 1,
+        "trialCost": 2,
+        "trialSeasons": 2,
+        "trialLandCost": 1,
+        "archiveCost": 1,
+        "studyCost": 0,
+        "trainingCost": 1,
+        "studyMultiplier": 1,
+        "hardshipLimit": 3
+      },
+      "parameterBounds": {
+        "actionsPerTurn": [
+          2,
+          6
+        ],
+        "turnsPerGeneration": [
+          4,
+          24
+        ],
+        "generations": [
+          1,
+          6
+        ],
+        "initialFood": [
+          0,
+          30
+        ],
+        "initialMoney": [
+          0,
+          30
+        ],
+        "foodPerTurn": [
+          1,
+          6
+        ],
+        "workIncome": [
+          1,
+          8
+        ],
+        "foodPrice": [
+          1,
+          5
+        ],
+        "cropPotential": [
+          2,
+          8
+        ],
+        "channelCost": [
+          1,
+          15
+        ],
+        "channelDurability": [
+          1,
+          8
+        ],
+        "repairCost": [
+          1,
+          8
+        ],
+        "trialCost": [
+          1,
+          10
+        ],
+        "trialSeasons": [
+          2,
+          6
+        ],
+        "trialLandCost": [
+          1,
+          2
+        ],
+        "archiveCost": [
+          1,
+          5
+        ],
+        "studyCost": [
+          0,
+          5
+        ],
+        "trainingCost": [
+          0,
+          5
+        ],
+        "studyMultiplier": [
+          1,
+          3
+        ],
+        "hardshipLimit": [
+          2,
+          6
+        ]
+      },
+      "scenarios": {
+        "river": {
+          "id": "river",
+          "name": "河渠村落",
+          "text": "旱、平、涝都有；可接触测量、沟渠和选种方法。",
+          "drought": 30,
+          "wet": 20,
+          "water": 2,
+          "production": {
+            "stocks": {
+              "wildFood": 3,
+              "timber": 5,
+              "clay": 20
+            },
+            "recovery": {
+              "wildFood": 1,
+              "timber": 1
+            },
+            "market": {
+              "food": 8,
+              "jobs": 1,
+              "woodenware": 2,
+              "pottery": 2,
+              "methods": 1
+            },
+            "teachers": [
+              "observation",
+              "survey",
+              "ditch",
+              "allocation",
+              "selection",
+              "trial",
+              "stabilize",
+              "resource-observation",
+              "controlled-fire",
+              "storage",
+              "pottery",
+              "agronomy",
+              "ceramic-engineering",
+              "mechanics",
+              "experimentation",
+              "precision-engineering"
+            ],
+            "imports": [
+              "woodworking"
+            ]
+          }
+        },
+        "dry": {
+          "id": "dry",
+          "name": "缺水村落",
+          "text": "旱季较多，公共水源有限；检验水利和种源路线的区别。",
+          "drought": 60,
+          "wet": 10,
+          "water": 1,
+          "production": {
+            "stocks": {
+              "wildFood": 6,
+              "timber": 10,
+              "clay": 4
+            },
+            "recovery": {
+              "wildFood": 3,
+              "timber": 3
+            },
+            "market": {
+              "food": 6,
+              "jobs": 1,
+              "woodenware": 1,
+              "pottery": 2,
+              "methods": 1
+            },
+            "teachers": [
+              "observation",
+              "survey",
+              "ditch",
+              "allocation",
+              "selection",
+              "trial",
+              "stabilize",
+              "resource-observation",
+              "controlled-fire",
+              "storage",
+              "woodworking",
+              "agronomy",
+              "ceramic-engineering",
+              "mechanics",
+              "experimentation",
+              "precision-engineering"
+            ],
+            "imports": [
+              "pottery"
+            ]
+          }
+        },
+        "woodland": {
+          "id": "woodland",
+          "name": "林地聚落",
+          "text": "可采食物和木材较丰富、黏土有限；当地传授木作，陶作方法需从交换渠道取得。环境条件不绑定文明。",
+          "drought": 30,
+          "wet": 20,
+          "water": 1,
+          "production": {
+            "stocks": {
+              "wildFood": 6,
+              "timber": 10,
+              "clay": 4
+            },
+            "recovery": {
+              "wildFood": 3,
+              "timber": 3
+            },
+            "market": {
+              "food": 6,
+              "jobs": 1,
+              "woodenware": 1,
+              "pottery": 2,
+              "methods": 1
+            },
+            "teachers": [
+              "observation",
+              "survey",
+              "ditch",
+              "allocation",
+              "selection",
+              "trial",
+              "stabilize",
+              "resource-observation",
+              "controlled-fire",
+              "storage",
+              "woodworking",
+              "agronomy",
+              "ceramic-engineering",
+              "mechanics",
+              "experimentation",
+              "precision-engineering"
+            ],
+            "imports": [
+              "pottery"
+            ]
+          }
+        },
+        "clay-valley": {
+          "id": "clay-valley",
+          "name": "黏土河谷",
+          "text": "黏土充足、可采木材较少；当地传授陶作，木作方法可从交换渠道取得。食物与商品交换均有容量。",
+          "drought": 30,
+          "wet": 20,
+          "water": 2,
+          "production": {
+            "stocks": {
+              "wildFood": 3,
+              "timber": 5,
+              "clay": 20
+            },
+            "recovery": {
+              "wildFood": 1,
+              "timber": 1
+            },
+            "market": {
+              "food": 8,
+              "jobs": 1,
+              "woodenware": 2,
+              "pottery": 2,
+              "methods": 1
+            },
+            "teachers": [
+              "observation",
+              "survey",
+              "ditch",
+              "allocation",
+              "selection",
+              "trial",
+              "stabilize",
+              "resource-observation",
+              "controlled-fire",
+              "storage",
+              "pottery",
+              "agronomy",
+              "ceramic-engineering",
+              "mechanics",
+              "experimentation",
+              "precision-engineering"
+            ],
+            "imports": [
+              "woodworking"
+            ]
+          }
+        }
+      },
+      "technologies": [
+        {
+          "id": "resource-observation",
+          "name": "环境观察",
+          "branch": "获取与材料",
+          "world": "资源辨识",
+          "prerequisites": [],
+          "study": 1,
+          "practices": [
+            "resource-survey"
+          ],
+          "benefit": "辨认采食地点，同样行动最多多取一份食物，仍受当地库存限制。",
+          "practiceText": "完成一次实地资源辨识",
+          "insight": null
+        },
+        {
+          "id": "woodworking",
+          "name": "木材加工与连接",
+          "branch": "获取与材料",
+          "world": "木材加工",
+          "prerequisites": [],
+          "helpfulPrerequisites": [
+            "survey"
+          ],
+          "study": 2,
+          "practices": [
+            "wood-shaped"
+          ],
+          "benefit": "制造木容器或采集工具；测量经验可减少一次学习，但不要求先学农业。 掌握后可建木工作台，开放两件一批的木容器制作，减少重复装配行动。",
+          "practiceText": "实际完成一件木制品",
+          "insight": null
+        },
+        {
+          "id": "controlled-fire",
+          "name": "燃料与控火",
+          "branch": "热加工",
+          "world": "火的利用",
+          "prerequisites": [],
+          "study": 1,
+          "practices": [
+            "fire-tended"
+          ],
+          "benefit": "安排燃料与受控加热，为烧制陶器提供必要基础。",
+          "practiceText": "消耗一份木材燃料完成控火实践",
+          "insight": null
+        },
+        {
+          "id": "pottery",
+          "name": "陶器成形与烧制",
+          "branch": "热加工",
+          "world": "陶作",
+          "prerequisites": [
+            "controlled-fire"
+          ],
+          "study": 2,
+          "practices": [
+            "pot-fired"
+          ],
+          "benefit": "黏土成形后跨季干燥，再用燃料烧制容器；可用于交换或储存。 掌握后可建陶窑，开放四件一批的陶器制作；仍需跨季干燥和足量燃料。",
+          "practiceText": "实际完成一次陶器烧制",
+          "insight": null
+        },
+        {
+          "id": "storage",
+          "name": "容器配置与储存",
+          "branch": "保存",
+          "world": "物品保存",
+          "prerequisites": [],
+          "study": 1,
+          "practices": [
+            "storage-fitted"
+          ],
+          "benefit": "学习使用容器保存余粮，无需先学制造；可利用购买、继承或自己制造的实物。",
+          "practiceText": "消耗一件容器完成储存配置",
+          "insight": null
+        },
+        {
+          "id": "observation",
+          "name": "田间观察",
+          "branch": "田间基础",
+          "world": "耕作经验",
+          "prerequisites": [],
+          "study": 1,
+          "practices": [
+            "cultivation"
+          ],
+          "benefit": "建立水分与收成的记录，开放测量和选种学习。",
+          "insight": "经历一次旱季耕作",
+          "practiceText": "完成一次耕作（无需先学习）"
+        },
+        {
+          "id": "survey",
+          "name": "地形测量",
+          "branch": "灌溉",
+          "world": "基础测量",
+          "prerequisites": [
+            "observation"
+          ],
+          "study": 2,
+          "practices": [
+            "survey"
+          ],
+          "benefit": "学会测量地块，获得渠道布局的前置基础。",
+          "insight": null,
+          "practiceText": "完成地块测量练习"
+        },
+        {
+          "id": "ditch",
+          "name": "渠道布局",
+          "branch": "灌溉",
+          "world": "沟渠施工",
+          "prerequisites": [
+            "survey"
+          ],
+          "study": 2,
+          "practices": [
+            "channel-model"
+          ],
+          "benefit": "能建设家用引水渠；设施才会改善耕作供水。",
+          "insight": null,
+          "practiceText": "完成渠道模型练习"
+        },
+        {
+          "id": "allocation",
+          "name": "配水管理",
+          "branch": "灌溉",
+          "world": "沟渠施工",
+          "prerequisites": [
+            "ditch"
+          ],
+          "study": 2,
+          "practices": [
+            "water-plan"
+          ],
+          "benefit": "耕作时每单位引水满足两单位需水；只在水分不足时有用。",
+          "insight": null,
+          "practiceText": "拥有可用渠道时完成配水练习"
+        },
+        {
+          "id": "selection",
+          "name": "田间选种",
+          "branch": "种源",
+          "world": "留种选种",
+          "prerequisites": [
+            "observation"
+          ],
+          "study": 2,
+          "practices": [
+            "selection"
+          ],
+          "benefit": "能从现有种源中准备候选种子，开放比较试种。",
+          "insight": null,
+          "practiceText": "消耗 1 口粮完成选种练习"
+        },
+        {
+          "id": "trial",
+          "name": "对照试种",
+          "branch": "种源",
+          "world": "留种选种",
+          "prerequisites": [
+            "selection"
+          ],
+          "study": 2,
+          "practices": [
+            "trial-completed"
+          ],
+          "benefit": "能比较种源在不同天气下的表现；结果是记录，不是自动增产。",
+          "insight": null,
+          "practiceText": "完成一次多季试种项目"
+        },
+        {
+          "id": "stabilize",
+          "name": "种源定选",
+          "branch": "种源",
+          "world": "留种选种",
+          "prerequisites": [
+            "trial"
+          ],
+          "study": 2,
+          "practices": [
+            "stock-release"
+          ],
+          "benefit": "能依据试种记录决定替换或保留种源；不是现代遗传育种。",
+          "insight": null,
+          "practiceText": "读过试种记录后完成一次定选"
+        },
+        {
+          "id": "agronomy",
+          "name": "农艺与加工",
+          "branch": "农业与加工",
+          "world": "工艺与实验协作",
+          "prerequisites": [
+            "observation"
+          ],
+          "study": 1,
+          "practices": [
+            "development-agronomy"
+          ],
+          "benefit": "余粮加工成工坊补给，供实验和精密生产使用；农业设备改善有收成时的产量。",
+          "insight": null,
+          "practiceText": "完成对应工业项目"
+        },
+        {
+          "id": "ceramic-engineering",
+          "name": "陶质构件工艺",
+          "branch": "陶作与材料",
+          "world": "工艺与实验协作",
+          "prerequisites": [
+            "pottery"
+          ],
+          "study": 1,
+          "practices": [
+            "development-ceramic-engineering"
+          ],
+          "benefit": "从容器走向机械和实验所需构件；需陶作熟练等级1。",
+          "insight": null,
+          "practiceText": "完成对应工业项目"
+        },
+        {
+          "id": "mechanics",
+          "name": "机械传动",
+          "branch": "机械与设备",
+          "world": "工艺与实验协作",
+          "prerequisites": [
+            "woodworking"
+          ],
+          "study": 1,
+          "practices": [
+            "development-mechanics"
+          ],
+          "benefit": "把木材与陶质构件装配成传动机构，进一步制造农具和实验器具；需木作熟练等级1。",
+          "insight": null,
+          "practiceText": "完成对应工业项目"
+        },
+        {
+          "id": "experimentation",
+          "name": "材料实验方法",
+          "branch": "科学研究",
+          "world": "工艺与实验协作",
+          "prerequisites": [],
+          "study": 1,
+          "practices": [
+            "development-experimentation"
+          ],
+          "benefit": "消耗补给与陶质构件开展对照，得到研究记录，改良家庭工艺；实验设备提高每次记录产出。",
+          "insight": null,
+          "practiceText": "完成材料对照或制造实验器具"
+        },
+        {
+          "id": "precision-engineering",
+          "name": "精密器件工艺",
+          "branch": "陶作与精密制造",
+          "world": "工艺与实验协作",
+          "prerequisites": [
+            "ceramic-engineering"
+          ],
+          "study": 1,
+          "practices": [
+            "development-precision-engineering"
+          ],
+          "benefit": "精密器件既可交付，也用于校准仪、提水泵和控温窑；设备开启校准、蓄水灌溉和材料回收。制造精密器件需陶作等级2。",
+          "insight": null,
+          "practiceText": "完成对应工业项目"
+        }
+      ],
+      "worldTechnologies": [
+        "耕作经验",
+        "基础测量",
+        "沟渠施工",
+        "留种选种",
+        "资源辨识",
+        "木材加工",
+        "火的利用",
+        "陶作",
+        "物品保存",
+        "工艺与实验协作"
+      ],
+      "practiceNames": {
+        "cultivation": "耕作",
+        "survey": "地块测量",
+        "channel-model": "渠道模型",
+        "water-plan": "配水方案",
+        "selection": "留选种子",
+        "trial-completed": "多季试种",
+        "stock-release": "种源定选",
+        "resource-survey": "实地资源辨识",
+        "wood-shaped": "木制品制作",
+        "fire-tended": "燃料与控火",
+        "pot-fired": "陶器烧制",
+        "storage-fitted": "储存配置",
+        "development-agronomy": "完成农艺与加工项目",
+        "development-ceramic-engineering": "完成陶质构件工艺项目",
+        "development-mechanics": "完成机械传动项目",
+        "development-experimentation": "材料实验或器具制造",
+        "development-precision-engineering": "完成精密器件工艺项目"
+      },
+      "production": {
+        "parameters": {
+          "gatherFood": 2,
+          "gatherWood": 2,
+          "gatherClay": 2,
+          "baseStorage": 2,
+          "woodenStorage": 4,
+          "potteryStorage": 6,
+          "spoilDivisor": 2,
+          "toolDurability": 4,
+          "toolBonus": 1,
+          "woodRecipeCost": 2,
+          "potteryClayCost": 2,
+          "potteryFuelCost": 2,
+          "woodenwarePrice": 4,
+          "potteryPrice": 3,
+          "methodPrice": 2
+        },
+        "parameterBounds": {
+          "gatherFood": [
+            1,
+            12
+          ],
+          "gatherWood": [
+            1,
+            12
+          ],
+          "gatherClay": [
+            1,
+            12
+          ],
+          "baseStorage": [
+            1,
+            12
+          ],
+          "woodenStorage": [
+            1,
+            12
+          ],
+          "potteryStorage": [
+            1,
+            12
+          ],
+          "spoilDivisor": [
+            1,
+            4
+          ],
+          "toolDurability": [
+            1,
+            12
+          ],
+          "toolBonus": [
+            1,
+            12
+          ],
+          "woodRecipeCost": [
+            1,
+            12
+          ],
+          "potteryClayCost": [
+            1,
+            12
+          ],
+          "potteryFuelCost": [
+            1,
+            12
+          ],
+          "woodenwarePrice": [
+            1,
+            12
+          ],
+          "potteryPrice": [
+            1,
+            12
+          ],
+          "methodPrice": [
+            1,
+            12
+          ]
+        }
+      },
+      "technologyFeedback": {
+        "buildActions": 2,
+        "workbenchWood": 4,
+        "kilnWood": 4,
+        "kilnClay": 4
+      },
+      "socialInheritance": {
+        "wage": 1,
+        "goodsCapacity": 6,
+        "archiveDiscount": 1
+      },
+      "development": {
+        "parameters": {
+          "experienceStep": 1,
+          "equipmentDurability": 4,
+          "marketSupply": 2,
+          "experimentFood": 1,
+          "mentorFood": 1,
+          "tradeSpread": 1
+        },
+        "parameterBounds": {
+          "experienceStep": [
+            1,
+            5
+          ],
+          "equipmentDurability": [
+            1,
+            12
+          ],
+          "marketSupply": [
+            1,
+            4
+          ],
+          "experimentFood": [
+            1,
+            3
+          ],
+          "mentorFood": [
+            1,
+            3
+          ],
+          "tradeSpread": [
+            1,
+            2
+          ]
+        }
+      },
+      "productNetwork": true,
+      "householdProgress": true,
+      "passiveInvestment": {
+        "victoryPercent": 60,
+        "reportPrice": 24
+      },
+      "economy": {
+        "wage": 1,
+        "hireCost": 2,
+        "durability": 12
+      }
+    },
+    "rulesFingerprint": "c5b3c621f1dad43beae9e18827f30a1265ca639f8190f454766e3485213589b2",
+    "seed": 17,
+    "scenarioId": "clay-valley",
+    "agent": {
+      "kind": "scripted",
+      "name": "industry-self",
+      "settings": {
+        "policyFingerprint": "adb5b8db78ae209f3146af7de9d67a363153c91937719a4cbda9a7e092758abd"
+      }
+    }
+  },
+  "entries": [
+    {
+      "revision": 1,
+      "command": {
+        "commandId": "step:0",
+        "expectedRevision": 0,
+        "actionId": "economy:study:M01"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "study",
+            "target": "M01"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-learned",
+          "subject": "materials",
+          "level": 1,
+          "personId": "person:1",
+          "source": "study"
+        }
+      ],
+      "stateHash": "5b7dced4532c6387d1adfa2b0edbb53f17b7f39a4d3aff7cbdbc17687ce0f477",
+      "previousHash": "b189916cf2b151494486d627a3336ce0853d9dfbfbda9f8b777efd3153513c0f",
+      "hash": "e7613cb9b53bf087cf18445047b7812976676d3b6829ecaac60c5eb2f3cb2dbb"
+    },
+    {
+      "revision": 2,
+      "command": {
+        "commandId": "step:1",
+        "expectedRevision": 1,
+        "actionId": "economy:build:S01"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "build",
+            "target": "S01"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "制造基础容器",
+          "changes": {
+            "wood": -2
+          }
+        },
+        {
+          "type": "economy-built",
+          "product": "S01",
+          "durability": 12
+        },
+        {
+          "type": "economy-evidence",
+          "topic": "M02",
+          "source": "制造基础容器"
+        }
+      ],
+      "stateHash": "a6bcbd8b41071ae46a6ce8230ff9a8154cc2b0bc70b64c673e8cc371604364d4",
+      "previousHash": "e7613cb9b53bf087cf18445047b7812976676d3b6829ecaac60c5eb2f3cb2dbb",
+      "hash": "40a553fecb2eacd3fd0968dd8f6cb1459bf7155bac2834acd7e9a53412438ce4"
+    },
+    {
+      "revision": 3,
+      "command": {
+        "commandId": "step:2",
+        "expectedRevision": 2,
+        "actionId": "economy:study:H01"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "study",
+            "target": "H01"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-learned",
+          "subject": "heat",
+          "level": 1,
+          "personId": "person:1",
+          "source": "study"
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 1,
+            "turn": 2,
+            "absoluteTurn": 2
+          },
+          "weather": "dry"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 3,
+            "timber": 5,
+            "clay": 20
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "ecf1629f27020c1893c65e881ff44d35069796b8f3311f844083c88c2d6fa5a0",
+      "previousHash": "40a553fecb2eacd3fd0968dd8f6cb1459bf7155bac2834acd7e9a53412438ce4",
+      "hash": "79cbd538e02f753ca745d53c36580599cba72b9295b6da92a5c8622fbf9b526b"
+    },
+    {
+      "revision": 4,
+      "command": {
+        "commandId": "step:3",
+        "expectedRevision": 3,
+        "actionId": "economy:gather:clay"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "clay"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "clay": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "clay",
+          "amount": 2,
+          "remaining": 18,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "1cc56c9bd284d9513e5afd3428f13dd16b662e2b97521278e82893d6096e3cf0",
+      "previousHash": "79cbd538e02f753ca745d53c36580599cba72b9295b6da92a5c8622fbf9b526b",
+      "hash": "dc940ec9f0c12021179ccb3872820237ac51b557bd1ae516f84ad5f4b2ea1ebd"
+    },
+    {
+      "revision": 5,
+      "command": {
+        "commandId": "step:4",
+        "expectedRevision": 4,
+        "actionId": "economy:gather:wood"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "wood"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "wood": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "wood",
+          "amount": 2,
+          "remaining": 3,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "c91e7f5cca57da008db57a9ad4bffc8d45c94aadfd0fe01daa3b8d3c6b021e58",
+      "previousHash": "dc940ec9f0c12021179ccb3872820237ac51b557bd1ae516f84ad5f4b2ea1ebd",
+      "hash": "325c641b0f39aa92b4f41261a0749472211265ceb646034ee379fd90064f2ca4"
+    },
+    {
+      "revision": 6,
+      "command": {
+        "commandId": "step:5",
+        "expectedRevision": 5,
+        "actionId": "economy:build:F02"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "build",
+            "target": "F02"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "制造陶窑",
+          "changes": {
+            "clay": -4,
+            "wood": -2
+          }
+        },
+        {
+          "type": "economy-built",
+          "product": "F02",
+          "durability": 12
+        },
+        {
+          "type": "economy-evidence",
+          "topic": "H02",
+          "source": "制造陶窑"
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 1,
+            "turn": 3,
+            "absoluteTurn": 3
+          },
+          "weather": "wet"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 3,
+            "timber": 4,
+            "clay": 18
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "4219bb473d47b65c677bc41d2f2b44aa23af6618861442782e88282c56690a5b",
+      "previousHash": "325c641b0f39aa92b4f41261a0749472211265ceb646034ee379fd90064f2ca4",
+      "hash": "7496bf4cbd3721c8639692a67bf53b8d5504d16f156af1dc72ad238eed3e7d12"
+    },
+    {
+      "revision": 7,
+      "command": {
+        "commandId": "step:6",
+        "expectedRevision": 6,
+        "actionId": "economy:gather:food"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "food"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "food",
+          "amount": 2,
+          "remaining": 1,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "63f5fbb395575dc1a4db80444e607872908b1ef3d902edd640559b319d4e22ca",
+      "previousHash": "7496bf4cbd3721c8639692a67bf53b8d5504d16f156af1dc72ad238eed3e7d12",
+      "hash": "bb1c0f1b811cb23c7b2af82529efa995ddf4505630ba7b13584adf933a033be5"
+    },
+    {
+      "revision": 8,
+      "command": {
+        "commandId": "step:7",
+        "expectedRevision": 7,
+        "actionId": "economy:study:M02"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "study",
+            "target": "M02"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-learned",
+          "subject": "materials",
+          "level": 2,
+          "personId": "person:1",
+          "source": "study"
+        }
+      ],
+      "stateHash": "658afb99aa4fd71bdddfc0cc9296c10fbcdf7fd929b9159121bb2f1cd9c8a4e9",
+      "previousHash": "bb1c0f1b811cb23c7b2af82529efa995ddf4505630ba7b13584adf933a033be5",
+      "hash": "dea2773504684b4b4f3765140f11fceb3d3ad247f2663c3ec30474cb72e96ca0"
+    },
+    {
+      "revision": 9,
+      "command": {
+        "commandId": "step:8",
+        "expectedRevision": 8,
+        "actionId": "economy:gather:wood"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "wood"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "wood": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "wood",
+          "amount": 2,
+          "remaining": 2,
+          "toolUsed": false
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 1,
+            "turn": 4,
+            "absoluteTurn": 4
+          },
+          "weather": "dry"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 1,
+            "timber": 2,
+            "clay": 18
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "0b37f978b2612853ac1fd27142081aabbacecb643e09db9410d6b4c5b0245777",
+      "previousHash": "dea2773504684b4b4f3765140f11fceb3d3ad247f2663c3ec30474cb72e96ca0",
+      "hash": "e87b3ae783feb2b2f99bb564fd07c16319b123749c370ac2590532b74999786b"
+    },
+    {
+      "revision": 10,
+      "command": {
+        "commandId": "step:9",
+        "expectedRevision": 9,
+        "actionId": "economy:gather:food"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "food"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "food",
+          "amount": 1,
+          "remaining": 0,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "446d9c3a2a7c078ded6e5a279505da47dc975ffae73d9e1734a1ceb455af70dd",
+      "previousHash": "e87b3ae783feb2b2f99bb564fd07c16319b123749c370ac2590532b74999786b",
+      "hash": "d8d941c0f5ea4211406111d3e3b8201f3a4febc71b0d4402353bb5b8887bccb5"
+    },
+    {
+      "revision": 11,
+      "command": {
+        "commandId": "step:10",
+        "expectedRevision": 10,
+        "actionId": "economy:gather:wood"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "wood"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "wood": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "wood",
+          "amount": 2,
+          "remaining": 0,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "9c4239b588fbad47f965da75387435000d94e1067f0d9643af8311d6d24afe39",
+      "previousHash": "d8d941c0f5ea4211406111d3e3b8201f3a4febc71b0d4402353bb5b8887bccb5",
+      "hash": "9c96bae6b18872c6cfb3d7e0e3267c63b9f1e5ca60eb9372281b390c3e5fcd86"
+    },
+    {
+      "revision": 12,
+      "command": {
+        "commandId": "step:11",
+        "expectedRevision": 11,
+        "actionId": "economy:gather:clay"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "clay"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "clay": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "clay",
+          "amount": 2,
+          "remaining": 16,
+          "toolUsed": false
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 1,
+            "turn": 5,
+            "absoluteTurn": 5
+          },
+          "weather": "dry"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 0,
+            "timber": 0,
+            "clay": 16
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "4051a6be3d6392cfaf8b94bdce0929f0e2e7b40adc522936c8ac6cd910b2c494",
+      "previousHash": "9c96bae6b18872c6cfb3d7e0e3267c63b9f1e5ca60eb9372281b390c3e5fcd86",
+      "hash": "23a5e487f0aa18764c3426f79862d23c230a28eb45a03fcb62ae269616322658"
+    },
+    {
+      "revision": 13,
+      "command": {
+        "commandId": "step:12",
+        "expectedRevision": 12,
+        "actionId": "economy:buyfood:bulk"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "buyfood",
+            "target": "bulk"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 4,
+            "food": 0
+          }
+        },
+        {
+          "type": "food-purchased",
+          "amount": 4
+        }
+      ],
+      "stateHash": "9452216165785133bcb01bba869961404cfc9845040463230efd20fc393b23ce",
+      "previousHash": "23a5e487f0aa18764c3426f79862d23c230a28eb45a03fcb62ae269616322658",
+      "hash": "dfc76316349dc031ec687b02e9aea283fc7f89aa3075c870385fac4ce1ede47c"
+    },
+    {
+      "revision": 14,
+      "command": {
+        "commandId": "step:13",
+        "expectedRevision": 13,
+        "actionId": "economy:gather:clay"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "clay"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "clay": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "clay",
+          "amount": 2,
+          "remaining": 14,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "a1b727919bef9d56787f6830f78d029a31c208793aa8b613671efa992b2b3620",
+      "previousHash": "dfc76316349dc031ec687b02e9aea283fc7f89aa3075c870385fac4ce1ede47c",
+      "hash": "313469892de49714a1228ba58ef51346f434f90237a2f047be01a474bb275d0f"
+    },
+    {
+      "revision": 15,
+      "command": {
+        "commandId": "step:14",
+        "expectedRevision": 14,
+        "actionId": "economy:process:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "process",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "本人开工",
+          "changes": {
+            "wood": -2,
+            "clay": -2
+          }
+        },
+        {
+          "type": "economy-equipment-used",
+          "product": "F02",
+          "remaining": 11
+        },
+        {
+          "type": "economy-process",
+          "recipe": "ceramics",
+          "actor": "本人",
+          "stage": "start",
+          "factor": 1
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 1,
+            "turn": 6,
+            "absoluteTurn": 6
+          },
+          "weather": "dry"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 0,
+            "timber": 0,
+            "clay": 14
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "67f54d828386e58f46e57f50c33f473439701ed1f15a69a7ebfb3af84c6a341e",
+      "previousHash": "313469892de49714a1228ba58ef51346f434f90237a2f047be01a474bb275d0f",
+      "hash": "565de0db50698028521284a8ba2652d50b13d84d6cfed72cad225df206b69335"
+    },
+    {
+      "revision": 16,
+      "command": {
+        "commandId": "step:15",
+        "expectedRevision": 15,
+        "actionId": "economy:finish:project"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "finish",
+            "target": "project"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "本人完成烧制陶质构件",
+          "changes": {
+            "ceramics": 2
+          }
+        },
+        {
+          "type": "economy-process",
+          "recipe": "ceramics",
+          "actor": "本人",
+          "stage": "complete",
+          "factor": 1
+        },
+        {
+          "type": "economy-evidence",
+          "topic": "M03",
+          "source": "烧制陶质构件"
+        }
+      ],
+      "stateHash": "276c64defebca6f7d7a61e9106d2905a958c82720327cf07ec4ee95368647b4b",
+      "previousHash": "565de0db50698028521284a8ba2652d50b13d84d6cfed72cad225df206b69335",
+      "hash": "2109de91a7b606b01348ed24692fa01906ee81dbbc9416b10f5d89841b656709"
+    },
+    {
+      "revision": 17,
+      "command": {
+        "commandId": "step:16",
+        "expectedRevision": 16,
+        "actionId": "economy:sellfood:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "sellfood",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "订单交付",
+          "changes": {
+            "ceramics": -1
+          }
+        },
+        {
+          "type": "economy-trade",
+          "good": "ceramics",
+          "operation": "sell",
+          "amount": 1,
+          "money": 5
+        },
+        {
+          "type": "food-purchased",
+          "amount": 2,
+          "money": 2
+        }
+      ],
+      "stateHash": "2d631a14dbf78093b26ea9ccdce893a88b9a54a7a1c1a698c9fd85066d45090b",
+      "previousHash": "2109de91a7b606b01348ed24692fa01906ee81dbbc9416b10f5d89841b656709",
+      "hash": "3291e0e0d1057540b68f3951f7bf94514f3d801d29df2b1f5b8c1f90544fb516"
+    },
+    {
+      "revision": 18,
+      "command": {
+        "commandId": "step:17",
+        "expectedRevision": 17,
+        "actionId": "economy:buy:wood"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "buy",
+            "target": "wood"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 2,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "市场采购",
+          "changes": {
+            "wood": 1
+          }
+        },
+        {
+          "type": "economy-trade",
+          "good": "wood",
+          "operation": "buy",
+          "amount": 1,
+          "money": 2
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 1,
+            "turn": 7,
+            "absoluteTurn": 7
+          },
+          "weather": "normal"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 1,
+            "timber": 1,
+            "clay": 14
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "c80f907bc993ceef17651eae79eb1fd1f6aeedf78503606cd4230bd6ac81aa5f",
+      "previousHash": "3291e0e0d1057540b68f3951f7bf94514f3d801d29df2b1f5b8c1f90544fb516",
+      "hash": "6e66d7c422961e495ddf3873e228d1ebf7b8f6c5fb67ce2bf569f83ca0592ba6"
+    },
+    {
+      "revision": 19,
+      "command": {
+        "commandId": "step:18",
+        "expectedRevision": 18,
+        "actionId": "economy:gather:wood"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "wood"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "wood": 1
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "wood",
+          "amount": 1,
+          "remaining": 0,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "eb7fe696c68b291f60514910785d8df01d9781b491e120169506a8e6a0d1aa6c",
+      "previousHash": "6e66d7c422961e495ddf3873e228d1ebf7b8f6c5fb67ce2bf569f83ca0592ba6",
+      "hash": "d3fd08995ee1d6e95c3111f1536d3d3cc6e580ab0f37adc5ca55e8ccf99cbbf7"
+    },
+    {
+      "revision": 20,
+      "command": {
+        "commandId": "step:19",
+        "expectedRevision": 19,
+        "actionId": "economy:gather:clay"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "clay"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "clay": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "clay",
+          "amount": 2,
+          "remaining": 12,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "45d68c2be5aaaada32078270e0a7a62d25b9a256ff9fd2df8cff02b838cc7591",
+      "previousHash": "d3fd08995ee1d6e95c3111f1536d3d3cc6e580ab0f37adc5ca55e8ccf99cbbf7",
+      "hash": "c5bd96d1c328fc821f2978eeb2c7579666fb026ffbfe393982bfbd90204faebd"
+    },
+    {
+      "revision": 21,
+      "command": {
+        "commandId": "step:20",
+        "expectedRevision": 20,
+        "actionId": "economy:process:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "process",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "本人开工",
+          "changes": {
+            "wood": -2,
+            "clay": -2
+          }
+        },
+        {
+          "type": "economy-equipment-used",
+          "product": "F02",
+          "remaining": 10
+        },
+        {
+          "type": "economy-process",
+          "recipe": "ceramics",
+          "actor": "本人",
+          "stage": "start",
+          "factor": 1
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 1,
+            "turn": 8,
+            "absoluteTurn": 8
+          },
+          "weather": "normal"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 2,
+            "timber": 1,
+            "clay": 12
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "0dcd3cfbc0deea5039a791bf5844521b9ff7f89f7bee6768dbeaf86f6c7c6b07",
+      "previousHash": "c5bd96d1c328fc821f2978eeb2c7579666fb026ffbfe393982bfbd90204faebd",
+      "hash": "ed09c8b4464f4a689b5b393b31bf061b49c92583eeff601b6439e9196842273b"
+    },
+    {
+      "revision": 22,
+      "command": {
+        "commandId": "step:21",
+        "expectedRevision": 21,
+        "actionId": "economy:gather:food"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "food"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "food",
+          "amount": 2,
+          "remaining": 0,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "86f5f50761531af90516ebc8caeaafd0fb1a312dec218f973bcc5b1502fb8e99",
+      "previousHash": "ed09c8b4464f4a689b5b393b31bf061b49c92583eeff601b6439e9196842273b",
+      "hash": "c96e0bb6e6721d29b6e8043b11d5e1f9aca94cd90b188993a3f9b00d8ef359d0"
+    },
+    {
+      "revision": 23,
+      "command": {
+        "commandId": "step:22",
+        "expectedRevision": 22,
+        "actionId": "economy:finish:project"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "finish",
+            "target": "project"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "本人完成烧制陶质构件",
+          "changes": {
+            "ceramics": 2
+          }
+        },
+        {
+          "type": "economy-process",
+          "recipe": "ceramics",
+          "actor": "本人",
+          "stage": "complete",
+          "factor": 1
+        }
+      ],
+      "stateHash": "cc52ee59bbc2d8cb7643904ae07c4911f481c2898c28434aacc5389db89ed3ff",
+      "previousHash": "c96e0bb6e6721d29b6e8043b11d5e1f9aca94cd90b188993a3f9b00d8ef359d0",
+      "hash": "f8d003cb00814ba7b39c134b7d5533b29164510874e08012fd9df52708bfbb48"
+    },
+    {
+      "revision": 24,
+      "command": {
+        "commandId": "step:23",
+        "expectedRevision": 23,
+        "actionId": "economy:sellfood:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "sellfood",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "订单交付",
+          "changes": {
+            "ceramics": -1
+          }
+        },
+        {
+          "type": "economy-trade",
+          "good": "ceramics",
+          "operation": "sell",
+          "amount": 1,
+          "money": 5
+        },
+        {
+          "type": "food-purchased",
+          "amount": 2,
+          "money": 2
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 1,
+            "turn": 9,
+            "absoluteTurn": 9
+          },
+          "weather": "wet"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 1,
+            "timber": 2,
+            "clay": 12
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "404ffc71d05da5de1b9fa7465a27f6beb3cedbe88cef1b5f0b63b6646add8a44",
+      "previousHash": "f8d003cb00814ba7b39c134b7d5533b29164510874e08012fd9df52708bfbb48",
+      "hash": "ef1ae1e6f0156f2b1ec35c13343b96073c0c36f3ffc2a756e237ea726fad0018"
+    },
+    {
+      "revision": 25,
+      "command": {
+        "commandId": "step:24",
+        "expectedRevision": 24,
+        "actionId": "economy:sellfood:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "sellfood",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "订单交付",
+          "changes": {
+            "ceramics": -1
+          }
+        },
+        {
+          "type": "economy-trade",
+          "good": "ceramics",
+          "operation": "sell",
+          "amount": 1,
+          "money": 5
+        },
+        {
+          "type": "food-purchased",
+          "amount": 2,
+          "money": 2
+        }
+      ],
+      "stateHash": "11798ad8562fe91a5a40f53c28ea3805b82ea1ad200936afeb4db33ba3e88524",
+      "previousHash": "ef1ae1e6f0156f2b1ec35c13343b96073c0c36f3ffc2a756e237ea726fad0018",
+      "hash": "ca816f8f444e0885dfd4c49f5c492d4d620f6be35b07f874a60d581432876acd"
+    },
+    {
+      "revision": 26,
+      "command": {
+        "commandId": "step:25",
+        "expectedRevision": 25,
+        "actionId": "economy:gather:wood"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "wood"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "wood": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "wood",
+          "amount": 2,
+          "remaining": 0,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "f548900a38ca9ef6bc91938fc6c41a646c15c0adc86dfd3e36f1c441c5f88421",
+      "previousHash": "ca816f8f444e0885dfd4c49f5c492d4d620f6be35b07f874a60d581432876acd",
+      "hash": "f84d5ab5e078d1c767e5367129793cebd5ade26f28c36a90276a0680ff4844e2"
+    },
+    {
+      "revision": 27,
+      "command": {
+        "commandId": "step:26",
+        "expectedRevision": 26,
+        "actionId": "economy:gather:clay"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "clay"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "clay": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "clay",
+          "amount": 2,
+          "remaining": 10,
+          "toolUsed": false
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 1,
+            "turn": 10,
+            "absoluteTurn": 10
+          },
+          "weather": "dry"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 1,
+            "timber": 0,
+            "clay": 10
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "958433fa7dd0bfb56a5d87e0378b6de064ada1b22eecf7be6291f640423b9906",
+      "previousHash": "f84d5ab5e078d1c767e5367129793cebd5ade26f28c36a90276a0680ff4844e2",
+      "hash": "d9b9cb5a9623c9d7961f74aa9ebb17d32bac7cef681f4514eaa6171a82b6940d"
+    },
+    {
+      "revision": 28,
+      "command": {
+        "commandId": "step:27",
+        "expectedRevision": 27,
+        "actionId": "economy:process:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "process",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "本人开工",
+          "changes": {
+            "wood": -2,
+            "clay": -2
+          }
+        },
+        {
+          "type": "economy-equipment-used",
+          "product": "F02",
+          "remaining": 9
+        },
+        {
+          "type": "economy-process",
+          "recipe": "ceramics",
+          "actor": "本人",
+          "stage": "start",
+          "factor": 1
+        }
+      ],
+      "stateHash": "9d2b3d15c0da380a76d3b89da0dca5637339029e0535c7254268bf896a5a9694",
+      "previousHash": "d9b9cb5a9623c9d7961f74aa9ebb17d32bac7cef681f4514eaa6171a82b6940d",
+      "hash": "4cfd2f4b9e3e288441aea5274b78755ba7b04956258bbdbc5ddd75af3e1f53cf"
+    },
+    {
+      "revision": 29,
+      "command": {
+        "commandId": "step:28",
+        "expectedRevision": 28,
+        "actionId": "economy:end:season"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "end",
+            "target": "season"
+          },
+          "cost": {
+            "ap": 0,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 1,
+            "turn": 11,
+            "absoluteTurn": 11
+          },
+          "weather": "normal"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 2,
+            "timber": 1,
+            "clay": 10
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "d26244e1146668f58f7f147776c4ca8f982e9ae82f73765a10a0fcd73477fd82",
+      "previousHash": "4cfd2f4b9e3e288441aea5274b78755ba7b04956258bbdbc5ddd75af3e1f53cf",
+      "hash": "5283cbf06bc30069860659760c3fd54d2e4e2f41c75a282a7dab93bf4543b765"
+    },
+    {
+      "revision": 30,
+      "command": {
+        "commandId": "step:29",
+        "expectedRevision": 29,
+        "actionId": "economy:gather:food"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "food"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "food",
+          "amount": 2,
+          "remaining": 0,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "7f4d99fd5470346c1f05953e7c64f9299339ea6aed41174fd70293710be1b5e9",
+      "previousHash": "5283cbf06bc30069860659760c3fd54d2e4e2f41c75a282a7dab93bf4543b765",
+      "hash": "6b15d00e1edd2193d7358109eaabc321c0123a85812a910c9d6cfb47be03ce13"
+    },
+    {
+      "revision": 31,
+      "command": {
+        "commandId": "step:30",
+        "expectedRevision": 30,
+        "actionId": "economy:finish:project"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "finish",
+            "target": "project"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "本人完成烧制陶质构件",
+          "changes": {
+            "ceramics": 2
+          }
+        },
+        {
+          "type": "economy-process",
+          "recipe": "ceramics",
+          "actor": "本人",
+          "stage": "complete",
+          "factor": 1
+        }
+      ],
+      "stateHash": "f87b4ed9933187880b839cbb1be2b20be889dbafb49e967850c4759428701f5a",
+      "previousHash": "6b15d00e1edd2193d7358109eaabc321c0123a85812a910c9d6cfb47be03ce13",
+      "hash": "6d2f908f25abe1fb35429425f85209b24456385068618170dd133a7edc36b41f"
+    },
+    {
+      "revision": 32,
+      "command": {
+        "commandId": "step:31",
+        "expectedRevision": 31,
+        "actionId": "economy:sellfood:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "sellfood",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "订单交付",
+          "changes": {
+            "ceramics": -1
+          }
+        },
+        {
+          "type": "economy-trade",
+          "good": "ceramics",
+          "operation": "sell",
+          "amount": 1,
+          "money": 5
+        },
+        {
+          "type": "food-purchased",
+          "amount": 2,
+          "money": 2
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 1,
+            "turn": 12,
+            "absoluteTurn": 12
+          },
+          "weather": "wet"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 1,
+            "timber": 2,
+            "clay": 10
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "1297bbd984ac5e75f6f0e66cff724ecd7b196eb15dae5a1fb42bbc49f1e3df77",
+      "previousHash": "6d2f908f25abe1fb35429425f85209b24456385068618170dd133a7edc36b41f",
+      "hash": "40c2d7ccd41afac3a905461d1ed172cc85868c9c9015357b92aedd44d6c15ee3"
+    },
+    {
+      "revision": 33,
+      "command": {
+        "commandId": "step:32",
+        "expectedRevision": 32,
+        "actionId": "economy:sellfood:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "sellfood",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "订单交付",
+          "changes": {
+            "ceramics": -1
+          }
+        },
+        {
+          "type": "economy-trade",
+          "good": "ceramics",
+          "operation": "sell",
+          "amount": 1,
+          "money": 5
+        },
+        {
+          "type": "food-purchased",
+          "amount": 2,
+          "money": 2
+        }
+      ],
+      "stateHash": "f695d9bd4edee30daa8e99c9b03b0eed23b84779621eab73fe565502372fb4cc",
+      "previousHash": "40c2d7ccd41afac3a905461d1ed172cc85868c9c9015357b92aedd44d6c15ee3",
+      "hash": "dc0363ef77da78dbb87ac50f05d84622b05384681465a0d0baee1d35eccb3410"
+    },
+    {
+      "revision": 34,
+      "command": {
+        "commandId": "step:33",
+        "expectedRevision": 33,
+        "actionId": "economy:gather:wood"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "wood"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "wood": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "wood",
+          "amount": 2,
+          "remaining": 0,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "db3bceb55027e50ba8d309802bce72c6345b288e922d84b976d1b6bc4ec9453c",
+      "previousHash": "dc0363ef77da78dbb87ac50f05d84622b05384681465a0d0baee1d35eccb3410",
+      "hash": "0c13e364725259df996d0e4cd6f18124aba283799aa27149db61217613c1c0a5"
+    },
+    {
+      "revision": 35,
+      "command": {
+        "commandId": "step:34",
+        "expectedRevision": 34,
+        "actionId": "economy:gather:clay"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "clay"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "clay": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "clay",
+          "amount": 2,
+          "remaining": 8,
+          "toolUsed": false
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 1,
+            "turn": 13,
+            "absoluteTurn": 13
+          },
+          "weather": "wet"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 2,
+            "timber": 1,
+            "clay": 8
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "1dcf89a10d2c2742f8c99dc68f8f47a10ee81eeb1a0c54213b6f9151700dfd83",
+      "previousHash": "0c13e364725259df996d0e4cd6f18124aba283799aa27149db61217613c1c0a5",
+      "hash": "bfef21e0807cd12e92ae46c22df167fb664f8f897e2d5eb2d9c187ae0fb1bafd"
+    },
+    {
+      "revision": 36,
+      "command": {
+        "commandId": "step:35",
+        "expectedRevision": 35,
+        "actionId": "economy:process:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "process",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "本人开工",
+          "changes": {
+            "wood": -2,
+            "clay": -2
+          }
+        },
+        {
+          "type": "economy-equipment-used",
+          "product": "F02",
+          "remaining": 8
+        },
+        {
+          "type": "economy-process",
+          "recipe": "ceramics",
+          "actor": "本人",
+          "stage": "start",
+          "factor": 1
+        }
+      ],
+      "stateHash": "e61f81d822adc04cec132e2ad190a41f58d68e29cb4d027acc55583062eeed40",
+      "previousHash": "bfef21e0807cd12e92ae46c22df167fb664f8f897e2d5eb2d9c187ae0fb1bafd",
+      "hash": "f2e8f38ec6d0bed4216bffe2639087b00e2bdcc93948705cbef7e52149b6dfa0"
+    },
+    {
+      "revision": 37,
+      "command": {
+        "commandId": "step:36",
+        "expectedRevision": 36,
+        "actionId": "economy:end:season"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "end",
+            "target": "season"
+          },
+          "cost": {
+            "ap": 0,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 1,
+            "turn": 14,
+            "absoluteTurn": 14
+          },
+          "weather": "dry"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 2,
+            "timber": 1,
+            "clay": 8
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "0b3d76fb6dabeca7ae9cd6f08d140c33d4803cfdf8ad5d0a8a9c9ec09c5ab5db",
+      "previousHash": "f2e8f38ec6d0bed4216bffe2639087b00e2bdcc93948705cbef7e52149b6dfa0",
+      "hash": "a9b9774b3abc7333df94ee137169f98ca04efa1a5ff9a3c28bd46a74df599fb6"
+    },
+    {
+      "revision": 38,
+      "command": {
+        "commandId": "step:37",
+        "expectedRevision": 37,
+        "actionId": "economy:gather:food"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "food"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "food",
+          "amount": 2,
+          "remaining": 0,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "b8a57e99d28da96a2a7cfac4c2245c0abae518debf4eed6f1bcb402db0c29339",
+      "previousHash": "a9b9774b3abc7333df94ee137169f98ca04efa1a5ff9a3c28bd46a74df599fb6",
+      "hash": "f87e45b2d07f933e4d697c84b56cce36645f89772c7d1ccc9f4bdf0380d457fb"
+    },
+    {
+      "revision": 39,
+      "command": {
+        "commandId": "step:38",
+        "expectedRevision": 38,
+        "actionId": "economy:finish:project"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "finish",
+            "target": "project"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "本人完成烧制陶质构件",
+          "changes": {
+            "ceramics": 2
+          }
+        },
+        {
+          "type": "economy-process",
+          "recipe": "ceramics",
+          "actor": "本人",
+          "stage": "complete",
+          "factor": 1
+        }
+      ],
+      "stateHash": "1294aea867768098f93014e7357f2e34f0c5a0685ca0cc7330bc46f9184e4c1d",
+      "previousHash": "f87e45b2d07f933e4d697c84b56cce36645f89772c7d1ccc9f4bdf0380d457fb",
+      "hash": "d4ddc77d74b25bf53e7e69a0482f3f2ee534dcc34dcbd69d7d87170788d454bb"
+    },
+    {
+      "revision": 40,
+      "command": {
+        "commandId": "step:39",
+        "expectedRevision": 39,
+        "actionId": "economy:sellfood:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "sellfood",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "订单交付",
+          "changes": {
+            "ceramics": -1
+          }
+        },
+        {
+          "type": "economy-trade",
+          "good": "ceramics",
+          "operation": "sell",
+          "amount": 1,
+          "money": 5
+        },
+        {
+          "type": "food-purchased",
+          "amount": 2,
+          "money": 2
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 1,
+            "turn": 15,
+            "absoluteTurn": 15
+          },
+          "weather": "wet"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 1,
+            "timber": 2,
+            "clay": 8
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "550d97d2ec536db49c79532c0cb62cbe00d25e01b3190622b5eb7b5e5db66579",
+      "previousHash": "d4ddc77d74b25bf53e7e69a0482f3f2ee534dcc34dcbd69d7d87170788d454bb",
+      "hash": "0a989b09204bd76372d9d6ef6fc6fb1401566d50b048a68f1182aabc6542fc35"
+    },
+    {
+      "revision": 41,
+      "command": {
+        "commandId": "step:40",
+        "expectedRevision": 40,
+        "actionId": "economy:sellfood:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "sellfood",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "订单交付",
+          "changes": {
+            "ceramics": -1
+          }
+        },
+        {
+          "type": "economy-trade",
+          "good": "ceramics",
+          "operation": "sell",
+          "amount": 1,
+          "money": 5
+        },
+        {
+          "type": "food-purchased",
+          "amount": 2,
+          "money": 2
+        }
+      ],
+      "stateHash": "d1fdd3b0a112536093bc5ce82efca5ba87d611106b7e61d773a2b69423a66c59",
+      "previousHash": "0a989b09204bd76372d9d6ef6fc6fb1401566d50b048a68f1182aabc6542fc35",
+      "hash": "7ada2d3b19cb40315cfbcc9f1bb9340df3fd7819fdd27f65e6fc4e224a309d54"
+    },
+    {
+      "revision": 42,
+      "command": {
+        "commandId": "step:41",
+        "expectedRevision": 41,
+        "actionId": "economy:gather:wood"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "wood"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "wood": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "wood",
+          "amount": 2,
+          "remaining": 0,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "8d33d3d00ce4988d0967b07594869ef4c866e43a05aeb950de5637709b724a40",
+      "previousHash": "7ada2d3b19cb40315cfbcc9f1bb9340df3fd7819fdd27f65e6fc4e224a309d54",
+      "hash": "9370bc494d0b208f55ebfd4ffb327d6c80cd470fdabf8ed82af395e4269e2a3d"
+    },
+    {
+      "revision": 43,
+      "command": {
+        "commandId": "step:42",
+        "expectedRevision": 42,
+        "actionId": "economy:gather:clay"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "clay"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "clay": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "clay",
+          "amount": 2,
+          "remaining": 6,
+          "toolUsed": false
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 1,
+            "turn": 16,
+            "absoluteTurn": 16
+          },
+          "weather": "normal"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 2,
+            "timber": 1,
+            "clay": 6
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "5528ea64bd32bf4c0cfbed725c92a9c473b0d7f04232f48760234ec4a7a383a4",
+      "previousHash": "9370bc494d0b208f55ebfd4ffb327d6c80cd470fdabf8ed82af395e4269e2a3d",
+      "hash": "827e81f9284fd72207b13b2ef31cec7fcca50877cd5b287d4f6afd67a2ca6947"
+    },
+    {
+      "revision": 44,
+      "command": {
+        "commandId": "step:43",
+        "expectedRevision": 43,
+        "actionId": "economy:process:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "process",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "本人开工",
+          "changes": {
+            "wood": -2,
+            "clay": -2
+          }
+        },
+        {
+          "type": "economy-equipment-used",
+          "product": "F02",
+          "remaining": 7
+        },
+        {
+          "type": "economy-process",
+          "recipe": "ceramics",
+          "actor": "本人",
+          "stage": "start",
+          "factor": 1
+        }
+      ],
+      "stateHash": "935910cca6ddf735cccd4bcd2e677bcb2daccf008c24432cc049c4ec7f99d314",
+      "previousHash": "827e81f9284fd72207b13b2ef31cec7fcca50877cd5b287d4f6afd67a2ca6947",
+      "hash": "f602cbe9612fa4dbbc421e84af120fe98dcc54b95ce6e43f8581afc04ae99430"
+    },
+    {
+      "revision": 45,
+      "command": {
+        "commandId": "step:44",
+        "expectedRevision": 44,
+        "actionId": "economy:end:season"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "end",
+            "target": "season"
+          },
+          "cost": {
+            "ap": 0,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "generation-ended",
+          "final": false,
+          "facts": {
+            "generation": 1,
+            "food": 1,
+            "money": 23,
+            "mastered": [],
+            "heir": [],
+            "archives": [],
+            "project": null,
+            "production": {
+              "inventory": {
+                "wood": 0,
+                "clay": 0,
+                "woodenware": 0,
+                "pottery": 0
+              },
+              "stocks": {
+                "wildFood": 2,
+                "timber": 1,
+                "clay": 6
+              },
+              "market": {
+                "food": 8,
+                "jobs": 1,
+                "woodenware": 2,
+                "pottery": 2,
+                "methods": 1
+              },
+              "toolDurability": 0,
+              "storage": {
+                "woodenware": false,
+                "pottery": false
+              },
+              "project": null,
+              "workshops": {
+                "woodenware": false,
+                "pottery": false
+              }
+            }
+          }
+        }
+      ],
+      "stateHash": "551fb4595b3719bb7446baadd2724fc5a1bb773f90ff09e94b5578406e7213fc",
+      "previousHash": "f602cbe9612fa4dbbc421e84af120fe98dcc54b95ce6e43f8581afc04ae99430",
+      "hash": "19938e7e48ca675844abea4e0d5a179edc3cdc74fec353d204772cd992174c67"
+    },
+    {
+      "revision": 46,
+      "command": {
+        "commandId": "step:45",
+        "expectedRevision": 45,
+        "actionId": "handover"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "handover"
+          },
+          "cost": {
+            "ap": 0,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "handed-over",
+          "generation": 2,
+          "fromPersonId": "person:1",
+          "personId": "person:2",
+          "mastered": [],
+          "learning": {}
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 2,
+            "turn": 1,
+            "absoluteTurn": 17
+          },
+          "weather": "dry"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 2,
+            "timber": 1,
+            "clay": 6
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "70189e5916db990d1b5bc2aee3cb64f94cffb1a83a82e9ee907b152482aafb92",
+      "previousHash": "19938e7e48ca675844abea4e0d5a179edc3cdc74fec353d204772cd992174c67",
+      "hash": "f2598e6e2b39367e862f906167beac6b4d9f96ebd94234b26f3e22bd5f8753c2"
+    },
+    {
+      "revision": 47,
+      "command": {
+        "commandId": "step:46",
+        "expectedRevision": 46,
+        "actionId": "economy:gather:food"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "food"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "food",
+          "amount": 2,
+          "remaining": 0,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "bc7189002d2d54f471f277ff52a81bf6975eb1a52e623ef98bf496e37028ebb2",
+      "previousHash": "f2598e6e2b39367e862f906167beac6b4d9f96ebd94234b26f3e22bd5f8753c2",
+      "hash": "692cc6db2190ed25b78bcde0de661a59513cd9d32f7652e98be89f5197480978"
+    },
+    {
+      "revision": 48,
+      "command": {
+        "commandId": "step:47",
+        "expectedRevision": 47,
+        "actionId": "economy:study:M01"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "study",
+            "target": "M01"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-learned",
+          "subject": "materials",
+          "level": 1,
+          "personId": "person:2",
+          "source": "study"
+        }
+      ],
+      "stateHash": "3f329dd0f0209dbccbdb00aff5b6ba15d80197ff4130fc43d3679b0eb9a69db9",
+      "previousHash": "692cc6db2190ed25b78bcde0de661a59513cd9d32f7652e98be89f5197480978",
+      "hash": "b5b7300dfd7ef11f2501b0af17d3adae3ca2bd2934d4d736c0c5749b4d5ba87c"
+    },
+    {
+      "revision": 49,
+      "command": {
+        "commandId": "step:48",
+        "expectedRevision": 48,
+        "actionId": "economy:research:M02"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "research",
+            "target": "M02"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "成形与连接对照实验",
+          "changes": {
+            "wood": -1,
+            "clay": -1
+          }
+        },
+        {
+          "type": "economy-evidence",
+          "topic": "M02",
+          "source": "成形与连接固定对照"
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 2,
+            "turn": 2,
+            "absoluteTurn": 18
+          },
+          "weather": "normal"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 1,
+            "timber": 2,
+            "clay": 6
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "f48bbddbc2d100c413e1b5ed47bd4671a54184396a624c9034c458c5aa4c3baf",
+      "previousHash": "b5b7300dfd7ef11f2501b0af17d3adae3ca2bd2934d4d736c0c5749b4d5ba87c",
+      "hash": "93b5fa93256446f58eca29268947c345734f9157b59500054bb932d928395adf"
+    },
+    {
+      "revision": 50,
+      "command": {
+        "commandId": "step:49",
+        "expectedRevision": 49,
+        "actionId": "economy:gather:food"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "food"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "food",
+          "amount": 1,
+          "remaining": 0,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "7d70019aa249602b560525144e776e4c671ea158fb14c556d84682ed6cfeda2f",
+      "previousHash": "93b5fa93256446f58eca29268947c345734f9157b59500054bb932d928395adf",
+      "hash": "c34a2fcd439eecb02a01508858347e15e7800aef4ca1e582e16a3f2953108142"
+    },
+    {
+      "revision": 51,
+      "command": {
+        "commandId": "step:50",
+        "expectedRevision": 50,
+        "actionId": "economy:buyfood:bulk"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "buyfood",
+            "target": "bulk"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 4,
+            "food": 0
+          }
+        },
+        {
+          "type": "food-purchased",
+          "amount": 4
+        }
+      ],
+      "stateHash": "5170ea8c7744cb7f747c63626b4f1646892e9c2c26fd17850325e625a1bc33f5",
+      "previousHash": "c34a2fcd439eecb02a01508858347e15e7800aef4ca1e582e16a3f2953108142",
+      "hash": "ccc2891af5cc6bde0d41fc15cf57d120f11a1922a81738061c05ab507c815cb2"
+    },
+    {
+      "revision": 52,
+      "command": {
+        "commandId": "step:51",
+        "expectedRevision": 51,
+        "actionId": "economy:study:M02"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "study",
+            "target": "M02"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-learned",
+          "subject": "materials",
+          "level": 2,
+          "personId": "person:2",
+          "source": "study"
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 2,
+            "turn": 3,
+            "absoluteTurn": 19
+          },
+          "weather": "wet"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 1,
+            "timber": 3,
+            "clay": 6
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "60af5b98357b0ea60362cb3196c6376c83a1c5241176e23d838f52cab54882cf",
+      "previousHash": "ccc2891af5cc6bde0d41fc15cf57d120f11a1922a81738061c05ab507c815cb2",
+      "hash": "cf3a661cabd3a5999474ac8a78899519b4854e624bc5307525905845d33475f0"
+    },
+    {
+      "revision": 53,
+      "command": {
+        "commandId": "step:52",
+        "expectedRevision": 52,
+        "actionId": "economy:finish:project"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "finish",
+            "target": "project"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "本人完成烧制陶质构件",
+          "changes": {
+            "ceramics": 2
+          }
+        },
+        {
+          "type": "economy-process",
+          "recipe": "ceramics",
+          "actor": "本人",
+          "stage": "complete",
+          "factor": 1
+        },
+        {
+          "type": "economy-evidence",
+          "topic": "M03",
+          "source": "烧制陶质构件"
+        }
+      ],
+      "stateHash": "1b556782b98733bb398ed7e93332744dc3790945fe250336b110fe4574e13fe3",
+      "previousHash": "cf3a661cabd3a5999474ac8a78899519b4854e624bc5307525905845d33475f0",
+      "hash": "075040f825d4810e954f1b78742535ca761df525edc86c1569529dc9f0ce0255"
+    },
+    {
+      "revision": 54,
+      "command": {
+        "commandId": "step:53",
+        "expectedRevision": 53,
+        "actionId": "economy:sellfood:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "sellfood",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "订单交付",
+          "changes": {
+            "ceramics": -1
+          }
+        },
+        {
+          "type": "economy-trade",
+          "good": "ceramics",
+          "operation": "sell",
+          "amount": 1,
+          "money": 5
+        },
+        {
+          "type": "food-purchased",
+          "amount": 2,
+          "money": 2
+        }
+      ],
+      "stateHash": "a12cb1ea4beef1aaf9d5b337020ca7deb9f9b40dc4b25a270647bdaec069f7e1",
+      "previousHash": "075040f825d4810e954f1b78742535ca761df525edc86c1569529dc9f0ce0255",
+      "hash": "609c9aff81bc3906841eec9c3d4c16fed2d5178b829564c75043a382b022aa31"
+    },
+    {
+      "revision": 55,
+      "command": {
+        "commandId": "step:54",
+        "expectedRevision": 54,
+        "actionId": "economy:sellfood:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "sellfood",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "订单交付",
+          "changes": {
+            "ceramics": -1
+          }
+        },
+        {
+          "type": "economy-trade",
+          "good": "ceramics",
+          "operation": "sell",
+          "amount": 1,
+          "money": 5
+        },
+        {
+          "type": "food-purchased",
+          "amount": 2,
+          "money": 2
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 2,
+            "turn": 4,
+            "absoluteTurn": 20
+          },
+          "weather": "normal"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 2,
+            "timber": 4,
+            "clay": 6
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "70c922b2ee35b74d1991133b3b07e1c951664d9c84a9210515d2b62216c0cdba",
+      "previousHash": "609c9aff81bc3906841eec9c3d4c16fed2d5178b829564c75043a382b022aa31",
+      "hash": "d48bbe8c605f5d070c04eaf5d2e793d01fce34c68ad57c28cd9a1f30dbe94b41"
+    },
+    {
+      "revision": 56,
+      "command": {
+        "commandId": "step:55",
+        "expectedRevision": 55,
+        "actionId": "economy:gather:wood"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "wood"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "wood": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "wood",
+          "amount": 2,
+          "remaining": 2,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "1dfda2de8775e3f55f540bee9c455216493ba5bb0678e186f46e45f5e98e4a65",
+      "previousHash": "d48bbe8c605f5d070c04eaf5d2e793d01fce34c68ad57c28cd9a1f30dbe94b41",
+      "hash": "c92a21c16cc7a1b0eed9779c3077b3b3f308cc22ba0af0fd1bc428f93a9fe2d5"
+    },
+    {
+      "revision": 57,
+      "command": {
+        "commandId": "step:56",
+        "expectedRevision": 56,
+        "actionId": "economy:gather:wood"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "wood"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "wood": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "wood",
+          "amount": 2,
+          "remaining": 0,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "22057b3d54918fe9f0374ec72cecc344d9f76c83cf1dd2ab560b37a1c0812677",
+      "previousHash": "c92a21c16cc7a1b0eed9779c3077b3b3f308cc22ba0af0fd1bc428f93a9fe2d5",
+      "hash": "ae649f3eea6b9af81f080e79673040a10ec12765621da9c776cc6e36cfdae7ca"
+    },
+    {
+      "revision": 58,
+      "command": {
+        "commandId": "step:57",
+        "expectedRevision": 57,
+        "actionId": "economy:gather:clay"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "clay"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "clay": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "clay",
+          "amount": 2,
+          "remaining": 4,
+          "toolUsed": false
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 2,
+            "turn": 5,
+            "absoluteTurn": 21
+          },
+          "weather": "normal"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 3,
+            "timber": 1,
+            "clay": 4
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "1580450d1c9ef089080a62eeafd081b0920541817bcd899364d2e80b10b10e45",
+      "previousHash": "ae649f3eea6b9af81f080e79673040a10ec12765621da9c776cc6e36cfdae7ca",
+      "hash": "cf9ff8cb5fe37e84ec2366b264b18fe583743ec0d74168836c4a0e46dc6eacfa"
+    },
+    {
+      "revision": 59,
+      "command": {
+        "commandId": "step:58",
+        "expectedRevision": 58,
+        "actionId": "economy:gather:clay"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "clay"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "clay": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "clay",
+          "amount": 2,
+          "remaining": 2,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "3484294a05841a925c9865cbcee7ab9695191bd357f3f49f3966fc567e3b351b",
+      "previousHash": "cf9ff8cb5fe37e84ec2366b264b18fe583743ec0d74168836c4a0e46dc6eacfa",
+      "hash": "7d8844b9c2e862919490f45d39a881700fae7ea4c574e9f53d16ea72df36ca37"
+    },
+    {
+      "revision": 60,
+      "command": {
+        "commandId": "step:59",
+        "expectedRevision": 59,
+        "actionId": "economy:process:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "process",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "本人开工",
+          "changes": {
+            "wood": -2,
+            "clay": -2
+          }
+        },
+        {
+          "type": "economy-equipment-used",
+          "product": "F02",
+          "remaining": 6
+        },
+        {
+          "type": "economy-process",
+          "recipe": "ceramics",
+          "actor": "本人",
+          "stage": "start",
+          "factor": 1
+        }
+      ],
+      "stateHash": "9da57af34db41fd66b6a4de332471d55c04797d64dbfc3083e8b4bacce230121",
+      "previousHash": "7d8844b9c2e862919490f45d39a881700fae7ea4c574e9f53d16ea72df36ca37",
+      "hash": "f5499c97ff61e689820717429ba7828e2b399f5046b1f7acce114194636b183a"
+    },
+    {
+      "revision": 61,
+      "command": {
+        "commandId": "step:60",
+        "expectedRevision": 60,
+        "actionId": "economy:end:season"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "end",
+            "target": "season"
+          },
+          "cost": {
+            "ap": 0,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 2,
+            "turn": 6,
+            "absoluteTurn": 22
+          },
+          "weather": "wet"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 3,
+            "timber": 2,
+            "clay": 2
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "ccf329c033444f5ec667a87f3ba4173de4e92539313304aee2202a7c1568a935",
+      "previousHash": "f5499c97ff61e689820717429ba7828e2b399f5046b1f7acce114194636b183a",
+      "hash": "aa55e36600ac3c4e0c1a44212981900946e2c7be2103da1055c1a7e5b9378f88"
+    },
+    {
+      "revision": 62,
+      "command": {
+        "commandId": "step:61",
+        "expectedRevision": 61,
+        "actionId": "economy:gather:food"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "food"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "food",
+          "amount": 2,
+          "remaining": 1,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "3f7338de38152170b4a568aa5cfd7007c0bf326c203e7dddbbd7a6563da886d8",
+      "previousHash": "aa55e36600ac3c4e0c1a44212981900946e2c7be2103da1055c1a7e5b9378f88",
+      "hash": "1fbbddc3ef2c803600b111a266aab04da29a5d215daaf08fd48501deef62fa37"
+    },
+    {
+      "revision": 63,
+      "command": {
+        "commandId": "step:62",
+        "expectedRevision": 62,
+        "actionId": "economy:finish:project"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "finish",
+            "target": "project"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "本人完成烧制陶质构件",
+          "changes": {
+            "ceramics": 2
+          }
+        },
+        {
+          "type": "economy-process",
+          "recipe": "ceramics",
+          "actor": "本人",
+          "stage": "complete",
+          "factor": 1
+        }
+      ],
+      "stateHash": "1f716a52bf480c52a54a329d1d941998019820920a5f81aae6d08b300b24bba2",
+      "previousHash": "1fbbddc3ef2c803600b111a266aab04da29a5d215daaf08fd48501deef62fa37",
+      "hash": "4e06c865ea2d4744e0d2b073751aa084c59fa50c50fa1f1bab1a8de098d5fa68"
+    },
+    {
+      "revision": 64,
+      "command": {
+        "commandId": "step:63",
+        "expectedRevision": 63,
+        "actionId": "economy:sellfood:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "sellfood",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "订单交付",
+          "changes": {
+            "ceramics": -1
+          }
+        },
+        {
+          "type": "economy-trade",
+          "good": "ceramics",
+          "operation": "sell",
+          "amount": 1,
+          "money": 5
+        },
+        {
+          "type": "food-purchased",
+          "amount": 2,
+          "money": 2
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 2,
+            "turn": 7,
+            "absoluteTurn": 23
+          },
+          "weather": "normal"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 2,
+            "timber": 3,
+            "clay": 2
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "442defe8f2712905c40d7d7af8a43acf338d964eb70aaf6cb4ab01351c500d77",
+      "previousHash": "4e06c865ea2d4744e0d2b073751aa084c59fa50c50fa1f1bab1a8de098d5fa68",
+      "hash": "7451e898cc85d67b18abe1c3811925a483e515db954a24ffe9875d5c4311381d"
+    },
+    {
+      "revision": 65,
+      "command": {
+        "commandId": "step:64",
+        "expectedRevision": 64,
+        "actionId": "economy:sellfood:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "sellfood",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "订单交付",
+          "changes": {
+            "ceramics": -1
+          }
+        },
+        {
+          "type": "economy-trade",
+          "good": "ceramics",
+          "operation": "sell",
+          "amount": 1,
+          "money": 5
+        },
+        {
+          "type": "food-purchased",
+          "amount": 2,
+          "money": 2
+        }
+      ],
+      "stateHash": "eb14ad4b739a768404a6682a23f724ce7a930cbe75428d2d3c9ff0a200107a01",
+      "previousHash": "7451e898cc85d67b18abe1c3811925a483e515db954a24ffe9875d5c4311381d",
+      "hash": "fa4981324f7b9b4e793d6120e7bccac905e701e7877be7470bc4c321814e5c6d"
+    },
+    {
+      "revision": 66,
+      "command": {
+        "commandId": "step:65",
+        "expectedRevision": 65,
+        "actionId": "economy:gather:wood"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "wood"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "wood": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "wood",
+          "amount": 2,
+          "remaining": 1,
+          "toolUsed": false
+        }
+      ],
+      "stateHash": "0aaa2bb3f20a8e17154cbd0378a2cead397f6290bb37f7c338f6b16f778a87dd",
+      "previousHash": "fa4981324f7b9b4e793d6120e7bccac905e701e7877be7470bc4c321814e5c6d",
+      "hash": "f024ee3370e13aa1fd25d4d0654680b24e987589c6dd073b8ad211e2cf9b437c"
+    },
+    {
+      "revision": 67,
+      "command": {
+        "commandId": "step:66",
+        "expectedRevision": 66,
+        "actionId": "economy:gather:clay"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "gather",
+            "target": "clay"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "当地采集",
+          "changes": {
+            "clay": 2
+          }
+        },
+        {
+          "type": "resource-gathered",
+          "resource": "clay",
+          "amount": 2,
+          "remaining": 0,
+          "toolUsed": false
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 2,
+            "turn": 8,
+            "absoluteTurn": 24
+          },
+          "weather": "normal"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 3,
+            "timber": 2,
+            "clay": 0
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "f0f089d132405e9c418f215f109dccc302d1e5fea1a152eee57b0a69d54a37be",
+      "previousHash": "f024ee3370e13aa1fd25d4d0654680b24e987589c6dd073b8ad211e2cf9b437c",
+      "hash": "f8ab40fef2170efb01ef84f347e287357b3c8acd6749afce5d1b63542c1ad8d5"
+    },
+    {
+      "revision": 68,
+      "command": {
+        "commandId": "step:67",
+        "expectedRevision": 67,
+        "actionId": "economy:process:ceramics"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "process",
+            "target": "ceramics"
+          },
+          "cost": {
+            "ap": 1,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "economy-goods",
+          "source": "本人开工",
+          "changes": {
+            "wood": -2,
+            "clay": -2
+          }
+        },
+        {
+          "type": "economy-equipment-used",
+          "product": "F02",
+          "remaining": 5
+        },
+        {
+          "type": "economy-process",
+          "recipe": "ceramics",
+          "actor": "本人",
+          "stage": "start",
+          "factor": 1
+        }
+      ],
+      "stateHash": "90434bc040ad4a6ded63b6706ec78ab244813ff9fc7d901a358877fc4fec45c2",
+      "previousHash": "f8ab40fef2170efb01ef84f347e287357b3c8acd6749afce5d1b63542c1ad8d5",
+      "hash": "c86e368c4200328c74cd71afa7aae9c70356fafb15dc7063279366a6d8875f09"
+    },
+    {
+      "revision": 69,
+      "command": {
+        "commandId": "step:68",
+        "expectedRevision": 68,
+        "actionId": "economy:end:season"
+      },
+      "events": [
+        {
+          "type": "action-paid",
+          "action": {
+            "type": "economy",
+            "operation": "end",
+            "target": "season"
+          },
+          "cost": {
+            "ap": 0,
+            "money": 0,
+            "food": 0
+          }
+        },
+        {
+          "type": "season-settled",
+          "consumed": 2,
+          "missing": 0,
+          "hardship": 0
+        },
+        {
+          "type": "season-started",
+          "clock": {
+            "generation": 2,
+            "turn": 9,
+            "absoluteTurn": 25
+          },
+          "weather": "wet"
+        },
+        {
+          "type": "local-supply",
+          "stocks": {
+            "wildFood": 3,
+            "timber": 3,
+            "clay": 0
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          }
+        }
+      ],
+      "stateHash": "18f0d261f4023416ff21f251b41446e657c146f1e8227ca638657144758a3058",
+      "previousHash": "c86e368c4200328c74cd71afa7aae9c70356fafb15dc7063279366a6d8875f09",
+      "hash": "5409dcb68cd42353ba47537156104abcef876630b325c4f3c7923d921a292a83"
+    }
+  ],
+  "snapshots": [
+    {
+      "revision": 0,
+      "state": {
+        "schemaVersion": 1,
+        "clock": {
+          "generation": 1,
+          "turn": 1,
+          "absoluteTurn": 1
+        },
+        "status": "active",
+        "ap": 3,
+        "world": {
+          "era": "跨地域生产与传承（非单一文明历史顺序）",
+          "technologies": [
+            "耕作经验",
+            "基础测量",
+            "沟渠施工",
+            "留种选种",
+            "资源辨识",
+            "木材加工",
+            "火的利用",
+            "陶作",
+            "物品保存",
+            "工艺与实验协作"
+          ]
+        },
+        "location": {
+          "id": "clay-valley",
+          "weather": "dry",
+          "rain": 0,
+          "water": 2,
+          "teachers": [
+            "observation",
+            "survey",
+            "ditch",
+            "allocation",
+            "selection",
+            "trial",
+            "stabilize",
+            "resource-observation",
+            "controlled-fire",
+            "storage",
+            "pottery",
+            "agronomy",
+            "ceramic-engineering",
+            "mechanics",
+            "experimentation",
+            "precision-engineering"
+          ],
+          "season": {
+            "cultivated": false,
+            "usedChannel": false,
+            "trialSample": false
+          }
+        },
+        "household": {
+          "id": "household:1",
+          "activePersonId": "person:1",
+          "heirId": "person:2",
+          "memberIds": [
+            "person:1",
+            "person:2"
+          ],
+          "food": 6,
+          "money": 8,
+          "hardship": 0,
+          "assetIds": [
+            "seed:initial"
+          ],
+          "stockId": "seed:initial",
+          "candidateId": null,
+          "activeProjectId": null
+        },
+        "persons": {
+          "person:1": {
+            "id": "person:1",
+            "name": "本代经营者",
+            "mastered": [],
+            "learning": {},
+            "practices": [],
+            "insights": []
+          },
+          "person:2": {
+            "id": "person:2",
+            "name": "已成年的后辈",
+            "mastered": [],
+            "learning": {},
+            "practices": [],
+            "insights": []
+          }
+        },
+        "assets": {
+          "seed:initial": {
+            "id": "seed:initial",
+            "kind": "seed",
+            "name": "普通地方种源",
+            "potential": 4,
+            "tolerance": 0
+          }
+        },
+        "projects": {},
+        "knowledge": {
+          "archives": [],
+          "reportIds": []
+        },
+        "randomState": 4596240,
+        "production": {
+          "inventory": {
+            "wood": 0,
+            "clay": 0,
+            "woodenware": 0,
+            "pottery": 0
+          },
+          "stocks": {
+            "wildFood": 3,
+            "timber": 5,
+            "clay": 20
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          },
+          "toolDurability": 0,
+          "storage": {
+            "woodenware": false,
+            "pottery": false
+          },
+          "project": null,
+          "workshops": {
+            "woodenware": false,
+            "pottery": false
+          }
+        },
+        "economy": {
+          "knowledge": {},
+          "evidence": {},
+          "notes": {},
+          "goods": {
+            "wood": 2,
+            "clay": 2,
+            "seedWheat": 1,
+            "seedSoy": 1,
+            "seedFlax": 1
+          },
+          "equipment": {},
+          "workers": {},
+          "field": {
+            "crop": null,
+            "planted": 0,
+            "moisture": 0,
+            "growth": 0,
+            "stress": 0,
+            "fertility": 2,
+            "lastCrop": null,
+            "tended": 0,
+            "composted": false,
+            "bonus": 0,
+            "duration": 2
+          },
+          "project": null,
+          "market": 4,
+          "recruitment": 1,
+          "industrySupply": 4,
+          "regional": {
+            "iron": false,
+            "fiber": false,
+            "teaching": {}
+          },
+          "published": {},
+          "ironBatches": 0,
+          "fiberBatches": 0,
+          "poweredTurn": 0,
+          "equipmentUsed": {}
+        }
+      },
+      "hash": "d7d9ff7ed891b1572f5ff88b8943cd0d0a1e4a638122413900f12bb8fba9782c"
+    },
+    {
+      "revision": 16,
+      "state": {
+        "schemaVersion": 1,
+        "clock": {
+          "generation": 1,
+          "turn": 6,
+          "absoluteTurn": 6
+        },
+        "status": "active",
+        "ap": 2,
+        "world": {
+          "era": "跨地域生产与传承（非单一文明历史顺序）",
+          "technologies": [
+            "耕作经验",
+            "基础测量",
+            "沟渠施工",
+            "留种选种",
+            "资源辨识",
+            "木材加工",
+            "火的利用",
+            "陶作",
+            "物品保存",
+            "工艺与实验协作"
+          ]
+        },
+        "location": {
+          "id": "clay-valley",
+          "weather": "dry",
+          "rain": 0,
+          "water": 2,
+          "teachers": [
+            "observation",
+            "survey",
+            "ditch",
+            "allocation",
+            "selection",
+            "trial",
+            "stabilize",
+            "resource-observation",
+            "controlled-fire",
+            "storage",
+            "pottery",
+            "agronomy",
+            "ceramic-engineering",
+            "mechanics",
+            "experimentation",
+            "precision-engineering"
+          ],
+          "season": {
+            "cultivated": false,
+            "usedChannel": false,
+            "trialSample": false
+          }
+        },
+        "household": {
+          "id": "household:1",
+          "activePersonId": "person:1",
+          "heirId": "person:2",
+          "memberIds": [
+            "person:1",
+            "person:2"
+          ],
+          "food": 3,
+          "money": 4,
+          "hardship": 0,
+          "assetIds": [
+            "seed:initial"
+          ],
+          "stockId": "seed:initial",
+          "candidateId": null,
+          "activeProjectId": null
+        },
+        "persons": {
+          "person:1": {
+            "id": "person:1",
+            "name": "本代经营者",
+            "mastered": [],
+            "learning": {},
+            "practices": [],
+            "insights": []
+          },
+          "person:2": {
+            "id": "person:2",
+            "name": "已成年的后辈",
+            "mastered": [],
+            "learning": {},
+            "practices": [],
+            "insights": []
+          }
+        },
+        "assets": {
+          "seed:initial": {
+            "id": "seed:initial",
+            "kind": "seed",
+            "name": "普通地方种源",
+            "potential": 4,
+            "tolerance": 0
+          }
+        },
+        "projects": {},
+        "knowledge": {
+          "archives": [],
+          "reportIds": []
+        },
+        "randomState": 1170952916,
+        "production": {
+          "inventory": {
+            "wood": 0,
+            "clay": 0,
+            "woodenware": 0,
+            "pottery": 0
+          },
+          "stocks": {
+            "wildFood": 0,
+            "timber": 0,
+            "clay": 14
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          },
+          "toolDurability": 0,
+          "storage": {
+            "woodenware": false,
+            "pottery": false
+          },
+          "project": null,
+          "workshops": {
+            "woodenware": false,
+            "pottery": false
+          }
+        },
+        "economy": {
+          "knowledge": {
+            "person:1": {
+              "materials": 2,
+              "heat": 1
+            }
+          },
+          "evidence": {
+            "person:1": [
+              "M02",
+              "H02",
+              "M03"
+            ]
+          },
+          "notes": {},
+          "goods": {
+            "wood": 2,
+            "clay": 2,
+            "seedWheat": 1,
+            "seedSoy": 1,
+            "seedFlax": 1,
+            "ceramics": 2
+          },
+          "equipment": {
+            "S01": 12,
+            "F02": 11
+          },
+          "workers": {},
+          "field": {
+            "crop": null,
+            "planted": 0,
+            "moisture": 0,
+            "growth": 0,
+            "stress": 0,
+            "fertility": 2,
+            "lastCrop": null,
+            "tended": 0,
+            "composted": false,
+            "bonus": 0,
+            "duration": 2
+          },
+          "project": null,
+          "market": 4,
+          "recruitment": 1,
+          "industrySupply": 4,
+          "regional": {
+            "iron": false,
+            "fiber": false,
+            "teaching": {}
+          },
+          "published": {},
+          "ironBatches": 0,
+          "fiberBatches": 0,
+          "poweredTurn": 0,
+          "equipmentUsed": {
+            "F02": 5
+          }
+        }
+      },
+      "hash": "276c64defebca6f7d7a61e9106d2905a958c82720327cf07ec4ee95368647b4b"
+    },
+    {
+      "revision": 32,
+      "state": {
+        "schemaVersion": 1,
+        "clock": {
+          "generation": 1,
+          "turn": 12,
+          "absoluteTurn": 12
+        },
+        "status": "active",
+        "ap": 3,
+        "world": {
+          "era": "跨地域生产与传承（非单一文明历史顺序）",
+          "technologies": [
+            "耕作经验",
+            "基础测量",
+            "沟渠施工",
+            "留种选种",
+            "资源辨识",
+            "木材加工",
+            "火的利用",
+            "陶作",
+            "物品保存",
+            "工艺与实验协作"
+          ]
+        },
+        "location": {
+          "id": "clay-valley",
+          "weather": "wet",
+          "rain": 3,
+          "water": 2,
+          "teachers": [
+            "observation",
+            "survey",
+            "ditch",
+            "allocation",
+            "selection",
+            "trial",
+            "stabilize",
+            "resource-observation",
+            "controlled-fire",
+            "storage",
+            "pottery",
+            "agronomy",
+            "ceramic-engineering",
+            "mechanics",
+            "experimentation",
+            "precision-engineering"
+          ],
+          "season": {
+            "cultivated": false,
+            "usedChannel": false,
+            "trialSample": false
+          }
+        },
+        "household": {
+          "id": "household:1",
+          "activePersonId": "person:1",
+          "heirId": "person:2",
+          "memberIds": [
+            "person:1",
+            "person:2"
+          ],
+          "food": 3,
+          "money": 14,
+          "hardship": 0,
+          "assetIds": [
+            "seed:initial"
+          ],
+          "stockId": "seed:initial",
+          "candidateId": null,
+          "activeProjectId": null
+        },
+        "persons": {
+          "person:1": {
+            "id": "person:1",
+            "name": "本代经营者",
+            "mastered": [],
+            "learning": {},
+            "practices": [],
+            "insights": []
+          },
+          "person:2": {
+            "id": "person:2",
+            "name": "已成年的后辈",
+            "mastered": [],
+            "learning": {},
+            "practices": [],
+            "insights": []
+          }
+        },
+        "assets": {
+          "seed:initial": {
+            "id": "seed:initial",
+            "kind": "seed",
+            "name": "普通地方种源",
+            "potential": 4,
+            "tolerance": 0
+          }
+        },
+        "projects": {},
+        "knowledge": {
+          "archives": [],
+          "reportIds": []
+        },
+        "randomState": 1944224582,
+        "production": {
+          "inventory": {
+            "wood": 0,
+            "clay": 0,
+            "woodenware": 0,
+            "pottery": 0
+          },
+          "stocks": {
+            "wildFood": 1,
+            "timber": 2,
+            "clay": 10
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          },
+          "toolDurability": 0,
+          "storage": {
+            "woodenware": false,
+            "pottery": false
+          },
+          "project": null,
+          "workshops": {
+            "woodenware": false,
+            "pottery": false
+          }
+        },
+        "economy": {
+          "knowledge": {
+            "person:1": {
+              "materials": 2,
+              "heat": 1
+            }
+          },
+          "evidence": {
+            "person:1": [
+              "M02",
+              "H02",
+              "M03"
+            ]
+          },
+          "notes": {},
+          "goods": {
+            "wood": 2,
+            "clay": 2,
+            "seedWheat": 1,
+            "seedSoy": 1,
+            "seedFlax": 1,
+            "ceramics": 2
+          },
+          "equipment": {
+            "S01": 12,
+            "F02": 9
+          },
+          "workers": {},
+          "field": {
+            "crop": null,
+            "planted": 0,
+            "moisture": 0,
+            "growth": 0,
+            "stress": 0,
+            "fertility": 2,
+            "lastCrop": null,
+            "tended": 0,
+            "composted": false,
+            "bonus": 0,
+            "duration": 2
+          },
+          "project": null,
+          "market": 4,
+          "recruitment": 1,
+          "industrySupply": 4,
+          "regional": {
+            "iron": false,
+            "fiber": false,
+            "teaching": {}
+          },
+          "published": {},
+          "ironBatches": 0,
+          "fiberBatches": 0,
+          "poweredTurn": 0,
+          "equipmentUsed": {
+            "F02": 10
+          }
+        }
+      },
+      "hash": "1297bbd984ac5e75f6f0e66cff724ecd7b196eb15dae5a1fb42bbc49f1e3df77"
+    },
+    {
+      "revision": 45,
+      "state": {
+        "schemaVersion": 1,
+        "clock": {
+          "generation": 1,
+          "turn": 16,
+          "absoluteTurn": 16
+        },
+        "status": "handover",
+        "ap": 2,
+        "world": {
+          "era": "跨地域生产与传承（非单一文明历史顺序）",
+          "technologies": [
+            "耕作经验",
+            "基础测量",
+            "沟渠施工",
+            "留种选种",
+            "资源辨识",
+            "木材加工",
+            "火的利用",
+            "陶作",
+            "物品保存",
+            "工艺与实验协作"
+          ]
+        },
+        "location": {
+          "id": "clay-valley",
+          "weather": "normal",
+          "rain": 2,
+          "water": 2,
+          "teachers": [
+            "observation",
+            "survey",
+            "ditch",
+            "allocation",
+            "selection",
+            "trial",
+            "stabilize",
+            "resource-observation",
+            "controlled-fire",
+            "storage",
+            "pottery",
+            "agronomy",
+            "ceramic-engineering",
+            "mechanics",
+            "experimentation",
+            "precision-engineering"
+          ],
+          "season": {
+            "cultivated": false,
+            "usedChannel": false,
+            "trialSample": false
+          }
+        },
+        "household": {
+          "id": "household:1",
+          "activePersonId": "person:1",
+          "heirId": "person:2",
+          "memberIds": [
+            "person:1",
+            "person:2"
+          ],
+          "food": 1,
+          "money": 23,
+          "hardship": 0,
+          "assetIds": [
+            "seed:initial"
+          ],
+          "stockId": "seed:initial",
+          "candidateId": null,
+          "activeProjectId": null
+        },
+        "persons": {
+          "person:1": {
+            "id": "person:1",
+            "name": "本代经营者",
+            "mastered": [],
+            "learning": {},
+            "practices": [],
+            "insights": []
+          },
+          "person:2": {
+            "id": "person:2",
+            "name": "已成年的后辈",
+            "mastered": [],
+            "learning": {},
+            "practices": [],
+            "insights": []
+          }
+        },
+        "assets": {
+          "seed:initial": {
+            "id": "seed:initial",
+            "kind": "seed",
+            "name": "普通地方种源",
+            "potential": 4,
+            "tolerance": 0
+          }
+        },
+        "projects": {},
+        "knowledge": {
+          "archives": [],
+          "reportIds": []
+        },
+        "randomState": 3753959065,
+        "production": {
+          "inventory": {
+            "wood": 0,
+            "clay": 0,
+            "woodenware": 0,
+            "pottery": 0
+          },
+          "stocks": {
+            "wildFood": 2,
+            "timber": 1,
+            "clay": 6
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          },
+          "toolDurability": 0,
+          "storage": {
+            "woodenware": false,
+            "pottery": false
+          },
+          "project": null,
+          "workshops": {
+            "woodenware": false,
+            "pottery": false
+          }
+        },
+        "economy": {
+          "knowledge": {
+            "person:1": {
+              "materials": 2,
+              "heat": 1
+            }
+          },
+          "evidence": {
+            "person:1": [
+              "M02",
+              "H02",
+              "M03"
+            ]
+          },
+          "notes": {},
+          "goods": {
+            "wood": 2,
+            "clay": 2,
+            "seedWheat": 1,
+            "seedSoy": 1,
+            "seedFlax": 1,
+            "ceramics": 1
+          },
+          "equipment": {
+            "S01": 12,
+            "F02": 7
+          },
+          "workers": {},
+          "field": {
+            "crop": null,
+            "planted": 0,
+            "moisture": 0,
+            "growth": 0,
+            "stress": 0,
+            "fertility": 2,
+            "lastCrop": null,
+            "tended": 0,
+            "composted": false,
+            "bonus": 0,
+            "duration": 2
+          },
+          "project": {
+            "good": "ceramics",
+            "amount": 1,
+            "started": 16
+          },
+          "market": 4,
+          "recruitment": 1,
+          "industrySupply": 4,
+          "regional": {
+            "iron": false,
+            "fiber": false,
+            "teaching": {}
+          },
+          "published": {},
+          "ironBatches": 0,
+          "fiberBatches": 0,
+          "poweredTurn": 0,
+          "equipmentUsed": {
+            "F02": 16
+          }
+        }
+      },
+      "hash": "551fb4595b3719bb7446baadd2724fc5a1bb773f90ff09e94b5578406e7213fc"
+    },
+    {
+      "revision": 48,
+      "state": {
+        "schemaVersion": 1,
+        "clock": {
+          "generation": 2,
+          "turn": 1,
+          "absoluteTurn": 17
+        },
+        "status": "active",
+        "ap": 1,
+        "world": {
+          "era": "跨地域生产与传承（非单一文明历史顺序）",
+          "technologies": [
+            "耕作经验",
+            "基础测量",
+            "沟渠施工",
+            "留种选种",
+            "资源辨识",
+            "木材加工",
+            "火的利用",
+            "陶作",
+            "物品保存",
+            "工艺与实验协作"
+          ]
+        },
+        "location": {
+          "id": "clay-valley",
+          "weather": "dry",
+          "rain": 0,
+          "water": 2,
+          "teachers": [
+            "observation",
+            "survey",
+            "ditch",
+            "allocation",
+            "selection",
+            "trial",
+            "stabilize",
+            "resource-observation",
+            "controlled-fire",
+            "storage",
+            "pottery",
+            "agronomy",
+            "ceramic-engineering",
+            "mechanics",
+            "experimentation",
+            "precision-engineering"
+          ],
+          "season": {
+            "cultivated": false,
+            "usedChannel": false,
+            "trialSample": false
+          }
+        },
+        "household": {
+          "id": "household:1",
+          "activePersonId": "person:2",
+          "heirId": "person:3",
+          "memberIds": [
+            "person:1",
+            "person:2",
+            "person:3"
+          ],
+          "food": 3,
+          "money": 23,
+          "hardship": 0,
+          "assetIds": [
+            "seed:initial"
+          ],
+          "stockId": "seed:initial",
+          "candidateId": null,
+          "activeProjectId": null
+        },
+        "persons": {
+          "person:1": {
+            "id": "person:1",
+            "name": "本代经营者",
+            "mastered": [],
+            "learning": {},
+            "practices": [],
+            "insights": []
+          },
+          "person:2": {
+            "id": "person:2",
+            "name": "本代经营者",
+            "mastered": [],
+            "learning": {},
+            "practices": [],
+            "insights": []
+          },
+          "person:3": {
+            "id": "person:3",
+            "name": "已成年的后辈",
+            "mastered": [],
+            "learning": {},
+            "practices": [],
+            "insights": []
+          }
+        },
+        "assets": {
+          "seed:initial": {
+            "id": "seed:initial",
+            "kind": "seed",
+            "name": "普通地方种源",
+            "potential": 4,
+            "tolerance": 0
+          }
+        },
+        "projects": {},
+        "knowledge": {
+          "archives": [],
+          "reportIds": []
+        },
+        "randomState": 1180700304,
+        "production": {
+          "inventory": {
+            "wood": 0,
+            "clay": 0,
+            "woodenware": 0,
+            "pottery": 0
+          },
+          "stocks": {
+            "wildFood": 0,
+            "timber": 1,
+            "clay": 6
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          },
+          "toolDurability": 0,
+          "storage": {
+            "woodenware": false,
+            "pottery": false
+          },
+          "project": null,
+          "workshops": {
+            "woodenware": false,
+            "pottery": false
+          }
+        },
+        "economy": {
+          "knowledge": {
+            "person:1": {
+              "materials": 2,
+              "heat": 1
+            },
+            "person:2": {
+              "materials": 1
+            }
+          },
+          "evidence": {
+            "person:1": [
+              "M02",
+              "H02",
+              "M03"
+            ]
+          },
+          "notes": {},
+          "goods": {
+            "wood": 2,
+            "clay": 2,
+            "seedWheat": 1,
+            "seedSoy": 1,
+            "seedFlax": 1,
+            "ceramics": 1
+          },
+          "equipment": {
+            "S01": 12,
+            "F02": 7
+          },
+          "workers": {},
+          "field": {
+            "crop": null,
+            "planted": 0,
+            "moisture": 0,
+            "growth": 0,
+            "stress": 0,
+            "fertility": 2,
+            "lastCrop": null,
+            "tended": 0,
+            "composted": false,
+            "bonus": 0,
+            "duration": 2
+          },
+          "project": {
+            "good": "ceramics",
+            "amount": 1,
+            "started": 16
+          },
+          "market": 4,
+          "recruitment": 1,
+          "industrySupply": 4,
+          "regional": {
+            "iron": false,
+            "fiber": false,
+            "teaching": {}
+          },
+          "published": {},
+          "ironBatches": 0,
+          "fiberBatches": 0,
+          "poweredTurn": 0,
+          "equipmentUsed": {
+            "F02": 16
+          }
+        }
+      },
+      "hash": "3f329dd0f0209dbccbdb00aff5b6ba15d80197ff4130fc43d3679b0eb9a69db9"
+    },
+    {
+      "revision": 64,
+      "state": {
+        "schemaVersion": 1,
+        "clock": {
+          "generation": 2,
+          "turn": 7,
+          "absoluteTurn": 23
+        },
+        "status": "active",
+        "ap": 3,
+        "world": {
+          "era": "跨地域生产与传承（非单一文明历史顺序）",
+          "technologies": [
+            "耕作经验",
+            "基础测量",
+            "沟渠施工",
+            "留种选种",
+            "资源辨识",
+            "木材加工",
+            "火的利用",
+            "陶作",
+            "物品保存",
+            "工艺与实验协作"
+          ]
+        },
+        "location": {
+          "id": "clay-valley",
+          "weather": "normal",
+          "rain": 2,
+          "water": 2,
+          "teachers": [
+            "observation",
+            "survey",
+            "ditch",
+            "allocation",
+            "selection",
+            "trial",
+            "stabilize",
+            "resource-observation",
+            "controlled-fire",
+            "storage",
+            "pottery",
+            "agronomy",
+            "ceramic-engineering",
+            "mechanics",
+            "experimentation",
+            "precision-engineering"
+          ],
+          "season": {
+            "cultivated": false,
+            "usedChannel": false,
+            "trialSample": false
+          }
+        },
+        "household": {
+          "id": "household:1",
+          "activePersonId": "person:2",
+          "heirId": "person:3",
+          "memberIds": [
+            "person:1",
+            "person:2",
+            "person:3"
+          ],
+          "food": 4,
+          "money": 28,
+          "hardship": 0,
+          "assetIds": [
+            "seed:initial"
+          ],
+          "stockId": "seed:initial",
+          "candidateId": null,
+          "activeProjectId": null
+        },
+        "persons": {
+          "person:1": {
+            "id": "person:1",
+            "name": "本代经营者",
+            "mastered": [],
+            "learning": {},
+            "practices": [],
+            "insights": []
+          },
+          "person:2": {
+            "id": "person:2",
+            "name": "本代经营者",
+            "mastered": [],
+            "learning": {},
+            "practices": [],
+            "insights": []
+          },
+          "person:3": {
+            "id": "person:3",
+            "name": "已成年的后辈",
+            "mastered": [],
+            "learning": {},
+            "practices": [],
+            "insights": []
+          }
+        },
+        "assets": {
+          "seed:initial": {
+            "id": "seed:initial",
+            "kind": "seed",
+            "name": "普通地方种源",
+            "potential": 4,
+            "tolerance": 0
+          }
+        },
+        "projects": {},
+        "knowledge": {
+          "archives": [],
+          "reportIds": []
+        },
+        "randomState": 2702906064,
+        "production": {
+          "inventory": {
+            "wood": 0,
+            "clay": 0,
+            "woodenware": 0,
+            "pottery": 0
+          },
+          "stocks": {
+            "wildFood": 2,
+            "timber": 3,
+            "clay": 2
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          },
+          "toolDurability": 0,
+          "storage": {
+            "woodenware": false,
+            "pottery": false
+          },
+          "project": null,
+          "workshops": {
+            "woodenware": false,
+            "pottery": false
+          }
+        },
+        "economy": {
+          "knowledge": {
+            "person:1": {
+              "materials": 2,
+              "heat": 1
+            },
+            "person:2": {
+              "materials": 2
+            }
+          },
+          "evidence": {
+            "person:1": [
+              "M02",
+              "H02",
+              "M03"
+            ],
+            "person:2": [
+              "M02",
+              "M03"
+            ]
+          },
+          "notes": {},
+          "goods": {
+            "wood": 3,
+            "clay": 3,
+            "seedWheat": 1,
+            "seedSoy": 1,
+            "seedFlax": 1,
+            "ceramics": 2
+          },
+          "equipment": {
+            "S01": 12,
+            "F02": 6
+          },
+          "workers": {},
+          "field": {
+            "crop": null,
+            "planted": 0,
+            "moisture": 0,
+            "growth": 0,
+            "stress": 0,
+            "fertility": 2,
+            "lastCrop": null,
+            "tended": 0,
+            "composted": false,
+            "bonus": 0,
+            "duration": 2
+          },
+          "project": null,
+          "market": 4,
+          "recruitment": 1,
+          "industrySupply": 4,
+          "regional": {
+            "iron": false,
+            "fiber": false,
+            "teaching": {}
+          },
+          "published": {},
+          "ironBatches": 0,
+          "fiberBatches": 0,
+          "poweredTurn": 0,
+          "equipmentUsed": {
+            "F02": 21
+          }
+        }
+      },
+      "hash": "442defe8f2712905c40d7d7af8a43acf338d964eb70aaf6cb4ab01351c500d77"
+    }
+  ]
+}

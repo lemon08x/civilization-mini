@@ -1,0 +1,390 @@
+[
+  {
+    "runId": "play-a1",
+    "policy": "craft",
+    "seed": 17,
+    "scenario": "woodland",
+    "status": "complete",
+    "generationsReached": 3,
+    "finalTurn": 16,
+    "food": 7,
+    "money": 76,
+    "hardship": 0,
+    "mastered": [
+      "woodworking",
+      "storage",
+      "controlled-fire",
+      "pottery"
+    ],
+    "heirMastered": [],
+    "archives": [
+      "pottery",
+      "woodworking",
+      "storage",
+      "controlled-fire"
+    ],
+    "goods": {
+      "supplies": 0,
+      "ceramicParts": 0,
+      "mechanisms": 0,
+      "fieldTools": 0,
+      "labTools": 0,
+      "precisionParts": 0,
+      "findings": 0
+    },
+    "productGoods": {
+      "calibrator": 0,
+      "pump": 0,
+      "kiln": 0,
+      "calibrations": 0,
+      "spentCeramics": 0
+    },
+    "actions": 140
+  },
+  {
+    "runId": "play-a2",
+    "policy": "craft",
+    "seed": 23,
+    "scenario": "woodland",
+    "status": "complete",
+    "generationsReached": 3,
+    "finalTurn": 16,
+    "food": 7,
+    "money": 76,
+    "hardship": 0,
+    "mastered": [
+      "woodworking",
+      "storage",
+      "controlled-fire",
+      "pottery"
+    ],
+    "heirMastered": [],
+    "archives": [
+      "pottery",
+      "woodworking",
+      "storage",
+      "controlled-fire"
+    ],
+    "goods": {
+      "supplies": 0,
+      "ceramicParts": 0,
+      "mechanisms": 0,
+      "fieldTools": 0,
+      "labTools": 0,
+      "precisionParts": 0,
+      "findings": 0
+    },
+    "productGoods": {
+      "calibrator": 0,
+      "pump": 0,
+      "kiln": 0,
+      "calibrations": 0,
+      "spentCeramics": 0
+    },
+    "actions": 141
+  },
+  {
+    "runId": "play-a3",
+    "policy": "craft",
+    "seed": 42,
+    "scenario": "woodland",
+    "status": "complete",
+    "generationsReached": 3,
+    "finalTurn": 16,
+    "food": 5,
+    "money": 76,
+    "hardship": 0,
+    "mastered": [
+      "woodworking",
+      "storage",
+      "controlled-fire",
+      "pottery"
+    ],
+    "heirMastered": [],
+    "archives": [
+      "pottery",
+      "woodworking",
+      "storage",
+      "controlled-fire"
+    ],
+    "goods": {
+      "supplies": 0,
+      "ceramicParts": 0,
+      "mechanisms": 0,
+      "fieldTools": 0,
+      "labTools": 0,
+      "precisionParts": 0,
+      "findings": 0
+    },
+    "productGoods": {
+      "calibrator": 0,
+      "pump": 0,
+      "kiln": 0,
+      "calibrations": 0,
+      "spentCeramics": 0
+    },
+    "actions": 138
+  },
+  {
+    "runId": "play-b1",
+    "policy": "dev",
+    "seed": 17,
+    "scenario": "woodland",
+    "status": "complete",
+    "generationsReached": 3,
+    "finalTurn": 16,
+    "food": 3,
+    "money": 88,
+    "hardship": 0,
+    "mastered": [
+      "woodworking"
+    ],
+    "heirMastered": [],
+    "archives": [],
+    "goods": {
+      "supplies": 0,
+      "ceramicParts": 0,
+      "mechanisms": 0,
+      "fieldTools": 0,
+      "labTools": 0,
+      "precisionParts": 0,
+      "findings": 0
+    },
+    "productGoods": {
+      "calibrator": 0,
+      "pump": 0,
+      "kiln": 0,
+      "calibrations": 0,
+      "spentCeramics": 0
+    },
+    "actions": 146
+  },
+  {
+    "runId": "play-b2",
+    "policy": "dev",
+    "seed": 23,
+    "scenario": "woodland",
+    "status": "complete",
+    "generationsReached": 3,
+    "finalTurn": 16,
+    "food": 3,
+    "money": 88,
+    "hardship": 0,
+    "mastered": [
+      "woodworking"
+    ],
+    "heirMastered": [],
+    "archives": [],
+    "goods": {
+      "supplies": 0,
+      "ceramicParts": 0,
+      "mechanisms": 0,
+      "fieldTools": 0,
+      "labTools": 0,
+      "precisionParts": 0,
+      "findings": 0
+    },
+    "productGoods": {
+      "calibrator": 0,
+      "pump": 0,
+      "kiln": 0,
+      "calibrations": 0,
+      "spentCeramics": 0
+    },
+    "actions": 146
+  },
+  {
+    "runId": "play-b3",
+    "policy": "dev",
+    "seed": 42,
+    "scenario": "woodland",
+    "status": "complete",
+    "generationsReached": 3,
+    "finalTurn": 16,
+    "food": 3,
+    "money": 88,
+    "hardship": 0,
+    "mastered": [
+      "woodworking"
+    ],
+    "heirMastered": [],
+    "archives": [],
+    "goods": {
+      "supplies": 0,
+      "ceramicParts": 0,
+      "mechanisms": 0,
+      "fieldTools": 0,
+      "labTools": 0,
+      "precisionParts": 0,
+      "findings": 0
+    },
+    "productGoods": {
+      "calibrator": 0,
+      "pump": 0,
+      "kiln": 0,
+      "calibrations": 0,
+      "spentCeramics": 0
+    },
+    "actions": 146
+  },
+  {
+    "runId": "play-c1",
+    "policy": "agri",
+    "seed": 17,
+    "scenario": "river",
+    "status": "complete",
+    "generationsReached": 3,
+    "finalTurn": 16,
+    "food": 3,
+    "money": 56,
+    "hardship": 0,
+    "mastered": [
+      "observation",
+      "survey",
+      "ditch",
+      "allocation"
+    ],
+    "heirMastered": [],
+    "archives": [
+      "observation",
+      "survey",
+      "ditch",
+      "allocation"
+    ],
+    "goods": {
+      "supplies": 0,
+      "ceramicParts": 0,
+      "mechanisms": 0,
+      "fieldTools": 0,
+      "labTools": 0,
+      "precisionParts": 0,
+      "findings": 0
+    },
+    "productGoods": {
+      "calibrator": 0,
+      "pump": 0,
+      "kiln": 0,
+      "calibrations": 0,
+      "spentCeramics": 0
+    },
+    "actions": 145
+  },
+  {
+    "runId": "play-c2",
+    "policy": "agri",
+    "seed": 23,
+    "scenario": "river",
+    "status": "complete",
+    "generationsReached": 3,
+    "finalTurn": 16,
+    "food": 3,
+    "money": 48,
+    "hardship": 0,
+    "mastered": [
+      "observation",
+      "survey",
+      "ditch",
+      "allocation"
+    ],
+    "heirMastered": [],
+    "archives": [
+      "observation",
+      "survey",
+      "ditch",
+      "allocation"
+    ],
+    "goods": {
+      "supplies": 0,
+      "ceramicParts": 0,
+      "mechanisms": 0,
+      "fieldTools": 0,
+      "labTools": 0,
+      "precisionParts": 0,
+      "findings": 0
+    },
+    "productGoods": {
+      "calibrator": 0,
+      "pump": 0,
+      "kiln": 0,
+      "calibrations": 0,
+      "spentCeramics": 0
+    },
+    "actions": 145
+  },
+  {
+    "runId": "play-d1",
+    "policy": "science",
+    "seed": 17,
+    "scenario": "woodland",
+    "status": "complete",
+    "generationsReached": 3,
+    "finalTurn": 16,
+    "food": 3,
+    "money": 57,
+    "hardship": 0,
+    "mastered": [
+      "woodworking",
+      "controlled-fire",
+      "pottery"
+    ],
+    "heirMastered": [],
+    "archives": [
+      "pottery"
+    ],
+    "goods": {
+      "supplies": 0,
+      "ceramicParts": 0,
+      "mechanisms": 0,
+      "fieldTools": 0,
+      "labTools": 0,
+      "precisionParts": 0,
+      "findings": 0
+    },
+    "productGoods": {
+      "calibrator": 0,
+      "pump": 0,
+      "kiln": 0,
+      "calibrations": 0,
+      "spentCeramics": 0
+    },
+    "actions": 146
+  },
+  {
+    "runId": "play-d2",
+    "policy": "balanced",
+    "seed": 17,
+    "scenario": "woodland",
+    "status": "complete",
+    "generationsReached": 3,
+    "finalTurn": 16,
+    "food": 2,
+    "money": 63,
+    "hardship": 0,
+    "mastered": [
+      "woodworking",
+      "controlled-fire",
+      "pottery"
+    ],
+    "heirMastered": [],
+    "archives": [
+      "pottery"
+    ],
+    "goods": {
+      "supplies": 0,
+      "ceramicParts": 0,
+      "mechanisms": 0,
+      "fieldTools": 0,
+      "labTools": 0,
+      "precisionParts": 0,
+      "findings": 0
+    },
+    "productGoods": {
+      "calibrator": 0,
+      "pump": 0,
+      "kiln": 0,
+      "calibrations": 0,
+      "spentCeramics": 0
+    },
+    "actions": 134
+  }
+]

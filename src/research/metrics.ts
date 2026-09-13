@@ -26,8 +26,24 @@ export function collectStatistics(record: RunRecord) {
 export function metrics(record: RunRecord, state: GameState) {
   const { stats, history } = collectStatistics(record);
   return { status: state.status, completedGenerations: history.length, food: state.household.food, money: state.household.money, foodProduced: stats.foodProduced, foodShortfall: stats.shortfall, waterUsed: stats.waterUsed,
+    ...(state.economy?.tower?{tower:towerStatistics(record)}:{}),
+    ...(state.economy?{economy:{goods:structuredClone(state.economy.goods),workers:structuredClone(state.economy.workers),regional:structuredClone(state.economy.regional),equipment:structuredClone(state.economy.equipment)}}:{}),
     learnedNodes: [...new Set(stats.learned.map(x => x.id))], lastPersonMastered: [...activePerson(state).mastered], inheritedNodes: stats.inherited.map(x => ({ generation: x.generation, nodes: [...x.mastered] })), archivedNodes: [...state.knowledge.archives], samples: stats.researchSamples, studyActions: stats.studyActions, teachingActions: stats.teachingActions, commands: record.entries.length,
+    ...(state.productNetwork ? { productNetwork: productNetworkMetrics(record), productAssets: structuredClone(state.productNetwork) } : {}),
+    ...(state.development ? { development: developmentMetrics(record), developmentAssets: { goods: structuredClone(state.development!.goods), designs: structuredClone(state.development!.designs), project: structuredClone(state.development!.project), fieldDurability: state.development!.fieldDurability, labDurability: state.development!.labDurability } } : {}),
     ...(record.manifest.ruleset.production ? { production: productionMetrics(record), inventory: structuredClone(state.production!.inventory), storage: { ...state.production!.storage }, toolDurability: state.production!.toolDurability } : {}) };
+}
+
+function towerStatistics(record:RunRecord){
+  const result={completedFloors:0,constructionSeasons:0,interruptions:0,consumed:{} as Record<string,number>,won:false};
+  for(const entry of record.entries)for(const event of entry.events){
+    if(event.type!=='tower')continue;
+    if(event.operation==='floor-complete')result.completedFloors++;
+    if(event.operation==='interrupted')result.interruptions++;
+    if(event.operation==='victory')result.won=true;
+    if(event.operation==='built'){result.constructionSeasons++;for(const [id,n]of Object.entries(event.goods))result.consumed[id]=(result.consumed[id]??0)+n;}
+  }
+  return result;
 }
 export type Metrics = ReturnType<typeof metrics>;
 
@@ -45,6 +61,38 @@ export function productionMetrics(record: RunRecord) {
       if (event.action.type === 'buy-food') result.buyFoodActions++;
       if (event.action.type === 'cultivate') result.cultivateActions++;
     }
+  }
+  return result;
+}
+
+export function developmentMetrics(record: RunRecord) {
+  const result = { outputs: {} as Record<string,number>, purchases: {} as Record<string,number>, deliveries: {} as Record<string,number>, experienceByPerson: {} as Record<string,Record<string,number>>, experiments: 0, findings: 0, refinements: 0, purchaseCost: 0, deliveryIncome: 0, fieldUses: 0, labUses: 0 };
+  for (const entry of record.entries) for (const event of entry.events) {
+    if (event.type === 'calibration-sold') { result.deliveries.calibrations=(result.deliveries.calibrations??0)+1; result.deliveryIncome+=event.money; }
+    if (event.type === 'development-completed') result.outputs[event.good] = (result.outputs[event.good] ?? 0) + event.amount;
+    if (event.type === 'development-traded') {
+      const map = event.operation === 'buy' ? result.purchases : result.deliveries;
+      map[event.good] = (map[event.good] ?? 0) + event.amount;
+      if (event.operation === 'buy') result.purchaseCost += event.money; else result.deliveryIncome += event.money;
+    }
+    if (event.type === 'industrial-clay-bought') { result.purchases.clay = (result.purchases.clay ?? 0) + event.amount; result.purchaseCost += 3; }
+    if (event.type === 'experience-gained') { const person = result.experienceByPerson[event.personId] ??= {}; person[event.domain] = (person[event.domain] ?? 0) + event.amount; }
+    if (event.type === 'experiment-conducted') { result.experiments++; result.findings += event.amount; if (event.equipped) result.labUses++; }
+    if (event.type === 'design-refined') result.refinements++;
+    if (event.type === 'field-equipment-used') result.fieldUses++;
+  }
+  return result;
+}
+
+export function productNetworkMetrics(record:RunRecord) {
+  const result={made:{} as Record<string,number>,operations:{} as Record<string,number>,residues:0,storedWaterUsed:0,usesByGeneration:{} as Record<number,string[]>};
+  let generation=1;
+  for(const entry of record.entries)for(const event of entry.events){
+    if(event.type==='handed-over')generation=event.generation;
+    if(event.type==='product-completed')result.made[event.device]=(result.made[event.device]??0)+1;
+    if(event.type==='product-operated'){result.operations[event.device]=(result.operations[event.device]??0)+1;(result.usesByGeneration[generation]??=[]).push(event.device);}
+    if(event.type==='ceramic-residue')result.residues+=event.amount;
+    if(event.type==='stored-water-used')result.storedWaterUsed+=event.amount;
   }
   return result;
 }

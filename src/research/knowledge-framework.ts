@@ -61,5 +61,14 @@ export function diagnoseRecord(record: RunRecord) {
   for (const [key,item] of studies) if (!mastered.has(key)) findings.push(item);
   for (const [key,item] of workshops) if (!completed.has(key)) findings.push(item);
   for (const n of record.manifest.ruleset.technologies) if (!touched.has(n.id)) findings.push({kind:'node-unvisited',nodeId:n.id,message:'未见节点相关事件；仅表示覆盖缺口，不证明不可达或无用。',evidence:[]});
+  const unusedProducts = new Map<string,Diagnostic>();
+  let pendingProduct:Diagnostic|null=null;
+  for(const entry of record.entries)entry.events.forEach((event,eventIndex)=>{
+    const evidence={revision:entry.revision,eventIndex};
+    if(event.type==='product-started')pendingProduct={kind:'product-unfinished',message:event.device+'已投入高级材料但未完工，检查项目位和代际窗口。',evidence:[evidence]};
+    if(event.type==='product-completed'){pendingProduct=null;unusedProducts.set(event.device,{kind:'product-unused',message:event.device+'已产出但之后未使用专用能力；检查安装、耗材与策略覆盖。',evidence:[evidence]});}
+    if(event.type==='product-operated')unusedProducts.delete(event.device);
+  });
+  findings.push(...unusedProducts.values());if(pendingProduct)findings.push(pendingProduct);
   return { findings, touchedNodes:[...touched], totalNodes:record.manifest.ruleset.technologies.length };
 }

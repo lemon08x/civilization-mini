@@ -1,3 +1,7 @@
+import { OPERATIONS_BOUNDS } from '../../src/game/model/operations.js';
+import { TOWER_BOUNDS } from '../../src/game/model/tower.js';
+import { WORKSHOP_BOUNDS } from '../../src/game/model/workshop.js';
+import { SHOP_BOUNDS } from '../../src/game/model/shop.js';
 import { readdir, readFile, realpath, stat } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 import { isRecord } from '../../src/game/ruleset.js';
@@ -74,7 +78,7 @@ export async function loadResearchIndex(root: string, rules?: Ruleset) {
         const spec = isRecord(meta.spec) ? meta.spec : meta;
         item.conditions = { seeds: spec.seeds ?? spec.seed, scenarios: spec.scenarios ?? spec.scenario, agents: spec.agents, variants: spec.variants, maxActions: spec.maxActions, policyFingerprint: meta.policyFingerprint };
         if (typeof meta.controller === 'string') item.controllers.push(meta.controller);
-        if (Array.isArray(spec.variants)) for (const v of spec.variants) if (isRecord(v) && isRecord(v.parameters)) for (const [key, after] of Object.entries(v.parameters)) item.parameterChanges.push({ variant: String(v.id), path: key, before: configValue(rules, key.startsWith('production.') ? `production.parameters.${key.slice(11)}` : `parameters.${key}`), after });
+        if (Array.isArray(spec.variants)) for (const v of spec.variants) if (isRecord(v) && isRecord(v.parameters)) for (const [key, after] of Object.entries(v.parameters)) item.parameterChanges.push({ variant: String(v.id), path: key, before: configValue(rules, (key.startsWith('shop.')||key.startsWith('operations.')) ? key : key.startsWith('development.') ? `development.parameters.${key.slice(12)}` : key.startsWith('production.') ? `production.parameters.${key.slice(11)}` : `parameters.${key}`), after });
       }
     } else item.issues.push('缺少实验清单，不能确认运行条件');
     const resultsFile = files.includes(`${directory}/metrics.json`) ? 'metrics.json' : files.includes(`${directory}/results.json`) ? 'results.json' : null;
@@ -90,14 +94,19 @@ export async function loadResearchIndex(root: string, rules?: Ruleset) {
     for (const file of p.evidence) try { await readReviewFile(root, file); } catch (e) { issues.push(`提案 ${p.id} 的证据不可读取：${file}（${(e as Error).message}）`); }
   }
   let framework: KnowledgeFramework | null = null;
-  if (rules) try { framework = validateFramework(JSON.parse(await readReviewFile(root,'experiments/frameworks/knowledge.v1.json')),rules); } catch(e) { issues.push(`知识框架：${(e as Error).message}`); }
+  if (rules&&!rules.economy) try { framework = validateFramework(JSON.parse(await readReviewFile(root,rules.passiveInvestment?'experiments/frameworks/knowledge.v5.json':rules.householdProgress?'experiments/frameworks/knowledge.v4.json':rules.productNetwork?'experiments/frameworks/knowledge.v3.json':rules.development?'experiments/frameworks/knowledge.v2.json':'experiments/frameworks/knowledge.v1.json')),rules); } catch(e) { issues.push(`知识框架：${(e as Error).message}`); }
   const audits = (await names('experiments/audits')).filter(n=>n.endsWith('.json')).map(n=>`experiments/audits/${n}`);
   return { proposals, experiments: experiments.reverse(), issues, framework, audits };
 }
 export function parameterRows(rules: Ruleset) {
   return [
+    ...Object.entries(rules.tower??{}).map(([key,value])=>({key:`tower.${key}`,value,bounds:TOWER_BOUNDS[key as keyof typeof TOWER_BOUNDS],editable:true})),
+    ...Object.entries(rules.workshops??{}).map(([key,value])=>({key:`workshops.${key}`,value,bounds:WORKSHOP_BOUNDS[key as keyof typeof WORKSHOP_BOUNDS],editable:true})),
     ...Object.entries(rules.parameters).map(([key, value]) => ({ key, value, bounds: rules.parameterBounds[key as keyof typeof rules.parameters], editable: true })),
     ...Object.entries(rules.production?.parameters ?? {}).map(([key, value]) => ({ key: `production.${key}`, value, bounds: rules.production!.parameterBounds[key as keyof NonNullable<Ruleset['production']>['parameters']], editable: true })),
+    ...Object.entries(rules.development?.parameters ?? {}).map(([key,value])=>({key:`development.${key}`,value,bounds:rules.development!.parameterBounds[key as keyof NonNullable<Ruleset['development']>['parameters']],editable:true})),
+    ...Object.entries(rules.operations??{}).map(([key,value])=>({key:`operations.${key}`,value,bounds:OPERATIONS_BOUNDS[key as keyof typeof OPERATIONS_BOUNDS],editable:true})),
+    ...Object.entries(rules.shop??{}).map(([key,value])=>({key:`shop.${key}`,value,bounds:SHOP_BOUNDS[key as keyof typeof SHOP_BOUNDS],editable:true})),
     ...['technologyFeedback', 'socialInheritance'].flatMap(group => Object.entries((rules as unknown as Record<string, Record<string, number>>)[group] ?? {}).map(([key, value]) => ({ key: `${group}.${key}`, value, bounds: null, editable: false }))),
   ];
 }

@@ -1,10 +1,25 @@
 {
   "schemaVersion": 1,
-  "id": "production-baseline",
-  "seeds": [17],
-  "scenarios": ["woodland", "clay-valley"],
-  "agents": ["subsistence", "woodworker", "potter", "mixed"],
-  "variants": [{ "id": "baseline", "parameters": {} }],
-  "maxActions": 60,
+  "id": "development-script-baselines",
+  "seeds": [
+    17
+  ],
+  "scenarios": [
+    "woodland",
+    "clay-valley"
+  ],
+  "agents": [
+    "subsistence",
+    "woodworker",
+    "potter",
+    "mixed"
+  ],
+  "variants": [
+    {
+      "id": "baseline",
+      "parameters": {}
+    }
+  ],
+  "maxActions": 160,
   "decisionTimeoutMs": 30000
 }

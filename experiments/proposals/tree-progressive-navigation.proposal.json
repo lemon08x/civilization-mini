@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "tree-progressive-navigation",
+  "title": "科技与产品关系分层阅读",
+  "kind": "interface",
+  "status": "accepted",
+  "origin": "用户接受领域总览、分支展开与节点详情的减线方案并要求执行。",
+  "question": "如何避免产品与科技增加后主图连线失控？",
+  "hypothesis": "减少同时出现的关系类型，按分支和一层邻接追踪，跨领域通过入口导航。",
+  "counterEvidence": "领域自身进一步膨胀时仍需拆分子分支；当前不预先引入更多层级。",
+  "baseVersion": "0.6.0",
+  "targetVersion": "0.6.0",
+  "adoptedVersion": "0.6.0",
+  "experiments": [],
+  "evidence": [
+    "docs/PRODUCT_TREE.md",
+    "docs/LOGIC_GRAPH.md"
+  ],
+  "changes": [
+    {
+      "subject": "产品导航",
+      "before": "全部领域与规划同图连线",
+      "after": "领域总览、分支、局部追踪、返回和独立回收循环；现行与规划互斥"
+    },
+    {
+      "subject": "连线",
+      "before": "通用投入和跨领域支持同时铺图",
+      "after": "主图保留分支主线，其他条件在详情中追踪"
+    },
+    {
+      "subject": "科技",
+      "before": "辅助关系同时绘制",
+      "after": "必要前置为主，选中时显示辅助关系，任选条件放入详情，支持搜索"
+    }
+  ],
+  "result": "65项测试通过及短时界面检查。",
+  "sideEffects": "审阅图不读取个人存档，因此不伪造已掌握或可学习状态。",
+  "decision": "按用户要求采纳界面变更；无规则、参数或存档迁移，无新平衡模拟。"
+}

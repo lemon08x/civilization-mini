@@ -1,0 +1,1730 @@
+{
+  "kind": "scripted-capability-probe",
+  "question": "product-network-hypothesis.md",
+  "policyFingerprint": "ea9209dfc739741b81d6fa82f59bfae78b53bcf1ea0a215fb91610de8511dcc4",
+  "results": [
+    {
+      "mode": "sell",
+      "completedPlan": true,
+      "manifest": {
+        "runId": "product-sell",
+        "implementation": {
+          "version": "0.7.0",
+          "codeFingerprint": "fdea4d92c9afca9602998d433b0b5da0d36aea6e48a8a9f9301273fdfc119e32"
+        },
+        "ruleset": {
+          "schemaVersion": 1,
+          "id": "product-network-v6",
+          "rulesVersion": "0.6.0",
+          "parameters": {
+            "actionsPerTurn": 6,
+            "turnsPerGeneration": 24,
+            "generations": 3,
+            "initialFood": 30,
+            "initialMoney": 30,
+            "foodPerTurn": 2,
+            "workIncome": 2,
+            "foodPrice": 1,
+            "cropPotential": 4,
+            "channelCost": 3,
+            "channelDurability": 3,
+            "repairCost": 1,
+            "trialCost": 2,
+            "trialSeasons": 2,
+            "trialLandCost": 1,
+            "archiveCost": 1,
+            "studyCost": 0,
+            "trainingCost": 1,
+            "studyMultiplier": 1,
+            "hardshipLimit": 3
+          },
+          "parameterBounds": {
+            "actionsPerTurn": [
+              2,
+              6
+            ],
+            "turnsPerGeneration": [
+              4,
+              24
+            ],
+            "generations": [
+              1,
+              6
+            ],
+            "initialFood": [
+              0,
+              30
+            ],
+            "initialMoney": [
+              0,
+              30
+            ],
+            "foodPerTurn": [
+              1,
+              6
+            ],
+            "workIncome": [
+              1,
+              8
+            ],
+            "foodPrice": [
+              1,
+              5
+            ],
+            "cropPotential": [
+              2,
+              8
+            ],
+            "channelCost": [
+              1,
+              15
+            ],
+            "channelDurability": [
+              1,
+              8
+            ],
+            "repairCost": [
+              1,
+              8
+            ],
+            "trialCost": [
+              1,
+              10
+            ],
+            "trialSeasons": [
+              2,
+              6
+            ],
+            "trialLandCost": [
+              1,
+              2
+            ],
+            "archiveCost": [
+              1,
+              5
+            ],
+            "studyCost": [
+              0,
+              5
+            ],
+            "trainingCost": [
+              0,
+              5
+            ],
+            "studyMultiplier": [
+              1,
+              3
+            ],
+            "hardshipLimit": [
+              2,
+              6
+            ]
+          },
+          "scenarios": {
+            "river": {
+              "id": "river",
+              "name": "河渠村落",
+              "text": "旱、平、涝都有；可接触测量、沟渠和选种方法。",
+              "drought": 30,
+              "wet": 20,
+              "water": 2,
+              "production": {
+                "stocks": {
+                  "wildFood": 3,
+                  "timber": 5,
+                  "clay": 20
+                },
+                "recovery": {
+                  "wildFood": 1,
+                  "timber": 1
+                },
+                "market": {
+                  "food": 8,
+                  "jobs": 1,
+                  "woodenware": 2,
+                  "pottery": 2,
+                  "methods": 1
+                },
+                "teachers": [
+                  "observation",
+                  "survey",
+                  "ditch",
+                  "allocation",
+                  "selection",
+                  "trial",
+                  "stabilize",
+                  "resource-observation",
+                  "controlled-fire",
+                  "storage",
+                  "pottery",
+                  "agronomy",
+                  "ceramic-engineering",
+                  "mechanics",
+                  "experimentation",
+                  "precision-engineering"
+                ],
+                "imports": [
+                  "woodworking"
+                ]
+              }
+            },
+            "dry": {
+              "id": "dry",
+              "name": "缺水村落",
+              "text": "旱季较多，公共水源有限；检验水利和种源路线的区别。",
+              "drought": 60,
+              "wet": 10,
+              "water": 1,
+              "production": {
+                "stocks": {
+                  "wildFood": 6,
+                  "timber": 10,
+                  "clay": 4
+                },
+                "recovery": {
+                  "wildFood": 3,
+                  "timber": 3
+                },
+                "market": {
+                  "food": 6,
+                  "jobs": 1,
+                  "woodenware": 1,
+                  "pottery": 2,
+                  "methods": 1
+                },
+                "teachers": [
+                  "observation",
+                  "survey",
+                  "ditch",
+                  "allocation",
+                  "selection",
+                  "trial",
+                  "stabilize",
+                  "resource-observation",
+                  "controlled-fire",
+                  "storage",
+                  "woodworking",
+                  "agronomy",
+                  "ceramic-engineering",
+                  "mechanics",
+                  "experimentation",
+                  "precision-engineering"
+                ],
+                "imports": [
+                  "pottery"
+                ]
+              }
+            },
+            "woodland": {
+              "id": "woodland",
+              "name": "林地聚落",
+              "text": "可采食物和木材较丰富、黏土有限；当地传授木作，陶作方法需从交换渠道取得。环境条件不绑定文明。",
+              "drought": 30,
+              "wet": 20,
+              "water": 1,
+              "production": {
+                "stocks": {
+                  "wildFood": 6,
+                  "timber": 10,
+                  "clay": 4
+                },
+                "recovery": {
+                  "wildFood": 3,
+                  "timber": 3
+                },
+                "market": {
+                  "food": 6,
+                  "jobs": 1,
+                  "woodenware": 1,
+                  "pottery": 2,
+                  "methods": 1
+                },
+                "teachers": [
+                  "observation",
+                  "survey",
+                  "ditch",
+                  "allocation",
+                  "selection",
+                  "trial",
+                  "stabilize",
+                  "resource-observation",
+                  "controlled-fire",
+                  "storage",
+                  "woodworking",
+                  "agronomy",
+                  "ceramic-engineering",
+                  "mechanics",
+                  "experimentation",
+                  "precision-engineering"
+                ],
+                "imports": [
+                  "pottery"
+                ]
+              }
+            },
+            "clay-valley": {
+              "id": "clay-valley",
+              "name": "黏土河谷",
+              "text": "黏土充足、可采木材较少；当地传授陶作，木作方法可从交换渠道取得。食物与商品交换均有容量。",
+              "drought": 30,
+              "wet": 20,
+              "water": 2,
+              "production": {
+                "stocks": {
+                  "wildFood": 3,
+                  "timber": 5,
+                  "clay": 20
+                },
+                "recovery": {
+                  "wildFood": 1,
+                  "timber": 1
+                },
+                "market": {
+                  "food": 8,
+                  "jobs": 1,
+                  "woodenware": 2,
+                  "pottery": 2,
+                  "methods": 1
+                },
+                "teachers": [
+                  "observation",
+                  "survey",
+                  "ditch",
+                  "allocation",
+                  "selection",
+                  "trial",
+                  "stabilize",
+                  "resource-observation",
+                  "controlled-fire",
+                  "storage",
+                  "pottery",
+                  "agronomy",
+                  "ceramic-engineering",
+                  "mechanics",
+                  "experimentation",
+                  "precision-engineering"
+                ],
+                "imports": [
+                  "woodworking"
+                ]
+              }
+            }
+          },
+          "technologies": [
+            {
+              "id": "resource-observation",
+              "name": "环境观察",
+              "branch": "获取与材料",
+              "world": "资源辨识",
+              "prerequisites": [],
+              "study": 1,
+              "practices": [
+                "resource-survey"
+              ],
+              "benefit": "辨认采食地点，同样行动最多多取一份食物，仍受当地库存限制。",
+              "practiceText": "完成一次实地资源辨识",
+              "insight": null
+            },
+            {
+              "id": "woodworking",
+              "name": "木材加工与连接",
+              "branch": "获取与材料",
+              "world": "木材加工",
+              "prerequisites": [],
+              "helpfulPrerequisites": [
+                "survey"
+              ],
+              "study": 2,
+              "practices": [
+                "wood-shaped"
+              ],
+              "benefit": "制造木容器或采集工具；测量经验可减少一次学习，但不要求先学农业。 掌握后可建木工作台，开放两件一批的木容器制作，减少重复装配行动。",
+              "practiceText": "实际完成一件木制品",
+              "insight": null
+            },
+            {
+              "id": "controlled-fire",
+              "name": "燃料与控火",
+              "branch": "热加工",
+              "world": "火的利用",
+              "prerequisites": [],
+              "study": 1,
+              "practices": [
+                "fire-tended"
+              ],
+              "benefit": "安排燃料与受控加热，为烧制陶器提供必要基础。",
+              "practiceText": "消耗一份木材燃料完成控火实践",
+              "insight": null
+            },
+            {
+              "id": "pottery",
+              "name": "陶器成形与烧制",
+              "branch": "热加工",
+              "world": "陶作",
+              "prerequisites": [
+                "controlled-fire"
+              ],
+              "study": 2,
+              "practices": [
+                "pot-fired"
+              ],
+              "benefit": "黏土成形后跨季干燥，再用燃料烧制容器；可用于交换或储存。 掌握后可建陶窑，开放四件一批的陶器制作；仍需跨季干燥和足量燃料。",
+              "practiceText": "实际完成一次陶器烧制",
+              "insight": null
+            },
+            {
+              "id": "storage",
+              "name": "容器配置与储存",
+              "branch": "保存",
+              "world": "物品保存",
+              "prerequisites": [],
+              "study": 1,
+              "practices": [
+                "storage-fitted"
+              ],
+              "benefit": "学习使用容器保存余粮，无需先学制造；可利用购买、继承或自己制造的实物。",
+              "practiceText": "消耗一件容器完成储存配置",
+              "insight": null
+            },
+            {
+              "id": "observation",
+              "name": "田间观察",
+              "branch": "田间基础",
+              "world": "耕作经验",
+              "prerequisites": [],
+              "study": 1,
+              "practices": [
+                "cultivation"
+              ],
+              "benefit": "建立水分与收成的记录，开放测量和选种学习。",
+              "insight": "经历一次旱季耕作",
+              "practiceText": "完成一次耕作（无需先学习）"
+            },
+            {
+              "id": "survey",
+              "name": "地形测量",
+              "branch": "灌溉",
+              "world": "基础测量",
+              "prerequisites": [
+                "observation"
+              ],
+              "study": 2,
+              "practices": [
+                "survey"
+              ],
+              "benefit": "学会测量地块，获得渠道布局的前置基础。",
+              "insight": null,
+              "practiceText": "完成地块测量练习"
+            },
+            {
+              "id": "ditch",
+              "name": "渠道布局",
+              "branch": "灌溉",
+              "world": "沟渠施工",
+              "prerequisites": [
+                "survey"
+              ],
+              "study": 2,
+              "practices": [
+                "channel-model"
+              ],
+              "benefit": "能建设家用引水渠；设施才会改善耕作供水。",
+              "insight": null,
+              "practiceText": "完成渠道模型练习"
+            },
+            {
+              "id": "allocation",
+              "name": "配水管理",
+              "branch": "灌溉",
+              "world": "沟渠施工",
+              "prerequisites": [
+                "ditch"
+              ],
+              "study": 2,
+              "practices": [
+                "water-plan"
+              ],
+              "benefit": "耕作时每单位引水满足两单位需水；只在水分不足时有用。",
+              "insight": null,
+              "practiceText": "拥有可用渠道时完成配水练习"
+            },
+            {
+              "id": "selection",
+              "name": "田间选种",
+              "branch": "种源",
+              "world": "留种选种",
+              "prerequisites": [
+                "observation"
+              ],
+              "study": 2,
+              "practices": [
+                "selection"
+              ],
+              "benefit": "能从现有种源中准备候选种子，开放比较试种。",
+              "insight": null,
+              "practiceText": "消耗 1 口粮完成选种练习"
+            },
+            {
+              "id": "trial",
+              "name": "对照试种",
+              "branch": "种源",
+              "world": "留种选种",
+              "prerequisites": [
+                "selection"
+              ],
+              "study": 2,
+              "practices": [
+                "trial-completed"
+              ],
+              "benefit": "能比较种源在不同天气下的表现；结果是记录，不是自动增产。",
+              "insight": null,
+              "practiceText": "完成一次多季试种项目"
+            },
+            {
+              "id": "stabilize",
+              "name": "种源定选",
+              "branch": "种源",
+              "world": "留种选种",
+              "prerequisites": [
+                "trial"
+              ],
+              "study": 2,
+              "practices": [
+                "stock-release"
+              ],
+              "benefit": "能依据试种记录决定替换或保留种源；不是现代遗传育种。",
+              "insight": null,
+              "practiceText": "读过试种记录后完成一次定选"
+            },
+            {
+              "id": "agronomy",
+              "name": "农艺与加工",
+              "branch": "农业与加工",
+              "world": "工艺与实验协作",
+              "prerequisites": [
+                "observation"
+              ],
+              "study": 1,
+              "practices": [
+                "development-agronomy"
+              ],
+              "benefit": "余粮加工成工坊补给，供实验和精密生产使用；农业设备改善有收成时的产量。",
+              "insight": null,
+              "practiceText": "完成对应工业项目"
+            },
+            {
+              "id": "ceramic-engineering",
+              "name": "陶质构件工艺",
+              "branch": "陶作与材料",
+              "world": "工艺与实验协作",
+              "prerequisites": [
+                "pottery"
+              ],
+              "study": 1,
+              "practices": [
+                "development-ceramic-engineering"
+              ],
+              "benefit": "从容器走向机械和实验所需构件；需陶作熟练等级1。",
+              "insight": null,
+              "practiceText": "完成对应工业项目"
+            },
+            {
+              "id": "mechanics",
+              "name": "机械传动",
+              "branch": "机械与设备",
+              "world": "工艺与实验协作",
+              "prerequisites": [
+                "woodworking"
+              ],
+              "study": 1,
+              "practices": [
+                "development-mechanics"
+              ],
+              "benefit": "把木材与陶质构件装配成传动机构，进一步制造农具和实验器具；需木作熟练等级1。",
+              "insight": null,
+              "practiceText": "完成对应工业项目"
+            },
+            {
+              "id": "experimentation",
+              "name": "材料实验方法",
+              "branch": "科学研究",
+              "world": "工艺与实验协作",
+              "prerequisites": [],
+              "study": 1,
+              "practices": [
+                "development-experimentation"
+              ],
+              "benefit": "消耗补给与陶质构件开展对照，得到研究记录，改良家庭工艺；实验设备提高每次记录产出。",
+              "insight": null,
+              "practiceText": "完成材料对照或制造实验器具"
+            },
+            {
+              "id": "precision-engineering",
+              "name": "精密器件工艺",
+              "branch": "陶作与精密制造",
+              "world": "工艺与实验协作",
+              "prerequisites": [
+                "ceramic-engineering"
+              ],
+              "study": 1,
+              "practices": [
+                "development-precision-engineering"
+              ],
+              "benefit": "精密器件既可交付，也用于校准仪、提水泵和控温窑；设备开启校准、蓄水灌溉和材料回收。制造精密器件需陶作等级2。",
+              "insight": null,
+              "practiceText": "完成对应工业项目"
+            }
+          ],
+          "worldTechnologies": [
+            "耕作经验",
+            "基础测量",
+            "沟渠施工",
+            "留种选种",
+            "资源辨识",
+            "木材加工",
+            "火的利用",
+            "陶作",
+            "物品保存",
+            "工艺与实验协作"
+          ],
+          "practiceNames": {
+            "cultivation": "耕作",
+            "survey": "地块测量",
+            "channel-model": "渠道模型",
+            "water-plan": "配水方案",
+            "selection": "留选种子",
+            "trial-completed": "多季试种",
+            "stock-release": "种源定选",
+            "resource-survey": "实地资源辨识",
+            "wood-shaped": "木制品制作",
+            "fire-tended": "燃料与控火",
+            "pot-fired": "陶器烧制",
+            "storage-fitted": "储存配置",
+            "development-agronomy": "完成农艺与加工项目",
+            "development-ceramic-engineering": "完成陶质构件工艺项目",
+            "development-mechanics": "完成机械传动项目",
+            "development-experimentation": "材料实验或器具制造",
+            "development-precision-engineering": "完成精密器件工艺项目"
+          },
+          "production": {
+            "parameters": {
+              "gatherFood": 2,
+              "gatherWood": 2,
+              "gatherClay": 2,
+              "baseStorage": 12,
+              "woodenStorage": 4,
+              "potteryStorage": 6,
+              "spoilDivisor": 2,
+              "toolDurability": 4,
+              "toolBonus": 1,
+              "woodRecipeCost": 2,
+              "potteryClayCost": 2,
+              "potteryFuelCost": 2,
+              "woodenwarePrice": 4,
+              "potteryPrice": 3,
+              "methodPrice": 2
+            },
+            "parameterBounds": {
+              "gatherFood": [
+                1,
+                12
+              ],
+              "gatherWood": [
+                1,
+                12
+              ],
+              "gatherClay": [
+                1,
+                12
+              ],
+              "baseStorage": [
+                1,
+                12
+              ],
+              "woodenStorage": [
+                1,
+                12
+              ],
+              "potteryStorage": [
+                1,
+                12
+              ],
+              "spoilDivisor": [
+                1,
+                4
+              ],
+              "toolDurability": [
+                1,
+                12
+              ],
+              "toolBonus": [
+                1,
+                12
+              ],
+              "woodRecipeCost": [
+                1,
+                12
+              ],
+              "potteryClayCost": [
+                1,
+                12
+              ],
+              "potteryFuelCost": [
+                1,
+                12
+              ],
+              "woodenwarePrice": [
+                1,
+                12
+              ],
+              "potteryPrice": [
+                1,
+                12
+              ],
+              "methodPrice": [
+                1,
+                12
+              ]
+            }
+          },
+          "technologyFeedback": {
+            "buildActions": 2,
+            "workbenchWood": 4,
+            "kilnWood": 4,
+            "kilnClay": 4
+          },
+          "socialInheritance": {
+            "wage": 1,
+            "goodsCapacity": 6,
+            "archiveDiscount": 1
+          },
+          "development": {
+            "parameters": {
+              "experienceStep": 2,
+              "equipmentDurability": 4,
+              "marketSupply": 2,
+              "experimentFood": 1,
+              "mentorFood": 1,
+              "tradeSpread": 1
+            },
+            "parameterBounds": {
+              "experienceStep": [
+                1,
+                5
+              ],
+              "equipmentDurability": [
+                1,
+                12
+              ],
+              "marketSupply": [
+                1,
+                4
+              ],
+              "experimentFood": [
+                1,
+                3
+              ],
+              "mentorFood": [
+                1,
+                3
+              ],
+              "tradeSpread": [
+                1,
+                2
+              ]
+            }
+          },
+          "productNetwork": true
+        },
+        "rulesFingerprint": "08ff1f20200974a990bda1cef216045131c7e9a6744970ebaad10b651ca6cb42",
+        "seed": 17,
+        "scenarioId": "clay-valley",
+        "agent": {
+          "kind": "scripted",
+          "name": "product-sell",
+          "policyFingerprint": "ea9209dfc739741b81d6fa82f59bfae78b53bcf1ea0a215fb91610de8511dcc4"
+        }
+      },
+      "metrics": {
+        "status": "active",
+        "completedGenerations": 0,
+        "food": 19,
+        "money": 20,
+        "foodProduced": 0,
+        "foodShortfall": 0,
+        "waterUsed": 0,
+        "learnedNodes": [
+          "experimentation"
+        ],
+        "lastPersonMastered": [
+          "experimentation"
+        ],
+        "inheritedNodes": [],
+        "archivedNodes": [],
+        "samples": 0,
+        "studyActions": 1,
+        "teachingActions": 0,
+        "commands": 9,
+        "productNetwork": {
+          "made": {},
+          "operations": {},
+          "residues": 1,
+          "storedWaterUsed": 0,
+          "usesByGeneration": {}
+        },
+        "productAssets": {
+          "goods": {
+            "calibrator": 0,
+            "pump": 0,
+            "kiln": 0,
+            "calibrations": 0,
+            "spentCeramics": 1
+          },
+          "installed": {
+            "calibrator": 0,
+            "pump": 0,
+            "kiln": 0
+          },
+          "storedWater": 0,
+          "project": null
+        },
+        "development": {
+          "outputs": {},
+          "purchases": {
+            "precisionParts": 1,
+            "labTools": 1,
+            "ceramicParts": 1,
+            "supplies": 1
+          },
+          "deliveries": {
+            "precisionParts": 1,
+            "labTools": 1
+          },
+          "experienceByPerson": {
+            "person:1": {
+              "science": 1
+            }
+          },
+          "experiments": 1,
+          "findings": 1,
+          "refinements": 0,
+          "purchaseCost": 38,
+          "deliveryIncome": 28,
+          "fieldUses": 0,
+          "labUses": 0
+        },
+        "developmentAssets": {
+          "goods": {
+            "supplies": 0,
+            "ceramicParts": 0,
+            "mechanisms": 0,
+            "fieldTools": 0,
+            "labTools": 0,
+            "precisionParts": 0,
+            "findings": 1
+          },
+          "designs": {
+            "pottery": 0,
+            "woodwork": 0,
+            "agriculture": 0,
+            "science": 0
+          },
+          "project": null,
+          "fieldDurability": 0,
+          "labDurability": 0
+        },
+        "production": {
+          "gatheredFood": 0,
+          "gatheredWood": 0,
+          "gatheredClay": 0,
+          "spoiledFood": 8,
+          "craftedWoodenware": 0,
+          "craftedPottery": 0,
+          "craftedTools": 0,
+          "craftEarnings": 0,
+          "installedStorage": 0,
+          "importedMethods": 0,
+          "workActions": 0,
+          "buyFoodActions": 0,
+          "cultivateActions": 0
+        },
+        "inventory": {
+          "wood": 0,
+          "clay": 0,
+          "woodenware": 0,
+          "pottery": 0
+        },
+        "storage": {
+          "woodenware": false,
+          "pottery": false
+        },
+        "toolDurability": 0
+      },
+      "replay": "passed"
+    },
+    {
+      "mode": "calibrate",
+      "completedPlan": true,
+      "manifest": {
+        "runId": "product-calibrate",
+        "implementation": {
+          "version": "0.7.0",
+          "codeFingerprint": "fdea4d92c9afca9602998d433b0b5da0d36aea6e48a8a9f9301273fdfc119e32"
+        },
+        "ruleset": {
+          "schemaVersion": 1,
+          "id": "product-network-v6",
+          "rulesVersion": "0.6.0",
+          "parameters": {
+            "actionsPerTurn": 6,
+            "turnsPerGeneration": 24,
+            "generations": 3,
+            "initialFood": 30,
+            "initialMoney": 30,
+            "foodPerTurn": 2,
+            "workIncome": 2,
+            "foodPrice": 1,
+            "cropPotential": 4,
+            "channelCost": 3,
+            "channelDurability": 3,
+            "repairCost": 1,
+            "trialCost": 2,
+            "trialSeasons": 2,
+            "trialLandCost": 1,
+            "archiveCost": 1,
+            "studyCost": 0,
+            "trainingCost": 1,
+            "studyMultiplier": 1,
+            "hardshipLimit": 3
+          },
+          "parameterBounds": {
+            "actionsPerTurn": [
+              2,
+              6
+            ],
+            "turnsPerGeneration": [
+              4,
+              24
+            ],
+            "generations": [
+              1,
+              6
+            ],
+            "initialFood": [
+              0,
+              30
+            ],
+            "initialMoney": [
+              0,
+              30
+            ],
+            "foodPerTurn": [
+              1,
+              6
+            ],
+            "workIncome": [
+              1,
+              8
+            ],
+            "foodPrice": [
+              1,
+              5
+            ],
+            "cropPotential": [
+              2,
+              8
+            ],
+            "channelCost": [
+              1,
+              15
+            ],
+            "channelDurability": [
+              1,
+              8
+            ],
+            "repairCost": [
+              1,
+              8
+            ],
+            "trialCost": [
+              1,
+              10
+            ],
+            "trialSeasons": [
+              2,
+              6
+            ],
+            "trialLandCost": [
+              1,
+              2
+            ],
+            "archiveCost": [
+              1,
+              5
+            ],
+            "studyCost": [
+              0,
+              5
+            ],
+            "trainingCost": [
+              0,
+              5
+            ],
+            "studyMultiplier": [
+              1,
+              3
+            ],
+            "hardshipLimit": [
+              2,
+              6
+            ]
+          },
+          "scenarios": {
+            "river": {
+              "id": "river",
+              "name": "河渠村落",
+              "text": "旱、平、涝都有；可接触测量、沟渠和选种方法。",
+              "drought": 30,
+              "wet": 20,
+              "water": 2,
+              "production": {
+                "stocks": {
+                  "wildFood": 3,
+                  "timber": 5,
+                  "clay": 20
+                },
+                "recovery": {
+                  "wildFood": 1,
+                  "timber": 1
+                },
+                "market": {
+                  "food": 8,
+                  "jobs": 1,
+                  "woodenware": 2,
+                  "pottery": 2,
+                  "methods": 1
+                },
+                "teachers": [
+                  "observation",
+                  "survey",
+                  "ditch",
+                  "allocation",
+                  "selection",
+                  "trial",
+                  "stabilize",
+                  "resource-observation",
+                  "controlled-fire",
+                  "storage",
+                  "pottery",
+                  "agronomy",
+                  "ceramic-engineering",
+                  "mechanics",
+                  "experimentation",
+                  "precision-engineering"
+                ],
+                "imports": [
+                  "woodworking"
+                ]
+              }
+            },
+            "dry": {
+              "id": "dry",
+              "name": "缺水村落",
+              "text": "旱季较多，公共水源有限；检验水利和种源路线的区别。",
+              "drought": 60,
+              "wet": 10,
+              "water": 1,
+              "production": {
+                "stocks": {
+                  "wildFood": 6,
+                  "timber": 10,
+                  "clay": 4
+                },
+                "recovery": {
+                  "wildFood": 3,
+                  "timber": 3
+                },
+                "market": {
+                  "food": 6,
+                  "jobs": 1,
+                  "woodenware": 1,
+                  "pottery": 2,
+                  "methods": 1
+                },
+                "teachers": [
+                  "observation",
+                  "survey",
+                  "ditch",
+                  "allocation",
+                  "selection",
+                  "trial",
+                  "stabilize",
+                  "resource-observation",
+                  "controlled-fire",
+                  "storage",
+                  "woodworking",
+                  "agronomy",
+                  "ceramic-engineering",
+                  "mechanics",
+                  "experimentation",
+                  "precision-engineering"
+                ],
+                "imports": [
+                  "pottery"
+                ]
+              }
+            },
+            "woodland": {
+              "id": "woodland",
+              "name": "林地聚落",
+              "text": "可采食物和木材较丰富、黏土有限；当地传授木作，陶作方法需从交换渠道取得。环境条件不绑定文明。",
+              "drought": 30,
+              "wet": 20,
+              "water": 1,
+              "production": {
+                "stocks": {
+                  "wildFood": 6,
+                  "timber": 10,
+                  "clay": 4
+                },
+                "recovery": {
+                  "wildFood": 3,
+                  "timber": 3
+                },
+                "market": {
+                  "food": 6,
+                  "jobs": 1,
+                  "woodenware": 1,
+                  "pottery": 2,
+                  "methods": 1
+                },
+                "teachers": [
+                  "observation",
+                  "survey",
+                  "ditch",
+                  "allocation",
+                  "selection",
+                  "trial",
+                  "stabilize",
+                  "resource-observation",
+                  "controlled-fire",
+                  "storage",
+                  "woodworking",
+                  "agronomy",
+                  "ceramic-engineering",
+                  "mechanics",
+                  "experimentation",
+                  "precision-engineering"
+                ],
+                "imports": [
+                  "pottery"
+                ]
+              }
+            },
+            "clay-valley": {
+              "id": "clay-valley",
+              "name": "黏土河谷",
+              "text": "黏土充足、可采木材较少；当地传授陶作，木作方法可从交换渠道取得。食物与商品交换均有容量。",
+              "drought": 30,
+              "wet": 20,
+              "water": 2,
+              "production": {
+                "stocks": {
+                  "wildFood": 3,
+                  "timber": 5,
+                  "clay": 20
+                },
+                "recovery": {
+                  "wildFood": 1,
+                  "timber": 1
+                },
+                "market": {
+                  "food": 8,
+                  "jobs": 1,
+                  "woodenware": 2,
+                  "pottery": 2,
+                  "methods": 1
+                },
+                "teachers": [
+                  "observation",
+                  "survey",
+                  "ditch",
+                  "allocation",
+                  "selection",
+                  "trial",
+                  "stabilize",
+                  "resource-observation",
+                  "controlled-fire",
+                  "storage",
+                  "pottery",
+                  "agronomy",
+                  "ceramic-engineering",
+                  "mechanics",
+                  "experimentation",
+                  "precision-engineering"
+                ],
+                "imports": [
+                  "woodworking"
+                ]
+              }
+            }
+          },
+          "technologies": [
+            {
+              "id": "resource-observation",
+              "name": "环境观察",
+              "branch": "获取与材料",
+              "world": "资源辨识",
+              "prerequisites": [],
+              "study": 1,
+              "practices": [
+                "resource-survey"
+              ],
+              "benefit": "辨认采食地点，同样行动最多多取一份食物，仍受当地库存限制。",
+              "practiceText": "完成一次实地资源辨识",
+              "insight": null
+            },
+            {
+              "id": "woodworking",
+              "name": "木材加工与连接",
+              "branch": "获取与材料",
+              "world": "木材加工",
+              "prerequisites": [],
+              "helpfulPrerequisites": [
+                "survey"
+              ],
+              "study": 2,
+              "practices": [
+                "wood-shaped"
+              ],
+              "benefit": "制造木容器或采集工具；测量经验可减少一次学习，但不要求先学农业。 掌握后可建木工作台，开放两件一批的木容器制作，减少重复装配行动。",
+              "practiceText": "实际完成一件木制品",
+              "insight": null
+            },
+            {
+              "id": "controlled-fire",
+              "name": "燃料与控火",
+              "branch": "热加工",
+              "world": "火的利用",
+              "prerequisites": [],
+              "study": 1,
+              "practices": [
+                "fire-tended"
+              ],
+              "benefit": "安排燃料与受控加热，为烧制陶器提供必要基础。",
+              "practiceText": "消耗一份木材燃料完成控火实践",
+              "insight": null
+            },
+            {
+              "id": "pottery",
+              "name": "陶器成形与烧制",
+              "branch": "热加工",
+              "world": "陶作",
+              "prerequisites": [
+                "controlled-fire"
+              ],
+              "study": 2,
+              "practices": [
+                "pot-fired"
+              ],
+              "benefit": "黏土成形后跨季干燥，再用燃料烧制容器；可用于交换或储存。 掌握后可建陶窑，开放四件一批的陶器制作；仍需跨季干燥和足量燃料。",
+              "practiceText": "实际完成一次陶器烧制",
+              "insight": null
+            },
+            {
+              "id": "storage",
+              "name": "容器配置与储存",
+              "branch": "保存",
+              "world": "物品保存",
+              "prerequisites": [],
+              "study": 1,
+              "practices": [
+                "storage-fitted"
+              ],
+              "benefit": "学习使用容器保存余粮，无需先学制造；可利用购买、继承或自己制造的实物。",
+              "practiceText": "消耗一件容器完成储存配置",
+              "insight": null
+            },
+            {
+              "id": "observation",
+              "name": "田间观察",
+              "branch": "田间基础",
+              "world": "耕作经验",
+              "prerequisites": [],
+              "study": 1,
+              "practices": [
+                "cultivation"
+              ],
+              "benefit": "建立水分与收成的记录，开放测量和选种学习。",
+              "insight": "经历一次旱季耕作",
+              "practiceText": "完成一次耕作（无需先学习）"
+            },
+            {
+              "id": "survey",
+              "name": "地形测量",
+              "branch": "灌溉",
+              "world": "基础测量",
+              "prerequisites": [
+                "observation"
+              ],
+              "study": 2,
+              "practices": [
+                "survey"
+              ],
+              "benefit": "学会测量地块，获得渠道布局的前置基础。",
+              "insight": null,
+              "practiceText": "完成地块测量练习"
+            },
+            {
+              "id": "ditch",
+              "name": "渠道布局",
+              "branch": "灌溉",
+              "world": "沟渠施工",
+              "prerequisites": [
+                "survey"
+              ],
+              "study": 2,
+              "practices": [
+                "channel-model"
+              ],
+              "benefit": "能建设家用引水渠；设施才会改善耕作供水。",
+              "insight": null,
+              "practiceText": "完成渠道模型练习"
+            },
+            {
+              "id": "allocation",
+              "name": "配水管理",
+              "branch": "灌溉",
+              "world": "沟渠施工",
+              "prerequisites": [
+                "ditch"
+              ],
+              "study": 2,
+              "practices": [
+                "water-plan"
+              ],
+              "benefit": "耕作时每单位引水满足两单位需水；只在水分不足时有用。",
+              "insight": null,
+              "practiceText": "拥有可用渠道时完成配水练习"
+            },
+            {
+              "id": "selection",
+              "name": "田间选种",
+              "branch": "种源",
+              "world": "留种选种",
+              "prerequisites": [
+                "observation"
+              ],
+              "study": 2,
+              "practices": [
+                "selection"
+              ],
+              "benefit": "能从现有种源中准备候选种子，开放比较试种。",
+              "insight": null,
+              "practiceText": "消耗 1 口粮完成选种练习"
+            },
+            {
+              "id": "trial",
+              "name": "对照试种",
+              "branch": "种源",
+              "world": "留种选种",
+              "prerequisites": [
+                "selection"
+              ],
+              "study": 2,
+              "practices": [
+                "trial-completed"
+              ],
+              "benefit": "能比较种源在不同天气下的表现；结果是记录，不是自动增产。",
+              "insight": null,
+              "practiceText": "完成一次多季试种项目"
+            },
+            {
+              "id": "stabilize",
+              "name": "种源定选",
+              "branch": "种源",
+              "world": "留种选种",
+              "prerequisites": [
+                "trial"
+              ],
+              "study": 2,
+              "practices": [
+                "stock-release"
+              ],
+              "benefit": "能依据试种记录决定替换或保留种源；不是现代遗传育种。",
+              "insight": null,
+              "practiceText": "读过试种记录后完成一次定选"
+            },
+            {
+              "id": "agronomy",
+              "name": "农艺与加工",
+              "branch": "农业与加工",
+              "world": "工艺与实验协作",
+              "prerequisites": [
+                "observation"
+              ],
+              "study": 1,
+              "practices": [
+                "development-agronomy"
+              ],
+              "benefit": "余粮加工成工坊补给，供实验和精密生产使用；农业设备改善有收成时的产量。",
+              "insight": null,
+              "practiceText": "完成对应工业项目"
+            },
+            {
+              "id": "ceramic-engineering",
+              "name": "陶质构件工艺",
+              "branch": "陶作与材料",
+              "world": "工艺与实验协作",
+              "prerequisites": [
+                "pottery"
+              ],
+              "study": 1,
+              "practices": [
+                "development-ceramic-engineering"
+              ],
+              "benefit": "从容器走向机械和实验所需构件；需陶作熟练等级1。",
+              "insight": null,
+              "practiceText": "完成对应工业项目"
+            },
+            {
+              "id": "mechanics",
+              "name": "机械传动",
+              "branch": "机械与设备",
+              "world": "工艺与实验协作",
+              "prerequisites": [
+                "woodworking"
+              ],
+              "study": 1,
+              "practices": [
+                "development-mechanics"
+              ],
+              "benefit": "把木材与陶质构件装配成传动机构，进一步制造农具和实验器具；需木作熟练等级1。",
+              "insight": null,
+              "practiceText": "完成对应工业项目"
+            },
+            {
+              "id": "experimentation",
+              "name": "材料实验方法",
+              "branch": "科学研究",
+              "world": "工艺与实验协作",
+              "prerequisites": [],
+              "study": 1,
+              "practices": [
+                "development-experimentation"
+              ],
+              "benefit": "消耗补给与陶质构件开展对照，得到研究记录，改良家庭工艺；实验设备提高每次记录产出。",
+              "insight": null,
+              "practiceText": "完成材料对照或制造实验器具"
+            },
+            {
+              "id": "precision-engineering",
+              "name": "精密器件工艺",
+              "branch": "陶作与精密制造",
+              "world": "工艺与实验协作",
+              "prerequisites": [
+                "ceramic-engineering"
+              ],
+              "study": 1,
+              "practices": [
+                "development-precision-engineering"
+              ],
+              "benefit": "精密器件既可交付，也用于校准仪、提水泵和控温窑；设备开启校准、蓄水灌溉和材料回收。制造精密器件需陶作等级2。",
+              "insight": null,
+              "practiceText": "完成对应工业项目"
+            }
+          ],
+          "worldTechnologies": [
+            "耕作经验",
+            "基础测量",
+            "沟渠施工",
+            "留种选种",
+            "资源辨识",
+            "木材加工",
+            "火的利用",
+            "陶作",
+            "物品保存",
+            "工艺与实验协作"
+          ],
+          "practiceNames": {
+            "cultivation": "耕作",
+            "survey": "地块测量",
+            "channel-model": "渠道模型",
+            "water-plan": "配水方案",
+            "selection": "留选种子",
+            "trial-completed": "多季试种",
+            "stock-release": "种源定选",
+            "resource-survey": "实地资源辨识",
+            "wood-shaped": "木制品制作",
+            "fire-tended": "燃料与控火",
+            "pot-fired": "陶器烧制",
+            "storage-fitted": "储存配置",
+            "development-agronomy": "完成农艺与加工项目",
+            "development-ceramic-engineering": "完成陶质构件工艺项目",
+            "development-mechanics": "完成机械传动项目",
+            "development-experimentation": "材料实验或器具制造",
+            "development-precision-engineering": "完成精密器件工艺项目"
+          },
+          "production": {
+            "parameters": {
+              "gatherFood": 2,
+              "gatherWood": 2,
+              "gatherClay": 2,
+              "baseStorage": 12,
+              "woodenStorage": 4,
+              "potteryStorage": 6,
+              "spoilDivisor": 2,
+              "toolDurability": 4,
+              "toolBonus": 1,
+              "woodRecipeCost": 2,
+              "potteryClayCost": 2,
+              "potteryFuelCost": 2,
+              "woodenwarePrice": 4,
+              "potteryPrice": 3,
+              "methodPrice": 2
+            },
+            "parameterBounds": {
+              "gatherFood": [
+                1,
+                12
+              ],
+              "gatherWood": [
+                1,
+                12
+              ],
+              "gatherClay": [
+                1,
+                12
+              ],
+              "baseStorage": [
+                1,
+                12
+              ],
+              "woodenStorage": [
+                1,
+                12
+              ],
+              "potteryStorage": [
+                1,
+                12
+              ],
+              "spoilDivisor": [
+                1,
+                4
+              ],
+              "toolDurability": [
+                1,
+                12
+              ],
+              "toolBonus": [
+                1,
+                12
+              ],
+              "woodRecipeCost": [
+                1,
+                12
+              ],
+              "potteryClayCost": [
+                1,
+                12
+              ],
+              "potteryFuelCost": [
+                1,
+                12
+              ],
+              "woodenwarePrice": [
+                1,
+                12
+              ],
+              "potteryPrice": [
+                1,
+                12
+              ],
+              "methodPrice": [
+                1,
+                12
+              ]
+            }
+          },
+          "technologyFeedback": {
+            "buildActions": 2,
+            "workbenchWood": 4,
+            "kilnWood": 4,
+            "kilnClay": 4
+          },
+          "socialInheritance": {
+            "wage": 1,
+            "goodsCapacity": 6,
+            "archiveDiscount": 1
+          },
+          "development": {
+            "parameters": {
+              "experienceStep": 2,
+              "equipmentDurability": 4,
+              "marketSupply": 2,
+              "experimentFood": 1,
+              "mentorFood": 1,
+              "tradeSpread": 1
+            },
+            "parameterBounds": {
+              "experienceStep": [
+                1,
+                5
+              ],
+              "equipmentDurability": [
+                1,
+                12
+              ],
+              "marketSupply": [
+                1,
+                4
+              ],
+              "experimentFood": [
+                1,
+                3
+              ],
+              "mentorFood": [
+                1,
+                3
+              ],
+              "tradeSpread": [
+                1,
+                2
+              ]
+            }
+          },
+          "productNetwork": true
+        },
+        "rulesFingerprint": "08ff1f20200974a990bda1cef216045131c7e9a6744970ebaad10b651ca6cb42",
+        "seed": 17,
+        "scenarioId": "clay-valley",
+        "agent": {
+          "kind": "scripted",
+          "name": "product-calibrate",
+          "policyFingerprint": "ea9209dfc739741b81d6fa82f59bfae78b53bcf1ea0a215fb91610de8511dcc4"
+        }
+      },
+      "metrics": {
+        "status": "active",
+        "completedGenerations": 0,
+        "food": 5,
+        "money": 1,
+        "foodProduced": 0,
+        "foodShortfall": 0,
+        "waterUsed": 0,
+        "learnedNodes": [
+          "experimentation"
+        ],
+        "lastPersonMastered": [
+          "experimentation"
+        ],
+        "inheritedNodes": [],
+        "archivedNodes": [],
+        "samples": 0,
+        "studyActions": 1,
+        "teachingActions": 0,
+        "commands": 22,
+        "productNetwork": {
+          "made": {
+            "calibrator": 1
+          },
+          "operations": {
+            "calibrator": 1
+          },
+          "residues": 1,
+          "storedWaterUsed": 0,
+          "usesByGeneration": {
+            "1": [
+              "calibrator"
+            ]
+          }
+        },
+        "productAssets": {
+          "goods": {
+            "calibrator": 0,
+            "pump": 0,
+            "kiln": 0,
+            "calibrations": 1,
+            "spentCeramics": 1
+          },
+          "installed": {
+            "calibrator": 3,
+            "pump": 0,
+            "kiln": 0
+          },
+          "storedWater": 0,
+          "project": null
+        },
+        "development": {
+          "outputs": {},
+          "purchases": {
+            "precisionParts": 1,
+            "labTools": 1,
+            "ceramicParts": 1,
+            "supplies": 2
+          },
+          "deliveries": {},
+          "experienceByPerson": {
+            "person:1": {
+              "science": 4
+            }
+          },
+          "experiments": 1,
+          "findings": 1,
+          "refinements": 0,
+          "purchaseCost": 41,
+          "deliveryIncome": 0,
+          "fieldUses": 0,
+          "labUses": 0
+        },
+        "developmentAssets": {
+          "goods": {
+            "supplies": 0,
+            "ceramicParts": 0,
+            "mechanisms": 0,
+            "fieldTools": 0,
+            "labTools": 0,
+            "precisionParts": 0,
+            "findings": 0
+          },
+          "designs": {
+            "pottery": 0,
+            "woodwork": 0,
+            "agriculture": 0,
+            "science": 0
+          },
+          "project": null,
+          "fieldDurability": 0,
+          "labDurability": 0
+        },
+        "production": {
+          "gatheredFood": 0,
+          "gatheredWood": 0,
+          "gatheredClay": 0,
+          "spoiledFood": 12,
+          "craftedWoodenware": 0,
+          "craftedPottery": 0,
+          "craftedTools": 0,
+          "craftEarnings": 0,
+          "installedStorage": 0,
+          "importedMethods": 0,
+          "workActions": 6,
+          "buyFoodActions": 0,
+          "cultivateActions": 0
+        },
+        "inventory": {
+          "wood": 0,
+          "clay": 0,
+          "woodenware": 0,
+          "pottery": 0
+        },
+        "storage": {
+          "woodenware": false,
+          "pottery": false
+        },
+        "toolDurability": 0
+      },
+      "replay": "passed"
+    }
+  ]
+}

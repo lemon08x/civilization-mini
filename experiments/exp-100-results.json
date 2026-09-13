@@ -1,0 +1,3549 @@
+[
+  {
+    "strategy": "specialist",
+    "scenario": "clay-valley",
+    "seed": 7,
+    "status": "complete",
+    "gen": 3,
+    "money": 2,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 1,
+    "mastered": 8,
+    "milestones": {
+      "made:supplies": 14,
+      "made:ceramicParts": 16,
+      "made:mechanisms": 27,
+      "made:labTools": 28,
+      "made:precisionParts": 32,
+      "built:calibrator": 33,
+      "installed:calibrator": 33
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 6
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 9
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "specialist",
+    "scenario": "clay-valley",
+    "seed": 17,
+    "status": "complete",
+    "gen": 3,
+    "money": 5,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 2,
+    "mastered": 9,
+    "milestones": {
+      "made:supplies": 15,
+      "made:ceramicParts": 16,
+      "made:mechanisms": 17,
+      "made:labTools": 27,
+      "made:precisionParts": 33,
+      "built:calibrator": 44,
+      "installed:calibrator": 45
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 6
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 9
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "specialist",
+    "scenario": "clay-valley",
+    "seed": 23,
+    "status": "complete",
+    "gen": 3,
+    "money": 0,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 2,
+    "mastered": 9,
+    "milestones": {
+      "made:supplies": 14,
+      "made:ceramicParts": 15,
+      "made:mechanisms": 16,
+      "made:labTools": 27,
+      "made:precisionParts": 33,
+      "built:calibrator": 40,
+      "installed:calibrator": 41
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 9
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "specialist",
+    "scenario": "clay-valley",
+    "seed": 42,
+    "status": "complete",
+    "gen": 3,
+    "money": 1,
+    "food": 2,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 8,
+    "milestones": {
+      "made:supplies": 15,
+      "made:ceramicParts": 16,
+      "made:mechanisms": 18,
+      "made:labTools": 28
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 6
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "specialist",
+    "scenario": "clay-valley",
+    "seed": 55,
+    "status": "complete",
+    "gen": 3,
+    "money": 2,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 2,
+    "mastered": 8,
+    "milestones": {
+      "made:supplies": 14,
+      "made:ceramicParts": 15,
+      "made:mechanisms": 16,
+      "made:labTools": 28,
+      "made:precisionParts": 48
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "specialist",
+    "scenario": "clay-valley",
+    "seed": 99,
+    "status": "complete",
+    "gen": 3,
+    "money": 6,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 7,
+    "milestones": {
+      "made:supplies": 14,
+      "made:ceramicParts": 15,
+      "made:mechanisms": 16,
+      "made:labTools": 29,
+      "made:precisionParts": 32,
+      "built:calibrator": 33,
+      "installed:calibrator": 33
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 9
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 7
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "specialist",
+    "scenario": "clay-valley",
+    "seed": 123,
+    "status": "complete",
+    "gen": 3,
+    "money": 9,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 2,
+    "mastered": 8,
+    "milestones": {
+      "made:ceramicParts": 13,
+      "made:supplies": 14,
+      "made:mechanisms": 15,
+      "made:labTools": 16
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "specialist",
+    "scenario": "clay-valley",
+    "seed": 256,
+    "status": "complete",
+    "gen": 3,
+    "money": 1,
+    "food": 1,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 9,
+    "milestones": {
+      "made:supplies": 13,
+      "made:ceramicParts": 15,
+      "made:mechanisms": 16,
+      "made:labTools": 29,
+      "made:precisionParts": 33,
+      "built:calibrator": 45,
+      "installed:calibrator": 46
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 9
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "specialist",
+    "scenario": "woodland",
+    "seed": 7,
+    "status": "complete",
+    "gen": 3,
+    "money": 1,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 3,
+    "milestones": {
+      "made:supplies": 29
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 5
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 3
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "specialist",
+    "scenario": "woodland",
+    "seed": 17,
+    "status": "complete",
+    "gen": 3,
+    "money": 1,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 3,
+    "milestones": {
+      "made:supplies": 16
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 5
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 5
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 3
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "specialist",
+    "scenario": "woodland",
+    "seed": 23,
+    "status": "complete",
+    "gen": 3,
+    "money": 6,
+    "food": 2,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 3,
+    "milestones": {
+      "made:supplies": 17
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 5
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 3
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "specialist",
+    "scenario": "woodland",
+    "seed": 42,
+    "status": "complete",
+    "gen": 3,
+    "money": 1,
+    "food": 2,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 4,
+    "milestones": {
+      "made:supplies": 16,
+      "made:ceramicParts": 48
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 5
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 4
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "specialist",
+    "scenario": "woodland",
+    "seed": 55,
+    "status": "complete",
+    "gen": 3,
+    "money": 1,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 4,
+    "milestones": {
+      "made:supplies": 16,
+      "made:ceramicParts": 47
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 5
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 5
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 4
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "specialist",
+    "scenario": "woodland",
+    "seed": 99,
+    "status": "complete",
+    "gen": 3,
+    "money": 1,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 4,
+    "milestones": {
+      "made:supplies": 16
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 5
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 4
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "specialist",
+    "scenario": "woodland",
+    "seed": 123,
+    "status": "complete",
+    "gen": 3,
+    "money": 1,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 3,
+    "milestones": {
+      "made:supplies": 30,
+      "made:ceramicParts": 47
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 5
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 3
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "specialist",
+    "scenario": "woodland",
+    "seed": 256,
+    "status": "complete",
+    "gen": 3,
+    "money": 1,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 3,
+    "milestones": {
+      "made:supplies": 31
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 5
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 3
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "industrialUse",
+    "scenario": "clay-valley",
+    "seed": 7,
+    "status": "complete",
+    "gen": 3,
+    "money": 1,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 3,
+    "mastered": 8,
+    "milestones": {
+      "made:supplies": 14,
+      "made:ceramicParts": 16,
+      "made:mechanisms": 27
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 7,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 6
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "industrialUse",
+    "scenario": "clay-valley",
+    "seed": 17,
+    "status": "complete",
+    "gen": 3,
+    "money": 0,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 2,
+    "mastered": 8,
+    "milestones": {
+      "made:supplies": 15,
+      "made:ceramicParts": 16,
+      "made:mechanisms": 17,
+      "made:labTools": 46
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 6,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 6
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "industrialUse",
+    "scenario": "clay-valley",
+    "seed": 23,
+    "status": "complete",
+    "gen": 3,
+    "money": 3,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 2,
+    "mastered": 7,
+    "milestones": {
+      "made:supplies": 14,
+      "made:ceramicParts": 15,
+      "made:mechanisms": 16
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 7,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 7
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "industrialUse",
+    "scenario": "clay-valley",
+    "seed": 42,
+    "status": "complete",
+    "gen": 3,
+    "money": 0,
+    "food": 2,
+    "minFood": 0,
+    "hardship": 2,
+    "mastered": 8,
+    "milestones": {
+      "made:supplies": 15,
+      "made:ceramicParts": 16,
+      "made:mechanisms": 18
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 6,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 6
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "industrialUse",
+    "scenario": "clay-valley",
+    "seed": 55,
+    "status": "complete",
+    "gen": 3,
+    "money": 5,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 2,
+    "mastered": 8,
+    "milestones": {
+      "made:supplies": 14,
+      "made:ceramicParts": 15,
+      "made:mechanisms": 16,
+      "made:labTools": 48
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 6,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "industrialUse",
+    "scenario": "clay-valley",
+    "seed": 99,
+    "status": "complete",
+    "gen": 3,
+    "money": 9,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 3,
+    "mastered": 8,
+    "milestones": {
+      "made:supplies": 14,
+      "made:ceramicParts": 15,
+      "made:mechanisms": 16
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 6,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "industrialUse",
+    "scenario": "clay-valley",
+    "seed": 123,
+    "status": "complete",
+    "gen": 3,
+    "money": 1,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 4,
+    "mastered": 8,
+    "milestones": {
+      "made:ceramicParts": 13,
+      "made:supplies": 14,
+      "made:mechanisms": 15
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 6,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "industrialUse",
+    "scenario": "clay-valley",
+    "seed": 256,
+    "status": "complete",
+    "gen": 3,
+    "money": 4,
+    "food": 1,
+    "minFood": 0,
+    "hardship": 2,
+    "mastered": 8,
+    "milestones": {
+      "made:supplies": 13,
+      "made:ceramicParts": 15,
+      "made:mechanisms": 16
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 6,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "aggressiveDev",
+    "scenario": "clay-valley",
+    "seed": 7,
+    "status": "complete",
+    "gen": 3,
+    "money": 10,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 1,
+    "mastered": 8,
+    "milestones": {
+      "made:supplies": 14,
+      "made:ceramicParts": 16,
+      "made:mechanisms": 27,
+      "made:labTools": 28,
+      "made:precisionParts": 32,
+      "built:calibrator": 33,
+      "installed:calibrator": 33
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 6
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 9
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "aggressiveDev",
+    "scenario": "clay-valley",
+    "seed": 17,
+    "status": "complete",
+    "gen": 3,
+    "money": 12,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 1,
+    "mastered": 8,
+    "milestones": {
+      "made:supplies": 15,
+      "made:ceramicParts": 16,
+      "made:mechanisms": 17,
+      "made:labTools": 27
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 6
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 143
+  },
+  {
+    "strategy": "aggressiveDev",
+    "scenario": "clay-valley",
+    "seed": 23,
+    "status": "complete",
+    "gen": 3,
+    "money": 10,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 1,
+    "mastered": 8,
+    "milestones": {
+      "made:supplies": 14,
+      "made:ceramicParts": 15,
+      "made:mechanisms": 16,
+      "made:labTools": 27
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "aggressiveDev",
+    "scenario": "clay-valley",
+    "seed": 42,
+    "status": "complete",
+    "gen": 3,
+    "money": 8,
+    "food": 2,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 8,
+    "milestones": {
+      "made:supplies": 15,
+      "made:ceramicParts": 16,
+      "made:mechanisms": 18,
+      "made:labTools": 28
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 6
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "aggressiveDev",
+    "scenario": "clay-valley",
+    "seed": 55,
+    "status": "complete",
+    "gen": 3,
+    "money": 10,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 2,
+    "mastered": 7,
+    "milestones": {
+      "made:supplies": 14,
+      "made:ceramicParts": 15,
+      "made:mechanisms": 16,
+      "made:labTools": 28
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 7
+      }
+    ],
+    "actions": 142
+  },
+  {
+    "strategy": "aggressiveDev",
+    "scenario": "clay-valley",
+    "seed": 99,
+    "status": "complete",
+    "gen": 3,
+    "money": 8,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 7,
+    "milestones": {
+      "made:supplies": 14,
+      "made:ceramicParts": 15,
+      "made:mechanisms": 16,
+      "made:labTools": 29,
+      "made:precisionParts": 32,
+      "built:calibrator": 33,
+      "installed:calibrator": 33
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 9
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 7
+      }
+    ],
+    "actions": 144
+  },
+  {
+    "strategy": "aggressiveDev",
+    "scenario": "clay-valley",
+    "seed": 123,
+    "status": "complete",
+    "gen": 3,
+    "money": 5,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 2,
+    "mastered": 8,
+    "milestones": {
+      "made:ceramicParts": 13,
+      "made:supplies": 14,
+      "made:mechanisms": 15,
+      "made:labTools": 16
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 146
+  },
+  {
+    "strategy": "aggressiveDev",
+    "scenario": "clay-valley",
+    "seed": 256,
+    "status": "complete",
+    "gen": 3,
+    "money": 8,
+    "food": 1,
+    "minFood": 0,
+    "hardship": 1,
+    "mastered": 8,
+    "milestones": {
+      "made:supplies": 13,
+      "made:ceramicParts": 15,
+      "made:mechanisms": 16,
+      "made:labTools": 29
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 7
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 8
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 8
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "craftLife",
+    "scenario": "woodland",
+    "seed": 7,
+    "status": "complete",
+    "gen": 3,
+    "money": 57,
+    "food": 2,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 4,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 3
+      },
+      {
+        "gen": 2,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 4
+      }
+    ],
+    "actions": 136
+  },
+  {
+    "strategy": "craftLife",
+    "scenario": "woodland",
+    "seed": 17,
+    "status": "complete",
+    "gen": 3,
+    "money": 39,
+    "food": 1,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 3,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 1,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 3,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 3
+      }
+    ],
+    "actions": 144
+  },
+  {
+    "strategy": "craftLife",
+    "scenario": "woodland",
+    "seed": 23,
+    "status": "complete",
+    "gen": 3,
+    "money": 37,
+    "food": 3,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 3,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 1,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 3,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 3
+      }
+    ],
+    "actions": 144
+  },
+  {
+    "strategy": "craftLife",
+    "scenario": "woodland",
+    "seed": 42,
+    "status": "complete",
+    "gen": 3,
+    "money": 39,
+    "food": 4,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 3,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 1,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 3,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 3
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "craftLife",
+    "scenario": "woodland",
+    "seed": 55,
+    "status": "complete",
+    "gen": 3,
+    "money": 41,
+    "food": 1,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 3,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 1,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 3,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 3
+      }
+    ],
+    "actions": 144
+  },
+  {
+    "strategy": "craftLife",
+    "scenario": "woodland",
+    "seed": 99,
+    "status": "complete",
+    "gen": 3,
+    "money": 41,
+    "food": 2,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 3,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 1,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 3,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 3
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "craftLife",
+    "scenario": "woodland",
+    "seed": 123,
+    "status": "complete",
+    "gen": 3,
+    "money": 55,
+    "food": 2,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 4,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 3
+      },
+      {
+        "gen": 2,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 4
+      }
+    ],
+    "actions": 136
+  },
+  {
+    "strategy": "craftLife",
+    "scenario": "woodland",
+    "seed": 256,
+    "status": "complete",
+    "gen": 3,
+    "money": 55,
+    "food": 1,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 4,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 3
+      },
+      {
+        "gen": 2,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 4
+      }
+    ],
+    "actions": 137
+  },
+  {
+    "strategy": "water",
+    "scenario": "river",
+    "seed": 7,
+    "status": "complete",
+    "gen": 3,
+    "money": 22,
+    "food": 1,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 111
+  },
+  {
+    "strategy": "water",
+    "scenario": "river",
+    "seed": 17,
+    "status": "complete",
+    "gen": 3,
+    "money": 22,
+    "food": 1,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 111
+  },
+  {
+    "strategy": "water",
+    "scenario": "river",
+    "seed": 23,
+    "status": "complete",
+    "gen": 3,
+    "money": 18,
+    "food": 1,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 113
+  },
+  {
+    "strategy": "water",
+    "scenario": "river",
+    "seed": 42,
+    "status": "complete",
+    "gen": 3,
+    "money": 18,
+    "food": 3,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 113
+  },
+  {
+    "strategy": "water",
+    "scenario": "river",
+    "seed": 55,
+    "status": "complete",
+    "gen": 3,
+    "money": 20,
+    "food": 1,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 112
+  },
+  {
+    "strategy": "water",
+    "scenario": "river",
+    "seed": 99,
+    "status": "complete",
+    "gen": 3,
+    "money": 17,
+    "food": 2,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 115
+  },
+  {
+    "strategy": "water",
+    "scenario": "river",
+    "seed": 123,
+    "status": "complete",
+    "gen": 3,
+    "money": 22,
+    "food": 1,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 111
+  },
+  {
+    "strategy": "water",
+    "scenario": "river",
+    "seed": 256,
+    "status": "complete",
+    "gen": 3,
+    "money": 18,
+    "food": 1,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 112
+  },
+  {
+    "strategy": "water",
+    "scenario": "dry",
+    "seed": 7,
+    "status": "complete",
+    "gen": 3,
+    "money": 20,
+    "food": 1,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 115
+  },
+  {
+    "strategy": "water",
+    "scenario": "dry",
+    "seed": 17,
+    "status": "complete",
+    "gen": 3,
+    "money": 20,
+    "food": 1,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 113
+  },
+  {
+    "strategy": "water",
+    "scenario": "dry",
+    "seed": 23,
+    "status": "complete",
+    "gen": 3,
+    "money": 21,
+    "food": 1,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 116
+  },
+  {
+    "strategy": "water",
+    "scenario": "dry",
+    "seed": 42,
+    "status": "complete",
+    "gen": 3,
+    "money": 21,
+    "food": 2,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 115
+  },
+  {
+    "strategy": "water",
+    "scenario": "dry",
+    "seed": 55,
+    "status": "complete",
+    "gen": 3,
+    "money": 20,
+    "food": 2,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 115
+  },
+  {
+    "strategy": "water",
+    "scenario": "dry",
+    "seed": 99,
+    "status": "complete",
+    "gen": 3,
+    "money": 22,
+    "food": 2,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 116
+  },
+  {
+    "strategy": "water",
+    "scenario": "dry",
+    "seed": 123,
+    "status": "complete",
+    "gen": 3,
+    "money": 21,
+    "food": 2,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 116
+  },
+  {
+    "strategy": "water",
+    "scenario": "dry",
+    "seed": 256,
+    "status": "complete",
+    "gen": 3,
+    "money": 21,
+    "food": 1,
+    "minFood": 1,
+    "hardship": 0,
+    "mastered": 2,
+    "milestones": {
+      "channel": 5
+    },
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 2
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 2
+      }
+    ],
+    "actions": 114
+  },
+  {
+    "strategy": "safe",
+    "scenario": "clay-valley",
+    "seed": 7,
+    "status": "complete",
+    "gen": 3,
+    "money": 102,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "clay-valley",
+    "seed": 17,
+    "status": "complete",
+    "gen": 3,
+    "money": 100,
+    "food": 3,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "clay-valley",
+    "seed": 23,
+    "status": "complete",
+    "gen": 3,
+    "money": 94,
+    "food": 3,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "clay-valley",
+    "seed": 42,
+    "status": "complete",
+    "gen": 3,
+    "money": 94,
+    "food": 3,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "clay-valley",
+    "seed": 55,
+    "status": "complete",
+    "gen": 3,
+    "money": 92,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "clay-valley",
+    "seed": 99,
+    "status": "complete",
+    "gen": 3,
+    "money": 98,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "clay-valley",
+    "seed": 123,
+    "status": "complete",
+    "gen": 3,
+    "money": 102,
+    "food": 3,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "clay-valley",
+    "seed": 256,
+    "status": "complete",
+    "gen": 3,
+    "money": 94,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "river",
+    "seed": 7,
+    "status": "complete",
+    "gen": 3,
+    "money": 102,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "river",
+    "seed": 17,
+    "status": "complete",
+    "gen": 3,
+    "money": 100,
+    "food": 3,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "river",
+    "seed": 23,
+    "status": "complete",
+    "gen": 3,
+    "money": 94,
+    "food": 3,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "river",
+    "seed": 42,
+    "status": "complete",
+    "gen": 3,
+    "money": 94,
+    "food": 3,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "river",
+    "seed": 55,
+    "status": "complete",
+    "gen": 3,
+    "money": 92,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "river",
+    "seed": 99,
+    "status": "complete",
+    "gen": 3,
+    "money": 98,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "river",
+    "seed": 123,
+    "status": "complete",
+    "gen": 3,
+    "money": 102,
+    "food": 3,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "river",
+    "seed": 256,
+    "status": "complete",
+    "gen": 3,
+    "money": 94,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "woodland",
+    "seed": 7,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "woodland",
+    "seed": 17,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 3,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "woodland",
+    "seed": 23,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 3,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "woodland",
+    "seed": 42,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 3,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "woodland",
+    "seed": 55,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "woodland",
+    "seed": 99,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "woodland",
+    "seed": 123,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 3,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "woodland",
+    "seed": 256,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "dry",
+    "seed": 7,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "dry",
+    "seed": 17,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 3,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "dry",
+    "seed": 23,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "dry",
+    "seed": 42,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 3,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "dry",
+    "seed": 55,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "dry",
+    "seed": 99,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "dry",
+    "seed": 123,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "safe",
+    "scenario": "dry",
+    "seed": 256,
+    "status": "complete",
+    "gen": 3,
+    "money": 104,
+    "food": 2,
+    "minFood": 2,
+    "hardship": 0,
+    "mastered": 0,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 2,
+        "heir": 0,
+        "active": 0
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 0
+      }
+    ],
+    "actions": 145
+  },
+  {
+    "strategy": "inheritance",
+    "scenario": "clay-valley",
+    "seed": 7,
+    "status": "complete",
+    "gen": 3,
+    "money": 67,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 4,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 4
+      }
+    ],
+    "actions": 132
+  },
+  {
+    "strategy": "inheritance",
+    "scenario": "clay-valley",
+    "seed": 17,
+    "status": "complete",
+    "gen": 3,
+    "money": 65,
+    "food": 1,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 4,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 4
+      }
+    ],
+    "actions": 133
+  },
+  {
+    "strategy": "inheritance",
+    "scenario": "clay-valley",
+    "seed": 23,
+    "status": "complete",
+    "gen": 3,
+    "money": 73,
+    "food": 2,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 4,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 4
+      }
+    ],
+    "actions": 134
+  },
+  {
+    "strategy": "inheritance",
+    "scenario": "clay-valley",
+    "seed": 42,
+    "status": "complete",
+    "gen": 3,
+    "money": 67,
+    "food": 3,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 4,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 4
+      }
+    ],
+    "actions": 132
+  },
+  {
+    "strategy": "inheritance",
+    "scenario": "clay-valley",
+    "seed": 55,
+    "status": "complete",
+    "gen": 3,
+    "money": 69,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 4,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 3,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 4
+      }
+    ],
+    "actions": 135
+  },
+  {
+    "strategy": "inheritance",
+    "scenario": "clay-valley",
+    "seed": 99,
+    "status": "complete",
+    "gen": 3,
+    "money": 65,
+    "food": 1,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 4,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 4
+      }
+    ],
+    "actions": 133
+  },
+  {
+    "strategy": "inheritance",
+    "scenario": "clay-valley",
+    "seed": 123,
+    "status": "complete",
+    "gen": 3,
+    "money": 69,
+    "food": 0,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 4,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 4
+      }
+    ],
+    "actions": 132
+  },
+  {
+    "strategy": "inheritance",
+    "scenario": "clay-valley",
+    "seed": 256,
+    "status": "complete",
+    "gen": 3,
+    "money": 67,
+    "food": 2,
+    "minFood": 0,
+    "hardship": 0,
+    "mastered": 4,
+    "milestones": {},
+    "calibrations": 0,
+    "storedWater": 0,
+    "recycled": 0,
+    "findings": 0,
+    "handovers": [
+      {
+        "gen": 1,
+        "heir": 4,
+        "active": 4
+      },
+      {
+        "gen": 2,
+        "heir": 3,
+        "active": 4
+      },
+      {
+        "gen": 3,
+        "heir": 0,
+        "active": 4
+      }
+    ],
+    "actions": 135
+  }
+]

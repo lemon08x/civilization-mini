@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "life-chronicle",
+  "title": "可核对的经历与玩家自定志向",
+  "kind": "interface",
+  "status": "accepted",
+  "origin": "用户询问如何实现不把人生价值统一量化的成果体系。",
+  "question": "如何展示生活与代际变化，同时不替玩家定义成功？",
+  "hypothesis": "事件事实、玩家志向与物理资源分离，能够提供回顾依据而无需统一得分。",
+  "counterEvidence": "这里只覆盖已实现事件，没有健康、人物关系或主观幸福；没有通过试玩证明所有玩家都喜欢这种表达。",
+  "baseVersion": "0.6.0",
+  "targetVersion": "0.6.0",
+  "adoptedVersion": "0.6.0",
+  "experiments": [],
+  "evidence": [
+    "docs/LIFE_CHRONICLE.md"
+  ],
+  "changes": [
+    {
+      "subject": "成果表达",
+      "before": "主要显示库存、技能和统计",
+      "after": "按代展示具备条件、实际发生和跨代使用，带原始事件证据"
+    },
+    {
+      "subject": "玩家方向",
+      "before": "无独立志向记录",
+      "after": "可留空或修改，每次文字追加保留，不改变物理结算或脚本决策"
+    },
+    {
+      "subject": "评价",
+      "before": "数值统计",
+      "after": "保留投入与困境，新增描述性经历，不产生人生总分"
+    }
+  ],
+  "result": "真实行动接口与事件投影验证，无新增物理机制或参数。",
+  "sideEffects": "志向保存在独立浏览器记录中，导出经历不是可重放游戏存档；健康和关系尚未模拟。",
+  "decision": "实现只读经历与玩家注释。不修改规则版本或旧档，不重复模拟，不自动采纳AI调参。"
+}

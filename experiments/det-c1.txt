@@ -1,0 +1,92 @@
+=== SEASONS ===
+{"gen":1,"turn":1,"weather":"dry","food":6,"money":8,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":[],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":1,"turn":2,"weather":"dry","food":3,"money":8,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":1,"turn":3,"weather":"wet","food":2,"money":7,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":1,"turn":4,"weather":"dry","food":3,"money":7,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":1,"turn":5,"weather":"dry","food":2,"money":6,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":1,"turn":6,"weather":"dry","food":2,"money":4,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":1,"turn":7,"weather":"normal","food":2,"money":2,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch"],"heir":["observation"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":1,"turn":8,"weather":"normal","food":3,"money":2,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch"],"heir":["observation"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":1,"turn":9,"weather":"wet","food":3,"money":2,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch"],"heir":["observation","survey"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":1,"turn":10,"weather":"dry","food":3,"money":2,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch"],"heir":["observation","survey","ditch"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":1,"turn":11,"weather":"normal","food":2,"money":0,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch"],"heir":["observation","survey","ditch"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":1,"turn":12,"weather":"wet","food":3,"money":1,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch"],"heir":["observation","survey","ditch"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":1,"turn":13,"weather":"wet","food":3,"money":3,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch"],"heir":["observation","survey","ditch"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":1,"turn":14,"weather":"dry","food":3,"money":0,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch"],"heir":["observation","survey","ditch"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":1,"turn":15,"weather":"wet","food":3,"money":1,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation","survey","ditch"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":1,"turn":16,"weather":"normal","food":3,"money":1,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation","survey","ditch"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":1,"weather":"dry","food":3,"money":0,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":2,"weather":"normal","food":3,"money":0,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":3,"weather":"wet","food":3,"money":0,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":4,"weather":"normal","food":3,"money":0,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation","survey"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":5,"weather":"normal","food":3,"money":0,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation","survey","ditch"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":6,"weather":"wet","food":3,"money":2,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation","survey","ditch","allocation"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":7,"weather":"normal","food":3,"money":4,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation","survey","ditch","allocation"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":8,"weather":"normal","food":3,"money":6,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation","survey","ditch","allocation"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":9,"weather":"wet","food":3,"money":8,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation","survey","ditch","allocation"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":10,"weather":"normal","food":3,"money":10,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation","survey","ditch","allocation"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":11,"weather":"wet","food":3,"money":12,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation","survey","ditch","allocation"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":12,"weather":"dry","food":3,"money":14,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation","survey","ditch","allocation"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":13,"weather":"wet","food":3,"money":16,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation","survey","ditch","allocation"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":14,"weather":"dry","food":3,"money":18,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation","survey","ditch","allocation"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":15,"weather":"normal","food":2,"money":20,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation","survey","ditch","allocation"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":2,"turn":16,"weather":"normal","food":3,"money":22,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":["observation","survey","ditch","allocation"],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":1,"weather":"normal","food":3,"money":24,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":2,"weather":"wet","food":3,"money":26,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":3,"weather":"normal","food":3,"money":28,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":4,"weather":"dry","food":3,"money":30,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":5,"weather":"normal","food":2,"money":32,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":6,"weather":"normal","food":3,"money":34,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":7,"weather":"normal","food":3,"money":36,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":8,"weather":"normal","food":3,"money":38,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":9,"weather":"dry","food":3,"money":40,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":10,"weather":"normal","food":2,"money":42,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":11,"weather":"normal","food":3,"money":44,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":12,"weather":"dry","food":3,"money":46,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":13,"weather":"normal","food":2,"money":48,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":14,"weather":"dry","food":3,"money":50,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":15,"weather":"normal","food":2,"money":52,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+{"gen":3,"turn":16,"weather":"normal","food":3,"money":54,"hardship":0,"wood":0,"clay":0,"woodenware":0,"pottery":0,"mastered":["observation","survey","ditch","allocation"],"heir":[],"goods":{"supplies":0,"ceramicParts":0,"mechanisms":0,"fieldTools":0,"labTools":0,"precisionParts":0,"findings":0},"status":"active"}
+=== SUMMARY ===
+{
+  "runId": "det-c1",
+  "policy": "agri",
+  "seed": 17,
+  "scenario": "river",
+  "status": "complete",
+  "generationsReached": 3,
+  "finalTurn": 16,
+  "food": 3,
+  "money": 56,
+  "hardship": 0,
+  "mastered": [
+    "observation",
+    "survey",
+    "ditch",
+    "allocation"
+  ],
+  "heirMastered": [],
+  "archives": [
+    "observation",
+    "survey",
+    "ditch",
+    "allocation"
+  ],
+  "goods": {
+    "supplies": 0,
+    "ceramicParts": 0,
+    "mechanisms": 0,
+    "fieldTools": 0,
+    "labTools": 0,
+    "precisionParts": 0,
+    "findings": 0
+  },
+  "productGoods": {
+    "calibrator": 0,
+    "pump": 0,
+    "kiln": 0,
+    "calibrations": 0,
+    "spentCeramics": 0
+  },
+  "actions": 145
+}

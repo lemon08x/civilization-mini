@@ -1,3 +1,10 @@
+import { TOWER_BOUNDS,type TowerRules } from './model/tower.js';
+import { WORKSHOP_BOUNDS, type WorkshopRules } from './model/workshop.js';
+import { OPERATIONS_BOUNDS } from './model/operations.js';
+import type { OperationsRules } from './model/operations.js';
+import { SHOP_BOUNDS } from './model/shop.js';
+import type { ShopRules } from "./model/shop.js";
+import type { DevelopmentRules } from './model/development.js';
 import type { ProductionParameters, ProductionRules, ProductionScenario } from './model/production.js';
 export interface Parameters {
   actionsPerTurn: number; turnsPerGeneration: number; generations: number;
@@ -24,6 +31,16 @@ export interface Ruleset {
   worldTechnologies: string[];
   practiceNames: Record<string, string>;
   production?: ProductionRules;
+  development?: DevelopmentRules;
+  productNetwork?: true;
+  householdProgress?: true;
+  modern?: true;
+  tower?: TowerRules;
+  workshops?: WorkshopRules;
+  operations?: OperationsRules;
+  shop?: ShopRules;
+  economy?: {wage:number;hireCost:number;durability:number};
+  passiveInvestment?: { victoryPercent: number; reportPrice: number };
   technologyFeedback?: { buildActions: number; workbenchWood: number; kilnWood: number; kilnClay: number };
   socialInheritance?: { wage: number; goodsCapacity: number; archiveDiscount: number };
 }
@@ -42,10 +59,10 @@ export function deepFreeze<T>(value: T): T {
 const parameterKeys = ['actionsPerTurn', 'turnsPerGeneration', 'generations', 'initialFood', 'initialMoney', 'foodPerTurn', 'workIncome', 'foodPrice', 'cropPotential', 'channelCost', 'channelDurability', 'repairCost', 'trialCost', 'trialSeasons', 'trialLandCost', 'archiveCost', 'studyCost', 'trainingCost', 'studyMultiplier', 'hardshipLimit'];
 export function validateRuleset(value: unknown): Ruleset {
   if (!isRecord(value) || value.schemaVersion !== 1 || typeof value.id !== 'string' || typeof value.rulesVersion !== 'string' || !isRecord(value.parameters) || !isRecord(value.parameterBounds) || !isRecord(value.scenarios) || !Array.isArray(value.technologies) || !strings(value.worldTechnologies) || !isRecord(value.practiceNames)) throw new Error('规则配置格式不完整');
-  if (!['0.1.0', '0.2.0', '0.3.0', '0.4.0'].includes(value.rulesVersion) || (value.rulesVersion !== '0.1.0') !== (value.production !== undefined)) throw new Error('规则版本与生产机制不匹配');
+  if (!['0.1.0', '0.2.0', '0.3.0', '0.4.0', '0.5.0', '0.6.0', '0.7.0', '0.8.0', '0.9.0', '0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0'].includes(value.rulesVersion) || (value.rulesVersion !== '0.1.0') !== (value.production !== undefined)) throw new Error('规则版本与生产机制不匹配');
   if (value.rulesVersion !== '0.1.0' && !isRecord(value.production)) throw new Error('新规则必须提供完整生产配置');
-  if (['0.3.0', '0.4.0'].includes(value.rulesVersion) !== (value.technologyFeedback !== undefined)) throw new Error('科技反馈机制与规则版本不匹配');
-  if ((value.rulesVersion === '0.4.0') !== (value.socialInheritance !== undefined)) throw new Error('社会传承机制与规则版本不匹配');
+  if (['0.3.0', '0.4.0', '0.5.0', '0.6.0', '0.7.0', '0.8.0', '0.9.0', '0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0'].includes(value.rulesVersion) !== (value.technologyFeedback !== undefined)) throw new Error('科技反馈机制与规则版本不匹配');
+  if ((['0.4.0','0.5.0', '0.6.0', '0.7.0', '0.8.0', '0.9.0', '0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0'].includes(value.rulesVersion)) !== (value.socialInheritance !== undefined)) throw new Error('社会传承机制与规则版本不匹配');
   if (value.socialInheritance !== undefined && (!isRecord(value.socialInheritance) || !integerFields(value.socialInheritance, ['wage', 'goodsCapacity', 'archiveDiscount']) || Object.values(value.socialInheritance).some(n => (n as number) < 1))) throw new Error('社会传承配置无效');
   if (value.technologyFeedback !== undefined && (!isRecord(value.technologyFeedback) || !integerFields(value.technologyFeedback, ['buildActions', 'workbenchWood', 'kilnWood', 'kilnClay']) || Object.values(value.technologyFeedback).some(n => (n as number) < 1) || (value.technologyFeedback.buildActions as number) > (value.parameters.actionsPerTurn as number))) throw new Error('科技反馈设施配置无效');
   if (Object.keys(value.parameters).length !== parameterKeys.length || Object.keys(value.parameterBounds).length !== parameterKeys.length) throw new Error('规则参数集合不匹配');
@@ -66,7 +83,34 @@ export function validateRuleset(value: unknown): Ruleset {
     ids.add(node.id);
   }
   // 当前规则实现只支持这些领域方法；新增因果机制需代码版本，而非注入脚本。
-  for (const id of ['observation', 'survey', 'ditch', 'allocation', 'selection', 'trial', 'stabilize']) if (!ids.has(id)) throw new Error(`缺少规则实现需要的节点：${id}`);
+  if(!value.economy) for (const id of ['observation', 'survey', 'ditch', 'allocation', 'selection', 'trial', 'stabilize']) if (!ids.has(id)) throw new Error(`缺少规则实现需要的节点：${id}`);
+  if ((['0.5.0','0.6.0', '0.7.0', '0.8.0', '0.9.0', '0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0'].includes(value.rulesVersion)) !== (value.development !== undefined)) throw new Error('持续成长机制与规则版本不匹配');
+  if ((['0.6.0','0.7.0', '0.8.0', '0.9.0', '0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0'].includes(value.rulesVersion)) !== (value.productNetwork === true) || (value.productNetwork !== undefined && value.productNetwork !== true)) throw new Error('产品网络与规则版本不匹配');
+  if ((['0.7.0','0.8.0', '0.9.0', '0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0'].includes(value.rulesVersion)) !== (value.householdProgress===true) || (value.householdProgress!==undefined&&value.householdProgress!==true))throw new Error('家庭进展机制与规则版本不匹配');
+  if ((['0.8.0','0.9.0', '0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0'].includes(value.rulesVersion)) !== (value.passiveInvestment!==undefined)) throw new Error('被动投资机制与规则版本不匹配');
+  if(value.passiveInvestment!==undefined && (!isRecord(value.passiveInvestment)||!integerFields(value.passiveInvestment,['victoryPercent','reportPrice'])||(value.passiveInvestment.victoryPercent as number)<1||(value.passiveInvestment.reportPrice as number)<1)) throw new Error('投资与胜利配置无效');
+  if((['0.9.0','0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0'].includes(value.rulesVersion))!==(value.economy!==undefined))throw new Error('学科经济版本不匹配');
+  if(value.economy!==undefined&&(!isRecord(value.economy)||!integerFields(value.economy,['wage','hireCost','durability'])||Object.values(value.economy).some(n=>(n as number)<1)))throw new Error('学科经济参数无效');
+  if((['0.10.0','0.11.0', '0.12.0','0.13.0','0.14.0'].includes(value.rulesVersion))!==(value.shop!==undefined))throw new Error('商城规则版本不匹配');
+  if(value.shop!==undefined){
+    const keys=['transport','stock','deviceFee','importFee','textbookBase','lessonBase','trainingPrice','trainingExperience','granaryPrice','granaryCapacity','libraryPrice','repairPercent'];
+    if(!isRecord(value.shop)||!integerFields(value.shop,keys)||Object.keys(value.shop).length!==keys.length||Object.values(value.shop).some(n=>!Number.isInteger(n)||(n as number)<1||(n as number)>100)||(value.shop.repairPercent as number)>=100)throw new Error('商城参数无效：整数1—100，维修比例小于100');
+  }
+  if(isRecord(value.shop))for(const [key,[min,max]]of Object.entries(SHOP_BOUNDS)){const n=value.shop[key] as number;if(n<min||n>max)throw new Error('商城参数超出范围：'+key);}
+  if((['0.11.0','0.12.0','0.13.0','0.14.0'].includes(value.rulesVersion))!==(value.operations!==undefined))throw new Error('长期经营版本不匹配');
+  if(value.operations!==undefined){if(!isRecord(value.operations)||Object.keys(value.operations).length!==Object.keys(OPERATIONS_BOUNDS).length)throw new Error('长期经营参数不完整');for(const [k,[min,max]]of Object.entries(OPERATIONS_BOUNDS)){const n=value.operations[k];if(!Number.isInteger(n)||(n as number)<min||(n as number)>max)throw new Error('长期经营参数越界：'+k);}}
+  if ((['0.12.0','0.13.0','0.14.0'].includes(value.rulesVersion))!==(value.workshops!==undefined))throw new Error('作坊规则版本不匹配');
+  if(value.workshops!==undefined){if(!isRecord(value.workshops)||Object.keys(value.workshops).length!==2)throw new Error('作坊参数不完整');for(const [k,[min,max]]of Object.entries(WORKSHOP_BOUNDS)){const n=value.workshops[k];if(!Number.isInteger(n)||(n as number)<min||(n as number)>max)throw new Error('作坊参数越界：'+k);}}
+  if ((['0.13.0','0.14.0'].includes(value.rulesVersion))!==(value.tower!==undefined))throw new Error('文明试炼版本不匹配');
+  if(value.tower!==undefined){if(!isRecord(value.tower)||Object.keys(value.tower).length!==Object.keys(TOWER_BOUNDS).length)throw new Error('试炼参数不完整');for(const [k,[min,max]]of Object.entries(TOWER_BOUNDS)){const n=value.tower[k];if(!Number.isInteger(n)||(n as number)<min||(n as number)>max)throw new Error('试炼参数越界：'+k);}}
+  if (value.development !== undefined) {
+    const d = value.development;
+    const keys = ['experienceStep','equipmentDurability','marketSupply','experimentFood','mentorFood','tradeSpread'];
+    if(!isRecord(d)||!integerFields(d.parameters,keys)||!isRecord(d.parameterBounds)||Object.keys(d.parameterBounds).length!==keys.length)throw new Error('成长参数集合无效');
+    for(const key of keys){const b=d.parameterBounds[key],n=(d.parameters as Record<string,number>)[key];if(!Array.isArray(b)||b.length!==2||!b.every(Number.isInteger)||b[0]<1||b[1]>20||b[0]>b[1]||n<b[0]||n>b[1])throw new Error('成长参数边界无效');}
+    if(!value.economy) for(const id of ['agronomy','ceramic-engineering','mechanics','experimentation','precision-engineering'])if(!ids.has(id))throw new Error('缺少工业科学节点');
+  }
+  if((value.rulesVersion==='0.14.0')!==(value.modern===true)||(value.modern!==undefined&&value.modern!==true))throw new Error('现代科技版本不匹配');
   const rules = structuredClone(value) as unknown as Ruleset;
   if (rules.production) validateProduction(rules);
   else if (rules.technologies.some(t => t.prerequisiteAny || t.helpfulPrerequisites) || Object.values(rules.scenarios).some(s => s.production)) throw new Error('旧规则不能注入新生产机制');
@@ -86,7 +130,23 @@ export function resolveRuleset(base: Ruleset, overrides: unknown = {}): Ruleset 
   if (!isRecord(overrides)) throw new Error('候选参数必须是 JSON 对象');
   const parameters = { ...base.parameters };
   const production = base.production ? structuredClone(base.production) : undefined;
+  const tower=base.tower?structuredClone(base.tower):undefined;
+  const workshops=base.workshops?structuredClone(base.workshops):undefined;
+  const operations=base.operations?structuredClone(base.operations):undefined;
+  const shop=base.shop?structuredClone(base.shop):undefined;
+  const development = base.development ? structuredClone(base.development) : undefined;
   for (const [key, value] of Object.entries(overrides)) {
+    if(tower&&key.startsWith('tower.')){const name=key.slice(6) as keyof TowerRules;if(!Object.hasOwn(TOWER_BOUNDS,name))throw new Error('未知试炼参数');const [min,max]=TOWER_BOUNDS[name];if(!Number.isInteger(value)||(value as number)<min||(value as number)>max)throw new Error('试炼参数越界');tower[name]=value as number;continue;}
+    if(workshops&&key.startsWith('workshops.')){const name=key.slice(10) as keyof WorkshopRules;if(!Object.hasOwn(WORKSHOP_BOUNDS,name))throw new Error('未知作坊参数');const [min,max]=WORKSHOP_BOUNDS[name];if(!Number.isInteger(value)||(value as number)<min||(value as number)>max)throw new Error('作坊参数越界');workshops[name]=value as number;continue;}
+    if(operations&&key.startsWith('operations.')){const name=key.slice(11) as keyof OperationsRules;if(!Object.hasOwn(OPERATIONS_BOUNDS,name))throw new Error('未知经营参数');const [min,max]=OPERATIONS_BOUNDS[name];if(!Number.isInteger(value)||(value as number)<min||(value as number)>max)throw new Error('经营参数越界');operations[name]=value as number;continue;}
+    if(shop&&key.startsWith('shop.')){const name=key.slice(5) as keyof ShopRules;if(!Object.hasOwn(SHOP_BOUNDS,name))throw new Error('未知商城参数');const [min,max]=SHOP_BOUNDS[name];if(!Number.isInteger(value)||(value as number)<min||(value as number)>max)throw new Error('商城参数超出范围');shop[name]=value as number;continue;}
+    if(development && key.startsWith('development.')){
+      const name=key.slice(12) as keyof DevelopmentRules['parameters'];
+      if(!Object.hasOwn(development.parameterBounds,name))throw new Error('未知成长参数');
+      const [min,max]=development.parameterBounds[name];
+      if(!Number.isInteger(value)||(value as number)<min||(value as number)>max)throw new Error('成长参数超出范围');
+      development.parameters[name]=value as number;continue;
+    }
     if (production && key.startsWith('production.')) {
       const name = key.slice('production.'.length) as keyof ProductionParameters;
       if (!Object.hasOwn(production.parameterBounds, name)) throw new Error(`未知参数：${key}`);
@@ -100,7 +160,7 @@ export function resolveRuleset(base: Ruleset, overrides: unknown = {}): Ruleset 
     if (!Number.isInteger(value) || (value as number) < min || (value as number) > max) throw new Error(`参数超出范围：${key}`);
     parameters[key as keyof Parameters] = value as number;
   }
-  return validateRuleset({ ...base, parameters, ...(production ? { production } : {}) });
+  return validateRuleset({ ...base, parameters, ...(tower?{tower}:{}), ...(workshops?{workshops}:{}), ...(operations?{operations}:{}), ...(shop?{shop}:{}), ...(development ? {development} : {}), ...(production ? { production } : {}) });
 }
 
 const productionKeys = ['gatherFood', 'gatherWood', 'gatherClay', 'baseStorage', 'woodenStorage', 'potteryStorage', 'spoilDivisor', 'toolDurability', 'toolBonus', 'woodRecipeCost', 'potteryClayCost', 'potteryFuelCost', 'woodenwarePrice', 'potteryPrice', 'methodPrice'];
@@ -114,7 +174,7 @@ function validateProduction(rules: Ruleset): void {
     const range = p.parameterBounds[key], value = p.parameters[key];
     if (!Array.isArray(range) || range.length !== 2 || !range.every(Number.isInteger) || range[0] < 1 || range[1] > 100 || range[0] > range[1] || value < range[0] || value > range[1]) throw new Error(`生产参数边界无效：${key}`);
   }
-  for (const id of ['resource-observation', 'woodworking', 'controlled-fire', 'pottery', 'storage']) if (!rules.technologies.some(t => t.id === id)) throw new Error(`缺少生产节点：${id}`);
+  if(!rules.economy) for (const id of ['resource-observation', 'woodworking', 'controlled-fire', 'pottery', 'storage']) if (!rules.technologies.some(t => t.id === id)) throw new Error(`缺少生产节点：${id}`);
   for (const scenario of Object.values(rules.scenarios)) {
     const s = scenario.production;
     if (!isRecord(s) || !integerFields(s.stocks, ['wildFood', 'timber', 'clay']) || !integerFields(s.recovery, ['wildFood', 'timber']) || !integerFields(s.market, ['food', 'jobs', 'woodenware', 'pottery', 'methods']) || !strings(s.teachers) || !strings(s.imports)) throw new Error(`场景生产条件无效：${scenario.id}`);

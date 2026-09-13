@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "product-network-v6",
+  "title": "高级产品分流、设备能力与材料循环",
+  "kind": "mechanism",
+  "status": "accepted",
+  "origin": "用户要求高级产品带来独特效果，并建立对应科技成长的产品网络。",
+  "question": "精密器件除了卖钱和效率加成，还能打开哪些新操作？",
+  "hypothesis": "精密器件分流到校准仪、提水泵和控温窑，校准报告形成制造汇合，用后陶料形成回收回路。",
+  "counterEvidence": "两局是显式扩大初始储备与行动窗口的能力探针，不能证明默认成长节奏或经济平衡；专用设备仍有磨损和耗材成本。",
+  "baseVersion": "0.5.0",
+  "targetVersion": "0.6.0",
+  "adoptedVersion": "0.6.0",
+  "experiments": [],
+  "evidence": [
+    "docs/PRODUCT_NETWORK_V6.md",
+    "experiments/product-network-hypothesis.md",
+    "experiments/history/product-network-1789110554100/results.json"
+  ],
+  "changes": [
+    {
+      "subject": "精密器件用途",
+      "before": "交付高级订单",
+      "after": "可交付，也可制造校准仪、提水泵、控温窑"
+    },
+    {
+      "subject": "科学产品",
+      "before": "研究记录用于数值工艺改良",
+      "after": "校准仪把研究记录与补给变成设备制造所需校准报告"
+    },
+    {
+      "subject": "农业能力",
+      "before": "渠道供水或增产农具",
+      "after": "提水泵转移有限公共水至家用蓄水，跨季保存，无渠道也可灌溉"
+    },
+    {
+      "subject": "陶作循环",
+      "before": "实验后陶质构件消失",
+      "after": "留下用后陶料；控温窑消耗燃料和耐用度，有损回收成构件"
+    },
+    {
+      "subject": "观察与研究",
+      "before": "产品配方列表",
+      "after": "可点击产品网络、输入/能力/回路关系、设备使用指标和未使用诊断"
+    }
+  ],
+  "result": "两条固定种子脚本完成并严格重放；接口检查覆盖耗材、水量转移、回收、项目位与跨代使用。",
+  "sideEffects": "更复杂的产品链需要额外行动与实物；报告暂按可消耗批次校准凭据抽象，泵和窑不模拟现代工程细节；存档新开局。",
+  "decision": "依用户授权实现规则0.6.0的能力网络。未自动采纳参数候选，初始数值仍待检验。"
+}

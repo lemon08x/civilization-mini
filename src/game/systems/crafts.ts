@@ -1,3 +1,4 @@
+import { skillLevel } from './development.js';
 import type { GameState } from '../model/state.js';
 import { activePerson } from '../model/state.js';
 import type { ProductionScenario, ProductionState, Recipe } from '../model/production.js';
@@ -54,7 +55,7 @@ export function technologyOutcomes(state: GameState, rules: Ruleset) {
     workshops: (['woodenware', 'pottery'] as const).map(material => ({
       material, name: WORKSHOP_NAMES[material], technology: recipeMethod(material), built: Boolean(local.workshops?.[material]),
       mastered: has(activePerson(state), recipeMethod(material)), output: material === 'pottery' ? 4 : 2,
-      ordinaryCraftActions: 4, batchCraftActions: 2,
+      ordinaryCraftActions: rules.householdProgress&&material==='woodenware'&&skillLevel(state,rules,'woodwork')>=1?2:4, batchCraftActions: rules.householdProgress&&material==='woodenware'&&skillLevel(state,rules,'woodwork')>=1?1:2,
       buildAction: `build-workshop:${material}`, batchAction: `craft-batch:${material}`,
     })),
   };

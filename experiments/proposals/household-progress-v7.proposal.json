@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "household-progress-v7",
+  "title": "减少重复劳动与家学重建成本，保留未解决的控温窑节奏问题",
+  "kind": "mechanism",
+  "status": "accepted",
+  "origin": "用户报告慢节奏、持续口粮压力、传承成本与高级内容可达性问题；原局未落盘。",
+  "question": "默认48季内能否更早实际使用成果，同时保留时间和资源约束？",
+  "hypothesis": "经验阶梯、熟练制作、家学合授和建设即实践可改善成长；储存开放可选集中购粮。",
+  "counterEvidence": "控温窑专项仍丢失旧版首次回收；工业路线余粮未普遍改善，不能宣称已完成全局平衡。",
+  "baseVersion": "0.6.0",
+  "targetVersion": "0.7.0",
+  "adoptedVersion": "0.7.0",
+  "experiments": [],
+  "evidence": [
+    "docs/HOUSEHOLD_PROGRESS_V7.md",
+    "experiments/pacing-v7-hypothesis.md",
+    "experiments/history/pacing-1789118578815/results.json",
+    "experiments/history/pacing-1789118626881/results.json"
+  ],
+  "changes": [
+    {
+      "subject": "熟练度",
+      "before": "基础制作1经验，等级门槛2/8",
+      "after": "基础制作2经验，等级门槛1/4；后续仍持续增长"
+    },
+    {
+      "subject": "重复制作",
+      "before": "普通木作两行动完成",
+      "after": "木作等级1后一行动完成；工作台一行动完成两件且扣两份原料"
+    },
+    {
+      "subject": "家学",
+      "before": "理论与实践分开教学",
+      "after": "有家庭方法时同一行动合授，练习耗材与前置不免，经验最多父辈一半"
+    },
+    {
+      "subject": "储备",
+      "before": "每次只能买2粮",
+      "after": "已配置容器后可另选4粮采购，按价付费扣库存"
+    },
+    {
+      "subject": "水利",
+      "before": "先掌握渠道方法再建",
+      "after": "受指导建设可以产生渠道实践"
+    }
+  ],
+  "result": "默认种子17配对：自制精密器件未达→23季，专精路线45→13季；70项测试通过。",
+  "sideEffects": "尚未普遍解除口粮压力；控温窑应用仍晚，最后专项旧版48季使用、新版只建成。",
+  "decision": "采纳局部节奏修复并列出剩余问题；不扩大每季行动、代数或初始资源。新规则新档，旧档及冻结运行时保留。"
+}

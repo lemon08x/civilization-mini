@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "craft-science-v5",
+  "title": "持续手艺成长与农业—工业—科学联动",
+  "kind": "mechanism",
+  "status": "accepted",
+  "origin": "用户要求延长技能成长并把工业、科学接入农业与家族体系；本记录说明已实现的机制，不代表自动采纳模拟调参。",
+  "question": "如何避免陶罐成为成长终点，让农业产出支持跨行业活动？",
+  "hypothesis": "实际实践积累熟练度、工业部件与补给相互消耗、研究改良保留家族，可形成持续投入与跨代收益。",
+  "counterEvidence": "四局小样本中两条成长脚本各缺粮1，第一代陶作未完成精密器件；高阶改良还受脚本计划覆盖不足影响，平衡未证明。",
+  "baseVersion": "0.4.0",
+  "targetVersion": "0.5.0",
+  "adoptedVersion": "0.5.0",
+  "experiments": [],
+  "evidence": [
+    "docs/CRAFT_SCIENCE_V5.md",
+    "docs/CRAFT_GROWTH_VALIDATION.md",
+    "experiments/craft-growth-hypothesis.md",
+    "experiments/history/craft-growth-1789108950391/results.json"
+  ],
+  "changes": [
+    {
+      "subject": "知识节点",
+      "before": 12,
+      "after": 17
+    },
+    {
+      "subject": "技能成长",
+      "before": "制作只满足知识实践条件",
+      "after": "四领域熟练度，实际生产积累，等级开放复杂工序与逐阶工艺改良"
+    },
+    {
+      "subject": "跨行业循环",
+      "before": "普通容器、储存与作坊交换",
+      "after": "农业补给、陶质构件、传动机构、农业/实验设备、精密器件、实验记录与家族改良"
+    },
+    {
+      "subject": "代际积累",
+      "before": "方法、普通设施、委托、材料与项目",
+      "after": "增加工业产品、研究记录、工艺改良、设备耐用度和工业项目；实习部分传授熟练度"
+    },
+    {
+      "subject": "每代观察窗口",
+      "before": 8,
+      "after": 16,
+      "configPath": "parameters.turnsPerGeneration"
+    }
+  ],
+  "result": "54项测试通过，含8条旧轨迹和新增成长接口检查；4局固定种子脚本通过重放；浏览器完成学习、采购和实验。",
+  "sideEffects": "默认窗口变长；专业市场仍为有限外部抽象；精密器件目前只有订单用途。旧实现存档不自动迁移，需原工程读取，原档保留。",
+  "decision": "按用户授权接入0.5.0机制。初始参数仍是待检验假设，没有自动采用数值优化候选。"
+}

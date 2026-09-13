@@ -1,8 +1,10 @@
+import {chooseEconomyAction} from './economy.js';
 import type { SessionObservation } from '../../runtime/session.js';
 import type { Agent, PolicyId } from '../contract.js';
 import { chooseProductionAction } from './production.js';
 // 可解释的脚本对照组。不是大模型，不读取种子、RNG 或未来天气。
 export function chooseAction(observation: SessionObservation, policy: PolicyId = 'subsistence'): string | null {
+  if(observation.game.economy)return chooseEconomyAction(observation,policy);
   if (!observation.game.production && ['woodworker', 'potter', 'mixed'].includes(policy)) throw new Error('非农生产脚本需要通用生产规则 0.2.0');
   if (observation.game.production && ['subsistence', 'woodworker', 'potter', 'mixed'].includes(policy)) return chooseProductionAction(observation, policy);
   const selected = chooseAgricultureAction(observation, policy);

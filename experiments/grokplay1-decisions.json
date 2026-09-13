@@ -1,0 +1,3517 @@
+{
+  "researcher": "Grok 4.6",
+  "controller": "human/manual via observe+act",
+  "note": "遵守协议的代理实验：决策只依据观察；不是内置 scripted，也不是付费 API。",
+  "runId": "grokplay1",
+  "commands": 145,
+  "metrics": {
+    "status": "complete",
+    "completedGenerations": 3,
+    "food": 7,
+    "money": 104,
+    "foodProduced": 104,
+    "foodShortfall": 0,
+    "waterUsed": 0,
+    "learnedNodes": [
+      "woodworking",
+      "storage"
+    ],
+    "lastPersonMastered": [
+      "woodworking"
+    ],
+    "inheritedNodes": [
+      {
+        "generation": 2,
+        "nodes": [
+          "woodworking"
+        ]
+      },
+      {
+        "generation": 3,
+        "nodes": [
+          "woodworking"
+        ]
+      }
+    ],
+    "archivedNodes": [],
+    "samples": 0,
+    "studyActions": 3,
+    "teachingActions": 6,
+    "commands": 146,
+    "productNetwork": {
+      "made": {},
+      "operations": {},
+      "residues": 0,
+      "storedWaterUsed": 0,
+      "usesByGeneration": {}
+    },
+    "productAssets": {
+      "goods": {
+        "calibrator": 0,
+        "pump": 0,
+        "kiln": 0,
+        "calibrations": 0,
+        "spentCeramics": 0
+      },
+      "installed": {
+        "calibrator": 0,
+        "pump": 0,
+        "kiln": 0
+      },
+      "storedWater": 0,
+      "project": null
+    },
+    "development": {
+      "outputs": {},
+      "purchases": {},
+      "deliveries": {},
+      "experienceByPerson": {
+        "person:1": {
+          "agriculture": 9,
+          "woodwork": 7
+        },
+        "person:2": {
+          "woodwork": 9,
+          "agriculture": 7
+        },
+        "person:3": {
+          "agriculture": 10,
+          "woodwork": 9
+        }
+      },
+      "experiments": 0,
+      "findings": 0,
+      "refinements": 0,
+      "purchaseCost": 0,
+      "deliveryIncome": 0,
+      "fieldUses": 0,
+      "labUses": 0
+    },
+    "developmentAssets": {
+      "goods": {
+        "supplies": 0,
+        "ceramicParts": 0,
+        "mechanisms": 0,
+        "fieldTools": 0,
+        "labTools": 0,
+        "precisionParts": 0,
+        "findings": 0
+      },
+      "designs": {
+        "pottery": 0,
+        "woodwork": 0,
+        "agriculture": 0,
+        "science": 0
+      },
+      "project": null,
+      "fieldDurability": 0,
+      "labDurability": 0
+    },
+    "production": {
+      "gatheredFood": 12,
+      "gatheredWood": 52,
+      "gatheredClay": 0,
+      "spoiledFood": 19,
+      "craftedWoodenware": 25,
+      "craftedPottery": 0,
+      "craftedTools": 0,
+      "craftEarnings": 96,
+      "installedStorage": 1,
+      "importedMethods": 0,
+      "workActions": 0,
+      "buyFoodActions": 0,
+      "cultivateActions": 26
+    },
+    "inventory": {
+      "wood": 0,
+      "clay": 0,
+      "woodenware": 0,
+      "pottery": 0
+    },
+    "storage": {
+      "woodenware": true,
+      "pottery": false
+    },
+    "toolDurability": 0
+  },
+  "log": [
+    {
+      "revision": 1,
+      "actionId": "study:woodworking",
+      "reason": "当地有木作老师，理论 0/2；学一次后才能开工实践。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 1,
+        "ap": 1,
+        "food": 8,
+        "money": 8,
+        "weather": "干旱",
+        "mastered": [],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": false,
+        "project": null
+      }
+    },
+    {
+      "revision": 2,
+      "actionId": "study:woodworking",
+      "reason": "当地有木作老师，理论 1/2；学一次后才能开工实践。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 2,
+        "ap": 3,
+        "food": 4,
+        "money": 8,
+        "weather": "丰水",
+        "mastered": [],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": false,
+        "project": null
+      }
+    },
+    {
+      "revision": 3,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 丰水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 2,
+        "ap": 2,
+        "food": 8,
+        "money": 8,
+        "weather": "丰水",
+        "mastered": [],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": false,
+        "project": null
+      }
+    },
+    {
+      "revision": 4,
+      "actionId": "gather:wood",
+      "reason": "木作实践需要 2 木材，现有 0。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 2,
+        "ap": 1,
+        "food": 8,
+        "money": 8,
+        "weather": "丰水",
+        "mastered": [],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": false,
+        "project": null
+      }
+    },
+    {
+      "revision": 5,
+      "actionId": "craft:woodenware",
+      "reason": "理论已够，开工木容器作为木作实践。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 3,
+        "ap": 3,
+        "food": 4,
+        "money": 8,
+        "weather": "干旱",
+        "mastered": [],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": false,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 6,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 3,
+        "ap": 2,
+        "food": 4,
+        "money": 8,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": false,
+        "project": null
+      }
+    },
+    {
+      "revision": 7,
+      "actionId": "study:storage",
+      "reason": "已会木作，先学储存，用自制容器保护余粮。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 3,
+        "ap": 1,
+        "food": 4,
+        "money": 8,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": false,
+        "project": null
+      }
+    },
+    {
+      "revision": 8,
+      "actionId": "install-storage:woodenware",
+      "reason": "配置木容器储存，降低季末损耗。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 4,
+        "ap": 3,
+        "food": 2,
+        "money": 8,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 9,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 4,
+        "ap": 2,
+        "food": 6,
+        "money": 8,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 10,
+      "actionId": "teach:woodworking",
+      "reason": "窗口未结束，先完成木作教导，再考虑多生产。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 4,
+        "ap": 1,
+        "food": 6,
+        "money": 8,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 11,
+      "actionId": "teach:woodworking",
+      "reason": "窗口未结束，先完成木作教导，再考虑多生产。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 5,
+        "ap": 3,
+        "food": 4,
+        "money": 8,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 12,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 5,
+        "ap": 2,
+        "food": 4,
+        "money": 8,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 13,
+      "actionId": "teach:woodworking",
+      "reason": "窗口未结束，先完成木作教导，再考虑多生产。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 5,
+        "ap": 1,
+        "food": 4,
+        "money": 8,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 14,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 6,
+        "ap": 3,
+        "food": 2,
+        "money": 8,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 3,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 15,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 6,
+        "ap": 2,
+        "food": 2,
+        "money": 8,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 16,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 6,
+        "ap": 1,
+        "food": 2,
+        "money": 8,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 17,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 7,
+        "ap": 3,
+        "food": 0,
+        "money": 12,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 18,
+      "actionId": "gather:food",
+      "reason": "口粮 0 低于季耗 2，先保生活：gather:food",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 7,
+        "ap": 2,
+        "food": 2,
+        "money": 12,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 19,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 7,
+        "ap": 1,
+        "food": 6,
+        "money": 12,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 20,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 8,
+        "ap": 3,
+        "food": 4,
+        "money": 12,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 3,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 21,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 8,
+        "ap": 2,
+        "food": 8,
+        "money": 12,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 3,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 22,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 8,
+        "ap": 1,
+        "food": 8,
+        "money": 12,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 23,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 9,
+        "ap": 3,
+        "food": 6,
+        "money": 12,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 24,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 丰水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 9,
+        "ap": 2,
+        "food": 10,
+        "money": 12,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 25,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 9,
+        "ap": 1,
+        "food": 10,
+        "money": 16,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 26,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 10,
+        "ap": 3,
+        "food": 7,
+        "money": 16,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 3,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 27,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 10,
+        "ap": 2,
+        "food": 7,
+        "money": 16,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 28,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 10,
+        "ap": 1,
+        "food": 7,
+        "money": 16,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 29,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 11,
+        "ap": 3,
+        "food": 5,
+        "money": 20,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 30,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 11,
+        "ap": 2,
+        "food": 9,
+        "money": 20,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 31,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 11,
+        "ap": 1,
+        "food": 9,
+        "money": 20,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 3,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 32,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 12,
+        "ap": 3,
+        "food": 6,
+        "money": 20,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 33,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 12,
+        "ap": 2,
+        "food": 6,
+        "money": 20,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 34,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 12,
+        "ap": 1,
+        "food": 6,
+        "money": 24,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 35,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 13,
+        "ap": 3,
+        "food": 4,
+        "money": 24,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 3,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 36,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 13,
+        "ap": 2,
+        "food": 8,
+        "money": 24,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 3,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 37,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 13,
+        "ap": 1,
+        "food": 8,
+        "money": 24,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 38,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 14,
+        "ap": 3,
+        "food": 6,
+        "money": 24,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 39,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 14,
+        "ap": 2,
+        "food": 10,
+        "money": 24,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 40,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 14,
+        "ap": 1,
+        "food": 10,
+        "money": 28,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 41,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 15,
+        "ap": 3,
+        "food": 7,
+        "money": 28,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 3,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 42,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 15,
+        "ap": 2,
+        "food": 7,
+        "money": 28,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 43,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 15,
+        "ap": 1,
+        "food": 7,
+        "money": 28,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 44,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 16,
+        "ap": 3,
+        "food": 5,
+        "money": 32,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 45,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 16,
+        "ap": 2,
+        "food": 9,
+        "money": 32,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 46,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 1,
+        "turn": 16,
+        "ap": 1,
+        "food": 9,
+        "money": 32,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 3,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 47,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "handover",
+        "generation": 1,
+        "turn": 16,
+        "ap": 0,
+        "food": 6,
+        "money": 32,
+        "weather": "平水",
+        "mastered": [
+          "woodworking",
+          "storage"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 48,
+      "actionId": "handover",
+      "reason": "本代窗口结束，交接家产与在制品，不复制个人技能。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 1,
+        "ap": 3,
+        "food": 6,
+        "money": 32,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 1,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 49,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 1,
+        "ap": 2,
+        "food": 6,
+        "money": 32,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 1,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 50,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 1,
+        "ap": 1,
+        "food": 10,
+        "money": 32,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 1,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 51,
+      "actionId": "teach:woodworking",
+      "reason": "窗口未结束，先完成木作教导，再考虑多生产。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 2,
+        "ap": 3,
+        "food": 7,
+        "money": 32,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 1,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 52,
+      "actionId": "teach:woodworking",
+      "reason": "窗口未结束，先完成木作教导，再考虑多生产。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 2,
+        "ap": 2,
+        "food": 7,
+        "money": 32,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 1,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 53,
+      "actionId": "teach:woodworking",
+      "reason": "窗口未结束，先完成木作教导，再考虑多生产。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 2,
+        "ap": 1,
+        "food": 7,
+        "money": 32,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 54,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 3,
+        "ap": 3,
+        "food": 5,
+        "money": 36,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 55,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 3,
+        "ap": 2,
+        "food": 5,
+        "money": 36,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 56,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 3,
+        "ap": 1,
+        "food": 5,
+        "money": 36,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 57,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 4,
+        "ap": 3,
+        "food": 3,
+        "money": 36,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 58,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 4,
+        "ap": 2,
+        "food": 3,
+        "money": 40,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 59,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 4,
+        "ap": 1,
+        "food": 3,
+        "money": 40,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 60,
+      "actionId": "gather:food",
+      "reason": "余粮 3 偏紧，野食仍可采，先垫一口。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 5,
+        "ap": 3,
+        "food": 3,
+        "money": 40,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 61,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 丰水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 5,
+        "ap": 2,
+        "food": 7,
+        "money": 40,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 62,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 5,
+        "ap": 1,
+        "food": 7,
+        "money": 40,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 63,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 6,
+        "ap": 3,
+        "food": 5,
+        "money": 40,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 64,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 6,
+        "ap": 2,
+        "food": 5,
+        "money": 44,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 65,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 6,
+        "ap": 1,
+        "food": 5,
+        "money": 44,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 66,
+      "actionId": "end-turn",
+      "reason": "本季没有更合适的可见行动，结束以免空耗。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 7,
+        "ap": 3,
+        "food": 3,
+        "money": 44,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 67,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 7,
+        "ap": 2,
+        "food": 3,
+        "money": 44,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 68,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 7,
+        "ap": 1,
+        "food": 3,
+        "money": 44,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 69,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 8,
+        "ap": 3,
+        "food": 1,
+        "money": 48,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 70,
+      "actionId": "gather:food",
+      "reason": "口粮 1 低于季耗 2，先保生活：gather:food",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 8,
+        "ap": 2,
+        "food": 3,
+        "money": 48,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 71,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 8,
+        "ap": 1,
+        "food": 7,
+        "money": 48,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 72,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 9,
+        "ap": 3,
+        "food": 5,
+        "money": 48,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 73,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 9,
+        "ap": 2,
+        "food": 5,
+        "money": 48,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 74,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 9,
+        "ap": 1,
+        "food": 5,
+        "money": 48,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 75,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 10,
+        "ap": 3,
+        "food": 3,
+        "money": 52,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 76,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 10,
+        "ap": 2,
+        "food": 3,
+        "money": 52,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 77,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 10,
+        "ap": 1,
+        "food": 3,
+        "money": 52,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 78,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 11,
+        "ap": 3,
+        "food": 1,
+        "money": 52,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 79,
+      "actionId": "gather:food",
+      "reason": "口粮 1 低于季耗 2，先保生活：gather:food",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 11,
+        "ap": 2,
+        "food": 3,
+        "money": 52,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 80,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 11,
+        "ap": 1,
+        "food": 7,
+        "money": 52,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 81,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 12,
+        "ap": 3,
+        "food": 5,
+        "money": 56,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 82,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 12,
+        "ap": 2,
+        "food": 9,
+        "money": 56,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 83,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 12,
+        "ap": 1,
+        "food": 9,
+        "money": 56,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 84,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 13,
+        "ap": 3,
+        "food": 6,
+        "money": 56,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 85,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 13,
+        "ap": 2,
+        "food": 6,
+        "money": 56,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 86,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 13,
+        "ap": 1,
+        "food": 6,
+        "money": 60,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 87,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 14,
+        "ap": 3,
+        "food": 4,
+        "money": 60,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 88,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 14,
+        "ap": 2,
+        "food": 8,
+        "money": 60,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 89,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 14,
+        "ap": 1,
+        "food": 8,
+        "money": 60,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 90,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 15,
+        "ap": 3,
+        "food": 6,
+        "money": 60,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 91,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 15,
+        "ap": 2,
+        "food": 10,
+        "money": 60,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 92,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 15,
+        "ap": 1,
+        "food": 10,
+        "money": 64,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 93,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 16,
+        "ap": 3,
+        "food": 7,
+        "money": 64,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 94,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 16,
+        "ap": 2,
+        "food": 7,
+        "money": 64,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 95,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 2,
+        "turn": 16,
+        "ap": 1,
+        "food": 7,
+        "money": 64,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 96,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "handover",
+        "generation": 2,
+        "turn": 16,
+        "ap": 0,
+        "food": 5,
+        "money": 68,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [
+          "woodworking"
+        ],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 97,
+      "actionId": "handover",
+      "reason": "本代窗口结束，交接家产与在制品，不复制个人技能。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 1,
+        "ap": 3,
+        "food": 5,
+        "money": 68,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 98,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 丰水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 1,
+        "ap": 2,
+        "food": 9,
+        "money": 68,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 99,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 1,
+        "ap": 1,
+        "food": 9,
+        "money": 68,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 100,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 2,
+        "ap": 3,
+        "food": 6,
+        "money": 68,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 101,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 2,
+        "ap": 2,
+        "food": 6,
+        "money": 68,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 102,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 2,
+        "ap": 1,
+        "food": 6,
+        "money": 72,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 103,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 3,
+        "ap": 3,
+        "food": 4,
+        "money": 72,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 104,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 3,
+        "ap": 2,
+        "food": 8,
+        "money": 72,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 105,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 3,
+        "ap": 1,
+        "food": 8,
+        "money": 72,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 106,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 4,
+        "ap": 3,
+        "food": 6,
+        "money": 72,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 107,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 4,
+        "ap": 2,
+        "food": 10,
+        "money": 72,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 108,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 4,
+        "ap": 1,
+        "food": 10,
+        "money": 76,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 109,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 5,
+        "ap": 3,
+        "food": 7,
+        "money": 76,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 110,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 5,
+        "ap": 2,
+        "food": 7,
+        "money": 76,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 111,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 5,
+        "ap": 1,
+        "food": 7,
+        "money": 76,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 112,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 6,
+        "ap": 3,
+        "food": 5,
+        "money": 80,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 113,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 6,
+        "ap": 2,
+        "food": 5,
+        "money": 80,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 114,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 6,
+        "ap": 1,
+        "food": 5,
+        "money": 80,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 115,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 7,
+        "ap": 3,
+        "food": 3,
+        "money": 80,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 116,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 7,
+        "ap": 2,
+        "food": 3,
+        "money": 84,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 117,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 7,
+        "ap": 1,
+        "food": 3,
+        "money": 84,
+        "weather": "干旱",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 118,
+      "actionId": "gather:food",
+      "reason": "余粮 3 偏紧，野食仍可采，先垫一口。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 8,
+        "ap": 3,
+        "food": 3,
+        "money": 84,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 119,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 8,
+        "ap": 2,
+        "food": 7,
+        "money": 84,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 120,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 8,
+        "ap": 1,
+        "food": 7,
+        "money": 84,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 121,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 9,
+        "ap": 3,
+        "food": 5,
+        "money": 84,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 122,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 9,
+        "ap": 2,
+        "food": 9,
+        "money": 84,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 123,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 9,
+        "ap": 1,
+        "food": 9,
+        "money": 88,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 124,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 10,
+        "ap": 3,
+        "food": 6,
+        "money": 88,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 125,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 10,
+        "ap": 2,
+        "food": 10,
+        "money": 88,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 126,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 10,
+        "ap": 1,
+        "food": 10,
+        "money": 88,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 127,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 11,
+        "ap": 3,
+        "food": 7,
+        "money": 88,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 128,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 11,
+        "ap": 2,
+        "food": 7,
+        "money": 92,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 129,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 11,
+        "ap": 1,
+        "food": 7,
+        "money": 92,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 130,
+      "actionId": "end-turn",
+      "reason": "本季没有更合适的可见行动，结束以免空耗。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 12,
+        "ap": 3,
+        "food": 5,
+        "money": 92,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 131,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 12,
+        "ap": 2,
+        "food": 9,
+        "money": 92,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 132,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 12,
+        "ap": 1,
+        "food": 9,
+        "money": 92,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 133,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 13,
+        "ap": 3,
+        "food": 6,
+        "money": 92,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 134,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 丰水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 13,
+        "ap": 2,
+        "food": 10,
+        "money": 92,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 135,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 13,
+        "ap": 1,
+        "food": 10,
+        "money": 96,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 136,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 14,
+        "ap": 3,
+        "food": 7,
+        "money": 96,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 137,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 14,
+        "ap": 2,
+        "food": 7,
+        "money": 96,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 138,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 14,
+        "ap": 1,
+        "food": 7,
+        "money": 96,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 139,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 15,
+        "ap": 3,
+        "food": 5,
+        "money": 100,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 140,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 平水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 15,
+        "ap": 2,
+        "food": 9,
+        "money": 100,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 141,
+      "actionId": "gather:wood",
+      "reason": "木材不够下一件容器，林地有可采木材。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 15,
+        "ap": 1,
+        "food": 9,
+        "money": 100,
+        "weather": "平水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 2,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 142,
+      "actionId": "craft:woodenware",
+      "reason": "继续做容器：有订单或尚未配置储存。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 16,
+        "ap": 3,
+        "food": 6,
+        "money": 100,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": "woodenware"
+      }
+    },
+    {
+      "revision": 143,
+      "actionId": "finish-craft",
+      "reason": "先完成已开工的木作，实践和产品都在完工时才结算。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 16,
+        "ap": 2,
+        "food": 6,
+        "money": 100,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 144,
+      "actionId": "cultivate",
+      "reason": "本季耕作预览 4 粮，天气 丰水，补生活。",
+      "after": {
+        "status": "active",
+        "generation": 3,
+        "turn": 16,
+        "ap": 1,
+        "food": 10,
+        "money": 100,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 1,
+        "storage": true,
+        "project": null
+      }
+    },
+    {
+      "revision": 145,
+      "actionId": "sell-good:woodenware",
+      "reason": "卖掉多余木容器换钱，不把第一件储存容器卖掉。",
+      "after": {
+        "status": "complete",
+        "generation": 3,
+        "turn": 16,
+        "ap": 0,
+        "food": 7,
+        "money": 104,
+        "weather": "丰水",
+        "mastered": [
+          "woodworking"
+        ],
+        "heir": [],
+        "wood": 0,
+        "woodenware": 0,
+        "storage": true,
+        "project": null
+      }
+    }
+  ]
+}

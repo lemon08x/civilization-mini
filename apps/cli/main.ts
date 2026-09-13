@@ -2,14 +2,14 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { resolveRuleset, isRecord } from '../../src/game/ruleset.js';
 import { createSession, observeSession } from '../../src/runtime/session.js';
-import { importLegacy, importRecord } from '../../src/runtime/replay.js';
+import { importRecord } from '../../src/runtime/replay.js';
 import { FileRunStore } from '../../src/runtime/file-store.js';
 import { metrics } from '../../src/research/metrics.js';
 import { POLICIES } from '../../src/agents/contract.js';
 import { scriptedAgent } from '../../src/agents/scripted/baseline.js';
 import { runExperiment, validateExperiment } from '../../src/research/runner.js';
 import { reportMarkdown } from '../../src/research/compare.js';
-import { loadContext, projectRoot, readJson } from './context.js';
+import { loadCurrentContext, projectRoot, readJson } from './context.js';
 
 function options(args: string[]): Record<string, string> {
   const result: Record<string, string> = {};
@@ -23,21 +23,21 @@ function options(args: string[]): Record<string, string> {
 try {
   const [command = 'help', ...args] = process.argv.slice(2), opts = options(args);
   if (command === 'help') {
-    console.log(`世代规则预研 v0.5 — 默认社会传承规则 0.4.0
+    console.log(`世代规则预研 — 文明试炼规则0.13.0
   npm run lab -- new --run demo --seed 17 --scenario woodland
-  npm run lab -- new --run old-demo --rules legacy --scenario river
+  npm run lab -- new --run farm --rules economy --scenario river
   npm run lab -- observe --run demo
-  npm run lab -- act --run demo --revision 0 --action study:observation
+  npm run lab -- act --run demo --revision 0 --action economy:study:A01
   npm run lab -- metrics --run demo
   npm run lab -- export --run demo
   npm run lab -- import --run imported --file runs/manual.json
   npm run simulate -- --candidate experiments/storage-capacity.json
-  npm run simulate -- --rules legacy --spec experiments/plans/agriculture-v1.json
-运行产物只写 artifacts/。旧 --file 存档请显式 import，不原地覆盖。`);
+  node experiments/economy-v9-probe.mjs
+运行产物只写 artifacts/。只接受当前规则和实现的存档。`);
   } else {
-    const context = await loadContext();
-    if (opts.rules && !['legacy', 'production', 'feedback', 'society'].includes(opts.rules)) throw new Error('--rules 只支持 legacy / production / feedback / society');
-    const { implementation, legacyBase } = context, base = opts.rules === 'legacy' ? legacyBase : opts.rules === 'production' ? context.productionBase : opts.rules === 'feedback' ? context.feedbackBase : context.base;
+    const context = await loadCurrentContext();
+    if(opts.rules&&opts.rules!=='economy')throw new Error('当前入口只支持新版 --rules economy');
+    const {implementation,base}=context;
     const store = new FileRunStore(join(projectRoot, 'artifacts/runs'), implementation);
     if (command === 'simulate') {
       const raw = await readJson(opts.spec ? resolve(opts.spec) : join(projectRoot, 'experiments/plans/default.json'));
@@ -66,17 +66,16 @@ try {
         await writeFile(join(directory, 'failure.json'), JSON.stringify({ error: (error as Error).message }), { flag: 'wx' }); throw error;
       }
     } else {
-      if (!opts.run) throw new Error('请指定 --run；旧文件先使用 import --run 新ID --file 原路径');
+      if (!opts.run) throw new Error('请指定 --run');
       if (command === 'new') {
         const overrides = opts.params ? await readJson(resolve(opts.params)) : {};
-        const session = await createSession({ runId: opts.run, ruleset: resolveRuleset(base, overrides), implementation, seed: Number(opts.seed ?? 1), scenarioId: opts.scenario ?? (base.production ? 'woodland' : 'river') });
+        const session = await createSession({ runId: opts.run, ruleset: resolveRuleset(base, overrides), implementation, seed: Number(opts.seed ?? 1), scenarioId: opts.scenario ?? (base.modern?'canyon':base.production ? 'woodland' : 'river') });
         await store.create(session); console.log(JSON.stringify(observeSession(session), null, 2));
       } else if (command === 'import') {
         if (!opts.file) throw new Error('import 需要 --file');
         const raw = await readJson(resolve(opts.file));
-        let session;
-        if (isRecord(raw) && raw.format === 'civilization-mini-replay') session = await importLegacy(raw, legacyBase, implementation, opts.run);
-        else session = await importRecord(raw, implementation, opts.run);
+        if (!isRecord(raw) || !isRecord(raw.manifest) || !isRecord(raw.manifest.ruleset) || raw.manifest.ruleset.rulesVersion !== base.rulesVersion) throw new Error('只接受当前学科经济规则存档，请新开局');
+        const session = await importRecord(raw, implementation, opts.run);
         await store.create(session); console.log(JSON.stringify(observeSession(session), null, 2));
       } else if (command === 'act') {
         if (!opts.action || opts.revision === undefined) throw new Error('act 需要 --action 和 --revision');

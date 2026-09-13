@@ -9,7 +9,7 @@ import type { GameEvent } from '../src/game/model/events.js';
 
 const readFramework = async () => JSON.parse(await readFile(resolve(projectRoot,'experiments/frameworks/knowledge.v1.json'),'utf8'));
 test('跨领域框架覆盖现行节点，拒绝伪装实现、缺失关系和解锁环', async()=>{
-  const {base} = await loadContext(), value = await readFramework(), f=validateFramework(value,base);
+  const {societyBase:base} = await loadContext(), value = await readFramework(), f=validateFramework(value,base);
   assert.equal(f.nodes.length,32); assert.equal(f.nodes.filter(n=>n.status==='implemented').length,12);
   for(const mutate of [
     (v:typeof f)=>{v.nodes.find(n=>n.id==='steam')!.status='implemented';},

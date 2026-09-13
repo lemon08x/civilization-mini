@@ -1,3 +1,5 @@
+import { experience,gainExperience } from './development.js';
+import type { Discipline } from '../model/development.js';
 import { activePerson, addUnique, heir } from '../model/state.js';
 import type { GameState, Person } from '../model/state.js';
 import type { GameEvent } from '../model/events.js';
@@ -37,7 +39,7 @@ export function practice(state: GameState, nodeId: string, practiceId: string, e
   addUnique(person.practices, practiceId);
   events.push({ type: 'practiced', personId: person.id, nodeId, practiceId });
 }
-export function teach(state: GameState, nodeId: string, rules: Ruleset, events: GameEvent[]): void {
+export function teach(state: GameState, nodeId: string, rules: Ruleset, events: GameEvent[], familyLesson=false): void {
   const child = heir(state), tech = techById(rules, nodeId);
   const kind = (child.learning[nodeId] ?? 0) < studyRequired(rules, child, tech, state.knowledge.archives) ? 'study' : 'practice';
   if (kind === 'study') child.learning[nodeId] = (child.learning[nodeId] ?? 0) + 1;
@@ -46,6 +48,8 @@ export function teach(state: GameState, nodeId: string, rules: Ruleset, events: 
     if (!tag) throw new Error('后辈已完成全部实践');
     addUnique(child.practices, tag);
   }
+  if(familyLesson&&kind==='study'){const tag=tech.practices.find(t=>!child.practices.includes(t));if(tag){addUnique(child.practices,tag);events.push({type:'taught',personId:child.id,nodeId,kind:'practice'});}}
+  if(familyLesson){const domains:Record<string,Discipline>={woodworking:'woodwork',mechanics:'woodwork',pottery:'pottery','ceramic-engineering':'pottery','precision-engineering':'pottery',agronomy:'agriculture',experimentation:'science'};const domain=domains[nodeId];if(domain&&experience(state,domain,child.id)<Math.floor(experience(state,domain)/2))gainExperience(state,domain,Math.min(2,Math.floor(experience(state,domain)/2)-experience(state,domain,child.id)),events,child.id);}
   events.push({ type: 'taught', personId: child.id, nodeId, kind });
   masterAvailable(state, child, rules, events);
 }

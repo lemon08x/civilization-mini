@@ -1,11 +1,12 @@
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, resolve, sep } from 'node:path';
-import { loadContext, projectRoot } from '../cli/context.js';
+import { loadCurrentContext, projectRoot } from '../cli/context.js';
 import { loadResearchIndex, parameterRows, readReviewFile } from './review-data.js';
 import { fingerprint } from '../../src/runtime/records.js';
 
-const context = await loadContext();
+const loaded = await loadCurrentContext();
+const context = {...loaded,base:loaded.economyBase};
 const port = Number(process.env.PORT ?? 4317);
 const types: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
 const server = http.createServer(async (req, res) => {
@@ -28,7 +29,7 @@ const server = http.createServer(async (req, res) => {
     else if (path === '/review.css') absolute = join(projectRoot, 'apps/board/review.css');
     else if (path === '/style.css') absolute = join(projectRoot, 'apps/board/style.css');
     else if (path === '/implementation.json') absolute = join(projectRoot, 'dist/implementation.json');
-    else if (['/rulesets/traditional-agriculture.v1.json', '/rulesets/shared-production.v2.json', '/rulesets/technology-feedback.v3.json', '/rulesets/social-inheritance.v4.json'].includes(path)) absolute = join(projectRoot, path.slice(1));
+    else if (['/rulesets/megaproject-trial.v13.json','/rulesets/modern-grid.v14.json'].includes(path)) absolute = join(projectRoot, path.slice(1));
     else if (path.startsWith('/modules/') && path.endsWith('.js')) {
       const root = join(projectRoot, 'dist');
       absolute = resolve(root, path.slice('/modules/'.length));

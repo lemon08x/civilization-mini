@@ -1,3 +1,7 @@
+import {disciplineCatalog,productCatalog,economyRulesPage} from './economy-view.js';
+import { productPage } from './product-view.js';
+import { playerRulesPage } from './player-rules.js';
+import { logicPage } from './logic-view.js';
 import type { Ruleset } from '../../src/game/ruleset.js';
 import type { ImplementationIdentity } from '../../src/runtime/records.js';
 import type { loadResearchIndex, parameterRows, ExperimentReview, Proposal } from './review-data.js';
@@ -8,16 +12,21 @@ const show = (v: unknown) => v === null || v === undefined ? '未设置 / 无此
 const source = (path: string, label = path.split('/').at(-1)!) => `<button data-source="${esc(path)}">${esc(label)}</button>`;
 const statuses: Record<string, string> = { pending_validation: '待验证', pending_decision: '待采纳', accepted: '已接受', rejected: '已拒绝', deferred: '暂不采纳' };
 const kinds: Record<string, string> = { parameter: '参数调整', mechanism: '机制变更', strategy: '策略问题', interface: '界面改进' };
-let data: ReviewData | undefined, tab = 'rules', selectedTech = 'woodworking', query = '', scope = 'all', status = 'all', sourceRequest = 0;
-let frameworkNode = 'woodworking';
+let data: ReviewData | undefined, tab = ['technology','products','parameters','research','framework'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'rules', selectedTech = 'woodworking', query = '', scope = 'all', status = 'all', sourceRequest = 0;
+let frameworkNode = 'woodworking', techSearch='';
+let selectedProduct='g:precisionParts', productCategory='all', productPlans=false, productLocal=false, productCycle=false, productSearch='';
+type ProductRoute={selected:string;category:string;plans:boolean;local:boolean;cycle:boolean;left:number;top:number};
+const productHistory:ProductRoute[]=[];
+function rememberProduct(){const g=document.querySelector('.product-network');productHistory.push({selected:selectedProduct,category:productCategory,plans:productPlans,local:productLocal,cycle:productCycle,left:g?.scrollLeft??0,top:g?.scrollTop??0});}
 function frameworkPage(): string {
+  if(data!.rules.economy)return disciplineCatalog();
   const f = data!.framework;
   if (!f) return '<p class="notice">框架不可读取，请查看读取提示。</p>';
   const n = f.nodes.find(n=>n.id===frameworkNode) ?? f.nodes[0];
   const link = (id: string) => `<button data-knowledge="${esc(id)}">${esc(f.nodes.find(n=>n.id===id)?.name ?? id)}</button>`;
   const relationships = [['必要前置',n.required],['替代前置（任选）',n.alternative],['促进关系（不作门槛）',n.helpful],['思想讨论（无高低等级）',n.debates]] as const;
   const downstream = f.nodes.filter(x=>[...x.required,...x.alternative,...x.helpful,...x.debates].includes(n.id));
-  return `<section class="card"><h2>跨领域知识框架 · ${esc(f.version)}</h2><p>${f.domains.length} 个领域 · ${f.nodes.length} 个节点 · ${f.nodes.filter(n=>n.status==='implemented').length} 个已接入 · ${f.nodes.filter(n=>n.status==='proposed').length} 个待实现。框架基于规则 ${esc(f.baseRulesVersion)}，候选尚不能在游戏中学习或产生收益。</p><p>世界已有 → 当地可接触 → 个人学习与实践 → 家庭具备应用条件 → 成果留给后代。关系属于待检验的游戏设计假设，不表示唯一的历史道路。</p><div class="sources">${source('docs/KNOWLEDGE_RESEARCH.md','研究流程与下一步')}${source('experiments/frameworks/knowledge.v1.json','机器可读框架')}</div></section>
+  return `<section class="card"><h2>跨领域知识框架 · ${esc(f.version)}</h2><p>${f.domains.length} 个领域 · ${f.nodes.length} 个节点 · ${f.nodes.filter(n=>n.status==='implemented').length} 个已接入 · ${f.nodes.filter(n=>n.status==='proposed').length} 个待实现。框架基于规则 ${esc(f.baseRulesVersion)}，候选尚不能在游戏中学习或产生收益。</p><p>世界已有 → 当地可接触 → 个人学习与实践 → 家庭具备应用条件 → 成果留给后代。关系属于待检验的游戏设计假设，不表示唯一的历史道路。</p><div class="sources">${source('docs/KNOWLEDGE_RESEARCH.md','研究流程与下一步')}${source(data!.rules.passiveInvestment?'experiments/frameworks/knowledge.v5.json':data!.rules.householdProgress?'experiments/frameworks/knowledge.v4.json':data!.rules.productNetwork?'experiments/frameworks/knowledge.v3.json':data!.rules.development?'experiments/frameworks/knowledge.v2.json':'experiments/frameworks/knowledge.v1.json','机器可读框架')}</div></section>
     <div class="split"><section class="knowledge-domains">${f.domains.map(d=>`<article class="card"><h3>${esc(d.name)}</h3><div class="knowledge-list">${f.nodes.filter(x=>x.domain===d.id).map(x=>`<button data-knowledge="${esc(x.id)}" class="${x.id===n.id?'selected':''}" aria-pressed="${x.id===n.id}">${esc(x.name)} <small>${x.status==='implemented'?'已接入':'待实现'}${x.kind==='tradition'?' · 思想传统':''}</small></button>`).join('')}</div></article>`).join('')}</section>
     <section class="card knowledge-detail"><h2>${esc(n.name)}</h2><span class="tag ${n.status==='proposed'?'pending':''}">${n.status==='implemented'?'现行机制':'研究候选 · 尚无结算'}</span><p><strong>世界条件：</strong>${esc(n.world)}</p><p><strong>当地接触：</strong>${esc(n.access)}</p><p><strong>个人实践：</strong>${esc(n.practice)}</p><p><strong>家庭应用：</strong>${esc(n.application)}</p><p><strong>跨代留下：</strong>${esc(n.legacy)}</p><p><strong>投入与限制：</strong>${esc(n.cost)}</p><p class="notice"><strong>待研究：</strong>${esc(n.question)}</p>${relationships.map(([title,ids])=>`<p><strong>${title}</strong></p><div class="sources">${ids.map(link).join('')||'无'}</div>`).join('')}<p><strong>影响哪些节点</strong></p><div class="sources">${downstream.map(x=>link(x.id)).join('')||'尚未声明'}</div></section></div>
     <h2>研究队列 · 每轮只回答一个问题</h2><p class="muted">诊断信号不是因果结论。先检查策略是否尝试，再设基线和单项候选；已知失败应记录，不能不断降成本直到某个分数变高。</p><div class="grid">${f.questions.map(q=>`<section class="card"><h3>${esc(q.title)}</h3><div class="sources">${q.nodes.map(link).join('')}</div><p><strong>假设：</strong>${esc(q.hypothesis)}</p><p><strong>最小对照：</strong>${esc(q.probe)}</p><p><strong>成功条件：</strong>${esc(q.success)}</p><p><strong>同时检查：</strong>${esc(q.guardrails.join('；'))}</p><p><strong>停止或转向：</strong>${esc(q.stop)}</p><p class="muted">待实现节点：${q.nodes.filter(id=>f.nodes.find(n=>n.id===id)?.status==='proposed').map(id=>f.nodes.find(n=>n.id===id)!.name).join('、')||'无；可在当前机制内设计实验'}。${q.parameter?`现有候选参数：${esc(q.parameter)}`:'不支持直接参数覆盖；按问题设计策略对照或机制版本。'}</p></section>`).join('')}</div>
@@ -29,31 +38,12 @@ const parameterNames: Record<string, string> = {
 function currentValue(path: string): unknown { let value: unknown = data!.rules; for (const key of path.split('.')) { if (value === null || typeof value !== 'object' || !Object.hasOwn(value, key)) return null; value = (value as Record<string, unknown>)[key]; } return value; }
 
 function rulesPage(): string {
-  const r = data!.rules, p = r.parameters;
-  return `<section class="card"><h2>现在固定的是什么？</h2><p>本页读取当前默认规则。每局开始后，机制与参数固定；实验可以使用独立候选，不能在局中改世界。冻结并非永远不能改：结构变化需新规则版本与迁移说明。</p>
-    <div class="flow"><span>观察当前条件</span><b>→</b><span>选择合法行动</span><b>→</b><span>统一引擎结算</span><b>→</b><span>留下事件与跨代成果</span></div>
-    <p class="muted">每季 ${p.actionsPerTurn} 行动 · 每代 ${p.turnsPerGeneration} 季 · 观察 ${p.generations} 代 · 季耗 ${p.foodPerTurn} 粮。短窗口不是人物完整寿命，也不是统一胜负条件。</p></section>
-    <div class="grid three">
-    <section class="card"><h3>时间与生活</h3><p>季末公共商品使用与委托结算 → 家庭吃粮 → 余粮损耗 → 终止/交接判断 → 换季天气与供给。</p><p>连续 ${p.hardshipLimit} 季缺粮终止。当前天气可见，未来天气不向玩家开放。</p></section>
-    <section class="card"><h3>知识与科技</h3><p>${r.technologies.length} 个节点，区分必要前置、替代前置和有利经验。学习与实践一起满足才能掌握。</p><p>社会已有、当地可接触、本人会做、家庭有生产条件，是不同层次。</p></section>
-    <section class="card"><h3>生产与设施</h3><p>原料开工扣除，产品完工才获得；陶器必须跨季干燥。设施开放批量制作，但材料与销路仍受限制。</p><p>货物、工具、容器、设施和在制品可以跨代保存。</p></section>
-    <section class="card"><h3>家族传承</h3><p>方法材料减少后人的理论学习，最低仍需一次；前置与实践不免。继承资产不会自动复制个人技能。</p><p>下一代可以换行业，使用遗留容器并保留合作。</p></section>
-    <section class="card"><h3>当地社会分工</h3><p>讲授与指导实践后形成当地方法来源；匠人可受托经营家族设施。开工工资、当地原料、跨季工序和订单决定实际货款。</p><p>公共商品来自真实销售，邻里使用或玩家购买都会扣库存。</p></section>
-    <section class="card"><h3>明确尚未实现</h3><p>国家/全球技术扩散、其他家族自主研发、时代跃迁、迁居及完整劳动力市场。</p><p>目前七种内置策略是脚本基线，没有后台大模型研究或自动调参循环。</p></section></div>
-    <section class="card section-gap"><h2>规则来源与版本</h2><p>以下文档按增量组成现行规则；原始配置记录精确参数与科技定义。旧报告只说明其运行时的版本。</p><div class="sources">${source('docs/DESIGN_DIRECTION.md','设计方向')}${source('docs/RULEBOOK_V2.md','生产基础')}${source('docs/TECHNOLOGY_FEEDBACK_V3.md','科技成果')}${source('docs/SOCIAL_INHERITANCE_V4.md','社会传承与迁移')}${source('rulesets/social-inheritance.v4.json','当前完整规则')}</div><details><summary>旧版规则（查看，不切换当前游戏）</summary><div class="sources">${source('rulesets/traditional-agriculture.v1.json','0.1.0 农业')}${source('rulesets/shared-production.v2.json','0.2.0 生产')}${source('rulesets/technology-feedback.v3.json','0.3.0 科技反馈')}</div></details></section>`;
+  const r = data!.rules;
+  if(r.economy)return economyRulesPage();
+  return playerRulesPage(r) + `<details><summary>规则来源与版本（查阅）</summary>
+    <section class="card section-gap"><h2>规则来源与版本</h2><p>以下文档按增量组成现行规则；原始配置记录精确参数与科技定义。旧报告只说明其运行时的版本。</p><div class="sources">${source('docs/DESIGN_DIRECTION.md','设计方向')}${source('docs/RULEBOOK_V2.md','生产基础')}${source('docs/TECHNOLOGY_FEEDBACK_V3.md','科技成果')}${source('docs/SOCIAL_INHERITANCE_V4.md','社会传承与迁移')}${source('docs/CRAFT_SCIENCE_V5.md','持续成长与工业科学')}${source('docs/PRODUCT_NETWORK_V6.md','产品网络与高级能力')}${source('docs/LIFE_CHRONICLE.md','经历与传承：不设人生总分')}${source(r.passiveInvestment?'rulesets/passive-investment.v8.json':r.householdProgress?'rulesets/household-progress.v7.json':r.productNetwork?'rulesets/product-network.v6.json':r.development?'rulesets/craft-science.v5.json':'rulesets/social-inheritance.v4.json','当前完整规则')}</div><details><summary>旧版规则（查看，不切换当前游戏）</summary><div class="sources">${source('rulesets/traditional-agriculture.v1.json','0.1.0 农业')}${source('rulesets/shared-production.v2.json','0.2.0 生产')}${source('rulesets/technology-feedback.v3.json','0.3.0 科技反馈')}</div></details></section></details>`;
 }
-function techPage(): string {
-  const nodes = data!.rules.technologies, depths = new Map<string, number>();
-  const depth = (id: string): number => { if (depths.has(id)) return depths.get(id)!; const t = nodes.find(n => n.id === id)!; const parents = [...t.prerequisites, ...(t.prerequisiteAny ?? []), ...(t.helpfulPrerequisites ?? [])]; const d = parents.length ? Math.max(...parents.map(depth)) + 1 : 0; depths.set(id, d); return d; };
-  nodes.forEach(t => depth(t.id));
-  const levels = new Map<number, number>(), positions = new Map<string, { x: number; y: number }>();
-  for (const t of nodes) { const d = depth(t.id), row = levels.get(d) ?? 0; positions.set(t.id, { x: 20 + d * 205, y: 30 + row * 100 }); levels.set(d, row + 1); }
-  const width = (Math.max(...depths.values()) + 1) * 205 + 20, height = Math.max(...levels.values()) * 100 + 30;
-  const lines = nodes.flatMap(t => [['required', t.prerequisites], ['alternative', t.prerequisiteAny ?? []], ['helpful', t.helpfulPrerequisites ?? []]].flatMap(([kind, parents]) => (parents as string[]).map(id => { const a = positions.get(id)!, b = positions.get(t.id)!; return `<path class="edge ${kind}" d="M${a.x+175},${a.y+29} C${a.x+190},${a.y+29} ${b.x-15},${b.y+29} ${b.x},${b.y+29}" marker-end="url(#arrow)"/>`; }))).join('');
-  const boxes = nodes.map(t => { const p = positions.get(t.id)!; return `<g class="node ${t.id === selectedTech ? 'selected' : ''}" role="button" tabindex="0" aria-label="查看${esc(t.name)}" data-tech="${esc(t.id)}" transform="translate(${p.x},${p.y})"><rect width="175" height="58" rx="6"/><text x="12" y="25">${esc(t.name.slice(0,10))}</text><text x="12" y="45" style="font-size:11px">${esc(t.branch)}</text></g>`; }).join('');
-  const t = nodes.find(t => t.id === selectedTech) ?? nodes[0], names = (ids: string[]) => ids.map(id => nodes.find(n => n.id === id)?.name ?? id).join('、') || '无';
-  return `<h2>科技关系网络</h2><p class="muted">横向滚动查看完整网络，点击节点查看条件与实际用途。这里展示配置中的完整网络，不表示当前人物已经掌握；横向位置只表示依赖，不是文明等级。</p><div class="split"><div><div class="network"><svg style="width:${width}px;max-width:none" viewBox="0 0 ${width} ${height}" aria-label="科技依赖关系"><defs><marker id="arrow" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6" fill="#70816d"/></marker></defs>${lines}${boxes}</svg></div><p class="legend"><span>━━ 必要前置</span><span style="color:#7586a6">┄┄ 替代前置（任选）</span><span style="color:#ac812d">┈┈ 有利经验（非必需）</span></p></div><section class="card"><h3>${esc(t.name)}</h3><p class="tag">${esc(t.branch)}</p><p>${esc(t.benefit)}</p><p><strong>必要前置：</strong>${esc(names(t.prerequisites))}</p><p><strong>替代前置：</strong>${esc(names(t.prerequisiteAny ?? []))}</p><p><strong>有利经验：</strong>${esc(names(t.helpfulPrerequisites ?? []))}</p><p><strong>基础理论：</strong>${t.study} 次 × 学习倍率；再按经验、家学减免，最低 1 次。</p><p><strong>实际实践：</strong>${esc(t.practices.map(tag => data!.rules.practiceNames[tag]).join('、'))}</p><p><strong>社会条件：</strong>${esc(t.world)}</p><details><summary>各地区的初始接触条件</summary>${Object.values(data!.rules.scenarios).map(s => `<p>${esc(s.name)}：${s.production?.teachers.includes(t.id) ? '有当地老师' : s.production?.imports.includes(t.id) ? '可交换外来方法' : '没有初始教学或进口来源'}</p>`).join('')}<small>后续家族方法和社会传授可以改变实际可接触性。</small></details></section></div>`;
-}
+function techPage(): string { return data!.rules.economy?disciplineCatalog():logicPage(data!.rules, selectedTech,techSearch); }
 function parametersPage(): string {
   const rows = data!.parameters.filter(p => (scope === 'all' || (scope === 'editable') === p.editable) && `${p.key} ${parameterNames[p.key.split('.').at(-1)!]}`.toLowerCase().includes(query.toLowerCase()));
   return `<section class="card"><h2>谁能改，什么时候改？</h2><div class="table-wrap"><table><tr><th>角色</th><th>权限</th></tr><tr><td>玩家代理</td><td>仅观察与选择合法行动；不能修改规则、资源或未来天气。</td></tr><tr><td>参数对照实验</td><td>开局前覆盖白名单参数，受整数范围与跨字段约束检查；本局运行中固定。</td></tr><tr><td>研究与开发</td><td>可另提机制/科技结构变更；需版本、验证与迁移方案，不自动采纳。</td></tr></table></div><p class="muted">配置里有数字不等于候选入口允许修改。下面的权限来自当前代码支持的参数集合。给代理完整 shell/编辑权限时，项目约定本身不是安全隔离。</p></section>
@@ -87,13 +77,25 @@ function researchPage(): string {
 }
 function render() {
   if (!data) return;
+  const researchTools=document.querySelector<HTMLDetailsElement>('.research-tools');if(researchTools&&['parameters','research','framework'].includes(tab))researchTools.open=true;
   $('identity').innerHTML = `当前默认规则 <strong>${esc(data.rules.rulesVersion)}</strong> · 实现 ${esc(data.implementation.version)} · ${data.rules.technologies.length} 科技节点 · ${data.experiments.length} 份实验 · ${data.proposals.length} 个提案<details><summary>当前指纹</summary><div class="mono">规则 ${esc(data.rulesFingerprint)}<br>实现 ${esc(data.implementation.codeFingerprint)}</div></details>`;
-  $('review').innerHTML = data.issues.map(i=>`<p class="notice">读取提示：${esc(i)}</p>`).join('') + ({ rules: rulesPage, technology: techPage, parameters: parametersPage, research: researchPage, framework: frameworkPage }[tab] ?? rulesPage)();
+  $('review').innerHTML = data.issues.map(i=>`<p class="notice">读取提示：${esc(i)}</p>`).join('') + ({ rules: rulesPage, technology: techPage, products: ()=>data!.rules.economy?productCatalog():productPage(data!.rules,selectedProduct,productCategory,productPlans,productLocal,productHistory.length>0,productSearch,productCycle), parameters: parametersPage, research: researchPage, framework: frameworkPage }[tab] ?? rulesPage)();
   document.querySelectorAll<HTMLButtonElement>('[data-knowledge]').forEach(b=>b.addEventListener('click',()=>{frameworkNode=b.dataset.knowledge!;render();document.querySelector('.knowledge-detail')?.scrollIntoView({block:'start'});}));
   document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach(b=>b.classList.toggle('selected', b.dataset.tab===tab));
-  document.querySelectorAll<HTMLElement>('[data-tech]').forEach(b=> { const select=()=>{selectedTech=b.dataset.tech!;render();}; b.addEventListener('click',select);b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select();}}); });
+  document.querySelectorAll<HTMLElement>('[data-tech]').forEach(b=> { const select=()=>{const graph=document.querySelector('.tech-network');const left=graph?.scrollLeft??0,top=graph?.scrollTop??0;selectedTech=b.dataset.tech!;render();const next=document.querySelector('.tech-network');if(next){next.scrollLeft=left;next.scrollTop=top;if(!b.closest('svg'))document.querySelector<SVGElement>(`svg [data-tech="${selectedTech}"]`)?.scrollIntoView({block:'nearest',inline:'nearest'});}}; b.addEventListener('click',select);b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select();}}); });
   document.querySelectorAll<HTMLButtonElement>('[data-source]').forEach(b=>b.addEventListener('click',()=>void openSource(b.dataset.source!)));
+  document.querySelector('[data-open-technology]')?.addEventListener('click',e=>{e.preventDefault();tab='technology';history.replaceState(null,'','#technology');render();window.scrollTo(0,0);});
   $('apply-filter')?.addEventListener('click',()=>{ query=($('query') as HTMLInputElement).value; if(tab==='parameters')scope=($('scope') as HTMLSelectElement).value;else status=($('status') as HTMLSelectElement).value;render(); });
+  document.querySelectorAll<HTMLElement>('[data-product-node]').forEach(b=>{const select=()=>{const graph=document.querySelector('.product-network'),left=graph?.scrollLeft??0,top=graph?.scrollTop??0;rememberProduct();selectedProduct=b.dataset.productNode!;const changedBranch=productCategory!==b.dataset.productCategory;if(productCategory!==b.dataset.productCategory){productCategory=b.dataset.productCategory!;productCycle=false;}render();const next=document.querySelector('.product-network');if(next){next.scrollLeft=changedBranch?0:left;next.scrollTop=changedBranch?0:top;if(!b.closest('svg'))document.querySelector<SVGElement>(`svg [data-product-node="${selectedProduct}"]`)?.scrollIntoView({block:'nearest',inline:'nearest'});}};b.addEventListener('click',select);b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select();}});});
+  document.querySelectorAll<HTMLElement>('[data-product-tech]').forEach(b=>b.addEventListener('click',()=>{selectedTech=b.dataset.productTech!;tab='technology';history.replaceState(null,'','#technology');render();}));
+  $('product-category')?.addEventListener('change',()=>{rememberProduct();productCategory=($('product-category') as HTMLSelectElement).value;productLocal=false;productCycle=false;render();});
+  $('product-mode')?.addEventListener('change',()=>{rememberProduct();productPlans=($('product-mode') as HTMLSelectElement).value==='planned';productCategory='all';productCycle=false;productLocal=false;render();});
+  document.querySelectorAll<HTMLElement>('[data-product-branch]').forEach(b=>b.addEventListener('click',()=>{rememberProduct();productCategory=b.dataset.productBranch!;productLocal=false;productCycle=false;render();}));
+  $('product-back')?.addEventListener('click',()=>{const p=productHistory.pop();if(!p)return;selectedProduct=p.selected;productCategory=p.category;productPlans=p.plans;productLocal=p.local;productCycle=p.cycle;render();const g=document.querySelector('.product-network');if(g){g.scrollLeft=p.left;g.scrollTop=p.top;}});
+  $('product-local')?.addEventListener('click',()=>{rememberProduct();productLocal=!productLocal;render();});
+  $('product-cycle')?.addEventListener('click',()=>{rememberProduct();productCycle=!productCycle;productLocal=false;if(productCycle){selectedProduct='g:ceramicParts';productCategory='材料与金属';}render();});
+  $('tech-search-form')?.addEventListener('submit',e=>{e.preventDefault();techSearch=($('tech-search') as HTMLInputElement).value.trim();render();});
+  $('product-search-form')?.addEventListener('submit',e=>{e.preventDefault();productSearch=($('product-search') as HTMLInputElement).value.trim();render();});
   $('query')?.addEventListener('keydown',e=>{if(e.key==='Enter')$('apply-filter').click();});
 }
 async function openSource(path: string) {
@@ -109,6 +111,6 @@ async function refresh() {
   catch(e){const message=document.createElement('p');message.className='notice';message.textContent=`${(e as Error).message}。已有显示保留，请重试。`;$('review').prepend(message);}
   finally{button.disabled=false;}
 }
-document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.tab!;query='';render();}));
+document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.tab!;query='';history.replaceState(null,'',tab==='rules'?location.pathname:'#'+tab);render();}));
 $('refresh').addEventListener('click',()=>void refresh());
 await refresh();

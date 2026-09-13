@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "study-multiplier-holdout-20260911",
+  "seeds": [29],
+  "scenarios": ["clay-valley"],
+  "agents": ["potter", "mixed"],
+  "variants": [{"id": "baseline", "parameters": {}}],
+  "maxActions": 60,
+  "decisionTimeoutMs": 30000
+}

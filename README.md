@@ -1,57 +1,38 @@
 # Civilization Mini · 世代规则预研
 
-独立的桌游规则实验项目。先验证普通人的生活、学习与代际传承，再开发正式游戏；不依赖 Cocos，不修改 ../remake。
+当前规则 **0.14.0**、工程 **0.15.0**。主线为「现代流域电网与自动化工业区」：从继承六阶工业基础开始，通过真实供能、电子制造、无线通信与数字控制完成五层工程。
 
-默认规则 v0.4.0、工程 v0.5.0：无地图、回合制、普通人视角的文明发展预研。在工作台、陶窑与批量制作上增加家族方法学习减免、邻里传授、跨代作坊委托和公共商品流转；后人换行业仍能利用前代成果。12 个知识节点保留，尚未实现国家/全球扩散与时代推进。七个脚本策略不是大模型，尚未接入本地模型、付费 API 或后台循环。
+完整玩法见 [现代版玩法与验证](docs/CURRENT_GAMEPLAY_V14.md)。六科各10阶、共60课题；36项设备、26种配方。新增水电/燃料/光伏、储能、离心泵、现代化工与电子制造、通信调度、冷库、温室及精准农业。家庭生存、工资、市场、跨季物流、传承和纤维/绳索作坊继续运行。
 
-设计方向见 [定位与科技正反馈](docs/DESIGN_DIRECTION.md)，当前增量规则及迁移见 [社会传承规则](docs/SOCIAL_INHERITANCE_V4.md)，首轮小样本结论见 [跨行业传承验证](docs/SOCIAL_INHERITANCE_VALIDATION.md)。木作接续已验证转行后收益，仍需工资、原料和订单；尚未证明平衡。
+默认「峡谷水电工业区」，另有滨海和内陆缺水环境。五层主线为工业基建营 → 发电与输电走廊 → 电动泵站 → 电子制造与无线调度 → 清洁电网与数字协同工业区。最后一层须连续三季实际清洁发电、雇员生产控制器、无线与数字控制在线，并消耗现场材料和电力。
 
-旧农业规则 v0.1.0 和冻结轨迹保留，使用 `--rules legacy` 新建旧规则局。旧存档需要显式导入复制，不能当作新生产世界继续。
+旧版资料保留：[v13完整基础玩法](docs/CURRENT_GAMEPLAY_V13.md)、[大运河试炼](docs/MEGAPROJECT_TRIAL_V13.md)、[独立作坊](docs/WORKSHOP_NETWORK_V12.md)、[长期家业](docs/LASTING_ENTERPRISE_V11.md)、[地区商城](docs/REGIONAL_MARKET_V10.md)。它们记录各自版本，不代表现代版完整规则。当前数值未平衡，尚未证明默认48季完整通关。
 
-## 运行
+## 开始试玩
 
 需要 Node.js 24+。
 
 ```powershell
 npm ci
-npm run build
 npm start
 ```
 
-打开 http://127.0.0.1:4317。点选行动自动保存，反馈显示在页面顶部。浏览器使用 v5 新存储键，原 v1—v4 键保留；新建和导入会备份现存 v5。旧档必须通过实现指纹和完整重放验证，不自动转为新规则。历史工程 0.3.0/0.4.0 的生产或科技反馈存档暂不支持迁移，请用对应版本读取，原档保留。
+打开 http://127.0.0.1:4317。当前入口使用现代工业新版，请新开局；浏览器使用独立存储键保留旧档，不修改原记录或指纹。旧版不能直接导入新版，不提供自动迁移；详见现代版玩法中的迁移方案。每季3行动，先维持生活来源，再规划现代工艺与供能，通过「家业」页逐步委托日常事务，为现代工程供料并管理能源。雇佣后需要安排任务。点击「商城」选择物资或设备，加入采购清单后整单结账只花1行动；现货立即到账，订货次季交付。页内栏目展示实际成本与阻塞原因。
 
-CLI 默认新局为社会传承规则；`--rules feedback` 为冻结的 0.3.0 科技反馈规则，`--rules production` 为 0.2.0 生产规则，`--rules legacy` 为 0.1.0 农业规则。用当前工程新建旧规则局不等于迁移历史实现的旧存档。
-
-打开 http://127.0.0.1:4317/review 或点击游戏页底部「规则与实验审阅」，可查看现行机制、科技关系、参数权限，以及历史实验和提案的修改前后、证据与采纳状态。点击「刷新记录」读取新增记录；这是只读入口，不启动模拟或采纳修改。提案文件格式见 [审阅台说明](docs/REVIEW_DESK.md)。
+打开 `/review` 查看规则总览、学科主干、产品效果目录和研究证据。产品的材料、学科、运行条件在具体详情中。历史实验不代表当前规则的新结果。
 
 ```powershell
-npm run lab -- new --run demo --seed 17 --scenario woodland
+npm run build
+npm run lab -- new --run demo --seed 17 --scenario canyon
 node scripts/player.mjs observe --run demo
-node scripts/player.mjs act --run demo --revision 0 --action study:woodworking
-npm run lab -- import --run imported --file runs/manual.json
+node scripts/player.mjs act --run demo --revision 0 --action economy:towerstart:survey
 npm test
-npm run simulate -- --candidate experiments/storage-capacity.json
-npm run simulate -- --rules legacy --spec experiments/plans/agriculture-v1.json
 ```
 
-代码修改后先重新 build。CLI 按 run ID 操作，拒绝原地覆盖已有实验。新运行保存至 artifacts/runs；对照报告、完整规则和轨迹保存至 artifacts/experiments。默认批次 8 局，带一个候选为 16 局，不会自动采纳候选。
+玩家使用受限 `scripts/player.mjs`；网页、脚本和模型均通过同一行动接口。`src/game/game.ts` 是唯一结算权威，策略只读取 `observeSession()`。记录严格检查规则与实现指纹并重放；不能直接改存档优化参数。
 
-## 项目职责
+## 研究边界
 
-跨领域框架与研究诊断见 [知识研究框架](docs/KNOWLEDGE_RESEARCH.md)。审阅页新增 7 领域、32 节点的框架与研究队列，区分 12 个现行节点和 20 个待实现候选。构建后 `npm run research:audit -- <逐局 JSON>` 可生成带事件位置的诊断记录，不重跑模拟、不自动调参。
+先记录假设，再用相同场景、种子与策略做小批量对照；候选写入 `experiments/`，不自动覆盖正式规则。不创建常驻优化循环、不默认调用付费API。当前验证使用脚本基线，不称为大模型AI。
 
-| 目录 | 职责 |
-| --- | --- |
-| src/game | 状态、行动、生产/学习/项目/时间/传承系统、玩家观察；唯一规则结算 |
-| src/runtime | 命令执行、完整记录、指纹、重放、旧存档迁移与文件保存 |
-| src/agents | 代理协议、脚本基线、可注入模型调用的 JSON 适配器 |
-| src/research | 有界实验调度、事件指标、同条件比较 |
-| apps/cli、apps/board | 命令行与浏览器入口 |
-| rulesets | 冻结规则、科技节点、场景、参数边界 |
-| experiments | 候选参数与实验计划 |
-| tests | 重构前独立基准及运行保护验证 |
-| artifacts | 生成记录和报告，不作为规则来源 |
-
-详见 [当前规则与迁移](docs/SOCIAL_INHERITANCE_V4.md)、[生产基础规则](docs/RULEBOOK_V2.md)、[架构与演进约束](docs/ARCHITECTURE.md)、[AI 协议](docs/AI_PROTOCOL.md)、[预研问题](docs/RESEARCH.md)。历史农业结论保留在 [首次发现](docs/INITIAL_FINDINGS.md)，历史生产结果见 [通用生产验证](docs/PRODUCTION_VALIDATION.md)，历史科技反馈见 [科技反馈验证](docs/TECHNOLOGY_FEEDBACK_VALIDATION.md)，本轮结果见 [跨行业传承验证](docs/SOCIAL_INHERITANCE_VALIDATION.md)。
-
-默认在当前分支工作，只有用户明确要求时才创建或切换分支。重构前源码仍可从 Git 历史提交 2f0ffbf 查阅；原 runs/ 与 reports/ 保留。不要用新实现直接解释不同指纹的存档，需对应版本或显式迁移。当前支持冻结工程 0.2.0 的原始农业基线 v2 存档完整校验后复制导入，其他历史指纹继续拒绝猜测迁移。
+本版雇佣能代劳，但工资和原料压力仍明显，尚未证明更盈利。具体数据见本版说明。项目独立于 `../remake`，不引入 Cocos 或正式游戏工程。

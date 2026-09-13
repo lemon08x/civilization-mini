@@ -1,3 +1,10 @@
+import { resetModern,generateModern,serveModern,storeModern } from './modern.js';
+import { arriveTower,dispatchTower,recordTowerEvidence,settleTower } from './tower.js';
+import { arriveWorkshops,settleWorkshops } from './workshop.js';
+import { renewOperations,beforeOperations,afterOperations,advanceProjects,recordProjectEvidence } from './operations.js';
+import { renewShop } from './shop.js';
+import { settleEconomy,spoilEconomy } from './economy.js';
+import { operatePassive, technologyVictory } from './investment.js';
 import { activePerson, heir, project, seedValue } from '../model/state.js';
 import type { GameState } from '../model/state.js';
 import type { Ruleset } from '../ruleset.js';
@@ -19,11 +26,22 @@ export function newSeason(state: GameState, rules: Ruleset, events: GameEvent[])
   state.location.rain = { dry: 0, normal: 2, wet: 3 }[weather];
   state.location.water = weather === 'dry' ? scenario.water : 2;
   state.ap = rules.parameters.actionsPerTurn;
+  if(state.economy){state.economy.market=4;state.economy.industrySupply=4;state.economy.recruitment=1;}
+  if(state.development&&rules.development){state.development.tradeRemaining=rules.development.parameters.marketSupply;state.development.ordersRemaining=rules.development.parameters.marketSupply;}
   state.location.season = { cultivated: false, usedChannel: false, trialSample: false };
   events.push({ type: 'season-started', clock: { ...state.clock }, weather });
+  resetModern(state,events);
   renewLocalSupply(state, rules, events);
+  renewShop(state,rules,events);
+  arriveWorkshops(state,rules,events);
+  arriveTower(state,rules,events);
+  renewOperations(state,rules,events);
 }
 export function finishSeason(state: GameState, rules: Ruleset, events: GameEvent[]): void {
+  if(state.economy){beforeOperations(state,rules,events);generateModern(state,events);serveModern(state,events);settleEconomy(state,rules,events);settleWorkshops(state,rules,events);dispatchTower(state,rules,events);afterOperations(state,rules,events);recordProjectEvidence(state,events);
+
+  }
+  operatePassive(state,rules,events);
   settleSociety(state, rules, events);
   const p = rules.parameters, family = state.household;
   const consumed = Math.min(family.food, p.foodPerTurn);
@@ -31,8 +49,14 @@ export function finishSeason(state: GameState, rules: Ruleset, events: GameEvent
   const missing = p.foodPerTurn - consumed;
   family.hardship = missing ? family.hardship + 1 : 0;
   events.push({ type: 'season-settled', consumed, missing, hardship: family.hardship });
-  spoilFood(state, rules, events);
+  if(state.economy)spoilEconomy(state,events);else spoilFood(state, rules, events);
+  advanceProjects(state,rules,events);
+  recordTowerEvidence(state,events);
+  settleTower(state,rules,events);
+  storeModern(state,events);
   if (family.hardship >= p.hardshipLimit) { state.status = 'ended'; events.push({ type: 'experiment-ended', reason: 'hardship' }); return; }
+  const victory=technologyVictory(state,rules);
+  if(victory?.achieved){state.status='complete';if(!rules.tower)events.push({type:'technology-victory',mastered:victory.mastered.length,total:victory.total,required:victory.required});return;}
   if (state.clock.turn >= p.turnsPerGeneration) {
     const trial = project(state);
     const final = state.clock.generation >= p.generations;

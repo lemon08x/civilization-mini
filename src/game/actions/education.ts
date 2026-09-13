@@ -16,6 +16,7 @@ export function educationActions(state: GameState, rules: Ruleset): ActionDefini
       ...common, ...(!accessible(state, tech) ? ['当地没有教师，家庭也无材料'] : []), ...(has(person, tech.id) ? ['已经掌握'] : []), ...(progress >= required ? ['学习次数已足够，需完成实践'] : []),
     ], `学习 ${progress}/${required}；实践：${tech.practices.map(tag => rules.practiceNames[tag]).join('、')}。${tech.benefit}`, (draft, events) => study(draft, tech.id, events)));
     for (const tag of tech.practices) {
+      if(tag.startsWith('development-'))continue;
       if (['cultivation', 'trial-completed', 'stock-release', 'wood-shaped', 'pot-fired', 'storage-fitted'].includes(tag)) continue;
       actions.push(defineAction(state, `practice:${tech.id}:${tag}`, `实践：${rules.practiceNames[tag]}`, '实践', { money: ['selection', 'resource-survey', 'fire-tended'].includes(tag) ? 0 : p.trainingCost, food: tag === 'selection' ? 1 : 0, ...(tag === 'fire-tended' ? { materials: { wood: 1 } } : {}) }, [
         ...common, ...(!accessible(state, tech) ? ['没有受指导实践渠道'] : []), ...(progress < 1 ? ['先完成一次学习'] : []), ...(person.practices.includes(tag) ? ['已完成该项实践'] : []), ...(tag === 'water-plan' && !((channel(state)?.durability ?? 0) > 0) ? ['需要可用引水渠'] : []),
@@ -25,13 +26,14 @@ export function educationActions(state: GameState, rules: Ruleset): ActionDefini
     const heirMissing = !prerequisites(child, tech);
     const heirNeedsStudy = (child.learning[tech.id] ?? 0) < studyRequired(rules, child, tech, state.knowledge.archives);
     const heirPractice = tech.practices.find(tag => !child.practices.includes(tag));
-    const teachingMaterials = !heirNeedsStudy && ['wood-shaped', 'fire-tended', 'pot-fired'].includes(heirPractice ?? '') ? { wood: 1, ...(heirPractice === 'pot-fired' ? { clay: 1 } : {}) } : undefined;
-    actions.push(defineAction(state, `teach:${tech.id}`, `${heirNeedsStudy ? '教导' : '带后辈练习'}：${tech.name}`, '传承', teachingMaterials ? { materials: teachingMaterials } : {}, [
+    const familyLesson=Boolean(rules.householdProgress&&state.knowledge.archives.includes(tech.id));
+    const teachingMaterials = (!heirNeedsStudy||familyLesson) && ['wood-shaped', 'fire-tended', 'pot-fired'].includes(heirPractice ?? '') ? { wood: 1, ...(heirPractice === 'pot-fired' ? { clay: 1 } : {}) } : undefined;
+    actions.push(defineAction(state, `teach:${tech.id}`, `${heirNeedsStudy ? '教导' : '带后辈练习'}：${tech.name}`, '传承', {...(teachingMaterials?{materials:teachingMaterials}:{})}, [
       ...(!has(person, tech.id) ? ['自己尚未掌握'] : []), ...(heirMissing ? ['后辈缺少前置基础'] : []), ...(has(child, tech.id) ? ['后辈已经掌握'] : []),
-      ...(!heirNeedsStudy && heirPractice === 'trial-completed' && !state.knowledge.reportIds.length ? ['需要家庭试种记录供后辈复盘'] : []),
-      ...(!heirNeedsStudy && heirPractice === 'water-plan' && !((channel(state)?.durability ?? 0) > 0) ? ['需要可用引水渠'] : []),
-      ...(!heirNeedsStudy && heirPractice === 'storage-fitted' && !state.production?.storage.woodenware && !state.production?.storage.pottery ? ['需要已配置容器供后辈练习'] : []),
-    ], heirNeedsStudy ? '投入一点行动，完成后辈的一次学习。' : '投入一点行动开展有指导的练习／项目复盘；不额外产生产品。', (draft, events) => teach(draft, tech.id, rules, events)));
+      ...((!heirNeedsStudy||familyLesson) && heirPractice === 'trial-completed' && !state.knowledge.reportIds.length ? ['需要家庭试种记录供后辈复盘'] : []),
+      ...((!heirNeedsStudy||familyLesson) && heirPractice === 'water-plan' && !((channel(state)?.durability ?? 0) > 0) ? ['需要可用引水渠'] : []),
+      ...((!heirNeedsStudy||familyLesson) && heirPractice === 'storage-fitted' && !state.production?.storage.woodenware && !state.production?.storage.pottery ? ['需要已配置容器供后辈练习'] : []),
+    ], familyLesson?'家学合授：同一行动内讲授一次理论并指导一项实践；练习耗材照扣，传授有限熟练经验。':heirNeedsStudy ? '投入一点行动，完成后辈的一次学习。' : '投入一点行动开展有指导的练习／项目复盘；不额外产生产品。', (draft, events) => teach(draft, tech.id, rules, events,familyLesson)));
   }
   return actions;
 }

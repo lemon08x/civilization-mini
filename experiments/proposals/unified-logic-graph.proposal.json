@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "unified-logic-graph",
+  "title": "统一现行科技、技能、产品与用途图",
+  "kind": "interface",
+  "status": "accepted",
+  "origin": "用户要求梳理展示、删除无效展示并给出完整清晰逻辑图。",
+  "question": "如何让学习条件、制作投入和成果用途连续可查？",
+  "hypothesis": "以现行工序连接科技、熟练度、产品与用途，配合总图和局部追踪降低信息断裂。",
+  "counterEvidence": "全图仍较大；使用节点关联视图阅读具体链路。图按工序组说明，非全部行动ID清单。",
+  "baseVersion": "0.6.0",
+  "targetVersion": "0.6.0",
+  "adoptedVersion": "0.6.0",
+  "experiments": [],
+  "evidence": [
+    "docs/LOGIC_GRAPH.md"
+  ],
+  "changes": [
+    {
+      "subject": "关系展示",
+      "before": "科技前置与简化产品图分散",
+      "after": "统一方法、技能、材料、工序、产品、用途关系"
+    },
+    {
+      "subject": "游戏页",
+      "before": "独立简化产品图",
+      "after": "统一图入口，保留实际库存与操作"
+    },
+    {
+      "subject": "规划",
+      "before": "跨领域框架入口",
+      "after": "明确为研究候选，未实现节点不进入现行图"
+    }
+  ],
+  "result": "图覆盖检查与网页交互检查；无新平衡实验。",
+  "sideEffects": "完整关系较多，提供局部追踪和分类索引。",
+  "decision": "按用户要求完成界面调整；规则、存档与历史报告保留。"
+}

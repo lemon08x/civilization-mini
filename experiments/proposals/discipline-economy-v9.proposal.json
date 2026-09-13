@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "discipline-economy-v9",
+  "title": "独立学科、农业工业实物链与生产组织",
+  "kind": "mechanism",
+  "status": "accepted",
+  "origin": "用户确认首期实施，取消旧版兼容要求。",
+  "question": "学科与产品分离后，农业工业和雇佣能否形成可验证的实际循环？",
+  "hypothesis": "独立学科与共享实物加工减少展示混乱，雇员以工资交换家庭行动。",
+  "counterEvidence": "固定种子中雇佣产出和现金未胜过自营，工业雇佣出现2粮缺口。",
+  "baseVersion": "0.8.0",
+  "targetVersion": "0.9.0",
+  "adoptedVersion": "0.9.0",
+  "experiments": [],
+  "evidence": [
+    "docs/DISCIPLINE_ECONOMY_V9.md",
+    "experiments/economy-v9-hypothesis.md",
+    "experiments/history/economy-1789210473231/results.json",
+    "experiments/history/economy-1789210454931/results.json"
+  ],
+  "changes": [
+    {
+      "subject": "学科与产品",
+      "before": "科技与产品前置混合",
+      "after": "六学科36课题；21设备已实现，19规划；条件在详情"
+    },
+    {
+      "subject": "生产组织",
+      "before": "个人重复行动",
+      "after": "四类雇员，工资、经验、任务与跨代合同"
+    },
+    {
+      "subject": "农业",
+      "before": "口粮循环为主",
+      "after": "三作物及食品、纤维、油、肥料加工"
+    }
+  ],
+  "result": "首期有限实施，统一行动结算与真实资源约束已接通。",
+  "sideEffects": "雇佣现金和原料压力明显，高阶应用不完整。",
+  "decision": "接受首期结构，不宣称数值平衡；子分支和产品分类延后。"
+}

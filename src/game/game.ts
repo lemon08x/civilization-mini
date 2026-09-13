@@ -1,3 +1,10 @@
+import { initializeModern } from './systems/modern.js';
+import { initialTower,recordTowerEvidence } from './systems/tower.js';
+import { initialWorkshops } from './systems/workshop.js';
+import { initialOperations,recordProjectEvidence } from './systems/operations.js';
+import { initialShop } from './systems/shop.js';
+import { initialEconomy } from './systems/economy.js';
+import { initialProductNetwork } from './systems/product-network.js';
 import { actionId } from './model/action.js';
 import type { ActionOffer, GameAction } from './model/action.js';
 import { activePerson, blankPerson, heir } from './model/state.js';
@@ -10,6 +17,7 @@ import { masterAvailable } from './systems/learning.js';
 import { actionDefinitions } from './actions/index.js';
 import { initialProduction } from './systems/crafts.js';
 import type { Material } from './model/production.js';
+import { initialDevelopment,developFromEvents } from './systems/development.js';
 
 export function createInitialState(rules: Ruleset, seed: number, scenarioId: string): GameState {
   if (!Number.isInteger(seed) || seed < 1 || seed > 0xffffffff) throw new Error('种子需要是 1—4294967295 的整数');
@@ -31,6 +39,10 @@ export function createInitialState(rules: Ruleset, seed: number, scenarioId: str
     state.location.teachers = [...rules.scenarios[scenarioId].production!.teachers];
   }
   if (rules.socialInheritance) state.society = { teaching: {}, methods: [], goods: { woodenware: 0, pottery: 0 }, contracts: { woodenware: { active: false, project: null }, pottery: { active: false, project: null } } };
+  if(rules.development)state.development=initialDevelopment();
+  if(rules.productNetwork)state.productNetwork=initialProductNetwork();
+  if(rules.economy){state.economy=initialEconomy();if(rules.tower)state.economy.tower=initialTower();if(rules.workshops)state.economy.workshops=initialWorkshops();if(rules.shop)state.economy.shop=initialShop();if(rules.operations)state.economy.operations=initialOperations();state.world.era="学科与生产组织的形成";delete state.society;delete state.development;delete state.productNetwork;}
+  if(rules.modern&&!state.economy?.modern)initializeModern(state);
   newSeason(state, rules, []);
   return deepFreeze(state);
 }
@@ -47,8 +59,11 @@ export function transition(state: GameState, action: GameAction, rules: Ruleset)
   if (materials) for (const [material, amount] of Object.entries(materials)) next.production!.inventory[material as Material] -= amount;
   events.push({ type: 'action-paid', action: structuredClone(definition.offer.action), cost: { ap, money, food, ...(materials ? { materials: { ...materials } } : {}) } });
   definition.execute(next, events);
+  recordProjectEvidence(next,events);
+  recordTowerEvidence(next,events);
+  developFromEvents(next,events,rules);
   masterAvailable(next, activePerson(next), rules, events);
   if (rules.socialInheritance) masterAvailable(next, heir(next), rules, events);
-  if (action.type !== 'handover' && (action.type === 'end-turn' || next.ap === 0)) finishSeason(next, rules, events);
+  if (action.type !== 'handover' && (action.type === 'end-turn' || action.type==='economy'&&action.operation==='end' || next.ap === 0)) finishSeason(next, rules, events);
   return { state: deepFreeze(next), events: deepFreeze(events) };
 }

@@ -1,5 +1,8 @@
+import type { EconomyState } from './economy.js';
+import type { ProductNetworkState } from './product-network.js';
 import type { ProductionState } from './production.js';
 import type { SocietyState } from './society.js';
+import type { DevelopmentState } from './development.js';
 export type Weather = 'dry' | 'normal' | 'wet';
 export type GameStatus = 'active' | 'handover' | 'complete' | 'ended';
 export interface Clock { generation: number; turn: number; absoluteTurn: number }
@@ -57,8 +60,11 @@ export interface GameState {
   projects: Record<string, TrialProject>;
   knowledge: { archives: string[]; reportIds: string[] };
   randomState: number;
+  economy?: EconomyState;
+  productNetwork?: ProductNetworkState;
   production?: ProductionState;
   society?: SocietyState;
+  development?: DevelopmentState;
 }
 
 export function activePerson(state: GameState): Person { return state.persons[state.household.activePersonId]; }

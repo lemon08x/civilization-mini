@@ -1,3 +1,4 @@
+import { skillLevel } from '../systems/development.js';
 import { activePerson, addUnique } from '../model/state.js';
 import type { GameState } from '../model/state.js';
 import { MATERIAL_NAMES, RECIPE_NAMES, WORKSHOP_NAMES } from '../model/production.js';
@@ -14,6 +15,7 @@ export function craftActions(state: GameState, rules: Ruleset): ActionDefinition
     const config = rules.technologyFeedback;
     for (const material of ['woodenware', 'pottery'] as const) {
       const mastered = activePerson(state).mastered.includes(recipeMethod(material));
+      const fluent=Boolean(rules.householdProgress&&material==='woodenware'&&skillLevel(state,rules,'woodwork')>=1);
       actions.push(defineAction(state, `build-workshop:${material}`, `建造${WORKSHOP_NAMES[material]}`, '设施', {
         ap: config.buildActions, materials: material === 'woodenware' ? { wood: config.workbenchWood } : { wood: config.kilnWood, clay: config.kilnClay },
       }, [...(!mastered ? ['需本人掌握对应手艺'] : []), ...(local.workshops?.[material] ? ['设施已经建成'] : [])],
@@ -23,10 +25,11 @@ export function craftActions(state: GameState, rules: Ruleset): ActionDefinition
       }));
       actions.push(defineAction(state, `craft-batch:${material}`, `批量制作${MATERIAL_NAMES[material]}（${material === 'pottery' ? 4 : 2} 件）`, '制作', {
         materials: material === 'woodenware' ? { wood: p.woodRecipeCost * 2 } : { wood: p.potteryFuelCost * 2, clay: p.potteryClayCost * 2 },
-      }, [...(!mastered ? ['需本人掌握对应手艺'] : []), ...(!local.workshops?.[material] ? [`需先建造${WORKSHOP_NAMES[material]}`] : []), ...(local.project ? ['先完成当前制作项目'] : []), ...(state.society?.contracts[material].active || state.society?.contracts[material].project ? ['设施由受托匠人或其在制品占用'] : [])],
-      `支付两份配方原料，再花一次行动完工；比两次普通制作少 2 制作行动，建设、采料与销售另计。${material === 'pottery' ? '仍需跨季干燥。' : ''}`, (draft, events) => {
+      }, [...(!mastered ? ['需本人掌握对应手艺'] : []), ...(!local.workshops?.[material] ? [`需先建造${WORKSHOP_NAMES[material]}`] : []), ...(local.project || state.development?.project || state.productNetwork?.project ? ['先完成当前制作项目'] : []), ...(state.society?.contracts[material].active || state.society?.contracts[material].project ? ['设施由受托匠人或其在制品占用'] : [])],
+      `支付两份配方原料，${fluent?'熟练工坊1行动直接完成两件':'再花一次行动完工'}；建设、采料与销售另计。${material === 'pottery' ? '仍需跨季干燥。' : ''}`, (draft, events) => {
         draft.production!.project = { recipe: material, started: draft.clock.absoluteTurn, stage: 'shaped', method: recipeMethod(material), batch: true };
         events.push({ type: 'craft-started', recipe: material, started: draft.clock.absoluteTurn, batch: true });
+        if(fluent){draft.production!.inventory[material]+=2;draft.production!.project=null;addUnique(activePerson(draft).practices,'wood-shaped');events.push({type:'craft-completed',recipe:material,amount:2,batch:true});}
       }));
     }
   }
@@ -44,12 +47,14 @@ export function craftActions(state: GameState, rules: Ruleset): ActionDefinition
   }
   for (const recipe of ['woodenware', 'pottery', 'gather-tool'] as Recipe[]) {
     const materials: Partial<Record<Material, number>> = recipe === 'pottery' ? { clay: p.potteryClayCost, wood: p.potteryFuelCost } : { wood: p.woodRecipeCost };
-    actions.push(defineAction(state, `craft:${recipe}`, `开始制作${RECIPE_NAMES[recipe]}`, '制作', { materials }, [
-      ...methodBlockers(state, rules, recipeMethod(recipe)), ...(local.project ? ['先完成当前制作项目'] : []),
+    const fluent=Boolean(rules.householdProgress&&recipe!=='pottery'&&skillLevel(state,rules,'woodwork')>=1);
+    actions.push(defineAction(state, `craft:${recipe}`, `${fluent?'熟练制作':'开始制作'}${RECIPE_NAMES[recipe]}`, '制作', { materials }, [
+      ...methodBlockers(state, rules, recipeMethod(recipe)), ...(local.project || state.development?.project || state.productNetwork?.project ? ['先完成当前制作项目'] : []),
       ...(recipe === 'gather-tool' && local.toolDurability > 0 ? ['现有采集工具仍可使用'] : []),
-    ], recipe === 'pottery' ? '支付黏土和燃料，成形后跨季干燥，再花一次行动烧制 2 件陶器。' : `支付木材并成形，再花一次行动装配${RECIPE_NAMES[recipe]}。`, (draft, events) => {
+    ], fluent?'熟练木作：支付完整木材，1行动完成实物；不占用跨季项目。':recipe === 'pottery' ? '支付黏土和燃料，成形后跨季干燥，再花一次行动烧制 2 件陶器。' : `支付木材并成形，再花一次行动装配${RECIPE_NAMES[recipe]}。`, (draft, events) => {
       draft.production!.project = { recipe, started: draft.clock.absoluteTurn, stage: 'shaped', method: recipeMethod(recipe) };
       events.push({ type: 'craft-started', recipe, started: draft.clock.absoluteTurn });
+      if(fluent){if(recipe==='gather-tool')draft.production!.toolDurability=p.toolDurability;else draft.production!.inventory[recipe]++;draft.production!.project=null;addUnique(activePerson(draft).practices,'wood-shaped');events.push({type:'craft-completed',recipe,amount:1});}
     }));
   }
   const project = local.project;

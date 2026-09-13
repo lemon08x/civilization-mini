@@ -5,7 +5,7 @@ import { createSession, observeSession, submitCommand } from '../src/runtime/ses
 import { replayRecord, importRecord } from '../src/runtime/replay.js';
 import { resolveRuleset, validateRuleset } from '../src/game/ruleset.js';
 
-const { base, feedbackBase, implementation } = await loadContext();
+const { societyBase: base, feedbackBase, implementation } = await loadContext();
 async function game(overrides: Record<string, number> = {}, scenarioId = 'woodland') {
   let session = await createSession({ runId: 'social-test', ruleset: resolveRuleset(base, { turnsPerGeneration: 12, initialFood: 30, 'production.baseStorage': 12, ...overrides }), implementation, seed: 17, scenarioId });
   return { get session() { return session; }, get o() { return observeSession(session).game; },
