@@ -1,0 +1,2341 @@
+﻿{
+  "runId": "pt-20260913-202051-shJd-g02",
+  "revision": 54,
+  "game": {
+    "economy": {
+      "knowledge": {},
+      "evidence": {},
+      "notes": {},
+      "goods": {
+        "wood": 1,
+        "clay": 2,
+        "seedWheat": 0,
+        "seedSoy": 1,
+        "seedFlax": 1,
+        "wheat": 0,
+        "straw": 8
+      },
+      "equipment": {
+        "W01": 12
+      },
+      "workers": {},
+      "field": {
+        "crop": "wheat",
+        "planted": 22,
+        "moisture": 0,
+        "growth": 1,
+        "stress": 1,
+        "fertility": 0,
+        "lastCrop": "wheat",
+        "tended": 0,
+        "composted": false,
+        "bonus": 0,
+        "duration": 2
+      },
+      "project": null,
+      "market": 4,
+      "recruitment": 1,
+      "industrySupply": 4,
+      "regional": {
+        "iron": false,
+        "fiber": false,
+        "teaching": {}
+      },
+      "published": {},
+      "ironBatches": 0,
+      "fiberBatches": 0,
+      "poweredTurn": 0,
+      "equipmentUsed": {},
+      "shop": {
+        "cart": {},
+        "stock": {
+          "good-food": 8,
+          "good-wheat": 8,
+          "good-flour": 8,
+          "good-seedWheat": 8,
+          "good-wood": 8,
+          "good-clay": 8,
+          "good-iron": 2,
+          "good-fiber": 8,
+          "good-oil": 8,
+          "good-ceramics": 8,
+          "good-seal": 8,
+          "good-shaft": 8,
+          "good-valve": 8,
+          "device-W01": 1,
+          "device-W03": 1,
+          "device-P01": 1,
+          "device-P03": 1,
+          "device-T01": 1,
+          "device-T03": 1,
+          "device-S01": 1,
+          "device-S02": 1,
+          "device-U01": 1,
+          "device-U06": 1,
+          "device-U08": 1,
+          "asset-granary": 1
+        },
+        "transport": 12,
+        "orders": [],
+        "books": [],
+        "assets": [],
+        "produced": {
+          "wheat": 3,
+          "W01": 1
+        },
+        "seededTurn": 0
+      },
+      "operations": {
+        "paused": false,
+        "food": false,
+        "foodReserved": 0,
+        "farm": null,
+        "production": null,
+        "supplies": false,
+        "sales": false,
+        "maintenance": false,
+        "charter": false,
+        "mine": false,
+        "steam": false,
+        "projects": {},
+        "activeProject": null,
+        "notice": []
+      },
+      "modern": {
+        "power": 0,
+        "stored": 0,
+        "enabled": [],
+        "operated": {},
+        "services": {},
+        "cropBonus": 0
+      },
+      "branches": {
+        "learned": {
+          "person:1": [
+            "A0",
+            "A1",
+            "L0",
+            "M0",
+            "M1",
+            "M3",
+            "M2",
+            "L2",
+            "L3",
+            "L1",
+            "L4",
+            "M4",
+            "M5",
+            "L5",
+            "L6",
+            "L7",
+            "O0",
+            "O1",
+            "O2"
+          ],
+          "person:2": [
+            "A0"
+          ]
+        },
+        "archives": [],
+        "protocols": [],
+        "channels": [],
+        "delivered": []
+      },
+      "industry": {
+        "rules": {
+          "workerTime": 12,
+          "workerEnergy": 8,
+          "workerRecovery": 3,
+          "workerRestTime": 4,
+          "workerRestRecovery": 5,
+          "wageTimeUnit": 4,
+          "archiveDiscount": 1
+        },
+        "products": {
+          "W01": {
+            "source": "prototype",
+            "protocol": true
+          }
+        },
+        "commissioned": [],
+        "instances": {},
+        "workers": {}
+      },
+      "industryView": {
+        "catalog": [
+          {
+            "id": "W01",
+            "knowledge": [
+              "L0"
+            ],
+            "parents": [],
+            "kind": "device"
+          },
+          {
+            "id": "S01",
+            "knowledge": [
+              "M3"
+            ],
+            "parents": [],
+            "kind": "device"
+          },
+          {
+            "id": "T03",
+            "knowledge": [
+              "M1"
+            ],
+            "parents": [],
+            "kind": "device"
+          },
+          {
+            "id": "W03",
+            "knowledge": [
+              "L3",
+              "M2"
+            ],
+            "parents": [
+              "valve",
+              "seal"
+            ],
+            "kind": "device"
+          },
+          {
+            "id": "P01",
+            "knowledge": [
+              "L1",
+              "M1"
+            ],
+            "parents": [
+              "shaft"
+            ],
+            "kind": "device"
+          },
+          {
+            "id": "P03",
+            "knowledge": [
+              "L4",
+              "L1",
+              "M1"
+            ],
+            "parents": [
+              "shaft"
+            ],
+            "kind": "device"
+          },
+          {
+            "id": "U06",
+            "knowledge": [
+              "L1",
+              "M1"
+            ],
+            "parents": [],
+            "kind": "device"
+          },
+          {
+            "id": "E01",
+            "knowledge": [
+              "L6",
+              "L1",
+              "L4",
+              "M1",
+              "M5"
+            ],
+            "parents": [
+              "coil",
+              "shaft"
+            ],
+            "kind": "device"
+          },
+          {
+            "id": "U08",
+            "knowledge": [
+              "A1",
+              "M1"
+            ],
+            "parents": [],
+            "kind": "device"
+          },
+          {
+            "id": "S02",
+            "knowledge": [
+              "M2",
+              "M3"
+            ],
+            "parents": [
+              "S01",
+              "seal"
+            ],
+            "kind": "device"
+          },
+          {
+            "id": "T01",
+            "knowledge": [
+              "M1"
+            ],
+            "parents": [],
+            "kind": "device"
+          },
+          {
+            "id": "U01",
+            "knowledge": [
+              "A0",
+              "L0",
+              "M1"
+            ],
+            "parents": [],
+            "kind": "device"
+          },
+          {
+            "id": "seal",
+            "knowledge": [
+              "M2"
+            ],
+            "parents": [],
+            "kind": "goods",
+            "good": "seal"
+          },
+          {
+            "id": "shaft",
+            "knowledge": [
+              "L1",
+              "M1"
+            ],
+            "parents": [
+              "T03"
+            ],
+            "kind": "goods",
+            "good": "shaft"
+          },
+          {
+            "id": "valve",
+            "knowledge": [
+              "L2",
+              "M1",
+              "M2"
+            ],
+            "parents": [
+              "seal"
+            ],
+            "kind": "goods",
+            "good": "valve"
+          },
+          {
+            "id": "wire",
+            "knowledge": [
+              "M5"
+            ],
+            "parents": [],
+            "kind": "goods",
+            "good": "wire"
+          },
+          {
+            "id": "coil",
+            "knowledge": [
+              "M5",
+              "M1"
+            ],
+            "parents": [
+              "wire"
+            ],
+            "kind": "goods",
+            "good": "coil"
+          },
+          {
+            "id": "cable",
+            "knowledge": [
+              "M5"
+            ],
+            "parents": [
+              "wire",
+              "seal"
+            ],
+            "kind": "goods",
+            "good": "cable"
+          },
+          {
+            "id": "mill",
+            "knowledge": [
+              "L1",
+              "M1"
+            ],
+            "parents": [
+              "U06"
+            ],
+            "kind": "goods",
+            "good": "flour"
+          }
+        ],
+        "reserved": {
+          "time": 0,
+          "energy": 0
+        },
+        "products": {
+          "W01": {
+            "source": "prototype",
+            "protocol": true
+          }
+        },
+        "workers": {},
+        "rules": {
+          "workerTime": 12,
+          "workerEnergy": 8,
+          "workerRecovery": 3,
+          "workerRestTime": 4,
+          "workerRestRecovery": 5,
+          "wageTimeUnit": 4,
+          "archiveDiscount": 1
+        },
+        "systems": [
+          {
+            "id": "hand",
+            "name": "人工供水",
+            "knowledge": [
+              "A1"
+            ],
+            "products": [],
+            "systems": [],
+            "time": 3,
+            "energy": 2,
+            "qualification": "field",
+            "description": "按需人工提水；3时间/2精力，1公共水补2水分。",
+            "instance": null,
+            "unlockNeeds": [],
+            "blockers": [
+              "尚未建设"
+            ],
+            "wage": 0
+          },
+          {
+            "id": "pump",
+            "name": "机械供水",
+            "knowledge": [
+              "A1",
+              "O0"
+            ],
+            "products": [
+              "W03"
+            ],
+            "systems": [],
+            "equipment": "W03",
+            "time": 2,
+            "energy": 1,
+            "qualification": "field",
+            "description": "操作员使用泵，2时间/1精力；1公共水、1木材耗材、1耐用补2水分。",
+            "instance": null,
+            "unlockNeeds": [
+              "需验证活塞泵"
+            ],
+            "blockers": [
+              "尚未建设"
+            ],
+            "wage": 0
+          },
+          {
+            "id": "shaft",
+            "name": "单工位轴加工",
+            "knowledge": [
+              "O1"
+            ],
+            "products": [
+              "T03",
+              "shaft"
+            ],
+            "systems": [],
+            "equipment": "T03",
+            "time": 8,
+            "energy": 6,
+            "qualification": "craft",
+            "description": "搬运2/1、加工4/4、检验2/1合为一批；木2铁1产轴2，每季至多一批。",
+            "instance": null,
+            "unlockNeeds": [
+              "需验证锻打工具组",
+              "需验证制造传动轴"
+            ],
+            "blockers": [
+              "尚未建设"
+            ],
+            "wage": 0
+          }
+        ]
+      },
+      "branchView": {
+        "nodes": [
+          {
+            "id": "A0",
+            "name": "基础栽培",
+            "subject": "agronomy",
+            "parents": [],
+            "sample": {},
+            "benefit": "小麦播种、照料、收获；开局已会",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": true,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "A1",
+            "name": "田间水分管理",
+            "subject": "agronomy",
+            "parents": [
+              "A0"
+            ],
+            "sample": {},
+            "benefit": "配置自动灌溉与田间排水",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "M0",
+            "name": "材料识别",
+            "subject": "materials",
+            "parents": [],
+            "sample": {},
+            "benefit": "认识材料用途，选择储存、成形或绝缘分支",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "M1",
+            "name": "成形与连接",
+            "subject": "materials",
+            "parents": [
+              "M0"
+            ],
+            "sample": {},
+            "benefit": "锻打工具与部件连接",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "M2",
+            "name": "密封工艺",
+            "subject": "materials",
+            "parents": [
+              "M1"
+            ],
+            "sample": {},
+            "benefit": "制作密封件，配合阀门与泵",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "M3",
+            "name": "食品储存",
+            "subject": "materials",
+            "parents": [
+              "M0"
+            ],
+            "sample": {},
+            "benefit": "基础容器保护更多口粮",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "M4",
+            "name": "电工绝缘",
+            "subject": "materials",
+            "parents": [
+              "M0"
+            ],
+            "sample": {},
+            "benefit": "认识绝缘，联络电工材料商",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "M5",
+            "name": "导线与绕组工艺",
+            "subject": "materials",
+            "parents": [
+              "M4"
+            ],
+            "sample": {},
+            "benefit": "制作导线、电缆与线圈",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "L0",
+            "name": "受力与运动基础",
+            "subject": "mechanics",
+            "parents": [],
+            "sample": {},
+            "benefit": "简单提水器，机械与电磁共同基础",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "L1",
+            "name": "机械传动",
+            "subject": "mechanics",
+            "parents": [
+              "L0"
+            ],
+            "sample": {},
+            "benefit": "传动轴、手摇传动与磨粮",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "L2",
+            "name": "压力与流体",
+            "subject": "mechanics",
+            "parents": [
+              "L0"
+            ],
+            "sample": {},
+            "benefit": "阀门与流体基础，不必先学机械传动",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "L3",
+            "name": "泵与供水",
+            "subject": "mechanics",
+            "parents": [
+              "L2"
+            ],
+            "sample": {},
+            "benefit": "制造活塞泵，配合田间知识自动灌溉",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "L4",
+            "name": "水力动力",
+            "subject": "mechanics",
+            "parents": [
+              "L1"
+            ],
+            "sample": {},
+            "benefit": "水轮动力，先改善机械加工",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "L5",
+            "name": "电磁转换基础",
+            "subject": "mechanics",
+            "parents": [
+              "L0"
+            ],
+            "sample": {},
+            "benefit": "利用购入样品学习电磁，不要求先造发电机",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "L6",
+            "name": "发电机系统",
+            "subject": "mechanics",
+            "parents": [
+              "L5"
+            ],
+            "sample": {},
+            "benefit": "与传动和绕组工艺共同制造发电机",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "L7",
+            "name": "基础配电",
+            "subject": "mechanics",
+            "parents": [
+              "L6"
+            ],
+            "sample": {},
+            "benefit": "接入本地加工负载；不要求区域输电副本",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "O0",
+            "name": "劳动分工",
+            "subject": "organization",
+            "parents": [],
+            "sample": {},
+            "benefit": "招聘与供粮安排",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "O1",
+            "name": "生产工序",
+            "subject": "organization",
+            "parents": [
+              "O0"
+            ],
+            "sample": {},
+            "benefit": "工匠持续生产与农业托管",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          },
+          {
+            "id": "O2",
+            "name": "采购与交付",
+            "subject": "organization",
+            "parents": [
+              "O1"
+            ],
+            "sample": {},
+            "benefit": "自动补货、销售、维护和经营契约",
+            "known": true,
+            "inherited": false,
+            "heirInherited": true,
+            "heirKnown": false,
+            "archived": false,
+            "missing": []
+          }
+        ],
+        "paths": [
+          {
+            "id": "farm",
+            "name": "稳定农业与自动灌溉",
+            "nodes": [
+              "A0",
+              "A1",
+              "M0",
+              "M1",
+              "M2",
+              "M3",
+              "L0",
+              "L2",
+              "L3"
+            ],
+            "products": [
+              "S01",
+              "W03"
+            ],
+            "description": "先储粮，再做密封与泵；持续消耗真实水源、木材和设备耐用。",
+            "learned": 9
+          },
+          {
+            "id": "workshop",
+            "name": "机械加工与销售",
+            "nodes": [
+              "M0",
+              "M1",
+              "L0",
+              "L1",
+              "O0",
+              "O1",
+              "O2"
+            ],
+            "products": [
+              "T03"
+            ],
+            "description": "试制轴、首次交付、雇员工序、补货销售；收益取决于真实收支。",
+            "learned": 7
+          },
+          {
+            "id": "electric",
+            "name": "水力发电与基本电工",
+            "nodes": [
+              "L0",
+              "L1",
+              "L4",
+              "L5",
+              "L6",
+              "L7",
+              "M0",
+              "M1",
+              "M4",
+              "M5"
+            ],
+            "products": [
+              "P03",
+              "E01"
+            ],
+            "description": "水力机械先有收益，再做导线、线圈、发电与本地加工；化工半成品可采购。",
+            "learned": 10
+          }
+        ],
+        "channels": [],
+        "protocols": [],
+        "delivered": [],
+        "products": {
+          "W01": [
+            "L0"
+          ],
+          "S01": [
+            "M3"
+          ],
+          "T03": [
+            "M1"
+          ],
+          "W03": [
+            "L3",
+            "M2"
+          ],
+          "P01": [
+            "L1",
+            "M1"
+          ],
+          "P03": [
+            "L4",
+            "L1",
+            "M1"
+          ],
+          "U06": [
+            "L1",
+            "M1"
+          ],
+          "E01": [
+            "L6",
+            "L1",
+            "L4",
+            "M1",
+            "M5"
+          ],
+          "U08": [
+            "A1",
+            "M1"
+          ],
+          "S02": [
+            "M2",
+            "M3"
+          ],
+          "T01": [
+            "M1"
+          ],
+          "U01": [
+            "A0",
+            "L0",
+            "M1"
+          ]
+        },
+        "processes": {
+          "seal": [
+            "M2"
+          ],
+          "shaft": [
+            "L1",
+            "M1"
+          ],
+          "valve": [
+            "L2",
+            "M1",
+            "M2"
+          ],
+          "wire": [
+            "M5"
+          ],
+          "coil": [
+            "M5",
+            "M1"
+          ],
+          "cable": [
+            "M5"
+          ],
+          "mill": [
+            "L1",
+            "M1"
+          ]
+        }
+      },
+      "marketView": {
+        "catalog": [
+          {
+            "id": "good-food",
+            "target": "food",
+            "kind": "goods",
+            "name": "即食口粮",
+            "category": "物资",
+            "price": 1,
+            "weight": 1,
+            "local": true,
+            "effect": "即食生活补给；与市场购粮共用库存",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-wheat",
+            "target": "wheat",
+            "kind": "goods",
+            "name": "小麦",
+            "category": "物资",
+            "price": 2,
+            "weight": 1,
+            "local": true,
+            "effect": "1份生活口粮，或磨成面粉",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-flour",
+            "target": "flour",
+            "kind": "goods",
+            "name": "面粉",
+            "category": "物资",
+            "price": 2,
+            "weight": 1,
+            "local": true,
+            "effect": "1份生活口粮；按与小麦相同的食用份额定价",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-seedWheat",
+            "target": "seedWheat",
+            "kind": "goods",
+            "name": "小麦种子",
+            "category": "物资",
+            "price": 2,
+            "weight": 1,
+            "local": true,
+            "effect": "播种小麦；需基础栽培",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-wood",
+            "target": "wood",
+            "kind": "goods",
+            "name": "木材",
+            "category": "物资",
+            "price": 2,
+            "weight": 1,
+            "local": true,
+            "effect": "设备、部件与燃料",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-clay",
+            "target": "clay",
+            "kind": "goods",
+            "name": "黏土",
+            "category": "物资",
+            "price": 2,
+            "weight": 1,
+            "local": true,
+            "effect": "建窑、烧陶和烧砖",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-iron",
+            "target": "iron",
+            "kind": "goods",
+            "name": "铁料",
+            "category": "物资",
+            "price": 7,
+            "weight": 1,
+            "local": false,
+            "effect": "直接进入工具和机械部件配方",
+            "condition": "基础原料商少量铁料；交付传动轴后可签稳定供货",
+            "owned": false,
+            "stock": 2
+          },
+          {
+            "id": "good-fiber",
+            "target": "fiber",
+            "kind": "goods",
+            "name": "亚麻纤维",
+            "category": "物资",
+            "price": 6,
+            "weight": 1,
+            "local": false,
+            "effect": "密封件与绳索原料",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-oil",
+            "target": "oil",
+            "kind": "goods",
+            "name": "植物油",
+            "category": "物资",
+            "price": 6,
+            "weight": 1,
+            "local": false,
+            "effect": "密封件原料，当前不作为食品",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-ceramics",
+            "target": "ceramics",
+            "kind": "goods",
+            "name": "陶质构件",
+            "category": "物资",
+            "price": 7,
+            "weight": 1,
+            "local": false,
+            "effect": "容器、磨粮及其他设备的构件",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-seal",
+            "target": "seal",
+            "kind": "goods",
+            "name": "密封件",
+            "category": "物资",
+            "price": 7,
+            "weight": 1,
+            "local": false,
+            "effect": "泵、阀门和密闭容器的部件",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-shaft",
+            "target": "shaft",
+            "kind": "goods",
+            "name": "传动轴",
+            "category": "物资",
+            "price": 9,
+            "weight": 1,
+            "local": false,
+            "effect": "动力、播种与脱粒设备的部件",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "good-valve",
+            "target": "valve",
+            "kind": "goods",
+            "name": "阀门",
+            "category": "物资",
+            "price": 10,
+            "weight": 1,
+            "local": false,
+            "effect": "活塞泵部件",
+            "condition": "基础材料与半成品供应，按价采购，不要求副本等级",
+            "owned": false,
+            "stock": 8
+          },
+          {
+            "id": "device-W01",
+            "target": "W01",
+            "kind": "device",
+            "name": "提水辘轳",
+            "category": "设备",
+            "price": 10,
+            "weight": 4,
+            "local": true,
+            "effect": "田间管理从1公共水取得2点供水；每次扣1耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": true,
+            "stock": 1
+          },
+          {
+            "id": "device-W03",
+            "target": "W03",
+            "kind": "device",
+            "name": "活塞泵",
+            "category": "设备",
+            "price": 35,
+            "weight": 4,
+            "local": false,
+            "effect": "有作物且缺水时每季自动抽取1公共水灌溉，消耗1木材和1耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-P01",
+            "target": "P01",
+            "kind": "device",
+            "name": "手摇传动装置",
+            "category": "设备",
+            "price": 22,
+            "weight": 4,
+            "local": false,
+            "effect": "纤维和绳索加工一次处理双份，原料产出均翻倍，每批扣1耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-P03",
+            "target": "P03",
+            "kind": "device",
+            "name": "水轮动力装置",
+            "category": "设备",
+            "price": 30,
+            "weight": 4,
+            "local": false,
+            "effect": "有公共水时，磨粮、脱粒、榨油可免个人行动；每季限一批，仍扣原料与耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-T01",
+            "target": "T01",
+            "kind": "device",
+            "name": "切削工具组",
+            "category": "设备",
+            "price": 12,
+            "weight": 4,
+            "local": true,
+            "effect": "采木多取1木材，扣当地库存与1耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-T03",
+            "target": "T03",
+            "kind": "device",
+            "name": "锻打工具组",
+            "category": "设备",
+            "price": 24,
+            "weight": 4,
+            "local": false,
+            "effect": "开放传动轴、阀门制造，每批扣1耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-S01",
+            "target": "S01",
+            "kind": "device",
+            "name": "基础容器",
+            "category": "设备",
+            "price": 8,
+            "weight": 4,
+            "local": true,
+            "effect": "食品保护容量从4增至8，不产生额外食物。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-S02",
+            "target": "S02",
+            "kind": "device",
+            "name": "密闭容器",
+            "category": "设备",
+            "price": 20,
+            "weight": 4,
+            "local": false,
+            "effect": "食品保护容量增至14，不与基础容器重复叠加。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-U01",
+            "target": "U01",
+            "kind": "device",
+            "name": "翻土犁",
+            "category": "设备",
+            "price": 16,
+            "weight": 4,
+            "local": true,
+            "effect": "播种时本茬潜在收成+1，扣1耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-U06",
+            "target": "U06",
+            "kind": "device",
+            "name": "磨粮装置",
+            "category": "设备",
+            "price": 18,
+            "weight": 4,
+            "local": false,
+            "effect": "2小麦加工为3面粉，每批扣1耐用度，不与脱粒重复结算。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "device-U08",
+            "target": "U08",
+            "kind": "device",
+            "name": "排水设施",
+            "category": "设备",
+            "price": 16,
+            "weight": 4,
+            "local": false,
+            "effect": "丰水季自动免除在田作物积水胁迫，每次扣1耐用度。",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          },
+          {
+            "id": "asset-granary",
+            "target": "granary",
+            "kind": "asset",
+            "name": "家庭粮仓",
+            "category": "家庭资产",
+            "price": 32,
+            "weight": 4,
+            "local": false,
+            "effect": "食品保护容量提高至30，与容器取较大值，永久跨代保留",
+            "condition": "整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源",
+            "owned": false,
+            "stock": 1
+          }
+        ],
+        "quote": {
+          "lines": [],
+          "total": 0,
+          "weight": 0,
+          "remainingMoney": 8,
+          "blockers": [
+            "采购清单为空"
+          ]
+        },
+        "transport": 12,
+        "orders": [],
+        "assets": [],
+        "books": [],
+        "repairPrices": {
+          "W01": 1,
+          "W03": 16,
+          "P01": 9,
+          "P03": 13,
+          "T01": 6,
+          "T03": 10,
+          "S01": 4,
+          "S02": 8,
+          "U01": 8,
+          "U06": 7,
+          "U08": 6,
+          "E01": 22
+        }
+      },
+      "operationsView": {
+        "paused": false,
+        "food": false,
+        "foodReserved": 0,
+        "farm": null,
+        "production": null,
+        "supplies": false,
+        "sales": false,
+        "maintenance": false,
+        "charter": false,
+        "mine": false,
+        "steam": false,
+        "projects": {},
+        "activeProject": null,
+        "notice": [],
+        "foodTarget": 4,
+        "parameters": {
+          "foodTarget": 4,
+          "inputBatches": 2,
+          "cashReserve": 4,
+          "outputReserve": 2,
+          "repairThreshold": 1,
+          "commissionSeasons": 3,
+          "requiredAchievements": 2,
+          "projectFee": 4,
+          "mineYield": 2,
+          "steamFuel": 2
+        },
+        "organization": 3,
+        "stage": "亲自谋生",
+        "projectsCatalog": [],
+        "completed": [],
+        "recipes": [
+          {
+            "id": "seal",
+            "name": "制作密封件",
+            "outputs": {
+              "seal": 2
+            }
+          },
+          {
+            "id": "shaft",
+            "name": "制造传动轴",
+            "equipment": "T03",
+            "outputs": {
+              "shaft": 2
+            }
+          },
+          {
+            "id": "valve",
+            "name": "制造阀门",
+            "equipment": "T03",
+            "outputs": {
+              "valve": 1
+            }
+          },
+          {
+            "id": "mill",
+            "name": "磨粮",
+            "equipment": "U06",
+            "outputs": {
+              "flour": 3
+            }
+          },
+          {
+            "id": "wire",
+            "name": "制造绝缘铜线",
+            "outputs": {
+              "wire": 2
+            }
+          },
+          {
+            "id": "coil",
+            "name": "绕制电机线圈",
+            "equipment": "T03",
+            "outputs": {
+              "coil": 1
+            }
+          },
+          {
+            "id": "cable",
+            "name": "制造输电电缆",
+            "outputs": {
+              "cable": 1
+            }
+          }
+        ]
+      },
+      "foodTotal": 0,
+      "storage": 4,
+      "harvest": 5,
+      "disciplines": [],
+      "staff": [],
+      "products": [
+        {
+          "id": "W01",
+          "name": "提水辘轳",
+          "category": "供水与排水",
+          "effect": "田间管理从1公共水取得2点供水；每次扣1耐用度。",
+          "requires": {},
+          "inputs": {
+            "wood": 3
+          },
+          "from": []
+        },
+        {
+          "id": "W03",
+          "name": "活塞泵",
+          "category": "供水与排水",
+          "effect": "有作物且缺水时每季自动抽取1公共水灌溉，消耗1木材和1耐用度。",
+          "requires": {},
+          "inputs": {
+            "iron": 2,
+            "valve": 1,
+            "seal": 1
+          },
+          "from": [
+            "W01"
+          ]
+        },
+        {
+          "id": "P01",
+          "name": "手摇传动装置",
+          "category": "生产动力",
+          "effect": "纤维和绳索加工一次处理双份，原料产出均翻倍，每批扣1耐用度。",
+          "requires": {},
+          "inputs": {
+            "wood": 3,
+            "shaft": 1
+          },
+          "from": []
+        },
+        {
+          "id": "P03",
+          "name": "水轮动力装置",
+          "category": "生产动力",
+          "effect": "有公共水时，磨粮、脱粒、榨油可免个人行动；每季限一批，仍扣原料与耐用度。",
+          "requires": {},
+          "inputs": {
+            "wood": 4,
+            "iron": 1,
+            "shaft": 1
+          },
+          "from": [
+            "P01"
+          ]
+        },
+        {
+          "id": "T01",
+          "name": "切削工具组",
+          "category": "加工工具",
+          "effect": "采木多取1木材，扣当地库存与1耐用度。",
+          "requires": {},
+          "inputs": {
+            "wood": 1,
+            "iron": 1
+          },
+          "from": []
+        },
+        {
+          "id": "T03",
+          "name": "锻打工具组",
+          "category": "加工工具",
+          "effect": "开放传动轴、阀门制造，每批扣1耐用度。",
+          "requires": {},
+          "inputs": {
+            "wood": 2,
+            "iron": 2
+          },
+          "from": []
+        },
+        {
+          "id": "S01",
+          "name": "基础容器",
+          "category": "储存与防护",
+          "effect": "食品保护容量从4增至8，不产生额外食物。",
+          "requires": {},
+          "inputs": {
+            "wood": 2
+          },
+          "from": []
+        },
+        {
+          "id": "S02",
+          "name": "密闭容器",
+          "category": "储存与防护",
+          "effect": "食品保护容量增至14，不与基础容器重复叠加。",
+          "requires": {},
+          "inputs": {
+            "ceramics": 1,
+            "seal": 1
+          },
+          "from": [
+            "S01"
+          ]
+        },
+        {
+          "id": "U01",
+          "name": "翻土犁",
+          "category": "农业作业",
+          "effect": "播种时本茬潜在收成+1，扣1耐用度。",
+          "requires": {},
+          "inputs": {
+            "wood": 3,
+            "iron": 1
+          },
+          "from": []
+        },
+        {
+          "id": "U06",
+          "name": "磨粮装置",
+          "category": "农业作业",
+          "effect": "2小麦加工为3面粉，每批扣1耐用度，不与脱粒重复结算。",
+          "requires": {},
+          "inputs": {
+            "wood": 2,
+            "ceramics": 1
+          },
+          "from": [
+            "U05"
+          ]
+        },
+        {
+          "id": "U08",
+          "name": "排水设施",
+          "category": "农业作业",
+          "effect": "丰水季自动免除在田作物积水胁迫，每次扣1耐用度。",
+          "requires": {},
+          "inputs": {
+            "wood": 2,
+            "clay": 2
+          },
+          "from": []
+        },
+        {
+          "id": "E01",
+          "name": "水力发电机组",
+          "category": "电力与储能",
+          "effect": "开启供能后每季最多一次，消耗1公共水和1耐用，产生6电。",
+          "requires": {},
+          "inputs": {
+            "coil": 2,
+            "shaft": 1,
+            "ceramics": 2
+          },
+          "from": [
+            "P03"
+          ]
+        }
+      ],
+      "processes": [
+        {
+          "id": "seal",
+          "name": "制作密封件",
+          "inputs": {
+            "fiber": 1,
+            "oil": 1
+          },
+          "outputs": {
+            "seal": 2
+          },
+          "requires": {},
+          "wait": 0
+        },
+        {
+          "id": "shaft",
+          "name": "制造传动轴",
+          "inputs": {
+            "wood": 2,
+            "iron": 1
+          },
+          "outputs": {
+            "shaft": 2
+          },
+          "requires": {},
+          "equipment": "T03",
+          "wait": 0
+        },
+        {
+          "id": "valve",
+          "name": "制造阀门",
+          "inputs": {
+            "iron": 1,
+            "seal": 1
+          },
+          "outputs": {
+            "valve": 1
+          },
+          "requires": {},
+          "equipment": "T03",
+          "wait": 0
+        },
+        {
+          "id": "mill",
+          "name": "磨粮",
+          "inputs": {
+            "wheat": 2
+          },
+          "outputs": {
+            "flour": 3
+          },
+          "requires": {},
+          "equipment": "U06",
+          "wait": 0
+        },
+        {
+          "id": "wire",
+          "name": "制造绝缘铜线",
+          "inputs": {
+            "copper": 1,
+            "polymer": 1
+          },
+          "outputs": {
+            "wire": 2
+          },
+          "requires": {},
+          "wait": 0
+        },
+        {
+          "id": "coil",
+          "name": "绕制电机线圈",
+          "inputs": {
+            "wire": 2,
+            "iron": 1
+          },
+          "outputs": {
+            "coil": 1
+          },
+          "requires": {},
+          "equipment": "T03",
+          "wait": 0
+        },
+        {
+          "id": "cable",
+          "name": "制造输电电缆",
+          "inputs": {
+            "wire": 2,
+            "seal": 1
+          },
+          "outputs": {
+            "cable": 1
+          },
+          "requires": {},
+          "wait": 0
+        }
+      ],
+      "crops": {
+        "wheat": {
+          "name": "小麦",
+          "seed": "seedWheat",
+          "duration": 2,
+          "yield": 6,
+          "straw": 2,
+          "level": 1
+        },
+        "soy": {
+          "name": "大豆",
+          "seed": "seedSoy",
+          "duration": 2,
+          "yield": 4,
+          "straw": 1,
+          "level": 2
+        },
+        "flax": {
+          "name": "亚麻",
+          "seed": "seedFlax",
+          "duration": 3,
+          "yield": 5,
+          "straw": 1,
+          "level": 2
+        }
+      },
+      "goodsCatalog": {
+        "wood": {
+          "name": "木材",
+          "price": 1,
+          "food": 0
+        },
+        "clay": {
+          "name": "黏土",
+          "price": 1,
+          "food": 0
+        },
+        "ore": {
+          "name": "矿料",
+          "price": 2,
+          "food": 0
+        },
+        "iron": {
+          "name": "铁料",
+          "price": 5,
+          "food": 0
+        },
+        "wheat": {
+          "name": "小麦",
+          "price": 1,
+          "food": 1
+        },
+        "soy": {
+          "name": "大豆",
+          "price": 2,
+          "food": 1
+        },
+        "flax": {
+          "name": "亚麻茎",
+          "price": 2,
+          "food": 0
+        },
+        "straw": {
+          "name": "秸秆",
+          "price": 1,
+          "food": 0
+        },
+        "flour": {
+          "name": "面粉",
+          "price": 2,
+          "food": 1
+        },
+        "oil": {
+          "name": "植物油",
+          "price": 4,
+          "food": 0
+        },
+        "fiber": {
+          "name": "亚麻纤维",
+          "price": 4,
+          "food": 0
+        },
+        "rope": {
+          "name": "绳索",
+          "price": 6,
+          "food": 0
+        },
+        "compost": {
+          "name": "腐熟堆肥",
+          "price": 2,
+          "food": 0
+        },
+        "ceramics": {
+          "name": "陶质构件",
+          "price": 5,
+          "food": 0
+        },
+        "brick": {
+          "name": "耐火砖",
+          "price": 4,
+          "food": 0
+        },
+        "seal": {
+          "name": "密封件",
+          "price": 5,
+          "food": 0
+        },
+        "valve": {
+          "name": "阀门",
+          "price": 8,
+          "food": 0
+        },
+        "shaft": {
+          "name": "传动轴",
+          "price": 7,
+          "food": 0
+        },
+        "spring": {
+          "name": "弹簧",
+          "price": 8,
+          "food": 0
+        },
+        "solution": {
+          "name": "提纯溶液",
+          "price": 6,
+          "food": 0
+        },
+        "seedWheat": {
+          "name": "小麦种子",
+          "price": 1,
+          "food": 0
+        },
+        "seedSoy": {
+          "name": "大豆种子",
+          "price": 2,
+          "food": 0
+        },
+        "seedFlax": {
+          "name": "亚麻种子",
+          "price": 2,
+          "food": 0
+        },
+        "copper": {
+          "name": "铜料",
+          "price": 3,
+          "food": 0
+        },
+        "feedstock": {
+          "name": "化工原料",
+          "price": 3,
+          "food": 0
+        },
+        "mineral": {
+          "name": "矿质肥料原料",
+          "price": 2,
+          "food": 0
+        },
+        "silica": {
+          "name": "石英原料",
+          "price": 2,
+          "food": 0
+        },
+        "polymer": {
+          "name": "绝缘聚合物",
+          "price": 5,
+          "food": 0
+        },
+        "wire": {
+          "name": "绝缘铜线",
+          "price": 6,
+          "food": 0
+        },
+        "coil": {
+          "name": "电机线圈",
+          "price": 9,
+          "food": 0
+        },
+        "cable": {
+          "name": "输电电缆",
+          "price": 9,
+          "food": 0
+        },
+        "fuel": {
+          "name": "精炼燃料",
+          "price": 5,
+          "food": 0
+        },
+        "nutrient": {
+          "name": "配方肥料",
+          "price": 4,
+          "food": 0
+        },
+        "battery": {
+          "name": "蓄电池单元",
+          "price": 8,
+          "food": 0
+        },
+        "silicon": {
+          "name": "高纯硅",
+          "price": 7,
+          "food": 0
+        },
+        "circuit": {
+          "name": "电子电路",
+          "price": 12,
+          "food": 0
+        },
+        "controller": {
+          "name": "数字控制器",
+          "price": 16,
+          "food": 0
+        },
+        "composite": {
+          "name": "复合结构件",
+          "price": 10,
+          "food": 0
+        }
+      },
+      "parameters": {
+        "wage": 1,
+        "hireCost": 2,
+        "durability": 12
+      }
+    },
+    "rulesVersion": "0.20.0",
+    "victory": {
+      "mastered": [
+        "A0",
+        "A1",
+        "L0",
+        "M0",
+        "M1",
+        "M3",
+        "M2",
+        "L2",
+        "L3",
+        "L1",
+        "L4",
+        "M4",
+        "M5",
+        "L5",
+        "L6",
+        "L7",
+        "O0",
+        "O1",
+        "O2"
+      ],
+      "total": 19,
+      "required": 19,
+      "achievements": [],
+      "requiredAchievements": 0,
+      "percent": 100,
+      "targetPercent": 100,
+      "achieved": false,
+      "won": false
+    },
+    "status": "ended",
+    "scenario": {
+      "id": "clay-valley",
+      "name": "黏土河谷",
+      "description": "从相同农业基础开始，水源、天气与当地原料决定经营取舍。"
+    },
+    "clock": {
+      "generation": 1,
+      "turn": 22,
+      "absoluteTurn": 22,
+      "generations": 3,
+      "turnsPerGeneration": 16
+    },
+    "life": {
+      "budget": {
+        "spentTime": 7,
+        "reservedTime": 0,
+        "reservedEnergy": 0,
+        "freeTime": 5,
+        "freeEnergy": 0,
+        "tasks": []
+      },
+      "recovery": {
+        "fedHealth": 5,
+        "graceSeasons": 1,
+        "minimumEnergy": 4,
+        "farmTime": 3,
+        "farmEnergy": 2,
+        "careTime": 2,
+        "careEnergy": 1,
+        "careMoney": 1,
+        "inheritedTime": 1,
+        "inheritedEnergy": 1
+      },
+      "timeRemaining": 5,
+      "timePerSeason": 12,
+      "calendar": {
+        "year": 6,
+        "season": "夏"
+      },
+      "person": {
+        "ageYears": 45,
+        "ageQuarter": 2,
+        "health": 0,
+        "maxHealth": 100,
+        "energy": 0,
+        "maxEnergy": 4,
+        "alive": false,
+        "talent": {
+          "name": "善组织",
+          "effect": "招聘、采购与建立经营安排少用1时间"
+        }
+      },
+      "heir": {
+        "ageYears": 21,
+        "ageQuarter": 2,
+        "health": 0,
+        "maxHealth": 100,
+        "energy": 0,
+        "maxEnergy": 4,
+        "alive": false,
+        "talent": {
+          "name": "健壮",
+          "effect": "亲自体力劳动少消耗1精力"
+        }
+      },
+      "adultYears": 18,
+      "pendingRetirement": false
+    },
+    "ap": 0,
+    "parameters": {
+      "actionsPerTurn": 3,
+      "turnsPerGeneration": 16,
+      "generations": 3,
+      "initialFood": 6,
+      "initialMoney": 8,
+      "foodPerTurn": 2,
+      "workIncome": 2,
+      "foodPrice": 1,
+      "cropPotential": 4,
+      "channelCost": 3,
+      "channelDurability": 3,
+      "repairCost": 1,
+      "trialCost": 2,
+      "trialSeasons": 2,
+      "trialLandCost": 1,
+      "archiveCost": 1,
+      "studyCost": 0,
+      "trainingCost": 1,
+      "studyMultiplier": 1,
+      "hardshipLimit": 3
+    },
+    "world": {
+      "era": "农业聚落：生产、分工与文明成长",
+      "technologies": [
+        "学科知识"
+      ],
+      "teachers": [
+        "L01",
+        "L02",
+        "L03",
+        "L04",
+        "L05",
+        "L06",
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06",
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "A01",
+        "A02",
+        "A03",
+        "A04",
+        "A05",
+        "A06",
+        "O01",
+        "O02",
+        "O03",
+        "O04",
+        "O05",
+        "O06"
+      ],
+      "weather": "dry",
+      "rain": 0,
+      "water": 2,
+      "weatherName": "干旱"
+    },
+    "person": {
+      "name": "本代经营者",
+      "mastered": [],
+      "learning": {},
+      "practices": [],
+      "insights": []
+    },
+    "heir": {
+      "name": "成长中的后辈",
+      "mastered": [],
+      "learning": {},
+      "practices": [],
+      "insights": []
+    },
+    "family": {
+      "food": 0,
+      "money": 8,
+      "hardship": 6,
+      "channel": null,
+      "archives": [],
+      "stock": {
+        "name": "普通地方种源",
+        "potential": 4,
+        "tolerance": 0
+      },
+      "candidate": null,
+      "project": null,
+      "reports": []
+    },
+    "harvest": {
+      "gross": 0,
+      "food": 0,
+      "drawn": 0,
+      "deficit": 2,
+      "landCost": 0
+    },
+    "production": {
+      "inventory": {
+        "wood": 0,
+        "clay": 0,
+        "woodenware": 0,
+        "pottery": 0
+      },
+      "stocks": {
+        "wildFood": 3,
+        "timber": 5,
+        "clay": 20
+      },
+      "market": {
+        "food": 8,
+        "jobs": 1,
+        "woodenware": 2,
+        "pottery": 2,
+        "methods": 1
+      },
+      "toolDurability": 0,
+      "storage": {
+        "woodenware": false,
+        "pottery": false
+      },
+      "project": null,
+      "workshops": {
+        "woodenware": false,
+        "pottery": false
+      },
+      "parameters": {
+        "gatherFood": 2,
+        "gatherWood": 2,
+        "gatherClay": 2,
+        "baseStorage": 2,
+        "woodenStorage": 4,
+        "potteryStorage": 6,
+        "spoilDivisor": 2,
+        "toolDurability": 4,
+        "toolBonus": 1,
+        "woodRecipeCost": 2,
+        "potteryClayCost": 2,
+        "potteryFuelCost": 2,
+        "woodenwarePrice": 4,
+        "potteryPrice": 3,
+        "methodPrice": 2
+      },
+      "environment": {
+        "stocks": {
+          "wildFood": 3,
+          "timber": 5,
+          "clay": 20
+        },
+        "recovery": {
+          "wildFood": 1,
+          "timber": 1
+        },
+        "market": {
+          "food": 8,
+          "jobs": 1,
+          "woodenware": 2,
+          "pottery": 2,
+          "methods": 1
+        },
+        "teachers": [
+          "L01",
+          "L02",
+          "L03",
+          "L04",
+          "L05",
+          "L06",
+          "H01",
+          "H02",
+          "H03",
+          "H04",
+          "H05",
+          "H06",
+          "C01",
+          "C02",
+          "C03",
+          "C04",
+          "C05",
+          "C06",
+          "M01",
+          "M02",
+          "M03",
+          "M04",
+          "M05",
+          "M06",
+          "A01",
+          "A02",
+          "A03",
+          "A04",
+          "A05",
+          "A06",
+          "O01",
+          "O02",
+          "O03",
+          "O04",
+          "O05",
+          "O06"
+        ],
+        "imports": []
+      },
+      "storageCapacity": 2,
+      "spoilageAfterConsumption": 0,
+      "gathering": {
+        "food": 2,
+        "wood": 2,
+        "clay": 2
+      }
+    },
+    "technologies": [],
+    "actions": []
+  },
+  "recentEvents": [
+    {
+      "type": "action-paid",
+      "action": {
+        "type": "economy",
+        "operation": "rest",
+        "target": "self"
+      },
+      "cost": {
+        "ap": 0,
+        "time": 4,
+        "energy": 0,
+        "money": 0,
+        "food": 0
+      }
+    },
+    {
+      "type": "life",
+      "personId": "person:1",
+      "operation": "rest",
+      "detail": "休息恢复3精力"
+    },
+    {
+      "type": "action-paid",
+      "action": {
+        "type": "economy",
+        "operation": "farm",
+        "target": "wheat"
+      },
+      "cost": {
+        "ap": 0,
+        "time": 3,
+        "energy": 2,
+        "money": 0,
+        "food": 0
+      }
+    },
+    {
+      "type": "economy-goods",
+      "source": "本人播种",
+      "changes": {
+        "seedWheat": -1
+      }
+    },
+    {
+      "type": "economy-farm",
+      "operation": "sow",
+      "crop": "wheat",
+      "actor": "本人",
+      "amount": 0
+    },
+    {
+      "type": "action-paid",
+      "action": {
+        "type": "economy",
+        "operation": "end",
+        "target": "season"
+      },
+      "cost": {
+        "ap": 0,
+        "time": 0,
+        "energy": 0,
+        "money": 0,
+        "food": 0
+      }
+    },
+    {
+      "type": "economy-crop-growth",
+      "crop": "wheat",
+      "growth": 1,
+      "stress": 1
+    },
+    {
+      "type": "season-settled",
+      "consumed": 0,
+      "missing": 2,
+      "hardship": 6
+    },
+    {
+      "type": "life",
+      "personId": "person:1",
+      "operation": "death",
+      "detail": "本代经营者因健康耗尽离世"
+    },
+    {
+      "type": "life",
+      "personId": "person:2",
+      "operation": "death",
+      "detail": "成长中的后辈因健康耗尽离世"
+    },
+    {
+      "type": "life",
+      "personId": "person:1",
+      "operation": "succession",
+      "detail": "没有可接手的成年后辈，本次家族经营结束"
+    },
+    {
+      "type": "generation-ended",
+      "final": true,
+      "facts": {
+        "generation": 1,
+        "food": 0,
+        "money": 8,
+        "mastered": [
+          "A0",
+          "A1",
+          "L0",
+          "M0",
+          "M1",
+          "M3",
+          "M2",
+          "L2",
+          "L3",
+          "L1",
+          "L4",
+          "M4",
+          "M5",
+          "L5",
+          "L6",
+          "L7",
+          "O0",
+          "O1",
+          "O2"
+        ],
+        "heir": [
+          "A0"
+        ],
+        "archives": [],
+        "project": null,
+        "production": {
+          "inventory": {
+            "wood": 0,
+            "clay": 0,
+            "woodenware": 0,
+            "pottery": 0
+          },
+          "stocks": {
+            "wildFood": 3,
+            "timber": 5,
+            "clay": 20
+          },
+          "market": {
+            "food": 8,
+            "jobs": 1,
+            "woodenware": 2,
+            "pottery": 2,
+            "methods": 1
+          },
+          "toolDurability": 0,
+          "storage": {
+            "woodenware": false,
+            "pottery": false
+          },
+          "project": null,
+          "workshops": {
+            "woodenware": false,
+            "pottery": false
+          }
+        }
+      }
+    }
+  ]
+}

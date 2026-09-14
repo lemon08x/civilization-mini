@@ -1,3 +1,4 @@
+import { ancestorKnows } from './ancestry.js';
 import { activePerson, blankPerson, heir, project, seedValue, type GameState, type Person } from '../model/state.js';
 import type { GameEvent } from '../model/events.js';
 import type { LifeRules, Talent, Vitality } from '../model/life.js';
@@ -25,10 +26,10 @@ export function initializeLife(s:GameState,r:LifeRules):void {
   heir(s).name='成长中的后辈';
 }
 export function healthCeiling(v:Vitality,r:LifeRules):number {return Math.max(30,100-Math.max(0,Math.floor(v.ageSeasons/4)-r.agingYears)*2);}
-export function energyCeiling(v:Vitality):number {return Math.max(2,Math.floor(v.constitution*(0.4+v.health*0.006)));}
-export function lifeView(p:Person) {
+export function energyCeiling(v:Vitality):number {return Math.max(v.minimumEnergy??2,Math.floor(v.constitution*(0.4+v.health*0.006)));}
+export function lifeView(p:Person,r?:LifeRules) {
   const v=p.vitality;
-  return v?{ageYears:Math.floor(v.ageSeasons/4),ageQuarter:v.ageSeasons%4,health:v.health,energy:v.energy,maxEnergy:energyCeiling(v),alive:v.alive,talent:TALENTS[v.talent]}:undefined;
+  return v?{ageYears:Math.floor(v.ageSeasons/4),ageQuarter:v.ageSeasons%4,health:v.health,...(r?{maxHealth:healthCeiling(v,r)}:{}),energy:v.energy,maxEnergy:energyCeiling(v),alive:v.alive,talent:TALENTS[v.talent]}:undefined;
 }
 export function lifeEvent(events:GameEvent[],personId:string,operation:string,detail:string):void {events.push({type:'life',personId,operation,detail});}
 const physical=new Set(['farm','gather','work','build','process','finish','fertilize','nutrient','reclaim','expeditionship']);
@@ -39,18 +40,20 @@ export function lifeCost(s:GameState,id:string,oldAp:number):{time:number;energy
   const [,op,target]=id.split(':');
   if(id==='handover'||op==='end'||op==='retire')return {time:0,energy:0};
   if(op==='rest')return {time:4,energy:0};
-  if(op==='care')return {time:4,energy:1};
+  if(op==='care')return {time:s.life?.renewal?.careTime??4,energy:s.life?.renewal?.careEnergy??1};
   if(op==='pause'||op==='assign'||target==='off'||oldAp===0&&op!=='farm'&&op!=='process')return {time:0,energy:0};
   // Powered tools still require a brief personal instruction, but remove bodily labour.
   if(oldAp===0)return {time:1,energy:0};
   let time=physical.has(op)||learning.has(op)||op==='teach'||op==='branchteach'?4:2;
   let energy=physical.has(op)?4:learning.has(op)||op==='teach'||op==='branchteach'?2:1;
+  if(s.life?.renewal&&op==='farm'){time=s.life.renewal.farmTime;energy=s.life.renewal.farmEnergy;}
   const talent=activePerson(s).vitality!.talent;
   if(talent==='strong'&&physical.has(op))energy--;
   if(s.economy?.industry&&op==='branchlearn'&&s.economy.branches!.archives.includes(target))time=Math.max(1,time-s.economy.industry.rules.archiveDiscount);
   if(talent==='scholar'&&learning.has(op))time=Math.max(1,time-1);
   if(talent==='mentor'&&(op==='teach'||op==='branchteach')){time--;energy--;}
   if(talent==='organizer'&&management.has(op))time=Math.max(1,time-1);
+  if(s.life?.renewal&&op==='branchlearn'&&ancestorKnows(s,target)){time=Math.min(time,s.life.renewal.inheritedTime);energy=Math.min(energy,s.life.renewal.inheritedEnergy);}
   return {time,energy};
 }
 export function canSucceed(s:GameState):boolean {const v=heir(s).vitality;return s.household.heirId!==s.household.activePersonId&&!!v?.alive&&v.ageSeasons>=s.life!.rules.adultYears*4;}
@@ -58,18 +61,21 @@ export function recordLifeGeneration(s:GameState,events:GameEvent[]):void {
   const trial=project(s);
   events.push({type:'generation-ended',final:s.status==='ended',facts:{
     generation:s.clock.generation,food:s.household.food,money:s.household.money,
-    mastered:[...activePerson(s).mastered],heir:[...heir(s).mastered],archives:[...s.knowledge.archives],
+    mastered:[...(s.economy?.branches?.learned[s.household.activePersonId]??activePerson(s).mastered)],heir:[...(s.economy?.branches?.learned[s.household.heirId]??heir(s).mastered)],archives:[...s.knowledge.archives],
     project:trial?{started:trial.started,control:seedValue(trial.control),candidate:seedValue(trial.candidate),samples:structuredClone(trial.samples)}:null,
     ...(s.production?{production:structuredClone(s.production)}:{}),
   }});
 }
-export function settleLife(s:GameState,missing:number,events:GameEvent[]):void {
+export function settleLife(s:GameState,missing:number,events:GameEvent[],foodRequired=2):void {
   const r=s.life!.rules;
   for(const person of Object.values(s.persons)) {
     const v=person.vitality;if(!v?.alive)continue;
     v.ageSeasons++;
-    v.health=Math.max(0,Math.min(healthCeiling(v,r),v.health+(missing?-r.hungerDamage:1)));
-    const recovery=missing?0:Math.max(1,Math.floor(r.recovery*v.health/100))+(v.talent==='resilient'?1:0);
+    const renewal=s.life!.renewal;
+    const deficit=Math.min(1,missing/Math.max(1,foodRequired));
+    const damage=renewal?Math.ceil(r.hungerDamage*deficit*Math.min(1,Math.max(0,s.household.hardship-renewal.graceSeasons)/2)):r.hungerDamage;
+    v.health=Math.max(0,Math.min(healthCeiling(v,r),v.health+(missing?-damage:(renewal?.fedHealth??1))));
+    const recovery=renewal?Math.max(1,Math.ceil(r.recovery*(1-deficit*0.75)))+(v.talent==='resilient'?1:0):missing?0:Math.max(1,Math.floor(r.recovery*v.health/100))+(v.talent==='resilient'?1:0);
     v.energy=Math.min(energyCeiling(v),v.energy+recovery);
     if(v.health===0||v.ageSeasons>=v.lifespanSeasons){v.alive=false;v.energy=0;lifeEvent(events,person.id,'death',`${person.name}因${v.health===0?'健康耗尽':'自然衰老'}离世`);}
     else lifeEvent(events,person.id,'season',`${person.name}：${Math.floor(v.ageSeasons/4)}岁，健康${v.health}，精力${v.energy}/${energyCeiling(v)}`);
@@ -80,7 +86,7 @@ export function settleLife(s:GameState,missing:number,events:GameEvent[]):void {
     const v=person.vitality!;
     if(!v.alive||v.childId||v.ageSeasons<r.birthYears*4)continue;
     const id=`person:${Object.keys(s.persons).length+1}`,child=blankPerson(id,'成长中的后辈');
-    child.vitality=makeVitality(s,r,0);s.persons[id]=child;s.household.memberIds.push(id);v.childId=id;
+    child.vitality=makeVitality(s,r,0);if(s.life!.renewal)child.vitality.minimumEnergy=s.life!.renewal.minimumEnergy;s.persons[id]=child;s.household.memberIds.push(id);v.childId=id;
     if(person.id===s.household.activePersonId&&s.household.heirId===person.id)s.household.heirId=id;
     lifeEvent(events,id,'birth','家族迎来新生后辈，从零岁成长，不自动获得知识');
   }

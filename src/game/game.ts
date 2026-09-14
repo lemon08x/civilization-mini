@@ -51,6 +51,8 @@ export function createInitialState(rules: Ruleset, seed: number, scenarioId: str
   if(rules.branches){state.economy!.branches={learned:{[state.household.activePersonId]:['A0'],[state.household.heirId]:['A0']},archives:[],protocols:[],channels:[],delivered:[]};state.economy!.knowledge={};state.economy!.notes={};delete state.economy!.expeditions;delete state.economy!.workshops;}
   if(rules.industry)state.economy!.industry={rules:structuredClone(rules.industry),products:{},commissioned:[],instances:{},workers:{}};
   if(rules.life)initializeLife(state,rules.life);
+  if(rules.renewal){state.life!.renewal=structuredClone(rules.renewal);for(const p of Object.values(state.persons))if(p.vitality)p.vitality.minimumEnergy=rules.renewal.minimumEnergy;}
+  if(rules.socialFood){state.socialFood={rules:structuredClone(rules.socialFood),foodPerSeason:p.foodPerTurn,price:p.foodPrice,policy:'off',budget:rules.socialFood.defaultBudget,reserve:rules.socialFood.defaultReserve,delivery:false,serviceRemaining:rules.socialFood.serviceCapacity};state.production!.market.food=Math.min(state.production!.market.food,rules.socialFood.storage);}
   newSeason(state, rules, []);
   return deepFreeze(state);
 }

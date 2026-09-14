@@ -19,7 +19,7 @@ export function renewLocalSupply(state: GameState, rules: Ruleset, events: GameE
       local.stocks[key] = Math.min(s.stocks[key], local.stocks[key] + recovery);
     }
   }
-  local.market = { ...s.market };
+  local.market = { ...s.market, ...(state.socialFood?{food:local.market.food}:{}) };
   events.push({ type: 'local-supply', stocks: { ...local.stocks }, market: { ...local.market } });
 }
 export function storageCapacity(state: GameState, rules: Ruleset): number {

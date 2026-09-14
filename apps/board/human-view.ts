@@ -1,0 +1,38 @@
+import {placeIcon} from './ui-icons.js';
+import {pageNames,playerGroups,ruleGuide} from './player-guide.js';
+import type { SessionObservation } from '../../src/runtime/session.js';
+import { ALL_GOODS, CROPS } from '../../src/game/systems/economy-catalog.js';
+import { esc } from './economy-view.js';
+
+type Game = SessionObservation['game'];
+type Button = (id: string) => string;
+export const panel = (title:string, body:string) => `<section class="panel"><div class="panel-head"><h2>${title}</h2></div><div class="panel-body">${body}</div></section>`;
+export function meter(label:string, value:number, max:number, tone=''):string {
+  return `<div class="resource-meter ${tone}"><div><span>${esc(label)}</span><strong>${value} / ${max}</strong></div><progress aria-label="${esc(label)}" value="${Math.max(0,Math.min(value,max))}" max="${Math.max(1,max)}"></progress></div>`;
+}
+export function actionButton(g:Game, id:string, failed:boolean):string {
+  const a=g.actions.find(a=>a.id===id); if(!a)return '';
+  return `<div class="action-option"><button class="game-action" data-action="${esc(id)}" ${!a.enabled||failed?'disabled':''}><span class="action-name">${esc(a.label)}</span><span class="action-cost"><span>◷ ${a.time??a.ap} 时间</span>${g.life?`<span>ϟ ${a.energy??0} 精力</span>`:''}${a.money?`<span>◉ ${a.money} 钱</span>`:''}${a.food?`<span>🌾 ${a.food} 粮</span>`:''}</span></button>${!a.enabled?`<p class="blocked-reason">${esc(a.reason??'暂不可用')}</p>`:`<details class="action-help"><summary>行动效果</summary><p>${esc(a.description)}</p></details>`}</div>`;
+}
+export function farm(g:Game,button:Button):string {
+  const e=g.economy!,f=e.field;
+  const crop=f.crop?CROPS[f.crop].name:'空田';
+  return panel('家庭田地', `<div class="farm-scene ${f.crop?'planted':''}" role="img" aria-label="${crop}，生长${f.growth}/${f.duration}季">${Array.from({length:18},()=>`<span aria-hidden="true">${f.crop?'🌾':'﹏'}</span>`).join('')}<div class="field-label">${crop}</div></div><div class="farm-stats">${meter('生长进度',f.growth,f.duration)}${meter('肥力',f.fertility,3)}<div class="mini-stat"><span>水分补充</span><strong>${f.moisture}</strong></div><div class="mini-stat"><span>预计收成</span><strong>${f.crop?e.harvest:'—'}</strong></div></div><div class="action-grid">${g.actions.filter(a=>a.group==='农业').map(a=>button(a.id)).join('')}</div><details><summary>耕作说明</summary><p>当前种植小麦。本人和雇工共用田地；种子单独留存。播种、收获仍需本人操作，收成会随条件变化。</p></details>`);
+}
+function family(g:Game,button:Button):string {
+  const l=g.life;if(!l)return '';
+  return panel('家人与传承',`<div class="portrait-row"><div class="portrait" aria-hidden="true">♟</div><div><h3>经营者 <small>${l.person.ageYears} 岁</small></h3><span class="tag">${esc(l.person.talent.name)}</span></div></div>${meter('健康',l.person.health,l.person.maxHealth??100,'health')}${meter('精力',l.person.energy,l.person.maxEnergy,'energy')}<div class="inheritance-link">↓ 家业与知识传承</div>${l.heir?`<div class="heir"><strong>后辈 · ${l.heir.ageYears} 岁${l.heir.alive?'':' · 已故'}</strong><span class="tag">${esc(l.heir.talent.name)}</span><p>健康 ${l.heir.health} · 精力 ${l.heir.energy}/${l.heir.maxEnergy}</p></div>`:'<div class="heir">尚无后辈 · 满 30 岁且尚无子嗣时迎来新生后辈</div>'}<div class="compact-actions">${button('economy:rest:self')}${button('economy:care:self')}</div><details><summary>天赋与交接</summary><p>${esc(l.person.talent.effect)}</p>${l.heir?`<p>后辈：${esc(l.heir.talent.effect)}</p>`:''}<p>${l.pendingRetirement?'已安排季末交接':'后辈需要亲自学习；前代知识降低学习成本。'}</p>${button('economy:retire:family')}</details>`);
+}
+function village(g:Game):string {
+  const e=g.economy!;
+  return `<section class="overview-intro"><h2>这一季，先安排生活</h2><p>口粮 ${e.foodTotal} / 季耗 ${g.parameters.foodPerTurn}${g.socialFood?` · 预计购粮${g.socialFood.purchase}份 / ${g.socialFood.cost}钱 · 生活缺口${g.socialFood.missing}份`:''} · ${e.field.crop?`田里种着${CROPS[e.field.crop].name}`:'田地尚未播种'}</p><button data-page="农业">查看田地 →</button><button data-guide="聚落">一季怎么玩？</button></section><div class="category-cards">${playerGroups(g).slice(1).map(group=>`<article class="category-card"><h3>${group.name}</h3><p>${group.description}</p><div>${group.pages.map(p=>`<button data-page="${p}">${pageNames[p]??p} →</button>`).join('')}</div></article>`).join('')}</div>`;
+}
+export function humanScreen(g:Game,page:string,body:string,button:Button,events:string[],guide=false):string {
+  const e=g.economy!,l=g.life,end=g.status==='complete'||g.status==='ended';
+  const groups=playerGroups(g),group=groups.find(x=>x.pages.includes(page))??groups[0];
+  const foodLow=g.socialFood?g.socialFood.missing>0:e.foodTotal<g.parameters.foodPerTurn;
+  const hud=`<section class="player-hud"><div class="season-card"><small>第 ${g.clock.generation} 代</small><strong>${l?`第 ${l.calendar.year} 年 · ${l.calendar.season}`:`第 ${g.clock.turn} 季`}</strong><span>${esc(g.world.weatherName)}</span></div><div class="hud-item"><span>◷ 可用时间</span><strong>${l?l.budget.freeTime:g.ap}<small> / ${l?l.timePerSeason:g.parameters.actionsPerTurn}</small></strong></div><div class="hud-item"><span>ϟ 可用精力</span><strong>${l?l.budget.freeEnergy:'—'}</strong></div><div class="hud-item ${foodLow?'resource-warning':''}"><span>🌾 可食储备${g.socialFood?` · 预计购${g.socialFood.purchase}`:''}</span><strong>${e.foodTotal}<small> / 季耗 ${g.parameters.foodPerTurn}</small></strong></div><div class="hud-item"><span>◉ 钱财</span><strong>${g.family.money}</strong></div></section>`;
+  const inventory=panel('仓库',`<div class="inventory-grid">${Object.entries(e.goods).filter(([,n])=>n>0).map(([id,n])=>`<div class="inventory-item"><span>${esc(ALL_GOODS[id]?.name??id)}</span><strong>${n}</strong></div>`).join('')||'<p>暂无物资</p>'}</div><details><summary>口粮与保存</summary><p>即食粮 ${g.family.food}；保存保护容量 ${e.storage}。面粉、小麦、大豆依序补生活缺口；种子不当饭吃。</p></details>`);
+  const budget=l?`<details class="budget-details"><summary>查看本季劳动安排 · 预留 ${l.budget.reservedTime} 时间 / ${l.budget.reservedEnergy} 精力</summary><p>已用时间 ${l.budget.spentTime} · 剩余时间 ${l.timeRemaining}</p>${l.budget.tasks.map(t=>`<p>${esc(t.name)} <span class="tag">◷ ${t.time} / ϟ ${t.energy}</span></p>`).join('')||'<p>暂无系统任务</p>'}</details>`:'';
+  return `${hud}${foodLow?'<div class="food-alert" role="status">当前库存与预计购粮不足以覆盖本季消耗。<button data-page="农业">去田地</button><button data-page="商城">买补给</button><button data-page="生活">找生计</button></div>':''}<div class="organized-layout"><aside class="category-nav"><nav aria-label="功能分类">${groups.map(x=>`<div class="rail-group"><span class="rail-caption">${x.name}</span>${x.pages.map(p=>`<button data-page="${p}" class="${page===p?'selected':''}" aria-current="${page===p?'page':'false'}">${placeIcon(p)}<span>${pageNames[p]??p}</span></button>`).join('')}</div>`).join('')}</nav></aside><div class="play-main"><div class="section-heading"><div><p class="breadcrumb">${group.name}${page!=='聚落'?' / '+(pageNames[page]??page):''}</p><h2>${pageNames[page]??page}</h2></div>${!guide?`<button data-guide="${page}">${pageNames[page]??page}规则 ⓘ</button>`:''}</div>${guide?ruleGuide(g,page):page==='聚落'?village(g):page==='家人'?family(g,button):page==='仓库'?inventory:body}<section class="event-log" aria-live="polite"><h3>刚刚发生</h3>${events.length?events.slice(-3).map(t=>`<p>${esc(t)}</p>`).join(''):'<p>一家人从一块田开始。先安排口粮，再发展技艺。</p>'}${events.length>3?`<details><summary>查看本次全部变化</summary>${events.map(t=>`<p>${esc(t)}</p>`).join('')}</details>`:''}</section><div class="season-controls">${end?`<h2>${g.status==='ended'?'家族经营终止':g.victory?.won?'家族发展胜利':'观察期结束'}</h2><p>可以从页面底部导出这次旅程。</p>`:g.status==='handover'?`<h2>后辈接手</h2>${button('handover')}`:`<div><h3>这一季安排好了</h3><p>推进季节将结算口粮、生产与身体恢复。</p></div>${button('economy:end:season')}`}${budget}</div></div></div>`;
+}

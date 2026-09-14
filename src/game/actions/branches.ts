@@ -1,3 +1,4 @@
+import {ancestorKnows} from '../systems/ancestry.js';
 import {BRANCH_NODES,branchHas,branchNeeds,branchName} from '../systems/branches.js';
 import {changeGoods,missingGoods} from '../systems/economy.js';
 import {defineAction,type ActionDefinition} from './definition.js';
@@ -10,7 +11,7 @@ export function branchActions(s:GameState,r:Ruleset):ActionDefinition[]{
     const archived=b.archives.includes(node.id),sample=s.economy!.industry||archived?{}:node.sample;
     out.push(defineAction(s,`economy:branchlearn:${node.id}`,'学习：'+node.name,'分支',{},[
       ...branchNeeds(s,node.parents),...(branchHas(s,node.id)?['已经掌握']:[]),...missingGoods(s,sample),
-    ],`${s.economy!.industry?'学科只检查前置知识，地方指导始终可用；学习不消耗样品。':node.benefit+'。'}${s.economy!.industry?(archived?'家学减少学习时间。':''):archived?'按家学学习，无需重复消耗实验样品':'通过地方入门指导与实物练习学习；样品：'+(Object.entries(sample).map(([k,n])=>`${k}×${n}`).join('、')||'无')}。天赋影响时间精力报价。`,(d,ev)=>{
+    ],`${s.economy!.industry?'学科只检查前置知识，地方指导始终可用；学习不消耗样品。':node.benefit+'。'}${s.economy!.industry?(archived?'家学减少学习时间。':''):archived?'按家学学习，无需重复消耗实验样品':'通过地方入门指导与实物练习学习；样品：'+(Object.entries(sample).map(([k,n])=>`${k}×${n}`).join('、')||'无')}。${ancestorKnows(s,node.id)?'前代已学：仍须先学前置，本节点学习成本大幅降低。':s.life?.renewal?'本代首次探索；学会后直系后代学习成本大幅降低。':''}天赋影响时间精力报价。`,(d,ev)=>{
       changeGoods(d,sample,-1,ev,'学习样品');(d.economy!.branches!.learned[d.household.activePersonId]??=[]).push(node.id);
       ev.push({type:'branch',operation:'learned',node:node.id,detail:'掌握'+node.name});
     }));
@@ -21,7 +22,7 @@ export function branchActions(s:GameState,r:Ruleset):ActionDefinition[]{
       ...branchNeeds(s,[node.id]),...branchNeeds(s,node.parents,s.household.heirId),
       ...(s.household.heirId===s.household.activePersonId||!s.persons[s.household.heirId].vitality?.alive?['没有可教导的后辈']:[]),
       ...(branchHas(s,node.id,s.household.heirId)?['后辈已经掌握']:[]),
-    ],'一次教导一个有前置基础的节点；不复制整棵树。',(d,ev)=>{(d.economy!.branches!.learned[d.household.heirId]??=[]).push(node.id);ev.push({type:'branch',operation:'taught',node:node.id,detail:'后辈学会'+branchName(node.id)});}));
+    ],'一次教导一个有前置基础的节点，让后辈在交接前提前掌握；未教导的节点仍可在接手后自行学习。',(d,ev)=>{(d.economy!.branches!.learned[d.household.heirId]??=[]).push(node.id);ev.push({type:'branch',operation:'taught',node:node.id,detail:'后辈学会'+branchName(node.id)});}));
   }
   for(const channel of ['electric','metal']){
     const price=channel==='electric'?r.branches!.electricFee:r.branches!.metalFee;

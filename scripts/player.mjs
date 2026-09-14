@@ -9,7 +9,7 @@ try {
   const options = {};
   for (let i = 0; i < args.length; i += 2) {
     const key = args[i];
-    if (!['--run', '--revision', '--action', '--command-id', '--reason'].includes(key) || args[i+1] === undefined || Object.hasOwn(options,key)) throw new Error('无效参数');
+    if (!['--run', '--revision', '--action', '--command-id', '--reason', '--format'].includes(key) || args[i+1] === undefined || Object.hasOwn(options,key)) throw new Error('无效参数');
     options[key] = args[i+1];
   }
   if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$/.test(options['--run'] ?? '')) throw new Error('无效 run ID');

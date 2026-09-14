@@ -31,7 +31,7 @@ export function projectBlockers(s:GameState,id:RegionalProject):string[]{
 }
 export function reserveFood(s:GameState,r:Ruleset,events:GameEvent[]):void{
  const ops=s.economy?.operations;if(!ops)return;
- if(!ops.food||ops.paused)return;
+ if(s.socialFood||!ops.food||ops.paused)return;
  const n=Math.min(s.production!.market.food,foodTarget(s,r));
  ops.foodReserved+=n;s.production!.market.food-=n;
  opEvent(events,'reserved','food','供粮协议预留'+n+'份市场口粮，按实际配送付费',n);
@@ -115,7 +115,7 @@ export function afterOperations(s:GameState,r:Ruleset,events:GameEvent[]):void{
 }
 function supplyFood(s:GameState,r:Ruleset,events:GameEvent[],report:boolean){
  const o=s.economy!.operations!;
- if(o.food){
+ if(!s.socialFood&&o.food){
   const need=Math.max(0,foodTarget(s,r)-foodStock(s));const n=Math.min(need,o.foodReserved,Math.floor(s.household.money/r.parameters.foodPrice));
   if(n){const money=n*r.parameters.foodPrice;s.household.money-=money;s.household.food+=n;o.foodReserved-=n;events.push({type:'food-purchased',amount:n,money});opEvent(events,'supplied','food','长期供粮配送'+n+'份',n,money);}
   if(report&&foodStock(s)<r.parameters.foodPerTurn)alert(s,events,'food','供粮不足：需补充资金或市场供应');

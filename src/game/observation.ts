@@ -1,3 +1,5 @@
+import {socialFoodQuote} from './systems/social-food.js';
+import {personalBudget} from './systems/industry.js';
 import { lifeView } from './systems/life.js';
 import { economyView } from './systems/economy.js';
 import { technologyVictory } from './systems/investment.js';
@@ -23,12 +25,13 @@ export function getObservation(state: GameState, rules: Ruleset) {
   return {
     ...(state.productNetwork ? {productNetwork:productNetworkView(state,rules)} : {}),
     ...(state.economy?{economy:economyView(state,rules)}:{}),
+    ...(state.socialFood?{socialFood:socialFoodQuote(state)}:{}),
     rulesVersion: rules.rulesVersion,
     victory: technologyVictory(state,rules),
     status: state.status,
     scenario: { id: scenario.id, name: scenario.name, description: scenario.text },
     clock: { ...state.clock, generations: rules.parameters.generations, turnsPerGeneration: rules.parameters.turnsPerGeneration },
-    ...(state.life?{life:{timeRemaining:state.life.timeRemaining,timePerSeason:state.life.rules.timePerSeason,calendar:{year:Math.floor((state.clock.absoluteTurn-1)/4)+1,season:['春','夏','秋','冬'][(state.clock.absoluteTurn-1)%4]},person:lifeView(person)!,heir:family.heirId!==family.activePersonId?lifeView(child):null,adultYears:state.life.rules.adultYears,pendingRetirement:!!state.life.pendingRetirement}}:{}),
+    ...(state.life?{life:{budget:personalBudget(state),recovery:state.life.renewal??null,timeRemaining:state.life.timeRemaining,timePerSeason:state.life.rules.timePerSeason,calendar:{year:Math.floor((state.clock.absoluteTurn-1)/4)+1,season:['春','夏','秋','冬'][(state.clock.absoluteTurn-1)%4]},person:lifeView(person,state.life.rules)!,heir:family.heirId!==family.activePersonId?lifeView(child,state.life.rules):null,adultYears:state.life.rules.adultYears,pendingRetirement:!!state.life.pendingRetirement}}:{}),
     ap: state.ap, parameters: structuredClone(rules.parameters),
     world: { ...structuredClone(state.world), teachers: [...state.location.teachers], weather: state.location.weather, rain: state.location.rain, water: state.location.water, weatherName: { dry: '干旱', normal: '平水', wet: '丰水' }[state.location.weather] },
     person: personView(person), heir: personView(child),

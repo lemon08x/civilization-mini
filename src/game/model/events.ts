@@ -17,6 +17,7 @@ export interface GenerationFacts {
 export type GameEvent =
   | {type:'industry';operation:string;target:string;actor:string;time:number;energy:number;money:number;detail:string}
   | {type:'branch';operation:string;node:string;detail:string}
+  | {type:'social-food';operation:string;amount:number;money:number;time:number;detail:string}
   | {type:'life';personId:string;operation:string;detail:string}
   | {type:'expedition';id:string;operation:string;detail:string;goods:Record<string,number>;money:number;books:string[]}
   | {type:'tower';operation:string;floor:number;detail:string;goods:Record<string,number>}

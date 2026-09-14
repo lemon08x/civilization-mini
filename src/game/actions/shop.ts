@@ -20,7 +20,7 @@ export function shopActions(s:GameState,r:Ruleset):ActionDefinition[]{
  add('checkout','cart','确认整单采购',{money:quote.total},quote.blockers,`合计${quote.total}钱、${quote.weight}运输容量，付款后剩${quote.remainingMoney}钱。现货立即交付，订货下一季开始交付；所有材料和食品都占运输额度。`,(draft,events)=>{
   const shop=draft.economy!.shop!;shop.transport-=quote.weight;
   for(const {item,quantity}of quote.lines){
-   if(item.id==='good-food')draft.production!.market.food-=quantity;else shop.stock[item.id]-=quantity;
+   if(item.id==='good-food'){draft.production!.market.food-=quantity;if(draft.socialFood)draft.socialFood.serviceRemaining-=quantity;}else shop.stock[item.id]-=quantity;
    const order={kind:item.kind,target:item.target,name:item.name,amount:quantity,due:draft.clock.absoluteTurn+1};
    shopEvent(events,'purchased',item.target,item.name+(item.local?'：本地现货':'：订货，下一季开始交付'),item.price*quantity,quantity);
    if(item.local)deliverShop(draft,r,order,events);else shop.orders.push(order);

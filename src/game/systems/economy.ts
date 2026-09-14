@@ -163,6 +163,7 @@ export function settleEconomy(s:GameState,rules:Ruleset,events:GameEvent[]):void
     const d=id==='iron'?'chemistry':'materials';
     if(!e.regional[key]&&batches>=3&&(e.published[d]??0)>0){e.regional[key]=true;events.push({type:'economy-region',industry:key});}
   }
+  if(s.socialFood)return; // v21 converts food once, after social purchases and production.
   let need=Math.max(0,rules.parameters.foodPerTurn-s.household.food);
   for(const id of ['flour','wheat','soy']){const n=Math.min(need,amount(s,id));if(n){changeGoods(s,{[id]:n},-1,events,'家庭生活取粮');s.household.food+=n;need-=n;}}
 }

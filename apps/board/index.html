@@ -3,20 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>世代 · 规则实验桌</title>
+  <title>世代 · 我的聚落</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <header class="masthead">
-    <div><div class="eyebrow">CIVILIZATION MINI / RESEARCH 001</div><h1>世代 <span>规则实验桌</span></h1><p>先让世界运行，再问一门技艺为什么值得学。</p></div>
-    <div class="setup"><label>起始环境<select id="scenario"><option value="river">河渠农地</option><option value="clay-valley">黏土河谷</option><option value="woodland">林地聚落</option><option value="dry">缺水聚落</option></select></label><label>实验种子<input id="seed" type="number" value="17" min="1" max="4294967295"></label><button id="new-game">开启新实验</button></div>
+    <div><div class="eyebrow">CIVILIZATION MINI / PLAY</div><h1>世代 <span>我的聚落</span></h1><p>照顾家人，经营田地，让技艺代代传承。</p></div>
+    <a class="file-button" href="/start">返回开始界面</a>
   </header>
-  <div class="notice" id="rule-notice">规则 0.19.0 · 学科、产品与系统 · 数值待验证</div>
+  <div class="notice" id="rule-notice">规则 0.21.0 · 社会食品与生活安排 · 数值待验证</div>
   <div id="error" role="alert" hidden></div>
   <main id="app"></main>
   <footer>
+    <p><a href="/">返回入口</a> · <a href="/ai">AI 文本玩法</a></p>
     <p><a href="/review" target="_blank" rel="noopener">查看规则、科技关系与实验提案 →</a></p>
-    <div class="tools"><button id="export">导出可重放存档</button><label class="file-button">导入存档<input id="import" type="file" accept=".json,application/json" hidden></label><button id="observation">导出 AI 可见观察</button></div>
+    <div class="tools"><button id="export">导出可重放存档</button><label class="file-button">导入存档<input id="import" type="file" accept=".json,application/json" hidden></label></div>
     <p>结果由固定规则结算；脚本或 AI 只能选择行动。存档只保存在本机浏览器，命令行实验使用独立文件。</p>
   </footer>
   <script type="module" src="/modules/apps/board/economy-app.js"></script>

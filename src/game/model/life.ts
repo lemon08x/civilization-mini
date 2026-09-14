@@ -22,6 +22,7 @@ export interface Vitality {
   constitution: number;
   energy: number;
   health: number;
+  minimumEnergy?: number;
   talent: Talent;
   alive: boolean;
   childId: string | null;

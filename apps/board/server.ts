@@ -8,7 +8,7 @@ import { fingerprint } from '../../src/runtime/records.js';
 const loaded = await loadCurrentContext();
 const context = {...loaded,base:loaded.economyBase};
 const port = Number(process.env.PORT ?? 4317);
-const types: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
+const types: Record<string, string> = { '.md': 'text/plain; charset=utf-8', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
 const server = http.createServer(async (req, res) => {
   if (!['GET', 'HEAD'].includes(req.method ?? '')) { res.writeHead(405); res.end(); return; }
   try {
@@ -24,12 +24,16 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(req.method === 'HEAD' ? undefined : body); return;
     }
     let absolute: string;
-    if (path === '/') absolute = join(projectRoot, 'apps/board/index.html');
+    if (path === '/') absolute = join(projectRoot, 'apps/board/entry.html');
+    else if (path === '/start') absolute = join(projectRoot, 'apps/board/start.html');
+    else if (path === '/play') absolute = join(projectRoot, 'apps/board/index.html');
+    else if (path === '/ai') absolute = join(projectRoot, 'apps/board/ai.html');
+    else if (path === '/ai-guide.md') absolute = join(projectRoot, 'docs/AI_PLAYER.md');
     else if (path === '/review') absolute = join(projectRoot, 'apps/board/review.html');
     else if (path === '/review.css') absolute = join(projectRoot, 'apps/board/review.css');
     else if (path === '/style.css') absolute = join(projectRoot, 'apps/board/style.css');
     else if (path === '/implementation.json') absolute = join(projectRoot, 'dist/implementation.json');
-    else if (['/rulesets/three-trees.v19.json','/rulesets/branch-paths.v18.json','/rulesets/life-and-time.v17.json','/rulesets/megaproject-trial.v13.json','/rulesets/modern-grid.v14.json','/rulesets/agriculture-civilization.v15.json'].includes(path)) absolute = join(projectRoot, path.slice(1));
+    else if (['/rulesets/social-food.v21.json','/rulesets/branch-paths.v18.json','/rulesets/life-and-time.v17.json','/rulesets/megaproject-trial.v13.json','/rulesets/modern-grid.v14.json','/rulesets/agriculture-civilization.v15.json'].includes(path)) absolute = join(projectRoot, path.slice(1));
     else if (path.startsWith('/modules/') && path.endsWith('.js')) {
       const root = join(projectRoot, 'dist');
       absolute = resolve(root, path.slice('/modules/'.length));

@@ -1,3 +1,4 @@
+import {renewSocialFood,settleSocialFood} from './social-food.js';
 import { renewIndustry } from './industry.js';
 import { canSucceed, recordLifeGeneration, settleLife } from './life.js';
 import { arriveExpeditions,recordExpeditionEvidence,settleExpeditions } from './expedition.js';
@@ -37,6 +38,7 @@ export function newSeason(state: GameState, rules: Ruleset, events: GameEvent[])
   resetModern(state,events);
   renewLocalSupply(state, rules, events);
   renewShop(state,rules,events);
+  renewSocialFood(state,events);
   arriveWorkshops(state,rules,events);
   arriveTower(state,rules,events);
   arriveExpeditions(state,events);
@@ -49,6 +51,7 @@ export function finishSeason(state: GameState, rules: Ruleset, events: GameEvent
   }
   operatePassive(state,rules,events);
   settleSociety(state, rules, events);
+  settleSocialFood(state,events);
   const p = rules.parameters, family = state.household;
   const consumed = Math.min(family.food, p.foodPerTurn);
   family.food -= consumed;
@@ -63,7 +66,7 @@ export function finishSeason(state: GameState, rules: Ruleset, events: GameEvent
   settleExpeditions(state,rules,events);
   storeModern(state,events);
   if(state.life){
-    settleLife(state,missing,events);
+    settleLife(state,missing,events,p.foodPerTurn);
     if(state.status!=='active'){recordLifeGeneration(state,events);return;}
     if(state.life.pendingRetirement&&canSucceed(state)){state.status='handover';recordLifeGeneration(state,events);return;}
   }

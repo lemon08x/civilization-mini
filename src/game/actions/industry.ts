@@ -1,9 +1,9 @@
-import {INDUSTRY_PRODUCTS,SYSTEMS,type OperatorId} from '../model/industry.js';
+import {INDUSTRY_PRODUCTS,type OperatorId} from '../model/industry.js';
 import type {GameState} from '../model/state.js';
 import {defineAction,type ActionDefinition} from './definition.js';
 import {productName,productNeeds} from '../systems/industry-products.js';
 import {amount,changeGoods,consumeEquipment,equipped,missingGoods} from '../systems/economy.js';
-import {assignmentNeeds,installedIn,industryEvent,physicalNeeds,systemInputs,systemUnlockNeeds} from '../systems/industry.js';
+import {systemDefinitions,assignmentNeeds,installedIn,industryEvent,physicalNeeds,systemInputs,systemUnlockNeeds} from '../systems/industry.js';
 
 export function industryActions(s:GameState):ActionDefinition[]{
  const x=s.economy?.industry;if(!x)return [];
@@ -23,7 +23,7 @@ export function industryActions(s:GameState):ActionDefinition[]{
    d.economy!.industry!.products[p.id]={source:'inspection',protocol:false};industryEvent(ev,'inspected',p.id,'self',productName(p.id)+'检验完成；未取得制造规程');
   }));
  }
- for(const def of SYSTEMS){
+ for(const def of systemDefinitions(s)){
   const i=x.instances[def.id];
   result.push(defineAction(s,'economy:sysbuild:'+def.id,'建设：'+def.name,'系统',{time:2,energy:1},[
    ...systemUnlockNeeds(s,def),...(i?['已建此系统']:[]),

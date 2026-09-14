@@ -1,4 +1,6 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { textObservation } from './text-observation.js';
+import type { SessionObservation } from '../../src/runtime/session.js';
+import { mkdir, writeFile, rename } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { resolveRuleset, isRecord } from '../../src/game/ruleset.js';
 import { createSession, observeSession } from '../../src/runtime/session.js';
@@ -22,6 +24,18 @@ function options(args: string[]): Record<string, string> {
 }
 try {
   const [command = 'help', ...args] = process.argv.slice(2), opts = options(args);
+  if (opts.format && !['json', 'text'].includes(opts.format)) throw new Error('format 仅支持 json / text');
+  const printObservation = (o: SessionObservation) => console.log(opts.format === 'text' ? textObservation(o) : JSON.stringify(o, null, 2));
+  const publishObservation = async (o: SessionObservation) => {
+    const directory = join(projectRoot, 'artifacts/runs', o.runId);
+    const temporary = join(directory, 'observation-' + crypto.randomUUID() + '.tmp');
+    try {
+      await writeFile(temporary, textObservation(o), {flag: 'wx'});
+      await rename(temporary, join(directory, 'observation.md'));
+    } catch (error) {
+      console.error('行动/建档已保存，但文本观察更新失败；请用 observe --format text 获取最新观察：' + (error as Error).message);
+    }
+  };
   if (command === 'help') {
     console.log(`世代规则预研 — 三类升级树规则0.19.0
   npm run lab -- new --run demo --seed 17 --scenario woodland
@@ -70,20 +84,22 @@ try {
       if (command === 'new') {
         const overrides = opts.params ? await readJson(resolve(opts.params)) : {};
         const session = await createSession({ runId: opts.run, ruleset: resolveRuleset(base, overrides), implementation, seed: Number(opts.seed ?? 1), scenarioId: opts.scenario ?? (base.civilization?'river':base.modern?'canyon':base.production ? 'woodland' : 'river') });
-        await store.create(session); console.log(JSON.stringify(observeSession(session), null, 2));
+        await store.create(session); await publishObservation(observeSession(session)); printObservation(observeSession(session));
       } else if (command === 'import') {
         if (!opts.file) throw new Error('import 需要 --file');
         const raw = await readJson(resolve(opts.file));
         if (!isRecord(raw) || !isRecord(raw.manifest) || !isRecord(raw.manifest.ruleset) || raw.manifest.ruleset.rulesVersion !== base.rulesVersion) throw new Error('只接受当前学科经济规则存档，请新开局');
         const session = await importRecord(raw, implementation, opts.run);
-        await store.create(session); console.log(JSON.stringify(observeSession(session), null, 2));
+        await store.create(session); await publishObservation(observeSession(session)); printObservation(observeSession(session));
       } else if (command === 'act') {
         if (!opts.action || opts.revision === undefined) throw new Error('act 需要 --action 和 --revision');
         const result = await store.submit(opts.run, { commandId: opts['command-id'] ?? `${opts.run}:${opts.revision}`, expectedRevision: Number(opts.revision), actionId: opts.action, ...(opts.reason === undefined ? {} : { reason: opts.reason }) });
-        console.log(JSON.stringify({ ...observeSession(result.session), receipt: { duplicate: result.duplicate, revision: result.revision } }, null, 2));
+        await publishObservation(observeSession(result.session));
+        if (opts.format === 'text') printObservation(observeSession(result.session));
+        else console.log(JSON.stringify({ ...observeSession(result.session), receipt: { duplicate: result.duplicate, revision: result.revision } }, null, 2));
       } else {
         const session = await store.load(opts.run);
-        if (command === 'observe') console.log(JSON.stringify(observeSession(session), null, 2));
+        if (command === 'observe') printObservation(observeSession(session));
         else if (command === 'metrics') console.log(JSON.stringify(metrics(session.record, session.state), null, 2));
         else if (command === 'export') console.log(JSON.stringify(session.record, null, 2));
         else throw new Error('未知命令');

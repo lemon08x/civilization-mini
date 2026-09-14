@@ -22,7 +22,7 @@ const uses:Record<string,string>={food:'即食生活补给；与市场购粮共�
 export interface ShopItem {id:string;target:string;kind:ShopOrder['kind'];name:string;category:string;price:number;weight:number;local:boolean;effect:string;condition:string;owned:boolean;stock:number;}
 export function shopCatalog(s:GameState,r:Ruleset):ShopItem[]{
  const e=s.economy!,sh=e.shop!,cfg=r.shop!;
- const item=(x:Omit<ShopItem,'stock'>):ShopItem=>({...x,stock:x.id==='good-food'?s.production!.market.food:sh.stock[x.id]??0});
+ const item=(x:Omit<ShopItem,'stock'>):ShopItem=>({...x,stock:x.id==='good-food'?Math.min(s.production!.market.food,s.socialFood?.serviceRemaining??Infinity):sh.stock[x.id]??0});
  const goods=[...SHOP_GOODS,...(e.modern?['copper','feedstock','mineral','silica','polymer','wire','coil','cable','fuel','nutrient','battery','silicon','circuit','solution']:[])].map(id=>{
    const recipe=PROCESSES.find(p=>Object.hasOwn(p.outputs,id));
    const local=(BASIC.includes(id)||e.modern&&['copper','feedstock','mineral','silica'].includes(id))||!!recipe&&(sh.produced[id]??0)>=3&&localNeeds(s,recipe.requires);

@@ -15,9 +15,18 @@ export function defineAction(state: GameState, id: string, label: string, group:
   const ap=state.life?0:requestedAp;
   const baseLife=state.life?lifeCost(state,id,requestedAp):undefined;
   const life=baseLife?{time:costs.time??baseLife.time,energy:costs.energy??baseLife.energy}:undefined;
-  const reserved=state.economy?.industry?reservedLabor(state):{time:0,energy:0};
+  let reserved=state.economy?.industry?reservedLabor(state):{time:0,energy:0};
   const reasons = [...blockers.map(reason=>state.economy?.branches?reason.replace(/需生产组织第?1阶或家族记录/g,'需掌握劳动分工').replace(/需生产组织第?2阶或家族记录/g,'需掌握生产工序').replace(/需生产组织第?3阶或家族记录/g,'需掌握采购与交付'):reason),...branchActionNeeds(state,id)];
-  if(life){if(life.time>0&&state.life!.timeRemaining-reserved.time<life.time)reasons.push('本季时间不足（含系统预留）');if(life.energy>0&&activePerson(state).vitality!.energy-reserved.energy<life.energy)reasons.push('精力不足，请休息或结束本季');}
+  if((state.socialFood&&id.startsWith('economy:')||state.life?.renewal&&['farm','sysassign','sysrun','sysremove'].includes(id.split(':')[1]))&&reasons.length===0&&state.household.money>=money&&state.household.food>=food){
+    // Quote on an isolated draft: farming changes water demand; income, purchases and
+    // household policies change shopping demand. Never mutate the real state or advance a season.
+    const preview=structuredClone(state);preview.household.money-=money;preview.household.food-=food;execute(preview,[]);reserved=reservedLabor(preview);
+  }
+  if(life){
+    if(life.time>0&&state.life!.timeRemaining-reserved.time<life.time)reasons.push(`时间不足：剩余${state.life!.timeRemaining}，行动需${life.time}，行动后劳动预留${reserved.time}，可用${Math.max(0,state.life!.timeRemaining-reserved.time)}`);
+    if(life.energy>0&&activePerson(state).vitality!.energy-reserved.energy<life.energy)reasons.push(`精力不足：剩余${activePerson(state).vitality!.energy}，行动需${life.energy}，行动后劳动预留${reserved.energy}；可休息或暂停系统`);
+    if(state.life?.renewal)description+=` 行动耗费${life.time}时间／${life.energy}精力；行动后劳动预留${reserved.time}时间／${reserved.energy}精力（系统任务可暂停或改派，生活页可调整采购）。`;
+  }
   if (state.ap < ap) reasons.push('行动点不足');
   if (state.household.money < money) reasons.push('钱财不足');
   if (state.household.food < food) reasons.push('口粮不足');

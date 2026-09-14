@@ -9,7 +9,7 @@ export function lifeActions(s:GameState):ActionDefinition[] {
     defineAction(s,'economy:rest:self','休息','身体',{},v.energy>=energyCeiling(v)?['精力已满']:[],`用4时间恢复${r.restRecovery+(v.talent==='resilient'?1:0)}精力，不超过健康决定的上限。`,(d,ev)=>{
       const x=activePerson(d).vitality!,before=x.energy;x.energy=Math.min(energyCeiling(x),x.energy+r.restRecovery+(x.talent==='resilient'?1:0));lifeEvent(ev,d.household.activePersonId,'rest',`休息恢复${x.energy-before}精力`);
     }),
-    defineAction(s,'economy:care:self','营养疗养','身体',{money:2},v.health>=healthCeiling(v,r)?['健康已达到当前年龄上限']:[],`用4时间、1精力、2钱购买营养照护，恢复${r.careRecovery}健康；不能逆转衰老。`,(d,ev)=>{
+    defineAction(s,'economy:care:self','营养疗养','身体',{money:s.life.renewal?.careMoney??2},v.health>=healthCeiling(v,r)?['健康已达到当前年龄上限']:[],`用${s.life.renewal?.careTime??4}时间、${s.life.renewal?.careEnergy??1}精力、${s.life.renewal?.careMoney??2}钱购买营养照护，恢复${r.careRecovery}健康；不能逆转衰老。`,(d,ev)=>{
       const x=activePerson(d).vitality!,before=x.health;x.health=Math.min(healthCeiling(x,r),x.health+r.careRecovery);lifeEvent(ev,d.household.activePersonId,'care',`疗养恢复${x.health-before}健康`);
     }),
     defineAction(s,'economy:retire:family','安排季末交接','身体',{ap:0},[

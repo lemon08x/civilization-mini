@@ -18,7 +18,7 @@ async function loadIdentity() {
 }
 export async function loadCurrentContext() {
   const implementation = await loadIdentity();
-  const base = validateRuleset(await readJson(join(projectRoot, 'rulesets/three-trees.v19.json')));
+  const base = validateRuleset(await readJson(join(projectRoot, 'rulesets/social-food.v21.json')));
   return { implementation, base, economyBase: base };
 }
 export async function loadContext() {

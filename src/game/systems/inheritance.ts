@@ -35,7 +35,7 @@ export function handover(state: GameState, rules: Ruleset, events: GameEvent[]):
   }
   if(state.economy&&!state.economy.operations?.charter&&(state.economy.notes.organization??0)<3)for(const w of Object.values(state.economy.workers))if(w)w.active=false;
   state.status = 'active';
-  events.push({ type: 'handed-over', generation: state.clock.generation, fromPersonId, personId: child.id, mastered: [...child.mastered], learning: { ...child.learning } });
+  events.push({ type: 'handed-over', generation: state.clock.generation, fromPersonId, personId: child.id, mastered: [...(state.economy?.branches?.learned[child.id]??child.mastered)], learning: { ...child.learning } });
   handoverOperations(state,events);
   if(state.economy?.industry){state.economy.operations!.paused=false;for(const i of Object.values(state.economy.industry.instances))if(i&&i.operator==='self')i.enabled=false;}
   newSeason(state, rules, events);

@@ -65,11 +65,11 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
       draft.economy!.industrySupply--;changeGoods(draft,{[id]:n},1,events,'市场采购');events.push({type:'economy-trade',good:id,operation:'buy',amount:n,money:price});
     });
     for(const food of [false,true])add(food?'sellfood':'sell',id,'交付'+good.name+(food?'并购粮':''),'交换',{},[
-      ...missingGoods(s,{[id]:1}),...(e.market<1?['本季订单已满']:[]),...(food&&s.production!.market.food<2?['市场不足2粮']:[]),...(food&&s.household.money+salePrice(s,id)<2*rules.parameters.foodPrice?['货款与现钱不足购粮']:[]),
+      ...missingGoods(s,{[id]:1}),...(e.market<1?['本季订单已满']:[]),...(food&&s.production!.market.food<2?['市场不足2粮']:[]),...(food&&s.socialFood&&s.socialFood.serviceRemaining<2?['食品服务人员额度不足']:[]),...(food&&s.socialFood&&e.shop!.transport<2?['食品共享运输不足']:[]),...(food&&s.household.money+salePrice(s,id)<2*rules.parameters.foodPrice?['货款与现钱不足购粮']:[]),
     ],`交付1件得${salePrice(s,id)}钱${food?`，同时花${2*rules.parameters.foodPrice}钱买2粮`:''}；商品、钱款、订单和粮源真实扣减。`,(draft,events)=>{
       changeGoods(draft,{[id]:1},-1,events,'订单交付');draft.economy!.market--;draft.household.money+=salePrice(s,id);
       events.push({type:'economy-trade',good:id,operation:'sell',amount:1,money:salePrice(s,id)});
-      if(food){const money=2*rules.parameters.foodPrice;draft.household.money-=money;draft.household.food+=2;draft.production!.market.food-=2;events.push({type:'food-purchased',amount:2,money});}
+      if(food){const money=2*rules.parameters.foodPrice;draft.household.money-=money;draft.household.food+=2;draft.production!.market.food-=2;if(draft.socialFood){draft.socialFood.serviceRemaining-=2;draft.economy!.shop!.transport-=2;}events.push({type:'food-purchased',amount:2,money});}
     });
   }
   if(!e.shop)add('buyfood','bulk','买入4口粮','生活',{money:4*rules.parameters.foodPrice},s.production!.market.food<4?['市场不足4粮']:[],'购买普通即食口粮；仓库里的小麦、大豆和面粉也会在季末按需用于生活。',(draft,events)=>{draft.production!.market.food-=4;draft.household.food+=4;events.push({type:'food-purchased',amount:4});});
@@ -108,7 +108,7 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
     add('pause',kind,'暂停／恢复'+WORKER_NAMES[kind],'雇佣',{},!worker||worker.job==='rest'?['先招募并安排任务']:[], '保留合同、经验与在制品；暂停期间不工作、不扣工资。',(draft,events)=>{const w=draft.economy!.workers[kind]!;w.active=!w.active;events.push({type:'economy-worker',worker:kind,operation:'pause',money:0,detail:w.active?'恢复':'暂停'});});
     add('train',kind,'培训'+WORKER_NAMES[kind],'雇佣',{food:1},[...(!worker?['尚未招募']:[]),...(org<4?['需培训与知识传授']:[]),...(worker&&worker.experience>=8?['已完成此岗位培训']:[]),...(servicePending(s,'training',kind)?['正在委托培训']:[])],'花1行动与1口粮，使雇员经验+2，上限8；经验8后：普通雇工可播种，农工整地增益+1，工匠可按双份原料批量加工；工资也+1。',(draft,events)=>{draft.economy!.workers[kind]!.experience=Math.min(8,draft.economy!.workers[kind]!.experience+2);events.push({type:'economy-worker',worker:kind,operation:'train',money:0,detail:'经验+2（上限8）'});});
   }
-  add('end','season','结束本季','回合',{ap:0},[],`雇佣与田间先结算，再支付${rules.parameters.foodPerTurn}粮生活；现有可食储备${foodStock(s)}。`,()=>{});
+  add('end','season','结束本季','回合',{ap:0},[],`雇佣与田间先结算，再支付${rules.parameters.foodPerTurn}粮生活；现有可食储备${foodStock(s)}。${s.socialFood?'生产后按生活安排购粮，再进食；实际扣款受当时资金、市场和运输限制。':''}`,()=>{});
   if(e.operations)out.push(...operationsActions(s,rules));
   if(e.shop)out.push(...shopActions(s,rules));
   return [...out,...expeditionActions(s,rules),...workshopActions(s,rules),...towerActions(s,rules)];

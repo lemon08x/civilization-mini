@@ -1,3 +1,4 @@
+import {ancestorKnows} from './ancestry.js';
 import { productNeeds,productTrialNeeds } from './industry-products.js';
 import {BRANCH_NODES,BRANCH_PRODUCTS,BRANCH_PROCESSES,BRANCH_PATHS} from '../model/branches.js';
 import type {GameState} from '../model/state.js';
@@ -15,6 +16,7 @@ export function branchProcessNeeds(s:GameState,id:string,worker=false):string[]{
 export function branchActionNeeds(s:GameState,id:string):string[]{
   if(!s.economy?.branches||id==='handover')return [];
   const [,op,target]=id.split(':');
+  if(s.socialFood&&['foodpolicy','foodbudget','foodreserve','foodplan'].includes(op))return [];
   if(s.economy.industry){
     if(['inspect','sysbuild','syscommission','sysassign','sysrun','sysremove'].includes(op))return [];
     if(['assign','pause','farmplan','productionplan','supplyplan','salesplan','careplan','charter'].includes(op))return ['旧经营方式尚未纳入三类树，请使用系统安排与手动采购交付'];
@@ -49,7 +51,7 @@ export function recordBranchWork(s:GameState,events:GameEvent[]):void {
 }
 export function branchView(s:GameState){
   const b=s.economy!.branches!;
-  return {nodes:BRANCH_NODES.map(n=>({...n,...(s.economy!.industry?{sample:{}}:{}),known:branchHas(s,n.id),heirKnown:s.household.heirId!==s.household.activePersonId&&branchHas(s,n.id,s.household.heirId),archived:b.archives.includes(n.id),missing:branchNeeds(s,n.parents)})),
+  return {nodes:BRANCH_NODES.map(n=>({...n,...(s.economy!.industry?{sample:{}}:{}),known:branchHas(s,n.id),inherited:ancestorKnows(s,n.id),heirInherited:ancestorKnows(s,n.id,s.household.heirId),heirKnown:s.household.heirId!==s.household.activePersonId&&branchHas(s,n.id,s.household.heirId),archived:b.archives.includes(n.id),missing:branchNeeds(s,n.parents)})),
     paths:BRANCH_PATHS.map(p=>({...p,learned:p.nodes.filter(id=>branchHas(s,id)).length})),
     channels:[...b.channels],protocols:[...b.protocols],delivered:[...b.delivered],products:BRANCH_PRODUCTS,processes:BRANCH_PROCESSES};
 }
