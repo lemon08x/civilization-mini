@@ -15,6 +15,7 @@ export function textObservation(observation: SessionObservation): string {
     '', '## 暂不可用行动',
     ...actions.filter(a => !a.enabled).map(a => `- ${a.id} | ${a.label} | ${a.reason}`),
     '', '## 完整可见状态', '```json', JSON.stringify(state, null, 2), '```',
+    ...(observation.eraSettlements?['','## 已结算的社会阶段',...observation.eraSettlements.map(e=>e.detail)]:[]),
     '', '## 最近事件', '```json', JSON.stringify(recentEvents, null, 2), '```',
     '', '## 提交方式',
     `node scripts/player.mjs act --run ${runId} --revision ${revision} --action <上方可用行动ID> --format text`,

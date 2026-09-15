@@ -15,6 +15,7 @@ export interface GenerationFacts {
   production?: ProductionState;
 }
 export type GameEvent =
+  | {type:'era';operation:string;stage:number;card:string;amount:number;money:number;detail:string}
   | {type:'industry';operation:string;target:string;actor:string;time:number;energy:number;money:number;detail:string}
   | {type:'branch';operation:string;node:string;detail:string}
   | {type:'social-food';operation:string;amount:number;money:number;time:number;detail:string}
@@ -30,7 +31,7 @@ export type GameEvent =
   | {type:'economy-knowledge';operation:'archive'|'publish';subject:string;level:number}
   | {type:'economy-built';product:string;durability:number}
   | {type:'economy-process';recipe:string;actor:string;stage:'start'|'complete';factor:number}
-  | {type:'economy-farm';operation:'sow'|'harvest'|'tend'|'pump';crop:string;actor:string;amount:number}
+  | {type:'economy-farm';operation:'sow'|'harvest'|'tend'|'pump'|'waiting';crop:string;actor:string;amount:number}
   | {type:'economy-crop-growth';crop:string;growth:number;stress:number}
   | {type:'economy-worker';worker:string;operation:'hire'|'assign'|'pause'|'train'|'waiting'|'worked'|'share';money:number;detail:string}
   | {type:'economy-trade';good:string;operation:'buy'|'sell';amount:number;money:number}

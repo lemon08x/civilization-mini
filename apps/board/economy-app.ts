@@ -1,3 +1,4 @@
+import {erasPage} from './eras-view.js';
 import {socialFoodPage} from './social-food-view.js';
 import { actionButton, farm, humanScreen } from './human-view.js';
 import {industryProducts,industrySystems} from './industry-view.js';
@@ -15,14 +16,15 @@ import {ALL_PRODUCTS as PRODUCTS,ALL_GOODS as GOODS,ALL_TOPICS as TOPICS,SUBJECT
 import {esc,needsText,inputsText} from './economy-view.js';
 import type {GameEvent} from '../../src/game/model/events.js';
 const $=(id:string)=>document.getElementById(id)!;
-const rules=validateRuleset(await (await fetch('/rulesets/social-food.v21.json')).json());
+const rules=validateRuleset(await (await fetch('/rulesets/social-eras.v26.json')).json());
 const implementation:ImplementationIdentity=await(await fetch('/implementation.json')).json();
-const KEY='civilization-mini.social-food.v21';let raw=localStorage.getItem(KEY),failed=false,busy=false,page='聚落',guide=false,selectedCourse='',filter='',shopCategory='物资';
+const KEY='civilization-mini.social-eras.v26';let raw=localStorage.getItem(KEY),failed=false,busy=false,page='聚落',guide=false,selectedCourse='',filter='',shopCategory='物资';
 if(!raw){location.replace('/start');await new Promise<never>(()=>{});}
 let session=await createSession({runId:crypto.randomUUID(),ruleset:rules,implementation,seed:17,scenarioId:'river'});
 const error=(message:string)=>{$('error').hidden=!message;$('error').textContent=message;};
 try{if(raw){session=await replayRecord(JSON.parse(raw),implementation);if(session.record.manifest.ruleset.rulesVersion!==rules.rulesVersion)throw new Error('只接受当前农业文明规则；旧档保留，请另开新局');}}catch(e){failed=true;error('当前存档无法读取，请新开局：'+(e as Error).message);}
 function feedback(e:GameEvent):string {
+  if(e.type==='era')return e.detail;
   if(e.type==='social-food')return e.detail;
   if(e.type==='industry')return e.detail;
   if(e.type==='branch')return e.detail;
@@ -39,7 +41,7 @@ function feedback(e:GameEvent):string {
   if(e.type==='economy-built')return `${PRODUCTS.find(p=>p.id===e.product)?.name}已制造安装，耐用${e.durability}。`;
   if(e.type==='economy-equipment-used')return `${PRODUCTS.find(p=>p.id===e.product)?.name}生效，剩余${e.remaining}次。`;
   if(e.type==='economy-trade')return `${e.operation==='buy'?'购入':'交付'}${e.amount}${GOODS[e.good]?.name}，${e.money}钱。`;
-  if(e.type==='economy-farm')return `${e.actor}：${{sow:'播种',harvest:'收获',tend:'田间管理',pump:'自动灌溉'}[e.operation]}${CROPS[e.crop as keyof typeof CROPS].name}${e.operation==='harvest'?' '+e.amount:''}`;
+  if(e.type==='economy-farm')return `${e.actor}：${{sow:'播种',harvest:'收获',tend:'田间管理',pump:'自动灌溉',waiting:'持续耕作未能执行'}[e.operation]}${CROPS[e.crop as keyof typeof CROPS]?.name??e.crop}${e.operation==='harvest'?' '+e.amount:''}`;
   if(e.type==='economy-crop-growth')return `${CROPS[e.crop as keyof typeof CROPS].name}生长${e.growth}季，累计天气胁迫${e.stress}。`;
   if(e.type==='economy-process')return `${e.actor}${e.stage==='start'?'开工':'完成'}${PROCESSES.find(p=>p.id===e.recipe)?.name}。`;
   if(e.type==='economy-knowledge')return `${e.operation==='archive'?'留存家族记录':'传播地区知识'}：${SUBJECT_NAMES[e.subject as keyof typeof SUBJECT_NAMES]} ${e.level}阶。`;
@@ -56,11 +58,12 @@ async function save(next:Session){if(localStorage.getItem(KEY)!==raw)throw new E
 async function act(id:string){if(busy||failed)return;busy=true;try{await save((await submitCommand(session,{commandId:session.record.manifest.runId+':'+session.record.entries.length,expectedRevision:session.record.entries.length,actionId:id})).session);}catch(e){error((e as Error).message);}finally{busy=false;}}
 function render(){
   const o=observeSession(session).game,e=o.economy!,PRODUCTS=e.products,PROCESSES=e.processes;
-  $('rule-notice').textContent=`规则 ${o.rulesVersion} · 学科 / 产品 / 系统 · 19个学科节点，${PRODUCTS.length}项设备 · 数值待验证`;
+  $('rule-notice').textContent=`规则 ${o.rulesVersion} · 学科 / 产品 / 系统 · ${e.branchView?.nodes.length??19}个学科节点，${PRODUCTS.length}项设备 · 数值待验证`;
   const button=(id:string)=>actionButton(o,id,failed);
   const panel=(title:string,body:string)=>`<section class="panel"><div class="panel-head"><h2>${title}</h2></div><div class="panel-body">${body}</div></section>`;
   const acts=(group:string)=>o.actions.filter(a=>a.group===group&&(!filter||a.label.includes(filter))).map(a=>`<div class="family-item">${button(a.id)}</div>`).join('');
   let body='';
+  if(page==='社会')body=erasPage(observeSession(session),button);
   if(page==='副本')body=expeditionPage(observeSession(session),button);
   if(page==='试炼')body=towerPage(observeSession(session),button);
   if(page==='系统'||page==='家业')body=e.industryView?industrySystems(o,button):operationsPage(o,button)+(e.workshopView?'<section class="panel"><div class="panel-body"><h2>作坊协作</h2><p>建立纤维与绳索工序，配置跨季供货，观察库存与运输瓶颈。</p><button data-page="作坊">查看生产网络 →</button></div></section>':'');

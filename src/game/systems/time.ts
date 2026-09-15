@@ -1,4 +1,5 @@
 import {renewSocialFood,settleSocialFood} from './social-food.js';
+import {renewEraServices,operateEraServices,recordEraProduction,settleEra} from './eras.js';
 import { renewIndustry } from './industry.js';
 import { canSucceed, recordLifeGeneration, settleLife } from './life.js';
 import { arriveExpeditions,recordExpeditionEvidence,settleExpeditions } from './expedition.js';
@@ -37,6 +38,7 @@ export function newSeason(state: GameState, rules: Ruleset, events: GameEvent[])
   events.push({ type: 'season-started', clock: { ...state.clock }, weather });
   resetModern(state,events);
   renewLocalSupply(state, rules, events);
+  renewEraServices(state,rules);
   renewShop(state,rules,events);
   renewSocialFood(state,events);
   arriveWorkshops(state,rules,events);
@@ -46,6 +48,8 @@ export function newSeason(state: GameState, rules: Ruleset, events: GameEvent[])
   renewIndustry(state);
 }
 export function finishSeason(state: GameState, rules: Ruleset, events: GameEvent[]): void {
+  const productionStart=events.length;
+  operateEraServices(state,events);
   if(state.economy){beforeOperations(state,rules,events);if(!state.economy.industry){generateModern(state,events);serveModern(state,events);}settleEconomy(state,rules,events);settleWorkshops(state,rules,events);dispatchTower(state,rules,events);afterOperations(state,rules,events);recordProjectEvidence(state,events);
 
   }
@@ -65,8 +69,10 @@ export function finishSeason(state: GameState, rules: Ruleset, events: GameEvent
   recordExpeditionEvidence(state,events);
   settleExpeditions(state,rules,events);
   storeModern(state,events);
+  recordEraProduction(state,events,events.slice(productionStart));
   if(state.life){
     settleLife(state,missing,events,p.foodPerTurn);
+    settleEra(state,rules,events);
     if(state.status!=='active'){recordLifeGeneration(state,events);return;}
     if(state.life.pendingRetirement&&canSucceed(state)){state.status='handover';recordLifeGeneration(state,events);return;}
   }

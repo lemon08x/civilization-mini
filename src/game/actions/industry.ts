@@ -10,7 +10,7 @@ export function industryActions(s:GameState):ActionDefinition[]{
  const result:ActionDefinition[]=[];
  for(const p of INDUSTRY_PRODUCTS){
   const equipment=p.kind==='device';
-  result.push(defineAction(s,'economy:inspect:'+p.id,'检验：'+productName(p.id),'产品验证',{time:4,energy:2},[
+  result.push(defineAction(s,'economy:inspect:'+p.id,'检验：'+productName(p.id),'产品验证',{time:s.era&&s.economy!.branches!.learned[s.household.activePersonId]?.includes('Q0')?3:4,energy:2},[
    ...productNeeds(s,p.id,true),...(x.products[p.id]?['已有产品验证记录']:[]),
    ...(equipment?(!equipped(s,p.id)?['需可用产品实物']:[]):amount(s,p.good!)<1?['需一件实物样品']:[]),
    ...(equipment&&installedIn(s,p.id)?['先拆出已安装产品再检验']:[]),
@@ -25,11 +25,12 @@ export function industryActions(s:GameState):ActionDefinition[]{
  }
  for(const def of systemDefinitions(s)){
   const i=x.instances[def.id];
-  result.push(defineAction(s,'economy:sysbuild:'+def.id,'建设：'+def.name,'系统',{time:2,energy:1},[
-   ...systemUnlockNeeds(s,def),...(i?['已建此系统']:[]),
+  result.push(defineAction(s,'economy:sysbuild:'+def.id,'建设：'+def.name,'系统',{time:def.id==='well'?6:2,energy:def.id==='well'?4:1},[
+   ...systemUnlockNeeds(s,def),...(def.id==='well'?missingGoods(s,{wood:4,clay:2}):[]),...(i?['已建此系统']:[]),
    ...(def.equipment&&!equipped(s,def.equipment)?['需可用'+productName(def.equipment)]:[]),
    ...(def.equipment&&installedIn(s,def.equipment)?['设备已安装在系统中']:[]),
-  ],'投入安装时间；占用已有实物设备，不凭空赠送设备。建成后需本人调试，随后安排操作人员。',(d,ev)=>{
+  ],def.id==='well'?'挖井耗4木材、2黏土、6时间、4精力；建成后实际试抽并安排人员。':'投入安装时间；占用已有实物设备，不凭空赠送设备。建成后需本人调试，随后安排操作人员。',(d,ev)=>{
+   if(def.id==='well')changeGoods(d,{wood:4,clay:2},-1,ev,'家庭水井建设');
    d.economy!.industry!.instances[def.id]={id:def.id,commissioned:false,enabled:false,operator:null};industryEvent(ev,'built',def.id,'self',def.name+'已安装，等待调试');
   }));
   result.push(defineAction(s,'economy:syscommission:'+def.id,'调试：'+def.name,'系统',{time:def.time,energy:def.energy},[
@@ -37,7 +38,7 @@ export function industryActions(s:GameState):ActionDefinition[]{
   ],'本人按一批任务报价完成实际调试。供水进行试抽；加工产出真实轴。耗材、设备和时间精力均扣一次，不重复收费。',(d,ev)=>{
    changeGoods(d,systemInputs(def),-1,ev,'系统调试投入');
    if(def.equipment){consumeEquipment(d,def.equipment,ev);d.economy!.equipmentUsed[def.equipment]=d.clock.absoluteTurn;}
-   if(def.id==='shaft')changeGoods(d,{shaft:2},1,ev,'调试合格产出');else d.location.water--;
+   if(def.id==='shaft'){changeGoods(d,{shaft:2},1,ev,'调试合格产出');if(d.era)ev.push({type:'economy-process',recipe:'shaft',actor:'调试：本人',stage:'complete',factor:1});}else if(def.id==='well')d.era!.groundwater--;else d.location.water--;
    const instance=d.economy!.industry!.instances[def.id]!;instance.commissioned=true;
    if(!d.economy!.industry!.commissioned.includes(def.id))d.economy!.industry!.commissioned.push(def.id);
    industryEvent(ev,'commissioned',def.id,'self',def.name+'实际调试完成，尚未安排运行');

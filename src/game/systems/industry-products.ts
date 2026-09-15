@@ -1,12 +1,12 @@
 import {INDUSTRY_PRODUCTS} from '../model/industry.js';
-import {BRANCH_NODES} from '../model/branches.js';
+import {branchNodesFor} from '../model/branches.js';
 import {changeGoods,consumeEquipment} from './economy.js';
 import {ALL_PRODUCTS,ALL_PROCESSES} from './economy-catalog.js';
 import type {GameState} from '../model/state.js';
 import type {GameEvent} from '../model/events.js';
 
 export function productName(id:string):string{return ALL_PRODUCTS.find(p=>p.id===id)?.name??ALL_PROCESSES.find(p=>p.id===id)?.name??id;}
-export function knowledgeNeeds(s:GameState,ids:string[]):string[]{return ids.filter(id=>!s.economy!.branches!.learned[s.household.activePersonId]?.includes(id)).map(id=>'需掌握'+(BRANCH_NODES.find(n=>n.id===id)?.name??id));}
+export function knowledgeNeeds(s:GameState,ids:string[]):string[]{return ids.filter(id=>!s.economy!.branches!.learned[s.household.activePersonId]?.includes(id)).map(id=>'需掌握'+(branchNodesFor(s).find(n=>n.id===id)?.name??id));}
 export function productNeeds(s:GameState,id:string,inspection=false):string[]{
  const state=s.economy?.industry;if(!state)return [];
  const p=INDUSTRY_PRODUCTS.find(p=>p.id===id);if(!p)return ['产品尚未纳入三类树'];

@@ -10,7 +10,7 @@ export const INDUSTRY_PRODUCTS:ProductDefinition[]=[
   ...Object.entries(BRANCH_PRODUCTS).map(([id,knowledge])=>({id,knowledge,parents:parents[id]??[],kind:'device' as const})),
   ...Object.entries(BRANCH_PROCESSES).map(([id,knowledge])=>({id,knowledge,parents:parents[id]??[],kind:'goods' as const,good:id==='mill'?'flour':id})),
 ];
-export type SystemId='hand'|'pump'|'shaft';
+export type SystemId='hand'|'pump'|'shaft'|'well';
 export type OperatorId='self'|'laborer'|'farmer'|'artisan';
 export interface SystemDefinition {
   id:SystemId;name:string;knowledge:string[];products:string[];systems:SystemId[];

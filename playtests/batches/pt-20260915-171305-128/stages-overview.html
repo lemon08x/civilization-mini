@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>文明迷你 · v26 各发展阶段能力对照</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm; }
+  body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; font-size: 11pt; line-height: 1.55; color: #222; max-width: 190mm; margin: 0 auto; }
+  h1 { font-size: 19pt; border-bottom: 3px solid #2c5f8a; padding-bottom: 6px; color: #1d3d5c; }
+  h2 { font-size: 14pt; color: #2c5f8a; border-left: 5px solid #2c5f8a; padding-left: 8px; margin-top: 22px; }
+  h3 { font-size: 12pt; color: #333; margin-bottom: 4px; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0 14px; font-size: 10pt; }
+  th, td { border: 1px solid #999; padding: 5px 7px; vertical-align: top; text-align: left; }
+  th { background: #e8eef4; color: #1d3d5c; }
+  tr:nth-child(even) td { background: #f7f9fb; }
+  ul { margin: 4px 0 10px; padding-left: 20px; }
+  li { margin-bottom: 2px; }
+  .note { background: #fff8e6; border: 1px solid #e0c060; border-radius: 4px; padding: 8px 12px; margin: 10px 0; }
+  .warn { background: #fdecea; border: 1px solid #d98a8a; border-radius: 4px; padding: 8px 12px; margin: 10px 0; }
+  .tag { display: inline-block; background: #2c5f8a; color: #fff; border-radius: 3px; padding: 0 6px; font-size: 9pt; margin-right: 4px; }
+  .footer { margin-top: 24px; font-size: 9pt; color: #777; border-top: 1px solid #ccc; padding-top: 6px; }
+</style>
+</head>
+<body>
+
+<h1>文明迷你 · 不同发展阶段能做什么</h1>
+<p>规则版本 <b>0.26.0</b>（rulesets/social-eras.v26.json）。整理依据：规则文档 <code>docs/CIVILIZATION_ERAS_V26.md</code>、游戏实现（src/game）与三局试玩观察（v24/v25/v26 各一局）。四阶段依次为：农业村落 → 集镇分工 → 工业城镇 → 现代社会，每阶段默认 192 季时间预算。</p>
+
+<div class="note"><b>v26 核心变化</b>：社会是文明背景，不再用建成水井/泵/轴工位来结束时代。玩家可随时 <b>主动结算</b>（erasettle）进入下一社会；每个时代锁定一部分科技；同时提供不依赖科技树的公共服务。家庭建设（井/泵/轴工位）是<b>可选优化</b>，不是过关条件。</div>
+
+<h2>〇、所有阶段通用的行动（无阶段限制）</h2>
+<table>
+<tr><th style="width:22%">类别</th><th>具体行动</th></tr>
+<tr><td>生存与采集</td><td>采集食物 / 木材 / 黏土（农业阶段食物采集 +1）；临时做工；卖货（sell / sellfood 各类商品与材料）</td></tr>
+<tr><td>农业</td><td>播种 / 管理收获小麦、大豆、亚麻；持续耕作（farmcycle，安排后季末自动收获复种）；施用堆肥（学 A3 后）</td></tr>
+<tr><td>生活安排</td><td>食品策略（自给优先 / 市场生活 / 保留储备）；每季购粮预算；饭后储备目标；委托社会配送或本人赶集；休息；营养疗养；季末交接（后辈满 18 岁后）</td></tr>
+<tr><td>商城</td><td>购物车增减商品、清空；确认整单采购（现货立即交付，订货下季到）；维修设备；委托培训雇工</td></tr>
+<tr><td>回合与社会</td><td>结束本季；<b>结算当前社会并进入下一段（erasettle:stage）</b>——按当前产能推算剩余时间并兑现本阶段回报，不要求建成水井或泵</td></tr>
+<tr><td>学习</td><td>branchlearn / 留存 / 教导（课程按阶段锁定，见下）</td></tr>
+</table>
+
+<h2>一、农业村落（第 1 阶段，开局）</h2>
+<table>
+<tr><th style="width:22%">项目</th><th>内容</th></tr>
+<tr><td>阶段定位</td><td>农社靠天吃饭。公地采食与帮工不耗科技；收获回报权重最高（foodWeight 3）。成形、流体、泵、工厂知识尚未开放。</td></tr>
+<tr><td>可学课程</td><td>农学 A0/A1/A3/A4；材料 M0（识别）/M3（食品储存）；力学 L0；组织 O0（劳动分工）；数学 Q0（基础数学）；井渠 A2</td></tr>
+<tr><td>社会服务</td><td>公地采食 +1（gatherBonus）；村社帮工收入 +1（workBonus）；食品到货 4、服务容量 3</td></tr>
+<tr><td>可建设（可选）</td><td>人工供水（学 A1 后）；家庭水井（学 A2 + 4 木 + 2 黏土）——建井提升本阶段结算产能推算，但<b>不要求</b></td></tr>
+<tr><td>回报要点</td><td>收获凭证权重大；无公共供水时旱季收成按当地气候折减</td></tr>
+</table>
+
+<h2>二、集镇分工（第 2 阶段）</h2>
+<table>
+<tr><th style="width:22%">项目</th><th>内容</th></tr>
+<tr><td>阶段定位</td><td>集镇提供公井灌溉，不必先造泵。市集扩大；密封、流体、泵和分工课程在此开放。产出权重 food 2 / craft 2。</td></tr>
+<tr><td>新开放课程</td><td>材料 M1（成形与连接）/M2（密封工艺）；力学 L1（机械传动）/L2（压力与流体）/L3（泵与供水）；组织 O1（生产工序）/O2（采购与交付）；数学 Q1（应用数学）/Q2（账目与计量）；核算 O3（集镇生产核算，凭证 +25%）</td></tr>
+<tr><td><b>新社会服务：集镇公井</b></td><td>旱季自动为家庭田补水，<b>无需泵科技、无需建泵</b>；供水保障（waterSecured）由社会承担</td></tr>
+<tr><td>其他服务</td><td>食品到货 3、服务容量 4；无采食/帮工加成</td></tr>
+<tr><td>新解锁行动</td><td>雇佣普通雇工（学 O0 后）；雇佣熟练农工 / 工匠（学 O1 后）；可制造密封件、锻打工具组、阀门、活塞泵等（对应课程+材料）</td></tr>
+<tr><td>回报要点</td><td>公井保障旱季灌溉，收成推算不再折减</td></tr>
+</table>
+
+<h2>三、工业城镇（第 3 阶段）</h2>
+<table>
+<tr><th style="width:22%">项目</th><th>内容</th></tr>
+<tr><td>阶段定位</td><td>公共采购提供稳定铁料和电工材料；公共磨坊可把小麦磨成面粉。水力、发电和工厂管理在此开放。产出权重 food 1 / craft 3（加工回报高）。</td></tr>
+<tr><td>新开放课程</td><td>力学 L4（水力动力）/L5（电磁转换基础）/L6（发电机系统）；材料 M4（电工绝缘）/M5（导线与绕组工艺）；核算 O4（工厂批次管理，凭证 +25%）</td></tr>
+<tr><td><b>新社会服务：公共磨坊</b></td><td>2 小麦 → 1 面粉，付 1 钱，每季一次，<b>无需磨粮知识或设备</b>（私人磨粮产量更高，作为保底手段）</td></tr>
+<tr><td>其他服务</td><td>公共采购：稳定铁料与电工材料市场；集镇公井仍有效（publicWell=true）；食品到货 4、服务容量 6</td></tr>
+<tr><td>新解锁行动</td><td>制造链：密封件 → 锻打工具组 → 阀门 → 活塞泵 → 传动轴；建设单工位轴加工、排水设施、水力/发电设备等</td></tr>
+<tr><td>回报要点</td><td>加工凭证权重最高；公共磨坊可低门槛转化面粉</td></tr>
+</table>
+
+<h2>四、现代社会（第 4 阶段）</h2>
+<table>
+<tr><th style="width:22%">项目</th><th>内容</th></tr>
+<tr><td>阶段定位</td><td>市政配送口粮、可付费自来水。配电课程和最终家业试炼在此开放。自来水不追溯取消前期水井的价值。产出权重 food 1 / craft 3。</td></tr>
+<tr><td>新开放课程</td><td>力学 L7（基础配电）；核算 O5（当代生产调度，凭证 +25%）</td></tr>
+<tr><td><b>新社会服务</b></td><td>市政口粮配送（现代零售提供配送，无需切换/赶集）；<b>付费自来水</b>（tap:on，每个确实缺水的季节支付 1 钱由公共服务人员补 2 水分，无需求不收费）；最终副本跨代家业试炼</td></tr>
+<tr><td>社会卡「重视教育」</td><td>首次学习少 1 时间；<b>生产回报凭证按九成计算</b>——教育投入与当期回报需要取舍</td></tr>
+<tr><td>供水变化</td><td>集镇公井停用（publicWell=false），改为自来水；接入后供水保障恢复（tap + waterSecured）</td></tr>
+<tr><td><b>最终副本</b>（仅此阶段）</td><td>进入后通过 4 种工作推进进度至 6 格：交付 4 份家庭余粮（+1）、交付 2 根传动轴（+2）、支付 10 钱委托专业施工（+1）、完成一轮数学方案验算（需 Q1+L0，+1）。副本完成并<b>主动结算</b>后即<b>旅程胜利</b>；副本只影响胜负，不是离开现代的条件。</td></tr>
+</table>
+
+<h2>需要注意的阶段锁与机制</h2>
+<div class="warn">
+<ul>
+<li><b>科技按阶段锁定</b>：每门课有 unlockEra（0-3），当前社会未开放的课程显示“当前社会尚未开放”，无法提前学（v25 的自由点科技在 v26 已回退为锁课）。</li>
+<li><b>核算课不叠乘</b>：O3 / O4 / O5 三门各自使实际生产阶段回报凭证 +25%，三门不叠乘。</li>
+<li><b>社会服务替代科技线</b>：集镇公井 → 泵线非必需；工业公共磨坊 → 磨粮知识/设备非必需；现代自来水 → 供水保障改由付费服务。</li>
+<li><b>主动结算的取舍</b>：随时可结算进入下一社会，但按<b>当前</b>产能推算剩余时间兑现——未建井/泵/轴工位时旱季收成折减，结算收益低于建设完备后。快节奏与富收益二选一。</li>
+<li><b>持续耕作预留</b>：安排持续耕作后每季预留农事时间/精力（可暂停腾出），与阶段无关，三局观察一致。</li>
+</ul>
+</div>
+
+<div class="footer">
+整理时间：2026-09-15 · 规则版本 0.26.0 · 依据 docs/CIVILIZATION_ERAS_V26.md、src/game/model/eras.ts、src/game/model/branches.ts、src/game/actions/eras.ts 及三局试玩观察（river/clay-valley/woodland）。
+</div>
+
+</body>
+</html>

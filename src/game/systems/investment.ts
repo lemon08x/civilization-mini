@@ -1,4 +1,4 @@
-import {BRANCH_NODES} from '../model/branches.js';
+import {branchNodesFor,nodeInEra,BRANCH_NODES} from '../model/branches.js';
 import { TOWER_FLOORS } from './tower.js';
 import { topicsFor } from './economy-catalog.js';
 import { level } from './economy.js';
@@ -36,6 +36,7 @@ export function operatePassive(s:GameState,rules:Ruleset,events:GameEvent[],only
 
 export function technologyVictory(s:GameState,rules:Ruleset){
   if(!rules.passiveInvestment)return undefined;
+  if(s.era){const mastered=branchNodesFor(s).filter(n=>nodeInEra(s,n.id)&&Object.values(s.economy!.branches!.learned).some(ids=>ids.includes(n.id))).map(n=>n.id);return {mastered,total:branchNodesFor(s).length,required:0,achievements:s.era.dungeon.complete?['final-family-trial']:[],requiredAchievements:1,percent:Math.floor(s.era.dungeon.progress/s.era.rules.dungeonTarget*100),targetPercent:100,achieved:s.era.closed&&s.era.dungeon.complete,won:s.status==='complete'&&s.era.dungeon.complete};}
   if(s.economy?.branches){const mastered=[...new Set(Object.values(s.economy.branches.learned).flat())];return {mastered,total:BRANCH_NODES.length,required:BRANCH_NODES.length,achievements:[],requiredAchievements:0,percent:Math.floor(mastered.length*100/BRANCH_NODES.length),targetPercent:100,achieved:false,won:false};}
   if(s.economy){const mastered=topicsFor(s).filter(t=>s.household.memberIds.some(id=>level(s,t.subject,id)>=t.level)).map(t=>t.id);const total=topicsFor(s).length,required=Math.ceil(total*rules.passiveInvestment.victoryPercent/100);const achievements=Object.entries(s.economy.operations?.projects??{}).filter(([,p])=>p?.stage==='complete').map(([id])=>id),requiredAchievements=rules.operations?.requiredAchievements??0;const achieved=rules.civilization?false:rules.tower?(s.economy.tower?.floor??0)>=TOWER_FLOORS.length:mastered.length>=required&&achievements.length>=requiredAchievements;return {mastered,total,required,achievements,requiredAchievements,percent:Math.floor(mastered.length*100/total),targetPercent:rules.passiveInvestment.victoryPercent,achieved,won:s.status==='complete'&&achieved};}
   const known=new Set(s.household.memberIds.flatMap(id=>s.persons[id].mastered));

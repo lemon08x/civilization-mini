@@ -1,3 +1,4 @@
+import {initializeEras,recordEraProduction} from './systems/eras.js';
 import {recordProducts} from './systems/industry-products.js';
 import { recordBranchWork } from './systems/branches.js';
 import { initializeLife } from './systems/life.js';
@@ -53,6 +54,7 @@ export function createInitialState(rules: Ruleset, seed: number, scenarioId: str
   if(rules.life)initializeLife(state,rules.life);
   if(rules.renewal){state.life!.renewal=structuredClone(rules.renewal);for(const p of Object.values(state.persons))if(p.vitality)p.vitality.minimumEnergy=rules.renewal.minimumEnergy;}
   if(rules.socialFood){state.socialFood={rules:structuredClone(rules.socialFood),foodPerSeason:p.foodPerTurn,price:p.foodPrice,policy:'off',budget:rules.socialFood.defaultBudget,reserve:rules.socialFood.defaultReserve,delivery:false,serviceRemaining:rules.socialFood.serviceCapacity};state.production!.market.food=Math.min(state.production!.market.food,rules.socialFood.storage);}
+  initializeEras(state,rules);
   newSeason(state, rules, []);
   return deepFreeze(state);
 }
@@ -77,7 +79,8 @@ export function transition(state: GameState, action: GameAction, rules: Ruleset)
   developFromEvents(next,events,rules);
   masterAvailable(next, activePerson(next), rules, events);
   if (rules.socialInheritance) masterAvailable(next, heir(next), rules, events);
-  if (action.type !== 'handover' && (action.type === 'end-turn' || action.type==='economy'&&action.operation==='end' || (next.life?next.life.timeRemaining===0:next.ap === 0))) finishSeason(next, rules, events);
+  recordEraProduction(next,events,[...events]);
+  if (action.type !== 'handover' && (action.type === 'end-turn' || action.type==='economy'&&(action.operation==='end'||action.operation==='erasettle') || (next.life?next.life.timeRemaining===0:next.ap === 0))) finishSeason(next, rules, events);
   recordBranchWork(next,events);
   return { state: deepFreeze(next), events: deepFreeze(events) };
 }

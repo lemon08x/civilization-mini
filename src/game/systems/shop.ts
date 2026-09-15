@@ -1,3 +1,4 @@
+import {eraCard} from './eras.js';
 import {branchHas,BRANCH_PRODUCTS} from './branches.js';
 import { topicsFor,productsFor } from './economy-catalog.js';
 import type { GameState } from '../model/state.js';
@@ -26,7 +27,7 @@ export function shopCatalog(s:GameState,r:Ruleset):ShopItem[]{
  const goods=[...SHOP_GOODS,...(e.modern?['copper','feedstock','mineral','silica','polymer','wire','coil','cable','fuel','nutrient','battery','silicon','circuit','solution']:[])].map(id=>{
    const recipe=PROCESSES.find(p=>Object.hasOwn(p.outputs,id));
    const local=(BASIC.includes(id)||e.modern&&['copper','feedstock','mineral','silica'].includes(id))||!!recipe&&(sh.produced[id]??0)>=3&&localNeeds(s,recipe.requires);
-   const base=id==='food'?r.parameters.foodPrice:salePrice(s,id)+1;
+   const base=id==='food'?(s.socialFood?.price??r.parameters.foodPrice):salePrice(s,id)+1;
    return item({id:'good-'+id,target:id,kind:'goods',name:id==='food'?'即食口粮':GOODS[id].name,category:'物资',price:base+(local?0:1),weight:1,local,effect:uses[id]??'现代制造与工程物资，库存、采购运输和到货时间照常结算',condition:BASIC.includes(id)?'开局本地供应':`本地化：实际完成3批${GOODS[id].name}，并传播${Object.entries(recipe?.requires??{}).map(([d,n])=>SUBJECT_NAMES[d as Subject]+n+'阶').join('、')}；目前${sh.produced[id]??0}/3批`,owned:false});
  });
  const devices=productsFor(s).filter(p=>!['F04','F05'].includes(p.id)&&(!e.modern||!['N10','F10','E03'].includes(p.id))).map(p=>{
@@ -39,11 +40,11 @@ export function shopCatalog(s:GameState,r:Ruleset):ShopItem[]{
  if(e.branches){
    const channels=e.branches.channels,baseGoods=['food','wheat','flour','wood','clay','iron','fiber','oil','ceramics','seal','shaft','valve','seedWheat'];
    const electrical=['copper','polymer','wire','coil','cable'];
-   return available.filter(x=>x.kind==='goods'?(baseGoods.includes(x.target)||channels.includes('electric')&&electrical.includes(x.target)):x.kind==='device'?!!BRANCH_PRODUCTS[x.target]&&(x.target!=='E01'||channels.includes('electric')&&branchHas(s,'L6')):x.kind==='asset'&&x.target==='granary').map(x=>{
+   return available.filter(x=>x.kind==='goods'?(baseGoods.includes(x.target)||(channels.includes('electric')||(s.era?.index??0)>=2)&&electrical.includes(x.target)):x.kind==='device'?!!BRANCH_PRODUCTS[x.target]&&(x.target!=='E01'||(channels.includes('electric')||(s.era?.index??0)>=2)&&branchHas(s,'L6')):x.kind==='asset'&&x.target==='granary').map(x=>{
      if(x.kind!=='goods')return {...x,condition:'整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源'};
-     const metal=x.target==='iron',stable=channels.includes('metal');
+     const metal=x.target==='iron',stable=channels.includes('metal')||(s.era?.index??0)>=2;
      return {...x,effect:x.target==='seedWheat'?'播种小麦；需基础栽培':x.effect,price:metal?(stable?GOODS.iron.price+1:GOODS.iron.price+2):x.price,
-       stock:metal?Math.min(x.stock,stable?r.branches!.metalStock:r.branches!.basicIronStock):x.stock,
+       stock:metal?Math.min(x.stock,Math.max(1,(stable?r.branches!.metalStock:r.branches!.basicIronStock)+(eraCard(s)?.metal??0))):x.stock,
        condition:electrical.includes(x.target)?'电工材料渠道；按单采购，下季补充货源':metal?(stable?'稳定金属供货，仍需付款与运输':'基础原料商少量铁料；交付传动轴后可签稳定供货'):'基础材料与半成品供应，按价采购，不要求副本等级'};
    });
  }
@@ -78,7 +79,7 @@ export function renewShop(s:GameState,r:Ruleset,events:GameEvent[]):void{
  const ready=sh.orders.filter(o=>o.due<=s.clock.absoluteTurn);sh.orders=sh.orders.filter(o=>o.due>s.clock.absoluteTurn);
  for(const o of ready)deliverShop(s,r,o,events);
  sh.transport=r.shop!.transport;
- for(const x of shopCatalog(s,r))sh.stock[x.id]=s.economy?.branches&&x.target==='iron'?(s.economy.branches.channels.includes('metal')?r.branches!.metalStock:r.branches!.basicIronStock):x.kind==='goods'?r.shop!.stock:1;
+ for(const x of shopCatalog(s,r))sh.stock[x.id]=s.economy?.branches&&x.target==='iron'?Math.max(1,((s.economy.branches.channels.includes('metal')||(s.era?.index??0)>=2)?r.branches!.metalStock:r.branches!.basicIronStock)+(eraCard(s)?.metal??0)):x.kind==='goods'?r.shop!.stock:1;
 }
 export function cartQuote(s:GameState,r:Ruleset){
  const sh=s.economy!.shop!,catalog=shopCatalog(s,r);const unavailable=Object.keys(sh.cart).filter(id=>!catalog.some(x=>x.id===id));const lines=Object.entries(sh.cart).filter(([id])=>!unavailable.includes(id)).map(([id,quantity])=>({item:catalog.find(x=>x.id===id)!,quantity}));

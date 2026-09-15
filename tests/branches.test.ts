@@ -18,12 +18,15 @@ const act=(s:ReturnType<typeof fresh>,id:string)=>transition(s,parseActionId(id=
 const offer=(s:ReturnType<typeof fresh>,id:string)=>getAvailableActions(s,rules).find(a=>a.id==='economy:'+id)!;
 const know=(s:ReturnType<typeof fresh>,...ids:string[])=>s.economy!.branches!.learned[s.household.activePersonId].push(...ids);
 
-test('19个共享节点是浅层有向无环树，三路线前置闭合',()=>{
- assert.equal(new Set(BRANCH_NODES.map(n=>n.id)).size,19);
+test('共享节点是浅层有向无环树，三路线前置闭合',()=>{
+ assert.equal(new Set(BRANCH_NODES.map(n=>n.id)).size,21);
  const depth=(id:string,path:string[]=[]):number=>{assert.ok(!path.includes(id));const n=BRANCH_NODES.find(n=>n.id===id);assert.ok(n);return 1+Math.max(0,...n.parents.map(p=>depth(p,[...path,id])));};
  assert.equal(Math.max(...BRANCH_NODES.map(n=>depth(n.id))),4);
  assert.deepEqual(BRANCH_PATHS.map(p=>p.nodes.length),[9,7,10]);
  for(const p of BRANCH_PATHS)for(const id of p.nodes)for(const parent of BRANCH_NODES.find(n=>n.id===id)!.parents)assert.ok(p.nodes.includes(parent));
+ assert.deepEqual(BRANCH_NODES.find(n=>n.id==='O2')!.parents,['O0']);
+ assert.deepEqual(BRANCH_NODES.find(n=>n.id==='A3')!.parents,['A0']);
+ assert.deepEqual(BRANCH_NODES.find(n=>n.id==='A4')!.parents,['A0']);
 });
 test('v18参数严格校验，候选不修改基础规则',()=>{
  assert.throws(()=>validateRuleset({...rules,branches:undefined}));

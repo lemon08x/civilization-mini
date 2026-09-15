@@ -1,4 +1,6 @@
-import {branchHas} from '../systems/branches.js';
+import {ERAS} from '../model/eras.js';
+import {eraCard} from '../systems/eras.js';
+import {branchHas,branchNeeds} from '../systems/branches.js';
 import { expeditionActions } from './expedition.js';
 import { modernActions } from './modern.js';
 import { usePower } from '../systems/modern.js';
@@ -49,14 +51,14 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
   }
   for(const resource of ['wood','clay','food'] as const){
     const key=resource==='wood'?'timber':resource==='food'?'wildFood':'clay',available=s.production!.stocks[key];
-    const take=Math.min(available,2+(resource==='wood'&&equipped(s,'T01')?1:0));
-    add('gather',resource,'采集'+(resource==='food'?'食物':GOODS[resource].name),'生活',{},take<1?['当地资源已耗尽']:[],`取得${take}，真实扣当地库存。`,(draft,events)=>{
+    const take=Math.min(available,2+(resource==='wood'&&equipped(s,'T01')?1:0)+(resource==='food'?(s.era?ERAS[s.era.index].gatherBonus:0):0));
+    add('gather',resource,'采集'+(resource==='food'?'食物':GOODS[resource].name),'生活',{},take<1?['当地资源已耗尽']:[],`取得${take}，真实扣当地库存。${resource==='food'&&s.era&&ERAS[s.era.index].gatherBonus?'农社公地额外提供采集。':''}`,(draft,events)=>{
       draft.production!.stocks[key]-=take;if(resource==='food')draft.household.food+=take;else changeGoods(draft,{[resource]:take},1,events,'当地采集');
       if(resource==='wood'&&equipped(draft,'T01'))consumeEquipment(draft,'T01',events);
       events.push({type:'resource-gathered',resource,amount:take,remaining:draft.production!.stocks[key],toolUsed:false});
     });
   }
-  add('work','local','临时做工','生活',{},s.production!.market.jobs<1?['本季岗位已满']:[],`1行动赚${rules.parameters.workIncome}钱，扣1当地岗位。`,(draft,events)=>{draft.production!.market.jobs--;draft.household.money+=rules.parameters.workIncome;events.push({type:'income',source:'work',amount:rules.parameters.workIncome});});
+  add('work','local','临时做工','生活',{},s.production!.market.jobs<1?['本季岗位已满']:[],`1行动赚${(rules.parameters.workIncome+(eraCard(s)?.income??0)+(s.era?ERAS[s.era.index].workBonus:0))}钱，扣1当地岗位。${s.era&&ERAS[s.era.index].workBonus?'农社帮工提高收入。':''}`,(draft,events)=>{const pay=rules.parameters.workIncome+(eraCard(s)?.income??0)+(s.era?ERAS[s.era.index].workBonus:0);draft.production!.market.jobs--;draft.household.money+=pay;events.push({type:'income',source:'work',amount:pay});});
   for(const [id,good]of Object.entries(goodsFor(s))){
     const regional=id==='iron'&&e.regional.iron||id==='fiber'&&e.regional.fiber;
     const price=good.price+(regional?0:1);
@@ -65,18 +67,22 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
       draft.economy!.industrySupply--;changeGoods(draft,{[id]:n},1,events,'市场采购');events.push({type:'economy-trade',good:id,operation:'buy',amount:n,money:price});
     });
     for(const food of [false,true])add(food?'sellfood':'sell',id,'交付'+good.name+(food?'并购粮':''),'交换',{},[
-      ...missingGoods(s,{[id]:1}),...(e.market<1?['本季订单已满']:[]),...(food&&s.production!.market.food<2?['市场不足2粮']:[]),...(food&&s.socialFood&&s.socialFood.serviceRemaining<2?['食品服务人员额度不足']:[]),...(food&&s.socialFood&&e.shop!.transport<2?['食品共享运输不足']:[]),...(food&&s.household.money+salePrice(s,id)<2*rules.parameters.foodPrice?['货款与现钱不足购粮']:[]),
-    ],`交付1件得${salePrice(s,id)}钱${food?`，同时花${2*rules.parameters.foodPrice}钱买2粮`:''}；商品、钱款、订单和粮源真实扣减。`,(draft,events)=>{
+      ...missingGoods(s,{[id]:1}),...(e.market<1?['本季订单已满']:[]),...(food&&s.production!.market.food<2?['市场不足2粮']:[]),...(food&&s.socialFood&&s.socialFood.serviceRemaining<2?['食品服务人员额度不足']:[]),...(food&&s.socialFood&&e.shop!.transport<2?['食品共享运输不足']:[]),...(food&&s.household.money+salePrice(s,id)<2*(s.socialFood?.price??rules.parameters.foodPrice)?['货款与现钱不足购粮']:[]),
+    ],`交付1件得${salePrice(s,id)}钱${food?`，同时花${2*(s.socialFood?.price??rules.parameters.foodPrice)}钱买2粮`:''}；商品、钱款、订单和粮源真实扣减。`,(draft,events)=>{
       changeGoods(draft,{[id]:1},-1,events,'订单交付');draft.economy!.market--;draft.household.money+=salePrice(s,id);
       events.push({type:'economy-trade',good:id,operation:'sell',amount:1,money:salePrice(s,id)});
-      if(food){const money=2*rules.parameters.foodPrice;draft.household.money-=money;draft.household.food+=2;draft.production!.market.food-=2;if(draft.socialFood){draft.socialFood.serviceRemaining-=2;draft.economy!.shop!.transport-=2;}events.push({type:'food-purchased',amount:2,money});}
+      if(food){const money=2*(s.socialFood?.price??rules.parameters.foodPrice);draft.household.money-=money;draft.household.food+=2;draft.production!.market.food-=2;if(draft.socialFood){draft.socialFood.serviceRemaining-=2;draft.economy!.shop!.transport-=2;}events.push({type:'food-purchased',amount:2,money});}
     });
   }
-  if(!e.shop)add('buyfood','bulk','买入4口粮','生活',{money:4*rules.parameters.foodPrice},s.production!.market.food<4?['市场不足4粮']:[],'购买普通即食口粮；仓库里的小麦、大豆和面粉也会在季末按需用于生活。',(draft,events)=>{draft.production!.market.food-=4;draft.household.food+=4;events.push({type:'food-purchased',amount:4});});
+  if(!e.shop)add('buyfood','bulk','买入4口粮','生活',{money:4*(s.socialFood?.price??rules.parameters.foodPrice)},s.production!.market.food<4?['市场不足4粮']:[],'购买普通即食口粮；仓库里的小麦、大豆和面粉也会在季末按需用于生活。',(draft,events)=>{draft.production!.market.food-=4;draft.household.food+=4;events.push({type:'food-purchased',amount:4});});
   for(const crop of Object.keys(CROPS) as Crop[])add('farm',crop,(e.field.crop?'管理／收获':'播种')+CROPS[crop].name,'农业',{ap:e.shop&&!e.field.crop&&equipped(s,'U02')&&e.shop.seededTurn!==s.clock.absoluteTurn?0:1},[
     ...(e.field.crop&&e.field.crop!==crop?['田里种植的是其他作物']:[]),...farmBlocker(s,crop),
   ],'空田播种；生长期缺水时灌溉；成熟后收获。只有一块家庭田，个人与雇工共用。',(draft,events)=>farmWork(draft,crop,events));
-  add('fertilize','field','施用堆肥','农业',{},[...requirements(s,{agronomy:3}),...missingGoods(s,{compost:1}),...(e.field.composted||e.field.fertility>=3?['本茬已施肥或肥力充足']:[])],'消耗1堆肥，土壤肥力+1，上限3；不直接创造粮食。',(draft,events)=>{changeGoods(draft,{compost:1},-1,events,'施肥');draft.economy!.field.fertility++;draft.economy!.field.composted=true;recordEvidence(draft,'agronomy',events,'堆肥施用');});
+  for(const crop of Object.keys(CROPS) as Crop[])add('farmcycle',crop,'持续耕作：'+CROPS[crop].name,'农业',{ap:0},[
+    ...(e.ongoing?.farm===crop?['已经安排此作物']:[]) ,...(e.branches?(crop==='wheat'?branchNeeds(s,['A0']):branchNeeds(s,['A4'])):requirements(s,{agronomy:CROPS[crop].level})),
+  ],'安排后季末自动收获并按同一作物补种，直到暂停。成熟与播种仍扣一次农事时间或农工工资；缺种子时停在空田。井/泵继续负责缺水季灌溉。',(d)=>{d.economy!.ongoing={farm:crop};});
+  add('farmcycle','off','暂停持续耕作','农业',{ap:0},!e.ongoing?.farm?['没有持续耕作']:[],'停止自动收获和复种；田里现有作物仍可手动管理。',(d)=>{d.economy!.ongoing={farm:null};});
+  add('fertilize','field','施用堆肥','农业',{},[...(e.branches?branchNeeds(s,['A3']):requirements(s,{agronomy:3})),...missingGoods(s,{compost:1}),...(e.field.composted||e.field.fertility>=3?['本茬已施肥或肥力充足']:[])],'消耗1堆肥，土壤肥力+1，上限3；不直接创造粮食。',(draft,events)=>{changeGoods(draft,{compost:1},-1,events,'施肥');draft.economy!.field.fertility++;draft.economy!.field.composted=true;recordEvidence(draft,'agronomy',events,'堆肥施用');});
   for(const product of productsFor(s)){
     add('build',product.id,'制造并安装'+product.name,'产品',{},[...requirements(s,product.requires),...missingGoods(s,product.inputs),...(equipped(s,product.id)?['已有可用设备']:[]),...(deviceReserved(s,product.id)?['设备在制、维修或待交付']:[])],
       `${e.shop&&product.id==='U02'?'每季一次本人播种免行动，仍扣种子和耐用度':product.effect} 消耗${Object.entries(product.inputs).map(([id,n])=>n+GOODS[id].name).join('、')}；安装即具备能力，可传给后代。`,(draft,events)=>{
@@ -96,7 +102,7 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
   const org=organizationLevel(s),capacity=org>=5?4:org>=3?3:org>=2?2:1;
   for(const kind of Object.keys(WORKER_NAMES) as WorkerKind[]){
     const worker=e.workers[kind],required=kind==='laborer'?1:kind==='manager'?5:2;
-    add('hire',kind,'雇佣'+WORKER_NAMES[kind],'雇佣',{money:p.hireCost},[...(org<required?[`需生产组织第${required}阶或家族记录`]:[]),...(worker?['已雇有此岗位']:[]),...(Object.keys(e.workers).length>=capacity?['达到当前组织人数上限']:[]),...(e.recruitment<1?['本季招募机会用完']:[])],
+    add('hire',kind,'雇佣'+WORKER_NAMES[kind],'雇佣',{money:p.hireCost},[...(e.branches?(kind==='laborer'?branchNeeds(s,['O0']):kind==='manager'?['管理进阶分支尚未接入']:branchNeeds(s,['O1'])):org<required?[ `需生产组织第${required}阶或家族记录`]:[]),...(worker?['已雇有此岗位']:[]),...(Object.keys(e.workers).length>=capacity?['达到当前组织人数上限']:[]),...(e.recruitment<1?['本季招募机会用完']:[])],
       `招募费${p.hireCost}钱，之后按实际工作季支付工资；无任务、缺料、设备占用时待命不收费。熟练人员可使用其专业工艺，不赠送本人技能。`,(draft,events)=>{
         if(draft.economy!.industry){const r=draft.economy!.industry!.rules;draft.economy!.industry!.workers[kind]={timeRemaining:r.workerTime,energy:r.workerEnergy};}
         draft.economy!.recruitment--;draft.economy!.workers[kind]={kind,experience:kind==='laborer'?0:4,job:'rest',active:false,project:null};

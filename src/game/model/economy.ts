@@ -12,9 +12,11 @@ export type WorkerKind = 'laborer'|'farmer'|'artisan'|'manager';
 export type Work = 'polymer'|'wire'|'coil'|'cable'|'fuel'|'nutrient'|'battery'|'silicon'|'circuit'|'controller'|'composite'|'recycle'|'rest'|Crop|'ceramics'|'iron'|'fiber'|'brick'|'rope'|'oil'|'seal'|'shaft'|'valve'|'spring'|'solution'|'thresh'|'mill'|'compost';
 export interface Worker {kind:WorkerKind;experience:number;job:Work;active:boolean;project:{good:string;amount:number;started:number}|null;}
 export interface Field {crop:Crop|null;planted:number;moisture:number;growth:number;stress:number;fertility:number;lastCrop:Crop|null;tended:number;composted:boolean;bonus:number;duration:number;}
+export interface OngoingWork {farm:Crop|null;}
 export interface EconomyState {
   branches?:BranchState;
   industry?:IndustryState;
+  ongoing?:OngoingWork;
   lineage?:true;
   expeditions?:ExpeditionState;
   modern?: {power:number;stored:number;enabled:string[];operated:Record<string,number>;services:Record<string,number>;cropBonus:number};

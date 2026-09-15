@@ -1,3 +1,4 @@
+import {eraCard} from './eras.js';
 import { ancestorKnows } from './ancestry.js';
 import { activePerson, blankPerson, heir, project, seedValue, type GameState, type Person } from '../model/state.js';
 import type { GameEvent } from '../model/events.js';
@@ -34,11 +35,11 @@ export function lifeView(p:Person,r?:LifeRules) {
 export function lifeEvent(events:GameEvent[],personId:string,operation:string,detail:string):void {events.push({type:'life',personId,operation,detail});}
 const physical=new Set(['farm','gather','work','build','process','finish','fertilize','nutrient','reclaim','expeditionship']);
 const learning=new Set(['study','research','tuition','branchlearn']);
-const management=new Set(['channel','hire','checkout','assign','resumeplans','charter','foodplan','farmplan','productionplan','supplyplan','salesplan','careplan','mineplan','steamplan']);
+const management=new Set(['channel','hire','checkout','assign','resumeplans','charter','foodplan','farmplan','farmcycle','productionplan','supplyplan','salesplan','careplan','mineplan','steamplan']);
 // Cost categories describe personal involvement, not the number of UI clicks.
 export function lifeCost(s:GameState,id:string,oldAp:number):{time:number;energy:number} {
   const [,op,target]=id.split(':');
-  if(id==='handover'||op==='end'||op==='retire')return {time:0,energy:0};
+  if(id==='handover'||op==='end'||op==='erasettle'||op==='retire')return {time:0,energy:0};
   if(op==='rest')return {time:4,energy:0};
   if(op==='care')return {time:s.life?.renewal?.careTime??4,energy:s.life?.renewal?.careEnergy??1};
   if(op==='pause'||op==='assign'||target==='off'||oldAp===0&&op!=='farm'&&op!=='process')return {time:0,energy:0};
@@ -48,6 +49,8 @@ export function lifeCost(s:GameState,id:string,oldAp:number):{time:number;energy
   let energy=physical.has(op)?4:learning.has(op)||op==='teach'||op==='branchteach'?2:1;
   if(s.life?.renewal&&op==='farm'){time=s.life.renewal.farmTime;energy=s.life.renewal.farmEnergy;}
   const talent=activePerson(s).vitality!.talent;
+  if(s.era&&learning.has(op))time=Math.max(1,time-(eraCard(s)?.learning??0));
+  if(s.era&&op==='process'&&s.economy!.branches!.learned[s.household.activePersonId]?.includes('Q1'))energy=Math.max(0,energy-1);
   if(talent==='strong'&&physical.has(op))energy--;
   if(s.economy?.industry&&op==='branchlearn'&&s.economy.branches!.archives.includes(target))time=Math.max(1,time-s.economy.industry.rules.archiveDiscount);
   if(talent==='scholar'&&learning.has(op))time=Math.max(1,time-1);

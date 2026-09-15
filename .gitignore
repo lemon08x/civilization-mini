@@ -10,3 +10,7 @@ artifacts/
 .cache/
 coverage/
 *.tsbuildinfo
+
+# pip temp (installs blocked by system temp permissions)
+.pip-tmp/
+

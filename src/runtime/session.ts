@@ -33,7 +33,8 @@ export async function submitCommand(session: Session, input: unknown): Promise<{
   }
   const revision = session.record.entries.length;
   if (command.expectedRevision !== revision) throw new Error(`过期命令：当前 revision=${revision}`);
-  if (revision >= 1500) throw new Error('实验已达到 1500 条行动的运行上限');
+  const limit=session.state.era?session.state.era.rules.seasons*4*(session.state.life!.rules.timePerSeason+5)+100:1500;
+  if (revision >= limit) throw new Error(`实验已达到 ${limit} 条行动的运行上限`);
   const result = transition(session.state, parseActionId(command.actionId), session.record.manifest.ruleset);
   const stateHash = await fingerprint(result.state);
   const payload = { revision: revision + 1, command, events: result.events, stateHash, previousHash: session.record.entries.at(-1)?.hash ?? await fingerprint(session.record.manifest) };
@@ -44,6 +45,6 @@ export async function submitCommand(session: Session, input: unknown): Promise<{
   return { session: deepFreeze({ state: result.state, record }), duplicate: false, revision: entry.revision };
 }
 export function observeSession(session: Session) {
-  return { runId: session.record.manifest.runId, revision: session.record.entries.length, game: getObservation(session.state, session.record.manifest.ruleset), recentEvents: structuredClone(session.record.entries.slice(-3).flatMap(entry => entry.events)) };
+  return { runId: session.record.manifest.runId, revision: session.record.entries.length, game: getObservation(session.state, session.record.manifest.ruleset), recentEvents: structuredClone(session.record.entries.slice(-3).flatMap(entry => entry.events)), ...(session.state.era?{eraSettlements:structuredClone(session.record.entries.flatMap(entry=>entry.events).filter(e=>e.type==='era').filter(e=>e.operation==='settled'))}:{}) };
 }
 export type SessionObservation = ReturnType<typeof observeSession>;

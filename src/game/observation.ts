@@ -1,3 +1,4 @@
+import {eraView} from './systems/eras.js';
 import {socialFoodQuote} from './systems/social-food.js';
 import {personalBudget} from './systems/industry.js';
 import { lifeView } from './systems/life.js';
@@ -26,6 +27,7 @@ export function getObservation(state: GameState, rules: Ruleset) {
     ...(state.productNetwork ? {productNetwork:productNetworkView(state,rules)} : {}),
     ...(state.economy?{economy:economyView(state,rules)}:{}),
     ...(state.socialFood?{socialFood:socialFoodQuote(state)}:{}),
+    ...(state.era?{era:eraView(state,rules)}:{}),
     rulesVersion: rules.rulesVersion,
     victory: technologyVictory(state,rules),
     status: state.status,

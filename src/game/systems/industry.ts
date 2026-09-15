@@ -1,13 +1,15 @@
+import {publicWaterFee} from './eras.js';
 import {foodLabor} from './social-food.js';
 import {INDUSTRY_PRODUCTS,SYSTEMS,type SystemDefinition,type SystemInstance,type OperatorId} from '../model/industry.js';
 import {activePerson,type GameState} from '../model/state.js';
 import type {GameEvent} from '../model/events.js';
 import {knowledgeNeeds,productName} from './industry-products.js';
-import {changeGoods,consumeEquipment,equipped,missingGoods} from './economy.js';
+import {changeGoods,consumeEquipment,equipped,farmCycleLabor,missingGoods} from './economy.js';
 import {servicePending} from './shop.js';
 
 export function systemDefinitions(s:GameState):SystemDefinition[]{
- return SYSTEMS.map(def=>def.id==='hand'&&s.life?.renewal?{...def,time:s.life.renewal.farmTime,energy:s.life.renewal.farmEnergy,description:`按需人工提水；${s.life.renewal.farmTime}时间/${s.life.renewal.farmEnergy}精力，1公共水补2水分。`}:def);
+ const definitions:SystemDefinition[]=s.era?[{id:'well',name:'家庭水井',knowledge:['A2'],products:[],systems:[],time:2,energy:1,qualification:'field',description:'每季恢复1份可提取地下水；缺水时耗2时间/1精力提水灌溉，不依赖公共水。已建井跨社会保留。'},...SYSTEMS]:SYSTEMS;
+ return definitions.map(def=>def.id==='hand'&&s.life?.renewal?{...def,time:s.life.renewal.farmTime,energy:s.life.renewal.farmEnergy,description:`按需人工提水；${s.life.renewal.farmTime}时间/${s.life.renewal.farmEnergy}精力，1公共水补2水分。`}:def);
 }
 export function industryEvent(events:GameEvent[],operation:string,target:string,actor:string,detail:string,time=0,energy=0,money=0):void{events.push({type:'industry',operation,target,actor,detail,time,energy,money});}
 export function installedIn(s:GameState,equipment:string):string|undefined{
@@ -15,10 +17,12 @@ export function installedIn(s:GameState,equipment:string):string|undefined{
 }
 export function systemUnlockNeeds(s:GameState,def:SystemDefinition):string[]{
  const x=s.economy!.industry!;
+ if(def.id==='well'&&x.instances.well)return []; // Retained construction includes the old well design.
  return [...knowledgeNeeds(s,def.knowledge),...def.products.filter(id=>!x.products[id]).map(id=>'需验证'+productName(id)),...def.systems.filter(id=>!x.commissioned.includes(id)).map(id=>'需调试前置系统'+id)];
 }
 export function systemDemand(s:GameState,def:SystemDefinition):boolean{
  if(def.id==='shaft')return true;
+ if(publicWaterFee(s))return false;
  const f=s.economy!.field;return !!f.crop&&f.growth<f.duration&&s.location.rain+f.moisture<2;
 }
 export function operatorNeeds(s:GameState,def:SystemDefinition,operator:OperatorId|null):string[]{
@@ -42,7 +46,8 @@ export function systemLabor(s:GameState,operator:OperatorId='self',exclude?:stri
 }
 export function reservedLabor(s:GameState,operator:OperatorId='self',exclude?:string){
  const systems=systemLabor(s,operator,exclude),food=operator==='self'?foodLabor(s):{time:0,energy:0};
- return {time:systems.time+food.time,energy:systems.energy+food.energy};
+ const farm=operator==='self'?farmCycleLabor(s):{time:0,energy:0};
+ return {time:systems.time+food.time+farm.time,energy:systems.energy+food.energy+farm.energy};
 }
 export function assignmentNeeds(s:GameState,def:SystemDefinition,operator:OperatorId):string[]{
  const budget=operatorBudget(s,operator),reserved=reservedLabor(s,operator,def.id),needs=operatorNeeds(s,def,operator);
@@ -54,7 +59,7 @@ export function assignmentNeeds(s:GameState,def:SystemDefinition,operator:Operat
 export function systemInputs(def:SystemDefinition):Record<string,number>{return def.id==='shaft'?{wood:2,iron:1}:def.id==='pump'?{wood:1}:{};}
 export function physicalNeeds(s:GameState,def:SystemDefinition):string[]{
  const e=s.economy!;
- return [...missingGoods(s,systemInputs(def)),...(def.id!=='shaft'&&s.location.water<1?['公共水不足']:[]),
+ return [...missingGoods(s,systemInputs(def)),...(def.id==='well'?(s.era!.groundwater<1?['本季可提取地下水已用完']:[]):def.id!=='shaft'&&s.location.water<1?['公共水不足']:[]),
   ...(def.equipment&&!equipped(s,def.equipment)?['设备不可用或维修中']:[]),
   ...(def.equipment&&e.equipmentUsed[def.equipment]===s.clock.absoluteTurn?['设备本季已占用']:[]),
   ...(def.id==='shaft'&&!e.industry!.products.shaft?.protocol?['缺少轴制造规程，外购检验不能代替试制']:[])];
@@ -89,7 +94,7 @@ export function settleIndustry(s:GameState,events:GameEvent[]):void{
    changeGoods(s,{shaft:2},1,events,'系统加工产出');
    events.push({type:'economy-process',recipe:'shaft',actor:'系统：'+operator,stage:'complete',factor:1});
   }else{
-   s.location.water--;s.economy!.field.moisture+=2;s.economy!.field.tended=s.clock.absoluteTurn;
+   if(def.id==='well')s.era!.groundwater--;else s.location.water--;s.economy!.field.moisture+=2;s.economy!.field.tended=s.clock.absoluteTurn;
    events.push({type:'economy-farm',operation:def.id==='pump'?'pump':'tend',crop:s.economy!.field.crop!,actor:'系统：'+operator,amount:1});
   }
   industryEvent(events,'worked',def.id,operator,def.name+'完成；实际扣费',def.time,def.energy,pay);
@@ -103,7 +108,7 @@ export function renewIndustry(s:GameState):void{
 }
 export function personalBudget(s:GameState){
  const reserved=s.economy?.industry?reservedLabor(s):{time:0,energy:0};
- return {spentTime:s.life!.rules.timePerSeason-s.life!.timeRemaining,reservedTime:reserved.time,reservedEnergy:reserved.energy,freeTime:Math.max(0,s.life!.timeRemaining-reserved.time),freeEnergy:Math.max(0,activePerson(s).vitality!.energy-reserved.energy),tasks:systemDefinitions(s).filter(def=>{const i=s.economy?.industry?.instances[def.id];return i?.enabled&&i.commissioned&&i.operator==='self'&&systemDemand(s,def);}).map(def=>({id:String(def.id),name:def.name,time:def.time,energy:def.energy})).concat(foodLabor(s).time?[{id:'food-shopping',name:'生活食品赶集',...foodLabor(s)}]:[])};
+ return {spentTime:s.life!.rules.timePerSeason-s.life!.timeRemaining,reservedTime:reserved.time,reservedEnergy:reserved.energy,freeTime:Math.max(0,s.life!.timeRemaining-reserved.time),freeEnergy:Math.max(0,activePerson(s).vitality!.energy-reserved.energy),tasks:systemDefinitions(s).filter(def=>{const i=s.economy?.industry?.instances[def.id];return i?.enabled&&i.commissioned&&i.operator==='self'&&systemDemand(s,def);}).map(def=>({id:String(def.id),name:def.name,time:def.time,energy:def.energy})).concat(foodLabor(s).time?[{id:'food-shopping',name:'生活食品赶集',...foodLabor(s)}]:[]).concat(farmCycleLabor(s).time?[{id:'farm-cycle',name:'持续耕作',...farmCycleLabor(s)}]:[])};
 }
 export function industryView(s:GameState){
  const x=s.economy!.industry!;

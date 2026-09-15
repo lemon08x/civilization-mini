@@ -35,6 +35,7 @@ export interface GameState {
   clock: Clock;
   status: GameStatus;
   ap: number;
+  era?: import('./eras.js').EraState;
   socialFood?: import('./social-food.js').SocialFoodState;
   life?: {renewal?: import('./renewal.js').RenewalRules; rules: LifeRules; timeRemaining: number; pendingRetirement?: boolean};
   world: { era: string; technologies: string[] };
