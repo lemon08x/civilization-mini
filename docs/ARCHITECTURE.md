@@ -41,10 +41,11 @@ src/
   game/
     model/         状态、行动、事件类型
     actions/       行动条件、成本及对应效果
-    systems/       学习、生产、项目、时间、传承
+    systems/       学习、生产、项目、时间、传承；库存、知识、农事、加工、劳动为独立出口
     ruleset.ts     完整配置校验与候选解析
     observation.ts 玩家观察投影
     game.ts        初始状态、合法行动、唯一转换入口
+  present/         公开观察的 AI 摘要与分区，不参与结算
   runtime/         会话、记录、重放、文件保存
   agents/
     contract.ts    代理接口
@@ -52,6 +53,7 @@ src/
     llm/           JSON 决策校验与可注入模型调用
   research/        调度、事件统计、配对比较
 apps/
+  host/            board 与 CLI 共用的构建身份和规则加载
   cli/             文件与实验命令入口
   board/           浏览器桌游界面及本地静态服务
 rulesets/           冻结基线

@@ -4,7 +4,7 @@
 
 > 对应 [PR #1](https://github.com/lemon08x/civilization-mini/pull/1)；分支 `codex/architecture-cohesion-plan`；基线为 v0.27.0 `main` 提交 `7870c62`。
 > 本文在第一笔提交中建立并冻结本 PR 的范围与原子提交。当前分层由 [ARCHITECTURE.md](ARCHITECTURE.md) 维护；本文不是实施完成证明。
-> 状态：计划，PR 进行中尚未合入。日期：2026-09-16。
+> 状态：A–D 已在本 PR 落地，待验收。阶段 E 仅完成同请求观察复用，未做会话缓存。日期：2026-09-16。
 
 ## 1. 基线、目标与交付边界
 
