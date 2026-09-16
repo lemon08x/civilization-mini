@@ -14,21 +14,26 @@ npm run lab -- new --run ai-demo --scenario river --format text
 
 ## 读取与推进（玩家执行）
 
-直接读取 UTF-8 文件 `artifacts/runs/ai-demo/observation.md`。文件包含当前 revision、可用行动及报价、不可用原因、完整可见状态和最近事件。建档、导入和成功行动后自动更新；它只是观察副本，编辑它不改变游戏。
-
-根据最新观察选择一个可用行动，替换下面的占位符：
+`scripts/player.mjs` 默认输出精简观察。建档可用 `lab --format compact`，成功 `act` 会返回最新摘要并更新 `artifacts/runs/ai-demo/observation.md`。根据最新摘要选择一个可用行动，不必再机械读取完整观察或调用 observe：
 
 ```text
-node scripts/player.mjs act --run ai-demo --revision <最新revision> --action <可用行动ID> --reason "本次选择的原因" --format text
+node scripts/player.mjs act --run ai-demo --revision <最新revision> --action <可用行动ID> --reason "本次选择的原因"
 ```
 
-执行后读取新观察，再决定下一步。不要预排动作串或直接改存档。失败、冲突、文件更新警告或怀疑观察过期时，重新获取权威观察：
+材料成本、行动后劳动预留和紧急阻碍保留在摘要中。科技、产品、系统、全部不可用原因按需取分区：
+
+```text
+node scripts/player.mjs observe --run ai-demo --section branches
+```
+
+失败、冲突、文件更新警告或怀疑观察过期时，重新获取权威观察：
 
 ```powershell
+node scripts/player.mjs observe --run ai-demo
 node scripts/player.mjs observe --run ai-demo --format text
 ```
 
-该命令只读存档，不写观察文件；可将成功输出另存为文本。不要用失败输出覆盖已有观察。没有 `--format text` 时仍输出原有 JSON 格式。`metrics` 仍输出 JSON。
+`observe` 只读存档。player 入口未传 `--format` 时为 compact；`lab` 默认仍为 JSON。`--format json` / `--format text` 保持原行为。`metrics` 仍输出 JSON。
 
 ## 观察边界与存档
 

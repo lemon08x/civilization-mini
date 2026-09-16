@@ -30,13 +30,13 @@ npm run lab -- new --run pt-20260913-150000-a7c2-g01 --scenario river
 node scripts/player.mjs observe --run pt-20260913-150000-a7c2-g01
 ```
 
-从返回的 `game.actions` 中选择当前可用行动。每次由当前模型解释当前目标，提交一个行动，用真实的 `revision` 和 `actionId` 替换占位符：
+player 入口默认是精简观察。从可用行动中选择一个，提交时用真实的 `revision` 和 `actionId` 替换占位符：
 
 ```text
 node scripts/player.mjs act --run <run ID> --revision <最新 revision> --action <当前 actionId> --reason "当前观察下选择此行动的简短理由"
 ```
 
-`act` 已返回新观察，可以据此做下一次决策，不必机械地再调用一次 `observe`。发生错误或版本冲突时重新观察，不盲目重试动作串。休息、疗养与换代也通过观察中提供的行动提交；依据 `game.life` 中的时间、精力和健康安排生活，不把兼容字段 `ap` 当作新版预算。四季一年，寿命潜力不可见，不得读取原档预测死亡。
+`act` 已返回最新精简观察，可以据此做下一次决策，不必机械地再调用一次 `observe`。科技树、产品、系统或全部不可用原因用 `--section branches|industry|systems|actions-disabled`。发生错误或版本冲突时重新观察，不盲目重试动作串。完整观察使用 `--format text`。休息、疗养与换代也通过观察中提供的行动提交；依据 `game.life` 中的时间、精力和健康安排生活，不把兼容字段 `ap` 当作新版预算。四季一年，寿命潜力不可见，不得读取原档预测死亡。
 
 只根据公开玩法说明与观察决策，不读游戏内部状态或实验策略。操作命令可以通过终端工具执行，但不能放入自动选行动的程序。用户明确要求脚本或混合模式时另建批次，写明授权、自动化范围和实际局数，不并入亲自试玩结果。
 

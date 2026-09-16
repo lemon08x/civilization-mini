@@ -20,7 +20,7 @@ npm start
 打开 http://127.0.0.1:4317 选择入口：
 
 - **人类玩家**：`/play`，通过聚落地点、资源卡、田地成长、家人状态与行动按钮推进。效果和前置条件可展开查看，无法执行的行动显示原因。
-- **AI 文本玩家**：`/ai` 查看接入说明，或直接阅读 [AI_PLAYER.md](docs/AI_PLAYER.md)。建档和行动后生成 `artifacts/runs/<run ID>/observation.md`；模型读取文件，再通过 `scripts/player.mjs act` 提交行动。支持 `--format text`，默认 JSON 接口保留。
+- **AI 文本玩家**：`/ai` 查看接入说明，或直接阅读 [AI_PLAYER.md](docs/AI_PLAYER.md)。`scripts/player.mjs` 默认精简观察；成功 `act` 返回最新摘要，不必再机械 observe。完整 JSON/text 仍可用。
 
 两端共用规则结算，分别存档，不自动同步。入口与展示调整不改变规则或迁移历史存档。
 
