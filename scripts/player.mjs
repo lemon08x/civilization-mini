@@ -9,10 +9,12 @@ try {
   const options = {};
   for (let i = 0; i < args.length; i += 2) {
     const key = args[i];
-    if (!['--run', '--revision', '--action', '--command-id', '--reason', '--format'].includes(key) || args[i+1] === undefined || Object.hasOwn(options,key)) throw new Error('无效参数');
+    if (!['--run', '--revision', '--action', '--command-id', '--reason', '--format', '--section'].includes(key) || args[i+1] === undefined || Object.hasOwn(options,key)) throw new Error('无效参数');
     options[key] = args[i+1];
   }
   if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}$/.test(options['--run'] ?? '')) throw new Error('无效 run ID');
+  const forwarded = [...args];
+  if ((command === 'observe' || command === 'act') && options['--format'] === undefined && options['--section'] === undefined) forwarded.push('--format', 'compact');
   const run = resolve(root, 'artifacts/runs', options['--run']);
   const child = spawnSync(process.execPath, [
     '--permission',
@@ -21,7 +23,7 @@ try {
     `--allow-fs-read=${resolve(root,'package.json')}`,
     `--allow-fs-read=${resolve(root,'artifacts/runs')}`,
     ...(command === 'act' ? [`--allow-fs-write=${run}`] : []),
-    resolve(root,'dist/apps/cli/main.js'), command, ...args,
+    resolve(root,'dist/apps/cli/main.js'), command, ...forwarded,
   ], {cwd:root, stdio:'inherit', shell:false, windowsHide:true, env:{...process.env,NODE_OPTIONS:''}});
   if(child.error) throw child.error;
   process.exitCode=child.status ?? 1;
