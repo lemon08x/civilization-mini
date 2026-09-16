@@ -1,7 +1,7 @@
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, resolve, sep } from 'node:path';
-import { loadCurrentContext, projectRoot } from '../cli/context.js';
+import { loadCurrentContext, projectRoot } from '../host/context.js';
 import { loadResearchIndex, parameterRows, readReviewFile } from './review-data.js';
 import { fingerprint } from '../../src/runtime/records.js';
 
