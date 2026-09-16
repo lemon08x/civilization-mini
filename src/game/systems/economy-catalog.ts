@@ -1,3 +1,5 @@
+import {ELECTRIC_KNOWLEDGE} from '../model/electric.js';
+import {ELECTRIC_GOODS,ELECTRIC_PRODUCTS,ELECTRIC_PROCESSES} from './electric-catalog.js';
 import {BRANCH_PRODUCTS,BRANCH_PROCESSES} from '../model/branches.js';
 import { MODERN_TOPICS,MODERN_GOODS,MODERN_PRODUCTS,MODERN_PROCESSES } from './modern-catalog.js';
 import type { GameState } from '../model/state.js';
@@ -70,11 +72,11 @@ export const WORKER_NAMES:Record<WorkerKind,string>={laborer:'普通雇工',farm
 export const JOB_NAMES={brick:'耐火砖生产',rope:'绳索生产',oil:'榨油',seal:'密封件生产',shaft:'传动轴生产',valve:'阀门生产',spring:'弹簧生产',solution:'溶液生产',thresh:'脱粒',mill:'磨粮',compost:'堆肥',rest:'暂停',wheat:'小麦种植',soy:'大豆种植',flax:'亚麻种植',ceramics:'陶质构件生产',iron:'冶铁',fiber:'纤维加工'};
 
 export const ALL_TOPICS=[...TOPICS,...MODERN_TOPICS];
-export const ALL_GOODS={...GOODS,...MODERN_GOODS};
-export const ALL_PRODUCTS=[...PRODUCTS,...MODERN_PRODUCTS];
-export const ALL_PROCESSES=[...PROCESSES,...MODERN_PROCESSES];
+export const ALL_GOODS:Record<string,{name:string;price:number;food:number}>={...GOODS,...MODERN_GOODS,...ELECTRIC_GOODS};
+export const ALL_PRODUCTS=[...PRODUCTS,...MODERN_PRODUCTS,...ELECTRIC_PRODUCTS];
+export const ALL_PROCESSES=[...PROCESSES,...MODERN_PROCESSES,...ELECTRIC_PROCESSES];
 export const ALL_JOB_NAMES:Record<string,string>={...JOB_NAMES,...Object.fromEntries(MODERN_PROCESSES.map(p=>[p.id,p.name]))};
 export const topicsFor=(s:GameState)=>s.economy?.branches?[]:s.economy?.modern?ALL_TOPICS:TOPICS;
-export const productsFor=(s:GameState)=>s.economy?.branches?ALL_PRODUCTS.filter(p=>BRANCH_PRODUCTS[p.id]).map(p=>({...p,requires:{}})):s.economy?.modern?ALL_PRODUCTS:PRODUCTS;
-export const processesFor=(s:GameState)=>s.economy?.branches?ALL_PROCESSES.filter(p=>BRANCH_PROCESSES[p.id]).map(p=>({...p,requires:{}})):s.economy?.modern?ALL_PROCESSES:PROCESSES;
-export const goodsFor=(s:GameState)=>s.economy?.modern?ALL_GOODS:GOODS;
+export const productsFor=(s:GameState)=>s.economy?.branches?ALL_PRODUCTS.filter(p=>BRANCH_PRODUCTS[p.id]||s.electric&&ELECTRIC_KNOWLEDGE[p.id]).map(p=>({...p,requires:{},...(s.electric&&p.id==='E01'?{effect:`每季手动供能最多一次，消耗1公共水和1耐用；旱季发${s.electric.rules.dryHydroPower}电，其余季发6电。`}:{}),...(s.electric&&p.id==='E04'?{effect:'启用后季末存入最多6份余电，充电扣1耐用；次季手动供能时放电，每季最多一次。不自动发电或放电。'}:{}),...(s.electric&&p.id==='LAMP'?{effect:`手动供能时本季首次点灯耗${s.electric.rules.servicePower}电、1耐用，增加${s.electric.rules.lampTime}可用时间。可夜间学习，仍需精力。`}:{}),...(s.electric&&p.id==='TELEGRAPH'?{effect:`手动供能时每季耗${s.electric.rules.servicePower}电、1耐用，本季新订货即时交付；库存、运输、价款照常，不加速维修。`}:{})})):s.economy?.modern?[...PRODUCTS,...MODERN_PRODUCTS]:PRODUCTS;
+export const processesFor=(s:GameState)=>s.economy?.branches?ALL_PROCESSES.filter(p=>BRANCH_PROCESSES[p.id]||s.electric&&ELECTRIC_KNOWLEDGE[p.id]).map(p=>({...p,requires:{}})):s.economy?.modern?[...PROCESSES,...MODERN_PROCESSES]:PROCESSES;
+export const goodsFor=(s:GameState)=>s.electric?ALL_GOODS:s.economy?.modern?{...GOODS,...MODERN_GOODS}:GOODS;

@@ -1,3 +1,4 @@
+import {ELECTRIC_EPIGRAPHS} from '../model/electric.js';
 import {branchNodesFor,nodeInEra} from '../model/branches.js';
 import {ancestorKnows} from '../systems/ancestry.js';
 import {branchHas,branchNeeds,branchName} from '../systems/branches.js';
@@ -13,7 +14,7 @@ export function branchActions(s:GameState,r:Ruleset):ActionDefinition[]{
     const archived=b.archives.includes(node.id),sample=s.economy!.industry||archived?{}:node.sample;
     out.push(defineAction(s,`economy:branchlearn:${node.id}`,'学习：'+node.name,'分支',{},[
       ...unavailable,...branchNeeds(s,node.parents),...(branchHas(s,node.id)?['已经掌握']:[]),...missingGoods(s,sample),
-    ],`${s.economy!.industry?'学科只检查前置知识；部分课程要社会发展到相应阶段才开放。学习不消耗样品。':node.benefit+'。'}${s.economy!.industry?(archived?'家学减少学习时间。':''):archived?'按家学学习，无需重复消耗实验样品':'通过地方入门指导与实物练习学习；样品：'+(Object.entries(sample).map(([k,n])=>`${k}×${n}`).join('、')||'无')}。${ancestorKnows(s,node.id)?'前代已学：仍须先学前置，本节点学习成本大幅降低。':s.life?.renewal?'本代首次探索；学会后直系后代学习成本大幅降低。':''}天赋影响时间精力报价。`,(d,ev)=>{
+    ],`${s.economy!.industry?'学科只检查前置知识；部分课程要社会发展到相应阶段才开放。学习不消耗样品。':node.benefit+'。'}${s.economy!.industry?(archived?'家学减少学习时间。':''):archived?'按家学学习，无需重复消耗实验样品':'通过地方入门指导与实物练习学习；样品：'+(Object.entries(sample).map(([k,n])=>`${k}×${n}`).join('、')||'无')}。${ancestorKnows(s,node.id)?'前代已学：仍须先学前置，本节点学习成本大幅降低。':s.life?.renewal?'本代首次探索；学会后直系后代学习成本大幅降低。':''}天赋影响时间精力报价。${s.electric&&ELECTRIC_EPIGRAPHS[node.id]?ELECTRIC_EPIGRAPHS[node.id]:''}`,(d,ev)=>{
       changeGoods(d,sample,-1,ev,'学习样品');(d.economy!.branches!.learned[d.household.activePersonId]??=[]).push(node.id);
       ev.push({type:'branch',operation:'learned',node:node.id,detail:'掌握'+node.name});
     }));

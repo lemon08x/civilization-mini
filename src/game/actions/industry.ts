@@ -1,4 +1,4 @@
-import {INDUSTRY_PRODUCTS,type OperatorId} from '../model/industry.js';
+import {industryProductsFor,type OperatorId} from '../model/industry.js';
 import type {GameState} from '../model/state.js';
 import {defineAction,type ActionDefinition} from './definition.js';
 import {productName,productNeeds} from '../systems/industry-products.js';
@@ -8,7 +8,7 @@ import {systemDefinitions,assignmentNeeds,installedIn,industryEvent,physicalNeed
 export function industryActions(s:GameState):ActionDefinition[]{
  const x=s.economy?.industry;if(!x)return [];
  const result:ActionDefinition[]=[];
- for(const p of INDUSTRY_PRODUCTS){
+ for(const p of industryProductsFor(s)){
   const equipment=p.kind==='device';
   result.push(defineAction(s,'economy:inspect:'+p.id,'检验：'+productName(p.id),'产品验证',{time:s.era&&s.economy!.branches!.learned[s.household.activePersonId]?.includes('Q0')?3:4,energy:2},[
    ...productNeeds(s,p.id,true),...(x.products[p.id]?['已有产品验证记录']:[]),

@@ -33,7 +33,7 @@ const server = http.createServer(async (req, res) => {
     else if (path === '/review.css') absolute = join(projectRoot, 'apps/board/review.css');
     else if (path === '/style.css') absolute = join(projectRoot, 'apps/board/style.css');
     else if (path === '/implementation.json') absolute = join(projectRoot, 'dist/implementation.json');
-    else if (['/rulesets/social-eras.v26.json','/rulesets/social-eras.v25.json','/rulesets/social-eras.v24.json','/rulesets/social-eras.v23.json','/rulesets/social-eras.v22.json','/rulesets/branch-paths.v18.json','/rulesets/life-and-time.v17.json','/rulesets/megaproject-trial.v13.json','/rulesets/modern-grid.v14.json','/rulesets/agriculture-civilization.v15.json'].includes(path)) absolute = join(projectRoot, path.slice(1));
+    else if (['/rulesets/social-eras.v27.json','/rulesets/social-eras.v26.json','/rulesets/social-eras.v25.json','/rulesets/social-eras.v24.json','/rulesets/social-eras.v23.json','/rulesets/social-eras.v22.json','/rulesets/branch-paths.v18.json','/rulesets/life-and-time.v17.json','/rulesets/megaproject-trial.v13.json','/rulesets/modern-grid.v14.json','/rulesets/agriculture-civilization.v15.json'].includes(path)) absolute = join(projectRoot, path.slice(1));
     else if (path.startsWith('/modules/') && path.endsWith('.js')) {
       const root = join(projectRoot, 'dist');
       absolute = resolve(root, path.slice('/modules/'.length));

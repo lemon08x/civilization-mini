@@ -1,3 +1,4 @@
+import {electricReady,electricRewardPercent} from '../model/electric.js';
 import { installedIn,settleIndustry,industryView } from './industry.js';
 import {productNeeds} from './industry-products.js';
 import {branchHas,branchProcessNeeds,branchView} from './branches.js';
@@ -108,6 +109,7 @@ export function runProcess(s:GameState,p:ProcessSpec,events:GameEvent[],worker?:
   const factor=processMultiplier(s,p,worker),actor=worker?WORKER_NAMES[worker.kind]:'本人';
   const assembly=!p.wait&&assemblyReady(s,worker);
   if(p.power)usePower(s,p.power*factor,events,p.name);
+  if(s.electric&&p.id==='aluminium')s.economy!.modern!.services.ELECTROLYZER=s.clock.absoluteTurn;
   if(assembly){usePower(s,1,events,'标准化装配');consumeEquipment(s,'T07',events);s.economy!.equipmentUsed.T07=s.clock.absoluteTurn;}
   changeGoods(s,Object.fromEntries(Object.entries(p.inputs).map(([id,n])=>[id,n*factor])),-1,events,actor+'开工');
   if(p.equipment){consumeEquipment(s,p.equipment,events);s.economy!.equipmentUsed[p.equipment]=s.clock.absoluteTurn;}
@@ -212,7 +214,7 @@ export function spoilEconomy(s:GameState,events:GameEvent[]):void{
 }
 export function economyView(s:GameState,rules:Ruleset){
   const e=s.economy!;
-  return {...structuredClone(e),ongoing:structuredClone(e.ongoing??{farm:null}),...(e.industry?{industryView:industryView(s)}:{}),...(e.branches?{branchView:branchView(s)}:{}),...(e.expeditions?{expeditionView:expeditionView(s)}:{}),...(e.tower?{towerView:towerView(s,rules)}:{}),...(e.workshops?{workshopView:workshopView(s,rules)}:{}),...(e.shop?{marketView:shopView(s,rules)}:{}),...(e.operations?{operationsView:operationsView(s,rules)}:{}),foodTotal:foodStock(s),storage:modernOnline(s,'S08')?Math.max(30,storage(s)):storage(s),harvest:fieldYield(s),
+  return {...structuredClone(e),...(s.electric?{electricView:{rules:structuredClone(s.electric.rules),ready:electricReady(s),rewardPercent:electricRewardPercent(s),hydroOutput:s.location.weather==='dry'?s.electric.rules.dryHydroPower:6,loadOrder:['LAMP','TELEGRAPH'],description:'手动调度供能；电灯和电报按顺序耗电，电解按批耗电。季末余电可储存，否则跨季耗散。'}}:{}),ongoing:structuredClone(e.ongoing??{farm:null}),...(e.industry?{industryView:industryView(s)}:{}),...(e.branches?{branchView:branchView(s)}:{}),...(e.expeditions?{expeditionView:expeditionView(s)}:{}),...(e.tower?{towerView:towerView(s,rules)}:{}),...(e.workshops?{workshopView:workshopView(s,rules)}:{}),...(e.shop?{marketView:shopView(s,rules)}:{}),...(e.operations?{operationsView:operationsView(s,rules)}:{}),foodTotal:foodStock(s),storage:modernOnline(s,'S08')?Math.max(30,storage(s)):storage(s),harvest:fieldYield(s),
     disciplines:(e.branches?[]:SUBJECTS).map(subject=>({subject,name:SUBJECT_NAMES[subject],level:level(s,subject),heirLevel:level(s,subject,s.household.heirId),notes:e.notes[subject]??0,
       topics:topicsFor(s).filter(t=>t.subject===subject).map(t=>({...t,known:level(s,subject)>=t.level,evidence:(e.evidence[s.household.activePersonId]??[]).includes(t.id)}))})),
     staff:Object.values(e.workers).map(w=>({...structuredClone(w!),name:WORKER_NAMES[w!.kind],jobName:JOB_NAMES[w!.job],wage:wage(s,rules,w!),blockers:[...workerBlocker(s,w!),...planBlocker(s,w!,rules)]})),

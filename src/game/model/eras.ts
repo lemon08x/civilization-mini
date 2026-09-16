@@ -3,7 +3,7 @@ export interface EraState {
  rules:EraRules; index:number; elapsed:number; card:string;
  // A payable economic claim, not a production statistic. Settled into household money when the player chooses or the time budget expires.
  rewardEscrow:number; closed:boolean; groundwater:number; tap:boolean; pendingSettle:boolean;
- dungeon:{started:boolean;progress:number;complete:boolean};
+ dungeon:{started:boolean;progress:number;complete:boolean;powered?:boolean};
 }
 export const ERAS=[
  {id:'agriculture',name:'农业村落',imports:2,service:3,foodWeight:3,craftWeight:1,gatherBonus:1,workBonus:1,publicWell:false,publicMill:false,description:'农社靠天吃饭。公地采食和帮工不耗科技；收获回报高。成形、流体、泵和工厂知识尚未开放。'},

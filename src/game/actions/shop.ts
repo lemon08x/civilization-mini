@@ -1,3 +1,4 @@
+import {electricOnline} from '../model/electric.js';
 import { topicsFor,productsFor } from '../systems/economy-catalog.js';
 import type { GameState } from '../model/state.js';
 import type { Ruleset } from '../ruleset.js';
@@ -9,7 +10,7 @@ import { shopCatalog,cartQuote,deliverShop,deviceBusy,servicePending,repairPrice
 export function shopActions(s:GameState,r:Ruleset):ActionDefinition[]{
  const e=s.economy!,sh=e.shop!,out:ActionDefinition[]=[];
  const add=(op:string,target:string,label:string,cost:Parameters<typeof defineAction>[4],blockers:string[],description:string,execute:ActionDefinition['execute'])=>out.push(defineAction(s,`economy:${op}:${target}`,label,'商城',cost,blockers,description,execute));
- const quote=cartQuote(s,r);
+ const quote=cartQuote(s,r),instant=electricOnline(s,'TELEGRAPH');
  const final=!r.civilization&&s.clock.generation>=r.parameters.generations&&s.clock.turn>=r.parameters.turnsPerGeneration;
  for(const item of shopCatalog(s,r)){
   const quantity=sh.cart[item.id]??0;
@@ -17,13 +18,13 @@ export function shopActions(s:GameState,r:Ruleset):ActionDefinition[]{
   add('cartremove',item.id,'移除一份'+item.name,{ap:0},quantity<1?['清单中没有此商品']:[],'移除一份，未付款。',(draft,events)=>{const c=draft.economy!.shop!.cart;if(quantity===1)delete c[item.id];else c[item.id]=quantity-1;shopEvent(events,'cart',item.id,'已移除'+item.name);});
  }
  add('clearcart','all','清空采购清单',{ap:0},Object.keys(sh.cart).length?[]:['清单为空'],'清单不保留价格或占用库存。',(draft,events)=>{draft.economy!.shop!.cart={};shopEvent(events,'cart','all','采购清单已清空');});
- add('checkout','cart','确认整单采购',{money:quote.total},quote.blockers,`合计${quote.total}钱、${quote.weight}运输容量，付款后剩${quote.remainingMoney}钱。现货立即交付，订货下一季开始交付；所有材料和食品都占运输额度。`,(draft,events)=>{
+ add('checkout','cart','确认整单采购',{money:quote.total},quote.blockers,`合计${quote.total}钱、${quote.weight}运输容量，付款后剩${quote.remainingMoney}钱。${instant?'电报在线，新订货当季交付':'现货立即交付，订货下一季开始交付'}；所有材料和食品都占运输额度。`,(draft,events)=>{
   const shop=draft.economy!.shop!;shop.transport-=quote.weight;
   for(const {item,quantity}of quote.lines){
    if(item.id==='good-food'){draft.production!.market.food-=quantity;if(draft.socialFood)draft.socialFood.serviceRemaining-=quantity;}else shop.stock[item.id]-=quantity;
    const order={kind:item.kind,target:item.target,name:item.name,amount:quantity,due:draft.clock.absoluteTurn+1};
-   shopEvent(events,'purchased',item.target,item.name+(item.local?'：本地现货':'：订货，下一季开始交付'),item.price*quantity,quantity);
-   if(item.local)deliverShop(draft,r,order,events);else shop.orders.push(order);
+   shopEvent(events,'purchased',item.target,item.name+(item.local?'：本地现货':instant?'：电报协调，即时交付':'：订货，下一季开始交付'),item.price*quantity,quantity);
+   if(item.local||instant)deliverShop(draft,r,order,events);else shop.orders.push(order);
   }
   shop.cart={};
  });

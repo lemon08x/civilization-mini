@@ -1,5 +1,5 @@
 import type {SessionObservation} from '../../src/runtime/session.js';
-import {INDUSTRY_PRODUCTS,SYSTEMS} from '../../src/game/model/industry.js';
+import {SYSTEMS} from '../../src/game/model/industry.js';
 import {productName} from '../../src/game/systems/industry-products.js';
 import {branchRequirements} from './branch-view.js';
 import {esc,inputsText} from './economy-view.js';
@@ -7,7 +7,7 @@ const panel=(title:string,body:string)=>`<section class="panel"><div class="pane
 export function industryProducts(g:SessionObservation['game'],button:(id:string)=>string):string{
  const e=g.economy!,x=e.industryView!;
  return panel('产品研发与验证','<details><summary>如何获得实物、验证与规程</summary><p>解锁条件是前置知识与已验证产品。自行试制取得验证和制造规程；购买只获得实物，检验不赠送制造规程。验证记录不因实物消耗而失去。已有规程可跨代执行，新研发仍需个人知识。泵和发电机首次试制还需实际试运行。</p></details>')
- +INDUSTRY_PRODUCTS.map(p=>{const record=x.products[p.id],device=e.products.find(d=>d.id===p.id),recipe=e.processes.find(d=>d.id===p.id);return panel(productName(p.id),`<div class="production-stages"><span class="${record?'done':''}">${record?'✓':'○'} 产品验证</span><span aria-hidden="true">→</span><span class="${record?.protocol?'done':''}">${record?.protocol?'✓':'○'} 制造规程</span></div><p>${record?(record.protocol?'已验证 · 有制造规程':'已检验外购实物 · 无制造规程'):'尚未验证'}；${p.kind==='device'?`实物耐用 ${e.equipment[p.id]??0}`:`实物库存 ${e.goods[p.good!]??0}`}</p><details><summary>查看前置与材料</summary><p>知识：${branchRequirements(p.knowledge)}<br>前置产品验证：${p.parents.map(productName).join(' + ')||'无'}<br>制造材料：${inputsText(device?.inputs??recipe?.inputs??{})}</p></details>${!record?button('economy:inspect:'+p.id):''}${button('economy:'+(p.kind==='device'?'build:':'process:')+p.id)}`);}).join('');
+ +x.catalog.map(p=>{const record=x.products[p.id],device=e.products.find(d=>d.id===p.id),recipe=e.processes.find(d=>d.id===p.id);return panel(productName(p.id),`<div class="production-stages"><span class="${record?'done':''}">${record?'✓':'○'} 产品验证</span><span aria-hidden="true">→</span><span class="${record?.protocol?'done':''}">${record?.protocol?'✓':'○'} 制造规程</span></div><p>${record?(record.protocol?'已验证 · 有制造规程':'已检验外购实物 · 无制造规程'):'尚未验证'}；${p.kind==='device'?`实物耐用 ${e.equipment[p.id]??0}`:`实物库存 ${e.goods[p.good!]??0}`}</p><p>${device?.effect??''}</p><details><summary>查看前置与材料</summary><p>知识：${branchRequirements(p.knowledge)}<br>前置产品验证：${p.parents.map(productName).join(' + ')||'无'}<br>制造材料：${inputsText(device?.inputs??recipe?.inputs??{})}</p></details>${!record?button('economy:inspect:'+p.id):''}${button('economy:'+(p.kind==='device'?'build:':'process:')+p.id)}`);}).join('');
 }
 export function industrySystems(g:SessionObservation['game'],button:(id:string)=>string):string{
  const e=g.economy!,x=e.industryView!;

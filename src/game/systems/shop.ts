@@ -1,3 +1,4 @@
+import {ELECTRIC_KNOWLEDGE} from '../model/electric.js';
 import {eraCard} from './eras.js';
 import {branchHas,BRANCH_PRODUCTS} from './branches.js';
 import { topicsFor,productsFor } from './economy-catalog.js';
@@ -24,7 +25,7 @@ export interface ShopItem {id:string;target:string;kind:ShopOrder['kind'];name:s
 export function shopCatalog(s:GameState,r:Ruleset):ShopItem[]{
  const e=s.economy!,sh=e.shop!,cfg=r.shop!;
  const item=(x:Omit<ShopItem,'stock'>):ShopItem=>({...x,stock:x.id==='good-food'?Math.min(s.production!.market.food,s.socialFood?.serviceRemaining??Infinity):sh.stock[x.id]??0});
- const goods=[...SHOP_GOODS,...(e.modern?['copper','feedstock','mineral','silica','polymer','wire','coil','cable','fuel','nutrient','battery','silicon','circuit','solution']:[])].map(id=>{
+ const goods=[...SHOP_GOODS,...(s.electric?['alumina']:[]),...(e.modern?['copper','feedstock','mineral','silica','polymer','wire','coil','cable','fuel','nutrient','battery','silicon','circuit','solution']:[])].map(id=>{
    const recipe=PROCESSES.find(p=>Object.hasOwn(p.outputs,id));
    const local=(BASIC.includes(id)||e.modern&&['copper','feedstock','mineral','silica'].includes(id))||!!recipe&&(sh.produced[id]??0)>=3&&localNeeds(s,recipe.requires);
    const base=id==='food'?(s.socialFood?.price??r.parameters.foodPrice):salePrice(s,id)+1;
@@ -39,8 +40,8 @@ export function shopCatalog(s:GameState,r:Ruleset):ShopItem[]{
  const available=[...goods,...devices,...books,...assets];
  if(e.branches){
    const channels=e.branches.channels,baseGoods=['food','wheat','flour','wood','clay','iron','fiber','oil','ceramics','seal','shaft','valve','seedWheat'];
-   const electrical=['copper','polymer','wire','coil','cable'];
-   return available.filter(x=>x.kind==='goods'?(baseGoods.includes(x.target)||(channels.includes('electric')||(s.era?.index??0)>=2)&&electrical.includes(x.target)):x.kind==='device'?!!BRANCH_PRODUCTS[x.target]&&(x.target!=='E01'||(channels.includes('electric')||(s.era?.index??0)>=2)&&branchHas(s,'L6')):x.kind==='asset'&&x.target==='granary').map(x=>{
+   const electrical=['copper','polymer','wire','coil','cable',...(s.electric?['brick','feedstock','solution','fuel','battery','alumina']:[])];
+   return available.filter(x=>x.kind==='goods'?(baseGoods.includes(x.target)||(channels.includes('electric')||(s.era?.index??0)>=2)&&electrical.includes(x.target)):x.kind==='device'?(!!BRANCH_PRODUCTS[x.target]||!!s.electric&&!!ELECTRIC_KNOWLEDGE[x.target]&&(s.era?.index??0)>=2)&&(x.target!=='E01'||(channels.includes('electric')||(s.era?.index??0)>=2)&&branchHas(s,'L6')):x.kind==='asset'&&x.target==='granary').map(x=>{
      if(x.kind!=='goods')return {...x,condition:'整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源'};
      const metal=x.target==='iron',stable=channels.includes('metal')||(s.era?.index??0)>=2;
      return {...x,effect:x.target==='seedWheat'?'播种小麦；需基础栽培':x.effect,price:metal?(stable?GOODS.iron.price+1:GOODS.iron.price+2):x.price,

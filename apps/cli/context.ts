@@ -18,7 +18,7 @@ async function loadIdentity() {
 }
 export async function loadCurrentContext() {
   const implementation = await loadIdentity();
-  const base = validateRuleset(await readJson(join(projectRoot, 'rulesets/social-eras.v26.json')));
+  const base = validateRuleset(await readJson(join(projectRoot, 'rulesets/social-eras.v27.json')));
   return { implementation, base, economyBase: base };
 }
 export async function loadContext() {

@@ -1,3 +1,4 @@
+import {electricOnline} from '../model/electric.js';
 import type { GameState } from '../model/state.js';
 import type { GameEvent } from '../model/events.js';
 import { SUBJECTS } from '../model/economy.js';
@@ -35,7 +36,7 @@ export function generateModern(s:GameState,events:GameEvent[]):void {
  for(const id of GENERATORS){
   if(!m.enabled.includes(id)||m.operated[id]===s.clock.absoluteTurn||!equipped(s,id))continue;
   if(id==='E01'&&s.location.water<1||id==='E02'&&amount(s,'fuel')<1){modernEvent(events,id,'发电待命：缺水或精炼燃料');continue;}
-  let output=id==='E03'?(s.location.weather==='wet'?2:4):6;
+  let output=id==='E03'?(s.location.weather==='wet'?2:4):s.electric&&id==='E01'&&s.location.weather==='dry'?s.electric.rules.dryHydroPower:6;
   if(id==='E01')s.location.water--;
   if(id==='E02'){
    changeGoods(s,{fuel:1},-1,events,'燃料发电');
@@ -51,6 +52,18 @@ export function generateModern(s:GameState,events:GameEvent[]):void {
 export function serveModern(s:GameState,events:GameEvent[]):void {
  const m=s.economy?.modern;if(!m||s.economy!.operations?.paused)return;
  if(s.economy?.branches&&!branchHas(s,'L6'))return;
+ if(s.electric){
+  if(!branchHas(s,'L7'))return;
+  for(const id of ['LAMP','TELEGRAPH']){
+   if(!m.enabled.includes(id)||electricOnline(s,id)||!equipped(s,id))continue;
+   const cost=s.electric.rules.servicePower;
+   if(m.power<cost){modernEvent(events,id,'停电：可用电不足，保留手动与次季订货退路');continue;}
+   usePower(s,cost,events,id);consumeEquipment(s,id,events);s.economy!.equipmentUsed[id]=s.clock.absoluteTurn;m.services[id]=s.clock.absoluteTurn;
+   if(id==='LAMP')s.life!.timeRemaining+=s.electric.rules.lampTime;
+   modernEvent(events,id,id==='LAMP'?`夜间照明已供电，可用时间增加${s.electric.rules.lampTime}`:'电报在线，本季新订货即时交付');
+  }
+  return;
+ }
  for(const id of SERVICES){
   if(!m.enabled.includes(id)||modernOnline(s,id)||!equipped(s,id))continue;
   if(id==='N10'&&(!modernOnline(s,'N08')||organizationLevel(s)<10||level(s,'mechanics')<10))continue;

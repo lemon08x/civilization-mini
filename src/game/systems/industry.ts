@@ -1,6 +1,7 @@
+import {seasonTime} from '../model/electric.js';
 import {publicWaterFee} from './eras.js';
 import {foodLabor} from './social-food.js';
-import {INDUSTRY_PRODUCTS,SYSTEMS,type SystemDefinition,type SystemInstance,type OperatorId} from '../model/industry.js';
+import {industryProductsFor,SYSTEMS,type SystemDefinition,type SystemInstance,type OperatorId} from '../model/industry.js';
 import {activePerson,type GameState} from '../model/state.js';
 import type {GameEvent} from '../model/events.js';
 import {knowledgeNeeds,productName} from './industry-products.js';
@@ -108,10 +109,10 @@ export function renewIndustry(s:GameState):void{
 }
 export function personalBudget(s:GameState){
  const reserved=s.economy?.industry?reservedLabor(s):{time:0,energy:0};
- return {spentTime:s.life!.rules.timePerSeason-s.life!.timeRemaining,reservedTime:reserved.time,reservedEnergy:reserved.energy,freeTime:Math.max(0,s.life!.timeRemaining-reserved.time),freeEnergy:Math.max(0,activePerson(s).vitality!.energy-reserved.energy),tasks:systemDefinitions(s).filter(def=>{const i=s.economy?.industry?.instances[def.id];return i?.enabled&&i.commissioned&&i.operator==='self'&&systemDemand(s,def);}).map(def=>({id:String(def.id),name:def.name,time:def.time,energy:def.energy})).concat(foodLabor(s).time?[{id:'food-shopping',name:'生活食品赶集',...foodLabor(s)}]:[]).concat(farmCycleLabor(s).time?[{id:'farm-cycle',name:'持续耕作',...farmCycleLabor(s)}]:[])};
+ return {spentTime:seasonTime(s)-s.life!.timeRemaining,reservedTime:reserved.time,reservedEnergy:reserved.energy,freeTime:Math.max(0,s.life!.timeRemaining-reserved.time),freeEnergy:Math.max(0,activePerson(s).vitality!.energy-reserved.energy),tasks:systemDefinitions(s).filter(def=>{const i=s.economy?.industry?.instances[def.id];return i?.enabled&&i.commissioned&&i.operator==='self'&&systemDemand(s,def);}).map(def=>({id:String(def.id),name:def.name,time:def.time,energy:def.energy})).concat(foodLabor(s).time?[{id:'food-shopping',name:'生活食品赶集',...foodLabor(s)}]:[]).concat(farmCycleLabor(s).time?[{id:'farm-cycle',name:'持续耕作',...farmCycleLabor(s)}]:[])};
 }
 export function industryView(s:GameState){
  const x=s.economy!.industry!;
- return {catalog:structuredClone(INDUSTRY_PRODUCTS),reserved:reservedLabor(s),products:structuredClone(x.products),workers:structuredClone(x.workers),rules:structuredClone(x.rules),
+ return {catalog:structuredClone(industryProductsFor(s)),reserved:reservedLabor(s),products:structuredClone(x.products),workers:structuredClone(x.workers),rules:structuredClone(x.rules),
   systems:systemDefinitions(s).map(def=>{const instance=x.instances[def.id];return {...def,instance:instance?structuredClone(instance):null,unlockNeeds:systemUnlockNeeds(s,def),blockers:instance?systemBlockers(s,def,instance):['尚未建设'],wage:instance?wageFor(s,def,instance.operator):0};})};
 }

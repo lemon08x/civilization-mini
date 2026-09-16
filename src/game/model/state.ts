@@ -31,6 +31,7 @@ export interface TrialProject {
   samples: TrialSample[];
 }
 export interface GameState {
+  electric?: {rules:import('./electric.js').ElectricRules};
   schemaVersion: 1;
   clock: Clock;
   status: GameStatus;

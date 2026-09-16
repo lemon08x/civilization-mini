@@ -1,3 +1,4 @@
+import {electricRewardPercent} from '../model/electric.js';
 import {ERAS,ERA_CARDS} from '../model/eras.js';
 import {branchNodesFor,nodeInEra} from '../model/branches.js';
 import {ALL_PROCESSES,CROPS} from './economy-catalog.js';
@@ -9,7 +10,7 @@ export const eraCard=(s:GameState)=>ERA_CARDS.find(c=>c.id===s.era?.card);
 export function eraEvent(s:GameState,events:GameEvent[],operation:string,detail:string,amount=0,money=0){const e=s.era!;events.push({type:'era',operation,stage:e.index,card:e.card,detail,amount,money});}
 function drawCard(s:GameState):string{let x=s.randomState;x^=x<<13;x^=x>>>17;x^=x<<5;s.randomState=x>>>0;return ERA_CARDS[Math.floor(s.randomState/4294967296*ERA_CARDS.length)].id;}
 export function initializeEras(s:GameState,r:Ruleset):void{
- if(!r.eras)return;s.era={rules:structuredClone(r.eras),index:0,elapsed:0,card:drawCard(s),rewardEscrow:0,closed:false,groundwater:1,tap:false,pendingSettle:false,dungeon:{started:false,progress:0,complete:false}};
+ if(!r.eras)return;s.era={rules:structuredClone(r.eras),index:0,elapsed:0,card:drawCard(s),rewardEscrow:0,closed:false,groundwater:1,tap:false,pendingSettle:false,dungeon:{started:false,progress:0,complete:false,...(r.electric?{powered:false}:{})}};
 }
 export function renewEraServices(s:GameState,r:Ruleset):void{
  const e=s.era;if(!e)return;const stage=ERAS[e.index],card=eraCard(s)!;
@@ -133,6 +134,8 @@ export function settleEra(s:GameState,rules:Ruleset,events:GameEvent[]):void{
   const proj=projectEraRemainder(s,rules,remaining);e.rewardEscrow+=proj.claims;
   eraEvent(s,events,'projected',`主动结算，剩余${remaining}季按当前有效产能推算：收获${proj.harvestUnits}份、加工${proj.craftUnits}份，凭证${proj.claims/10}份。${proj.notes.join('；')}`,proj.claims);
  }
+ const percent=electricRewardPercent(s);
+ if(percent<100){e.rewardEscrow=Math.floor(e.rewardEscrow*percent/100);eraEvent(s,events,'electric-discount',`现代结算缺少本季实际用电服务，回报凭证按${percent}%兑现；公共服务和已有收益仍保留。`);}
  const money=Math.floor(e.rewardEscrow/(e.rules.rewardDivisor*10));s.household.money+=money;
  const how=chosen&&!timedOut?'玩家主动结算，剩余时间已推算':'阶段时间预算用尽';
  eraEvent(s,events,'settled',`${ERAS[e.index].name}结束（${how}）：本阶段回报凭证${e.rewardEscrow/10}，兑现${money}钱。收益已结清，不被后续社会服务追溯取消。`,e.rewardEscrow,money);
@@ -144,6 +147,6 @@ export function settleEra(s:GameState,rules:Ruleset,events:GameEvent[]):void{
 export function eraView(s:GameState,rules:Ruleset){
  const e=s.era!,remaining=Math.max(0,e.rules.seasons-e.elapsed),stage=ERAS[e.index];
  const preview=projectEraRemainder(s,rules,remaining);
- const payable=e.rewardEscrow+preview.claims;
- return {stage,index:e.index,stages:ERAS.map(x=>({id:x.id,name:x.name})),elapsed:e.elapsed,duration:e.rules.seasons,remaining,card:eraCard(s)!,rewardClaims:e.rewardEscrow/10,expectedReward:Math.floor(payable/(e.rules.rewardDivisor*10)),rewardDivisor:e.rules.rewardDivisor,closed:e.closed,groundwater:e.groundwater,tap:e.tap,publicWaterAvailable:e.index===3,publicWell:stage.publicWell,publicMill:stage.publicMill,services:eraServices(s),projection:{remaining:preview.remaining,harvestUnits:preview.harvestUnits,craftUnits:preview.craftUnits,claims:preview.claims/10,previewReward:Math.floor((e.rewardEscrow+preview.claims)/(e.rules.rewardDivisor*10)),waterSecured:preview.waterSecured,notes:preview.notes,appliesOnSettle:true},canSettle:!e.closed,dungeon:e.index===3?{...e.dungeon,target:e.rules.dungeonTarget}:null,lockedKnowledge:branchNodesFor(s).filter(n=>!nodeInEra(s,n.id)).map(n=>({id:n.id,name:n.name}))};
+ const percent=electricRewardPercent(s),payable=Math.floor((e.rewardEscrow+preview.claims)*percent/100);
+ return {...(s.electric?{electricRewardPercent:percent,electricRequirement:'现代完整回报需本季实际点灯、电报服务或电解；副本需真实交付电力。'}:{}),stage,index:e.index,stages:ERAS.map(x=>({id:x.id,name:x.name})),elapsed:e.elapsed,duration:e.rules.seasons,remaining,card:eraCard(s)!,rewardClaims:e.rewardEscrow/10,expectedReward:Math.floor(payable/(e.rules.rewardDivisor*10)),rewardDivisor:e.rules.rewardDivisor,closed:e.closed,groundwater:e.groundwater,tap:e.tap,publicWaterAvailable:e.index===3,publicWell:stage.publicWell,publicMill:stage.publicMill,services:eraServices(s),projection:{remaining:preview.remaining,harvestUnits:preview.harvestUnits,craftUnits:preview.craftUnits,claims:preview.claims/10,previewReward:Math.floor(payable/(e.rules.rewardDivisor*10)),waterSecured:preview.waterSecured,notes:preview.notes,appliesOnSettle:true},canSettle:!e.closed,dungeon:e.index===3?{...e.dungeon,target:e.rules.dungeonTarget}:null,lockedKnowledge:branchNodesFor(s).filter(n=>!nodeInEra(s,n.id)).map(n=>({id:n.id,name:n.name}))};
 }

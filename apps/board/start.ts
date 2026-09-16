@@ -2,7 +2,7 @@ import { createSession } from '../../src/runtime/session.js';
 import { validateRuleset } from '../../src/game/ruleset.js';
 import type { ImplementationIdentity } from '../../src/runtime/records.js';
 
-const key='civilization-mini.social-eras.v26';
+const key='civilization-mini.social-eras.v27';
 const form=document.getElementById('start-form') as HTMLFormElement;
 const button=document.getElementById('new-game') as HTMLButtonElement;
 const error=document.getElementById('error')!;
@@ -11,7 +11,7 @@ try {
   const previous=localStorage.getItem(key);
   document.getElementById('continue-game')!.hidden=!previous;
   document.getElementById('save-notice')!.hidden=!previous;
-  const rules=validateRuleset(await (await fetch('/rulesets/social-eras.v26.json')).json());
+  const rules=validateRuleset(await (await fetch('/rulesets/social-eras.v27.json')).json());
   const implementation:ImplementationIdentity=await(await fetch('/implementation.json')).json();
   button.disabled=false;button.textContent='启程 →';
   form.onsubmit=async event=>{

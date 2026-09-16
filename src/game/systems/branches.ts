@@ -1,3 +1,5 @@
+import {industryProductsFor} from '../model/industry.js';
+import {APPLIANCES,ELECTRIC_EPIGRAPHS} from '../model/electric.js';
 import {ancestorKnows} from './ancestry.js';
 import { productNeeds,productTrialNeeds } from './industry-products.js';
 import {branchNodesFor,nodeInEra,ERA_NODES,BRANCH_NODES,BRANCH_PRODUCTS,BRANCH_PROCESSES,BRANCH_PATHS} from '../model/branches.js';
@@ -28,6 +30,7 @@ export function branchActionNeeds(s:GameState,id:string):string[]{
   if(op==='build')return BRANCH_PRODUCTS[target]?branchNeeds(s,BRANCH_PRODUCTS[target]):['该设备尚未纳入试点'];
   if(op==='process')return branchProcessNeeds(s,target);
   if(op==='farm')return target==='wheat'?branchNeeds(s,['A0']):['soy','flax'].includes(target)?branchNeeds(s,['A4']):['该种植分支尚未接入'];
+  if(s.electric&&op==='utility'&&['E01','E02','E04',...APPLIANCES.filter(x=>x!=='ELECTROLYZER')].includes(target.split('-')[0]))return target.endsWith('-off')?[]:branchNeeds(s,APPLIANCES.includes(target.split('-')[0])?['L7']:['L6']);
   if(op==='utility')return target.startsWith('E01-')?(target.endsWith('-off')?[]:branchNeeds(s,['L6'])):['当前仅试点水力发电'];
   if(op==='energize')return branchNeeds(s,['L6']);
   if(op==='hire')return target==='manager'?['管理进阶分支尚未接入']:branchNeeds(s,['O0',...(target==='laborer'?[]:['O1'])]);
@@ -52,7 +55,7 @@ export function recordBranchWork(s:GameState,events:GameEvent[]):void {
 }
 export function branchView(s:GameState){
   const b=s.economy!.branches!;
-  return {nodes:branchNodesFor(s).map(n=>({...n,...(s.economy!.industry?{sample:{}}:{}),known:branchHas(s,n.id),inherited:ancestorKnows(s,n.id),heirInherited:ancestorKnows(s,n.id,s.household.heirId),heirKnown:s.household.heirId!==s.household.activePersonId&&branchHas(s,n.id,s.household.heirId),archived:b.archives.includes(n.id),scope:(n.unlockEra??0)>0?'社会开放后可学':'通用知识',active:nodeInEra(s,n.id),recorded:!!b.learned[s.household.activePersonId]?.includes(n.id),missing:[...branchNeeds(s,n.parents),...(!nodeInEra(s,n.id)?['当前社会尚未开放此课程']:[])]})),
+  return {nodes:branchNodesFor(s).map(n=>({...n,...(s.electric&&ELECTRIC_EPIGRAPHS[n.id]?{epigraph:ELECTRIC_EPIGRAPHS[n.id]}:{}),...(s.economy!.industry?{sample:{}}:{}),known:branchHas(s,n.id),inherited:ancestorKnows(s,n.id),heirInherited:ancestorKnows(s,n.id,s.household.heirId),heirKnown:s.household.heirId!==s.household.activePersonId&&branchHas(s,n.id,s.household.heirId),archived:b.archives.includes(n.id),scope:(n.unlockEra??0)>0?'社会开放后可学':'通用知识',active:nodeInEra(s,n.id),recorded:!!b.learned[s.household.activePersonId]?.includes(n.id),missing:[...branchNeeds(s,n.parents),...(!nodeInEra(s,n.id)?['当前社会尚未开放此课程']:[])]})),
     paths:BRANCH_PATHS.map(p=>({...p,learned:p.nodes.filter(id=>branchHas(s,id)).length})),
-    channels:[...b.channels],protocols:[...b.protocols],delivered:[...b.delivered],products:BRANCH_PRODUCTS,processes:BRANCH_PROCESSES};
+    channels:[...b.channels],protocols:[...b.protocols],delivered:[...b.delivered],products:s.electric?Object.fromEntries(industryProductsFor(s).filter(p=>p.kind==='device').map(p=>[p.id,p.knowledge])):BRANCH_PRODUCTS,processes:s.electric?Object.fromEntries(industryProductsFor(s).filter(p=>p.kind==='goods').map(p=>[p.id,p.knowledge])):BRANCH_PROCESSES};
 }

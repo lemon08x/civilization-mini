@@ -54,6 +54,7 @@ export function createInitialState(rules: Ruleset, seed: number, scenarioId: str
   if(rules.life)initializeLife(state,rules.life);
   if(rules.renewal){state.life!.renewal=structuredClone(rules.renewal);for(const p of Object.values(state.persons))if(p.vitality)p.vitality.minimumEnergy=rules.renewal.minimumEnergy;}
   if(rules.socialFood){state.socialFood={rules:structuredClone(rules.socialFood),foodPerSeason:p.foodPerTurn,price:p.foodPrice,policy:'off',budget:rules.socialFood.defaultBudget,reserve:rules.socialFood.defaultReserve,delivery:false,serviceRemaining:rules.socialFood.serviceCapacity};state.production!.market.food=Math.min(state.production!.market.food,rules.socialFood.storage);}
+  if(rules.electric)state.electric={rules:structuredClone(rules.electric)};
   initializeEras(state,rules);
   newSeason(state, rules, []);
   return deepFreeze(state);

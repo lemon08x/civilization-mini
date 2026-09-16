@@ -1,3 +1,5 @@
+import {ELECTRIC_KNOWLEDGE,ELECTRIC_PARENTS} from './electric.js';
+import type {GameState} from './state.js';
 import {BRANCH_PRODUCTS,BRANCH_PROCESSES} from './branches.js';
 
 export interface IndustryRules {
@@ -29,4 +31,8 @@ export interface IndustryState {
   commissioned:SystemId[];
   instances:Partial<Record<SystemId,SystemInstance>>;
   workers:Record<string,WorkerBudget>;
+}
+
+export function industryProductsFor(s:GameState):ProductDefinition[]{
+ return s.electric?[...INDUSTRY_PRODUCTS,...Object.entries(ELECTRIC_KNOWLEDGE).map(([id,knowledge])=>({id,knowledge,parents:ELECTRIC_PARENTS[id]??[],kind:(['fuel','battery','aluminium','aluminiumwire'].includes(id)?'goods':'device') as 'goods'|'device',...(['fuel','battery','aluminium','aluminiumwire'].includes(id)?{good:id==='aluminiumwire'?'wire':id}:{})}))]:INDUSTRY_PRODUCTS;
 }
