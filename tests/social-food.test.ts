@@ -7,7 +7,7 @@ import {activePerson,heir} from '../src/game/model/state.js';
 import {validateRuleset,resolveRuleset} from '../src/game/ruleset.js';
 import {foodStock} from '../src/game/systems/economy.js';
 import {socialFoodQuote,settleSocialFood} from '../src/game/systems/social-food.js';
-import {personalBudget} from '../src/game/systems/industry.js';
+import {personalBudget,systemLabor} from '../src/game/systems/industry.js';
 import {createSession,observeSession,submitCommand} from '../src/runtime/session.js';
 import {replayRecord} from '../src/runtime/replay.js';
 import type {GameEvent} from '../src/game/model/events.js';
@@ -115,7 +115,9 @@ test('food forecast accounts for personal production commitments, settlement doe
  const s=empty();s.socialFood!.policy='market';s.location.rain=0;
  s.economy!.field={...s.economy!.field,crop:'wheat',growth:0,duration:2,moisture:0};
  s.economy!.industry!.instances.hand={id:'hand',operator:'self',enabled:true,commissioned:true};
- s.life!.timeRemaining=3;assert.equal(socialFoodQuote(s).purchase,0);assert.match(socialFoodQuote(s).reasons.join(''),/赶集时间不足/);
+ s.life!.timeRemaining=3;
+ const production=systemLabor(s).time;
+ assert.equal(socialFoodQuote(s,false,production).purchase,0);assert.match(socialFoodQuote(s,false,production).reasons.join(''),/赶集时间不足/);
  // Post-production quote uses remaining time directly, even for a continuous processing task.
  s.economy!.industry!.instances.shaft={id:'shaft',operator:'self',enabled:true,commissioned:true};
  s.life!.timeRemaining=1;assert.equal(socialFoodQuote(s,true).purchase,2);

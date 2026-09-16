@@ -23,7 +23,8 @@ function random(state: GameState): number {
   state.randomState = x >>> 0;
   return state.randomState / 4294967296;
 }
-export function newSeason(state: GameState, rules: Ruleset, events: GameEvent[]): void {
+
+function rollWeather(state: GameState, rules: Ruleset, events: GameEvent[]): void {
   const scenario = rules.scenarios[state.location.id];
   const roll = random(state) * 100;
   const weather = roll < scenario.drought ? 'dry' : roll < scenario.drought + scenario.wet ? 'wet' : 'normal';
@@ -36,6 +37,9 @@ export function newSeason(state: GameState, rules: Ruleset, events: GameEvent[])
   if(state.development&&rules.development){state.development.tradeRemaining=rules.development.parameters.marketSupply;state.development.ordersRemaining=rules.development.parameters.marketSupply;}
   state.location.season = { cultivated: false, usedChannel: false, trialSample: false };
   events.push({ type: 'season-started', clock: { ...state.clock }, weather });
+}
+
+function renewArrivals(state: GameState, rules: Ruleset, events: GameEvent[]): void {
   resetModern(state,events);
   renewLocalSupply(state, rules, events);
   renewEraServices(state,rules);
@@ -47,12 +51,15 @@ export function newSeason(state: GameState, rules: Ruleset, events: GameEvent[])
   renewOperations(state,rules,events);
   renewIndustry(state);
 }
-export function finishSeason(state: GameState, rules: Ruleset, events: GameEvent[]): void {
+
+function settleProduction(state: GameState, rules: Ruleset, events: GameEvent[]): number {
   const productionStart=events.length;
   operateEraServices(state,events);
-  if(state.economy){beforeOperations(state,rules,events);if(!state.economy.industry){generateModern(state,events);serveModern(state,events);}settleEconomy(state,rules,events);settleWorkshops(state,rules,events);dispatchTower(state,rules,events);afterOperations(state,rules,events);recordProjectEvidence(state,events);
+  if(state.economy){beforeOperations(state,rules,events);if(!state.economy.industry){generateModern(state,events);serveModern(state,events);}settleEconomy(state,rules,events);settleWorkshops(state,rules,events);dispatchTower(state,rules,events);afterOperations(state,rules,events);recordProjectEvidence(state,events);}
+  return productionStart;
+}
 
-  }
+function settleHousehold(state: GameState, rules: Ruleset, events: GameEvent[]): {missing:number;foodPerTurn:number} {
   operatePassive(state,rules,events);
   settleSociety(state, rules, events);
   settleSocialFood(state,events);
@@ -63,6 +70,10 @@ export function finishSeason(state: GameState, rules: Ruleset, events: GameEvent
   family.hardship = missing ? family.hardship + 1 : 0;
   events.push({ type: 'season-settled', consumed, missing, hardship: family.hardship });
   if(state.economy)spoilEconomy(state,events);else spoilFood(state, rules, events);
+  return {missing, foodPerTurn:p.foodPerTurn};
+}
+
+function settleDistantWork(state: GameState, rules: Ruleset, events: GameEvent[], productionStart: number): void {
   advanceProjects(state,rules,events);
   recordTowerEvidence(state,events);
   settleTower(state,rules,events);
@@ -70,15 +81,23 @@ export function finishSeason(state: GameState, rules: Ruleset, events: GameEvent
   settleExpeditions(state,rules,events);
   storeModern(state,events);
   recordEraProduction(state,events,events.slice(productionStart));
+}
+
+function settleLifeAndEra(state: GameState, rules: Ruleset, events: GameEvent[], missing: number, foodPerTurn: number): boolean {
   if(state.life){
-    settleLife(state,missing,events,p.foodPerTurn);
+    settleLife(state,missing,events,foodPerTurn);
     settleEra(state,rules,events);
-    if(state.status!=='active'){recordLifeGeneration(state,events);return;}
-    if(state.life.pendingRetirement&&canSucceed(state)){state.status='handover';recordLifeGeneration(state,events);return;}
+    if(state.status!=='active'){recordLifeGeneration(state,events);return true;}
+    if(state.life.pendingRetirement&&canSucceed(state)){state.status='handover';recordLifeGeneration(state,events);return true;}
   }
-  if (!state.life && family.hardship >= p.hardshipLimit) { state.status = 'ended'; events.push({ type: 'experiment-ended', reason: 'hardship' }); return; }
+  return false;
+}
+
+function settleVictoryAndGeneration(state: GameState, rules: Ruleset, events: GameEvent[]): boolean {
+  const p = rules.parameters, family = state.household;
+  if (!state.life && family.hardship >= p.hardshipLimit) { state.status = 'ended'; events.push({ type: 'experiment-ended', reason: 'hardship' }); return true; }
   const victory=technologyVictory(state,rules);
-  if(victory?.achieved){state.status='complete';if(!rules.tower)events.push({type:'technology-victory',mastered:victory.mastered.length,total:victory.total,required:victory.required});return;}
+  if(victory?.achieved){state.status='complete';if(!rules.tower)events.push({type:'technology-victory',mastered:victory.mastered.length,total:victory.total,required:victory.required});return true;}
   if (!state.life && state.clock.turn >= p.turnsPerGeneration) {
     const trial = project(state);
     const final = !rules.civilization && state.clock.generation >= p.generations;
@@ -89,8 +108,21 @@ export function finishSeason(state: GameState, rules: Ruleset, events: GameEvent
       ...(state.production ? { production: structuredClone(state.production) } : {}),
     } });
     state.status = final ? 'complete' : 'handover';
-    return;
+    return true;
   }
+  return false;
+}
+
+export function newSeason(state: GameState, rules: Ruleset, events: GameEvent[]): void {
+  rollWeather(state, rules, events);
+  renewArrivals(state, rules, events);
+}
+export function finishSeason(state: GameState, rules: Ruleset, events: GameEvent[]): void {
+  const productionStart=settleProduction(state, rules, events);
+  const {missing, foodPerTurn}=settleHousehold(state, rules, events);
+  settleDistantWork(state, rules, events, productionStart);
+  if(settleLifeAndEra(state, rules, events, missing, foodPerTurn)) return;
+  if(settleVictoryAndGeneration(state, rules, events)) return;
   state.clock.turn++; state.clock.absoluteTurn++;
   newSeason(state, rules, events);
 }

@@ -2,7 +2,8 @@ import type { ExpeditionSpec, ExpeditionAttempt, ExpeditionState } from '../mode
 import type { GameState } from '../model/state.js';
 import type { GameEvent } from '../model/events.js';
 import type { Ruleset } from '../ruleset.js';
-import { changeGoods,requirements } from './economy.js';
+import { changeGoods } from './inventory.js';
+import { requirements } from './knowledge.js';
 import { modernOnline,usePower } from './modern.js';
 import { ALL_GOODS,ALL_TOPICS } from './economy-catalog.js';
 

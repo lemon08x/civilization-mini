@@ -1,8 +1,7 @@
 import type {GameState} from '../model/state.js';
 import type {GameEvent} from '../model/events.js';
 import {publicWaterFee} from './eras.js';
-import {systemLabor} from './industry.js';
-import {foodStock,amount,changeGoods} from './economy.js';
+import {foodStock,amount,changeGoods} from './inventory.js';
 export const FOOD_POLICIES={off:'暂停自动购买',self:'自给优先',market:'市场生活',reserve:'保留储备'};
 export function socialFoodEvent(events:GameEvent[],operation:string,detail:string,amount=0,money=0,time=0){events.push({type:'social-food',operation,detail,amount,money,time});}
 export function renewSocialFood(s:GameState,events:GameEvent[]):void{
@@ -13,7 +12,7 @@ export function renewSocialFood(s:GameState,events:GameEvent[]):void{
  s.production!.market.food+=incoming;
  socialFoodEvent(events,'arrived',`外部食品供应商到货${incoming}份，地区库存${s.production!.market.food}/${f.rules.storage}；本季服务人员可处理${f.serviceRemaining}份`,incoming);
 }
-export function socialFoodQuote(s:GameState,afterProduction=false){
+export function socialFoodQuote(s:GameState,afterProduction=false,productionTime=0){
  const f=s.socialFood!,delivery=f.delivery||s.era?.index===3,stock=foodStock(s),available=s.production!.market.food;
  const target=f.foodPerSeason+(f.policy==='reserve'?f.reserve:0);
  // Market living buys ready meals first, preserving grain for production when possible.
@@ -21,7 +20,7 @@ export function socialFoodQuote(s:GameState,afterProduction=false){
  const funds=Math.max(0,Math.floor((s.household.money-(afterProduction?0:publicWaterFee(s)))/f.price)),cap=Math.floor(f.budget/f.price);
  const transport=s.economy!.shop!.transport;
  const quantity=Math.min(need,available,funds,cap,f.serviceRemaining,transport);
- const timeAvailable=Math.max(0,s.life!.timeRemaining-(afterProduction?0:systemLabor(s).time));
+ const timeAvailable=Math.max(0,s.life!.timeRemaining-(afterProduction?0:productionTime));
  const time=quantity>0&&!delivery?f.rules.pickupTime:0;
  const reasons:string[]=[];
  if(need>0){
@@ -36,9 +35,9 @@ export function socialFoodQuote(s:GameState,afterProduction=false){
  return {policy:f.policy,policyName:FOOD_POLICIES[f.policy],delivery,budget:f.budget,reserve:f.reserve,price:f.price,foodPerSeason:f.foodPerSeason,householdStock:stock,marketStock:available,storage:f.rules.storage,scheduledImports:f.rules.imports,serviceRemaining:f.serviceRemaining,transport,need,purchase,cost:purchase*f.price,time:purchase?time:0,missing:Math.max(0,f.foodPerSeason-stock-purchase),expectedReserve:Math.max(0,stock+purchase-f.foodPerSeason),reasons,source:'外部地区食品供应商定额到货；集镇人员办理采购配送，与商城即食口粮共用库存和运输。'};
 }
 // This is a forecast, not a debit. It is included in the shared personal labor budget.
-export function foodLabor(s:GameState):{time:number;energy:number}{
+export function foodLabor(s:GameState,productionTime=0):{time:number;energy:number}{
  if(!s.socialFood)return {time:0,energy:0};
- const f=s.socialFood,q=socialFoodQuote(s);
+ const f=s.socialFood,q=socialFoodQuote(s,false,productionTime);
  return {time:q.need>0&&q.purchase>0&&!q.delivery?f.rules.pickupTime:0,energy:0};
 }
 export function settleSocialFood(s:GameState,events:GameEvent[]):void{

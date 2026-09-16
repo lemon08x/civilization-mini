@@ -1,7 +1,7 @@
 import {seasonTime} from './model/electric.js';
 import {eraView} from './systems/eras.js';
 import {socialFoodQuote} from './systems/social-food.js';
-import {personalBudget} from './systems/industry.js';
+import {personalBudget,systemLabor} from './systems/industry.js';
 import { lifeView } from './systems/life.js';
 import { economyView } from './systems/economy.js';
 import { technologyVictory } from './systems/investment.js';
@@ -27,7 +27,7 @@ export function getObservation(state: GameState, rules: Ruleset) {
   return {
     ...(state.productNetwork ? {productNetwork:productNetworkView(state,rules)} : {}),
     ...(state.economy?{economy:economyView(state,rules)}:{}),
-    ...(state.socialFood?{socialFood:socialFoodQuote(state)}:{}),
+    ...(state.socialFood?{socialFood:socialFoodQuote(state,false,state.economy?.industry?systemLabor(state).time:0)}:{}),
     ...(state.era?{era:eraView(state,rules)}:{}),
     rulesVersion: rules.rulesVersion,
     victory: technologyVictory(state,rules),

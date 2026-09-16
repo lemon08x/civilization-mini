@@ -3,7 +3,7 @@ import type { GameState } from '../model/state.js';
 import type { Ruleset } from '../ruleset.js';
 import type { GameEvent } from '../model/events.js';
 import type { TowerState } from '../model/tower.js';
-import { amount,changeGoods,foodStock,equipped,consumeEquipment } from './economy.js';
+import { amount,changeGoods,foodStock,equipped,consumeEquipment } from './inventory.js';
 import { ALL_GOODS as GOODS } from './economy-catalog.js';
 
 export const TOWER_FLOORS=[

@@ -59,15 +59,38 @@ test('文件保存保留历史，拒绝覆盖、重复提交和路径穿越',asy
  await assert.rejects(store.load('../test'));
 });
 test('领域层和运行层依赖边界',async()=>{
- for(const layer of ['game','runtime']){
+ for(const layer of ['game','runtime','present']){
   const root=join(projectRoot,'src',layer);
   for(const file of (await readdir(root,{recursive:true})).filter(f=>f.endsWith('.ts'))){
    const source=await readFile(join(root,file),'utf8');
    for(const match of source.matchAll(/from\s+['"]([^'"]+)['"]/g)){
     const target=relative(projectRoot,resolve(dirname(join(root,file)),match[1])).replaceAll('\\','/');
     assert.ok(!/^(src\/(research|agents)|apps)\//.test(target),`${layer}/${file}: ${match[1]}`);
-    if(layer==='game')assert.ok(!/runtime|node:/.test(match[1]));
+    if(layer==='game')assert.ok(!/runtime|node:|src\/present/.test(match[1]) && !target.startsWith('src/present/'));
+    if(layer==='runtime')assert.ok(!target.startsWith('src/present/'),`${layer}/${file}: ${match[1]}`);
+    if(layer==='present')assert.ok(!target.startsWith('src/game/'),`${layer}/${file}: ${match[1]}`);
    }
   }
  }
+});
+test('库存与供粮不再进入工业循环依赖',async()=>{
+ const root=join(projectRoot,'src/game/systems');
+ const files=(await readdir(root)).filter(f=>f.endsWith('.ts'));
+ const imports=new Map<string,string[]>();
+ for(const file of files){
+  const source=await readFile(join(root,file),'utf8');
+  const deps=[...source.matchAll(/from\s+'\.\/([^']+)\.js'/g)].map(m=>m[1]+'.ts').filter(dep=>files.includes(dep));
+  imports.set(file,deps);
+ }
+ function reaches(start:string,goal:string,seen=new Set<string>()):boolean{
+  if(seen.has(start))return false;
+  seen.add(start);
+  return (imports.get(start)??[]).some(dep=>dep===goal||reaches(dep,goal,seen));
+ }
+ assert.equal(reaches('inventory.ts','industry.ts'),false);
+ assert.equal(reaches('inventory.ts','economy.ts'),false);
+ assert.equal(reaches('social-food.ts','industry.ts'),false);
+ assert.equal(reaches('industry.ts','economy.ts'),false);
+ assert.equal(reaches('agriculture.ts','economy.ts'),false);
+ assert.equal(reaches('knowledge.ts','economy.ts'),false);
 });

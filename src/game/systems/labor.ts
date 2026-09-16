@@ -1,0 +1,29 @@
+import type { GameState } from '../model/state.js';
+import type { GameEvent } from '../model/events.js';
+import { reservedLabor } from './industry.js';
+
+export { reservedLabor, personalBudget, systemLabor } from './industry.js';
+export { farmCycleLabor } from './agriculture.js';
+export { foodLabor } from './social-food.js';
+
+export type LaborNeed = { time: number; energy: number };
+
+export function quoteReservedLabor(
+  state: GameState,
+  id: string,
+  costs: { money: number; food: number },
+  blockers: string[],
+  execute: (draft: GameState, events: GameEvent[]) => void,
+): LaborNeed {
+  let reserved = state.economy?.industry ? reservedLabor(state) : { time: 0, energy: 0 };
+  const previewable = (state.socialFood && id.startsWith('economy:') || state.life?.renewal && ['farm', 'farmcycle', 'sysassign', 'sysrun', 'sysremove'].includes(id.split(':')[1]))
+    && blockers.length === 0 && state.household.money >= costs.money && state.household.food >= costs.food;
+  if (previewable) {
+    const preview = structuredClone(state);
+    preview.household.money -= costs.money;
+    preview.household.food -= costs.food;
+    execute(preview, []);
+    reserved = reservedLabor(preview);
+  }
+  return reserved;
+}

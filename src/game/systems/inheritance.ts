@@ -5,7 +5,7 @@ import type { Ruleset } from '../ruleset.js';
 import type { GameEvent } from '../model/events.js';
 import { newSeason } from './time.js';
 import { SUBJECTS } from '../model/economy.js';
-import { level } from './economy.js';
+import { level } from './knowledge.js';
 
 export function handover(state: GameState, rules: Ruleset, events: GameEvent[]): void {
   const child = heir(state), fromPersonId = state.household.activePersonId;

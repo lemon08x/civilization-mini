@@ -48,3 +48,4 @@ export function observeSession(session: Session) {
   return { runId: session.record.manifest.runId, revision: session.record.entries.length, game: getObservation(session.state, session.record.manifest.ruleset), recentEvents: structuredClone(session.record.entries.slice(-3).flatMap(entry => entry.events)), ...(session.state.era?{eraSettlements:structuredClone(session.record.entries.flatMap(entry=>entry.events).filter(e=>e.type==='era').filter(e=>e.operation==='settled'))}:{}) };
 }
 export type SessionObservation = ReturnType<typeof observeSession>;
+export type GameObservation = SessionObservation['game'];
