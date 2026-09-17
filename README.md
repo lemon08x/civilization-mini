@@ -1,6 +1,6 @@
 # Civilization Mini · 世代规则预研
 
-当前规则 **0.27.0**（电气生产与现代通电验收）。玩法见 [CURRENT_GAMEPLAY_V27.md](docs/CURRENT_GAMEPLAY_V27.md)。业务流程与实现见 [SYSTEM_OVERVIEW.md](docs/SYSTEM_OVERVIEW.md)。
+当前规则 **0.27.0**（电气生产与现代通电验收）。玩法见 [CURRENT_GAMEPLAY_V27.md](docs/CURRENT_GAMEPLAY_V27.md)。代码分层见 [ARCHITECTURE.md](docs/ARCHITECTURE.md)。文档目录见 [docs/README.md](docs/README.md)。
 
 本仓库只维护这一版规则。没有离线研究模块、脚本策略或旧版本规则 JSON。
 
