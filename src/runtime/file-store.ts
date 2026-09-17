@@ -1,4 +1,4 @@
-import { mkdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rename, rm, unlink, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import type { Command, Session } from './records.js';
 import { parseSession, submitCommand, validateRunId } from './session.js';
@@ -34,5 +34,24 @@ export class FileRunStore {
     if (result.duplicate) return result;
     await this.write(this.directory(runId), result.session);
     return result;
+  }
+  async list(): Promise<string[]> {
+    await mkdir(resolve(this.root), { recursive: true });
+    const entries = await readdir(resolve(this.root), { withFileTypes: true });
+    const ids: string[] = [];
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      try {
+        validateRunId(entry.name);
+        await readFile(join(this.directory(entry.name), 'record.json'));
+        ids.push(entry.name);
+      } catch { /* 跳过不完整目录 */ }
+    }
+    return ids.sort();
+  }
+  async remove(runId: string): Promise<void> {
+    const directory = this.directory(runId);
+    await readFile(join(directory, 'record.json'));
+    await rm(directory, { recursive: true });
   }
 }

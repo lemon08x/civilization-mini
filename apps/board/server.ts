@@ -18,7 +18,13 @@ const server = http.createServer(async (req, res) => {
     else if (path === '/ai') absolute = join(projectRoot, 'apps/board/ai.html');
     else if (path === '/ai-guide.md') absolute = join(projectRoot, 'docs/AI_PLAYER.md');
     else if (path === '/style.css') absolute = join(projectRoot, 'apps/board/style.css');
-    else if (path === '/rulesets/social-eras.v27.json') absolute = join(projectRoot, path.slice(1));
+    else if (path === '/rulesets/current.json') {
+      const { base } = await loadCurrentContext();
+      const body = Buffer.from(JSON.stringify(base), 'utf8');
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+      res.end(req.method === 'HEAD' ? undefined : body);
+      return;
+    }
     else if (path.startsWith('/modules/') && path.endsWith('.js')) {
       const root = join(projectRoot, 'dist');
       absolute = resolve(root, path.slice('/modules/'.length));

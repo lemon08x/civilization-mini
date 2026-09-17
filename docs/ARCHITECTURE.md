@@ -1,96 +1,114 @@
-# 现行代码结构
+# 现行项目结构
 
-当前只支持规则 **0.27.0**。玩法见 [CURRENT_GAMEPLAY_V27.md](CURRENT_GAMEPLAY_V27.md)，AI 入口见 [AI_PLAYER.md](AI_PLAYER.md)。
+当前只支持规则 **0.27.0**。玩法见 [CURRENT_GAMEPLAY_V27.md](CURRENT_GAMEPLAY_V27.md)，改机制或改数值的流程见仓库根 [AGENTS.md](../AGENTS.md)，AI 入口见 [AI_PLAYER.md](AI_PLAYER.md)。
 
-## 为什么拆 `game` 和 `runtime`
+## 目录
 
-二者回答不同问题，避免结算和存档缠在一起。
+```text
+保留范围
+  src/game/              规则结算（唯一权威：game.ts）
+  rulesets/v27/          现行规则（拆开的 JSON）
+  apps/                  人类网页 + 命令行入口
+  playtests/             AI 试玩规则、精简观察、player.mjs
 
-| | `src/game` | `src/runtime` |
+入口胶水（不扩张）
+  src/runtime/           会话、命令校验、JSON 存档
+
+开发与说明（不扩张）
+  tests/                 机制用例，仅用户要求时运行
+  docs/                  本目录
+  AGENTS.md              协作与改规则流程
+  package.json / tsconfig.json
+
+运行产物（不入库）
+  dist/  node_modules/  saves/
+```
+
+试玩笔记在 `playtests/batches/`。网页存档在浏览器（开始界面打开或新开）；命令行存档在 `saves/`。
+
+## 一局怎么走
+
+```text
+网页 /play  或  lab new  或  player.mjs
+        │
+        ▼
+  runtime 校验 commandId + expectedRevision
+        │
+        ▼
+  game.ts  createInitialState / getAvailableActions / transition
+        │
+        ▼
+  写档（浏览器存档槽 或 saves/<id>/record.json）
+        │
+        ▼
+  observation.ts 公开观察
+        ├─ 网页：完整观察
+        └─ AI：present 收成 compact
+```
+
+`src/game` 不读盘、不认玩家、不选行动。`runtime` 不算产量、不改田地。策略只能读 `observeSession()` 的输出。
+
+## `src/game` 怎么拆
+
+| 位置 | 职责 |
+| --- | --- |
+| `game.ts` | 开局、列出行动、执行一步；季末调用 `systems/time.ts` |
+| `ruleset.ts` | 校验 JSON、有界参数覆盖（`resolveRuleset`） |
+| `model/` | 类型与目录常量（状态形状、学科节点、产品规格） |
+| `systems/` | 世界过程（灌溉、加工、季末顺序、传承） |
+| `actions/` | 玩家可点的行动报价与执行 |
+| `observation.ts` | 从状态生成公开观察 |
+
+机制（怎么抽水、怎么扣劳动、季末谁先结算）在 TypeScript。规则 JSON 里的数字和开关不实现公式。
+
+## 现行局实际运行的机制
+
+开局后走经济分支。玩家循环是：生活（粮、田、身体）→ 学科 → 产品/加工 → 工业系统与雇佣 → 商城/供能 → 社会阶段与购粮。
+
+对应代码（改这些不必先确认“是否属于保留范围”）：
+
+- 行动：`economy`、`branches`、`industry`、`life`、`eras`、`social-food`、`shop`、`operations`、`modern`
+- 过程：`time`、`economy`、`economy-catalog`、`agriculture`、`processing`、`inventory`、`knowledge`、`labor`、`industry`、`industry-products`、`branches`、`life`、`eras`、`social-food`、`shop`、`operations`、`modern`、电气/现代目录、`inheritance`、`ancestry`
+- `systems/crafts.ts` 仍负责当地库存回复（野粮、木材、岗位、市场粮），购粮和采集用这份 `production` 子状态
+
+`apps/board` 现行页：聚落、社会、农业、生活、家人、仓库、学科、产品、生产、系统、商城、能源。副本/试炼/作坊页仍在仓库里，观察没有对应 view 时导航不会出现。
+
+## 仍编译、现行局走不到
+
+v27 JSON 仍带若干旧开关。`createInitialState` 会先建 `society` / `development` / `productNetwork` / `expeditions` / `workshops`，再删掉。`tower` 根本不建。
+
+因此下面这些文件还在编译图里，对现行一局没有可观察效果：
+
+- 行动：`livelihood`、`crafts`、`education`、`research`、`society`、`development`、`product-network`、`expedition`、`tower`、`workshop`
+- 过程：远征、试炼、旧作坊、旧社会委托、成长经验、产品网、种源试炼
+- 网页：`expedition-view.ts`、`tower-view.ts`、`workshop-view.ts`
+
+清这些文件会碰到初始化、季末空转调用和规则校验，需单独确认后再做。
+
+## 数字在哪
+
+两处，改之前先定位：
+
+| 位置 | 典型内容 | 怎么改 |
 | --- | --- | --- |
-| 职责 | 规则：这一步在世界里发生了什么 | 对局：命令、会话、读写文件 |
-| 输入 | 状态 + 行动 + 规则 | 玩家命令（runId、revision、actionId） |
-| 输出 | 新状态 + 事件 | 保存后的会话、公开观察 |
-| 不做什么 | 不读盘、不认玩家、不选行动 | 不计算产量、不改田地 |
+| `rulesets/v27/parameters.json` | 开局粮钱、每季口粮 | 改 JSON，受 bounds 约束 |
+| `rulesets/v27/systems.json` | 工资、人生、购粮、电气、阶段长度 | 改 JSON，受 bounds 约束 |
+| `rulesets/v27/catalogs.json` | 物价、作物产量、产品投入、配方进出 | 改 JSON；校验时写回 TypeScript 目录对象 |
+| `rulesets/v27/scenarios.json` | 地点旱涝、公共水 | 改 JSON |
+| TypeScript 目录 | 名称、效果、学科节点结构 | 改机制时才动代码 |
 
-网页、命令行、测试都调用同一套 `transition`。改存档方式不必改农事公式；改灌溉规则不必改 `record.json` 形状。
+JSON 里的 `true` 只表示“这局启用该子系统”，不实现该系统。改“泵抽多少水”动代码；改“雇员工资是 1 还是 2”动 `systems.json`；改作物产量动 `catalogs.json`。
 
-一次行动：入口 → runtime 校验 `commandId` / `revision` → `game.ts` 结算 → 写档 → 返回观察。
-
-## `present` 是干什么的
-
-**不是**把 runtime 的存档 JSON 变简单。存档里仍是完整 `GameState`。
-
-公开观察 `observeSession()` 已经比存档干净（没有种子、随机状态），但对 AI 仍然太大：一次完整 JSON 约 26 万字符，还带着全部不可用行动。`src/present` 只把这份**已经公开的观察**收成精简摘要和 `--section` 分区，供 `player.mjs` 默认阅读。它不参与结算，也不读 `GameState`。
-
-人类网页继续用完整观察，不走 compact。
-
-## `apps` 是不是游戏 UI
-
-主要是入口，不全是画面。
+## `apps` / 胶水
 
 | 目录 | 作用 |
 | --- | --- |
-| `apps/board` | 人类浏览器对局：开局、点按钮、看田地/学堂/系统。本地静态服务。 |
-| `apps/cli` | 命令行：`new` / `observe` / `act` |
-| `apps/host` | 加载当前 `social-eras.v27.json`，给 board 和 CLI 共用 |
+| `apps/board` | 人类浏览器对局。`server.ts` 提供本地静态服务 |
+| `apps/cli` | `list` / `new` / `observe` / `act` / `delete` |
+| `apps/host` | 组装 `rulesets/v27/` 并校验 |
+| `src/runtime` | 命令幂等、revision、写 `saves/<id>/record.json` |
+| `playtests/player.mjs` | AI 只允许 observe / act，默认 compact |
 
-真正的规则不在 `apps` 里。`scripts/player.mjs` 是给 AI 的窄入口，再转去 CLI。
+## 测试
 
-## `rulesets` 里是什么
-
-现在只有 `rulesets/social-eras.v27.json`。里面主要是：
-
-- **开关**：这局开哪些机制（`economy`、`life`、`eras`、`electric`…）
-- **数字**：工资、仓储、每季时间、阶段长度、电灯加时等
-- **场景**：河渠等地点的旱涝、公共水
-- **旧科技节点表**：仍在 JSON 里；现行三条树的节点、作物和配方在 TypeScript 目录（`economy-catalog.ts`、`model/branches.ts` 等）
-
-**机制本身（怎么灌溉、怎么扣劳动、季末顺序）在 `src/game`，不在 JSON。** 改“泵抽多少水”动代码；改“雇员工资是 1 还是 2”动 JSON。JSON 里的 `true` 只表示“这局启用该子系统”，不实现该系统。
-
-## 测试现在测什么
-
-全部用当前 v27 开局。`tests/v27.ts` 是共用规则加载。
-
-| 文件 | 测什么 |
-| --- | --- |
-| `branch-mesh` | 学科分叉前置、持续耕作 |
-| `industry` | 产品验证、系统建设/派工、劳动预留、传承不复制个人知识 |
-| `electric` | 发电、负载、电报到货、现代结算与副本用电 |
-| `eras` | 社会阶段计时、主动结算、公井/公地、观察不含随机 |
-| `social-food` | 购粮策略、额度、与劳动预留交叉 |
-| `renewal` | 饥饿/健康、祖先知识、农事预留报价 |
-| `compact-observation` / `player-text` | 摘要与完整文本不泄漏隐藏状态，报价还在 |
-| `refactor` | 命令幂等与过期拒绝、存档不覆盖、分层与循环依赖 |
-
-不测旧规则版本、不测研究分数、不测脚本代玩。
-
-## 文档
-
-| 文件 | 用途 |
-| --- | --- |
-| [CURRENT_GAMEPLAY_V27.md](CURRENT_GAMEPLAY_V27.md) | 现行玩法 |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | 本页，代码怎么分层 |
-| [AI_PLAYER.md](AI_PLAYER.md) | AI 怎么用命令行玩 |
-| 仓库根 [README.md](../README.md) | 怎么启动 |
-| [playtests/START_HERE.md](../playtests/START_HERE.md) | 模型试玩约定 |
-
-## 除此之外还有什么
-
-```text
-src/game/          规则结算（model 类型、actions 行动、systems 过程）
-src/runtime/       会话与 JSON 存档
-src/present/       AI 精简观察
-apps/              网页、CLI、规则加载
-scripts/player.mjs  AI 受限命令
-rulesets/          当前规则 JSON
-tests/             上表
-playtests/         试玩批次笔记（不是结算）
-docs/              本目录
-package.json / tsconfig.json / AGENTS.md
-dist/              编译产物（gitignore）
-node_modules/      依赖
-artifacts/runs/    当前局存档（gitignore，不入库）
-```
-
-根目录若还有 `v26-各阶段能力对照.pdf`，属于旧对照表，不是运行所需。`scripts/` 里除 `player.mjs` 外的 ps1/mjs 是试玩辅助，不是结算。`src/game` 里仍有远征、试炼、旧工艺等文件，因为 v27 的初始化还按开关组装；现行局主要走经济/分支/工业/人生/时代。
+只在用户明确要求时运行。`tests/v27.ts` 加载现行规则。现有用例覆盖学科分叉、工业与劳动预留、电气、社会阶段、购粮、饥饿与健康。不测旧版本。新增测试文件须先确认。

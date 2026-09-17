@@ -1,4 +1,4 @@
-import type { SessionObservation } from '../runtime/session.js';
+import type { SessionObservation } from '../src/runtime/session.js';
 
 export type CompactSection =
   | 'branches' | 'industry' | 'systems' | 'social-food'
@@ -153,7 +153,7 @@ export function compactObservation(
     urgentBlockers: actions.filter(isUrgent).map(action => ({ id: action.id, reason: action.reason })),
     details: COMPACT_SECTIONS.map(section => ({
       section,
-      command: `node scripts/player.mjs observe --run ${observation.runId} --section ${section}`,
+      command: `node playtests/player.mjs observe --run ${observation.runId} --section ${section}`,
     })),
     ...(extras?.receipt ? { receipt: extras.receipt } : {}),
   };
@@ -207,8 +207,8 @@ export function formatCompactObservation(compact: CompactObservation): string {
   else for (const event of compact.events) lines.push(`- ${eventLine(event)}`);
   lines.push('', '## 分区详情', '静态目录与不可用行动不在本摘要内，按需读取：');
   for (const detail of compact.details) lines.push(`- ${detail.section}: ${detail.command}`);
-  lines.push('', '## 提交方式', `node scripts/player.mjs act --run ${compact.runId} --revision ${compact.revision} --action <可用行动ID>`);
-  lines.push('完整观察: node scripts/player.mjs observe --run ' + compact.runId + ' --format text');
+  lines.push('', '## 提交方式', `node playtests/player.mjs act --run ${compact.runId} --revision ${compact.revision} --action <可用行动ID>`);
+  lines.push('完整观察: node playtests/player.mjs observe --run ' + compact.runId + ' --format text');
   return lines.join('\n') + '\n';
 }
 

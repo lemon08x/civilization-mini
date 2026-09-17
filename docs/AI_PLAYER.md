@@ -1,44 +1,42 @@
 # AI 文本玩家入口
 
-人类使用 `/play` 的聚落界面；AI 使用本文与 `scripts/player.mjs`。二者共用行动接口和结算规则，但使用独立存档。此入口不自动调用模型、不自动选择行动。
+人类使用 `/play` 的聚落界面；AI 使用本文与 `playtests/player.mjs`。二者共用行动接口和结算规则，但使用独立存档。此入口不自动调用模型、不自动选择行动。
 
 ## 准备（宿主执行）
 
 需要 Node.js 24+，在项目根目录执行 `npm ci`、`npm run build`。创建独立 run ID；已有同名目录不会覆盖。
 
 ```powershell
-npm run lab -- new --run ai-demo --scenario river --format text
+npm run lab -- new --run ai-demo --scenario river
 ```
 
-模型试玩先读 `playtests/AGENTS.md` 与 `playtests/START_HERE.md`，按其中规定命名、记录批次和停止条件。
+模型试玩先读 `playtests/AGENTS.md` 与 `playtests/START_HERE.md`。
 
 ## 读取与推进（玩家执行）
 
-`scripts/player.mjs` 默认输出精简观察。建档可用 `lab --format compact`，成功 `act` 会返回最新摘要并更新 `artifacts/runs/ai-demo/observation.md`。根据最新摘要选择一个可用行动，不必再机械读取完整观察或调用 observe：
+`playtests/player.mjs` 默认输出精简观察。成功 `act` 会返回最新摘要并更新 `saves/ai-demo/observation.md`。根据最新摘要选择一个可用行动：
 
 ```text
-node scripts/player.mjs act --run ai-demo --revision <最新revision> --action <可用行动ID> --reason "本次选择的原因"
+node playtests/player.mjs act --run ai-demo --revision <最新revision> --action <可用行动ID> --reason "本次选择的原因"
 ```
 
-材料成本、行动后劳动预留和紧急阻碍保留在摘要中。科技、产品、系统、全部不可用原因按需取分区：
+科技、产品、系统、全部不可用原因按需取分区：
 
 ```text
-node scripts/player.mjs observe --run ai-demo --section branches
+node playtests/player.mjs observe --run ai-demo --section branches
 ```
 
-失败、冲突、文件更新警告或怀疑观察过期时，重新获取权威观察：
+失败或怀疑观察过期时，重新获取：
 
 ```powershell
-node scripts/player.mjs observe --run ai-demo
-node scripts/player.mjs observe --run ai-demo --format text
+node playtests/player.mjs observe --run ai-demo
+node playtests/player.mjs observe --run ai-demo --format text
 ```
 
-`observe` 只读存档。player 入口未传 `--format` 时为 compact；`lab` 默认仍为 JSON。`--format json` / `--format text` 保持原行为。
+`observe` 只读存档。未传 `--format` 时为 compact。
 
 ## 观察边界与存档
 
 - 文本仅从 `observeSession()` 生成，包含现在可见的天气，不包含种子、随机状态或未来天气。
-- `record.json` 和 `history/` 属于存档与重放资料，不供玩家读取。不要用隐藏状态辅助决策。
-- 观察副本可能因文件权限、并发或进程中断未及时更新；revision 校验会拒绝过期行动。以 `observe` 的成功输出为准。
-- 原始存档与历史报告保留。网页存档保存在浏览器；命令行存档在 `artifacts/runs/`。没有自动跨端同步。
-- 本次只改变入口与呈现，不改变规则版本与存档迁移要求。
+- `saves/<runId>/record.json` 是存档，不供玩家读取来辅助决策。
+- 网页存档在浏览器，开始界面打开或新开；命令行存档在 `saves/`。没有自动跨端同步。

@@ -80,3 +80,57 @@ export const topicsFor=(s:GameState)=>s.economy?.branches?[]:s.economy?.modern?A
 export const productsFor=(s:GameState)=>s.economy?.branches?ALL_PRODUCTS.filter(p=>BRANCH_PRODUCTS[p.id]||s.electric&&ELECTRIC_KNOWLEDGE[p.id]).map(p=>({...p,requires:{},...(s.electric&&p.id==='E01'?{effect:`每季手动供能最多一次，消耗1公共水和1耐用；旱季发${s.electric.rules.dryHydroPower}电，其余季发6电。`}:{}),...(s.electric&&p.id==='E04'?{effect:'启用后季末存入最多6份余电，充电扣1耐用；次季手动供能时放电，每季最多一次。不自动发电或放电。'}:{}),...(s.electric&&p.id==='LAMP'?{effect:`手动供能时本季首次点灯耗${s.electric.rules.servicePower}电、1耐用，增加${s.electric.rules.lampTime}可用时间。可夜间学习，仍需精力。`}:{}),...(s.electric&&p.id==='TELEGRAPH'?{effect:`手动供能时每季耗${s.electric.rules.servicePower}电、1耐用，本季新订货即时交付；库存、运输、价款照常，不加速维修。`}:{})})):s.economy?.modern?[...PRODUCTS,...MODERN_PRODUCTS]:PRODUCTS;
 export const processesFor=(s:GameState)=>s.economy?.branches?ALL_PROCESSES.filter(p=>BRANCH_PROCESSES[p.id]||s.electric&&ELECTRIC_KNOWLEDGE[p.id]).map(p=>({...p,requires:{}})):s.economy?.modern?[...PROCESSES,...MODERN_PROCESSES]:PROCESSES;
 export const goodsFor=(s:GameState)=>s.electric?ALL_GOODS:s.economy?.modern?{...GOODS,...MODERN_GOODS}:GOODS;
+
+export interface CatalogOverlay {
+  goods: Record<string, { price: number; food: number }>;
+  crops: Record<string, { duration: number; yield: number; straw: number; level: number }>;
+  products: Record<string, { inputs: Record<string, number> }>;
+  processes: Record<string, { inputs: Record<string, number>; outputs: Record<string, number>; wait: number; power?: number }>;
+}
+
+function integerMap(value: Record<string, number>, allowZero = true): void {
+  for (const n of Object.values(value)) {
+    if (!Number.isInteger(n) || n < (allowZero ? 0 : 1) || n > 99) throw new Error('目录数值越界');
+  }
+}
+
+/** JSON 是数字来源；TypeScript 目录只保留名称、效果和结构。 */
+export function applyCatalogOverlay(overlay: CatalogOverlay): void {
+  if (Object.keys(overlay.goods).length !== Object.keys(ALL_GOODS).length) throw new Error('物资目录条目不匹配');
+  for (const [id, n] of Object.entries(overlay.goods)) {
+    const item = ALL_GOODS[id];
+    if (!item || !Number.isInteger(n.price) || n.price < 0 || n.price > 99 || !Number.isInteger(n.food) || n.food < 0 || n.food > 9) throw new Error('物资数值无效：' + id);
+    item.price = n.price;
+    item.food = n.food;
+  }
+  if (Object.keys(overlay.crops).length !== Object.keys(CROPS).length) throw new Error('作物目录条目不匹配');
+  for (const [id, n] of Object.entries(overlay.crops)) {
+    const crop = CROPS[id as Crop];
+    if (!crop || ![n.duration, n.yield, n.straw, n.level].every(Number.isInteger) || n.duration < 1 || n.yield < 1) throw new Error('作物数值无效：' + id);
+    crop.duration = n.duration;
+    crop.yield = n.yield;
+    crop.straw = n.straw;
+    crop.level = n.level;
+  }
+  if (Object.keys(overlay.products).length !== ALL_PRODUCTS.length) throw new Error('产品目录条目不匹配');
+  for (const product of ALL_PRODUCTS) {
+    const n = overlay.products[product.id];
+    if (!n || !n.inputs) throw new Error('缺少产品投入：' + product.id);
+    integerMap(n.inputs);
+    product.inputs = { ...n.inputs };
+  }
+  if (Object.keys(overlay.processes).length !== ALL_PROCESSES.length) throw new Error('工序目录条目不匹配');
+  for (const process of ALL_PROCESSES) {
+    const n = overlay.processes[process.id];
+    if (!n || !n.inputs || !n.outputs || !Number.isInteger(n.wait) || n.wait < 0 || n.wait > 8) throw new Error('工序数值无效：' + process.id);
+    integerMap(n.inputs);
+    integerMap(n.outputs, false);
+    process.inputs = { ...n.inputs };
+    process.outputs = { ...n.outputs };
+    process.wait = n.wait;
+    if (n.power !== undefined) {
+      if (!Number.isInteger(n.power) || n.power < 1 || n.power > 12) throw new Error('工序用电无效：' + process.id);
+      process.power = n.power;
+    } else delete process.power;
+  }
+}

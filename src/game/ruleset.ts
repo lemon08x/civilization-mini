@@ -13,6 +13,7 @@ import { SHOP_BOUNDS } from './model/shop.js';
 import type { ShopRules } from "./model/shop.js";
 import type { DevelopmentRules } from './model/development.js';
 import type { ProductionParameters, ProductionRules, ProductionScenario } from './model/production.js';
+import { applyCatalogOverlay, type CatalogOverlay } from './systems/economy-catalog.js';
 export interface Parameters {
   actionsPerTurn: number; turnsPerGeneration: number; generations: number;
   initialFood: number; initialMoney: number; foodPerTurn: number; workIncome: number;
@@ -59,6 +60,7 @@ export interface Ruleset {
   passiveInvestment?: { victoryPercent: number; reportPrice: number };
   technologyFeedback?: { buildActions: number; workbenchWood: number; kilnWood: number; kilnClay: number };
   socialInheritance?: { wage: number; goodsCapacity: number; archiveDiscount: number };
+  catalogs: CatalogOverlay;
 }
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -149,6 +151,8 @@ export function validateRuleset(value: unknown): Ruleset {
     if(!isRecord(value.electric)||Object.keys(value.electric).length!==Object.keys(ELECTRIC_BOUNDS).length)throw new Error('电气参数不完整');
     for(const [k,[min,max]] of Object.entries(ELECTRIC_BOUNDS)){const n=value.electric[k];if(!Number.isInteger(n)||(n as number)<min||(n as number)>max)throw new Error('电气参数越界：'+k);}
   }
+  if (!isRecord(value.catalogs) || !isRecord(value.catalogs.goods) || !isRecord(value.catalogs.crops) || !isRecord(value.catalogs.products) || !isRecord(value.catalogs.processes)) throw new Error('目录数值不完整');
+  applyCatalogOverlay(value.catalogs as unknown as CatalogOverlay);
   const rules = structuredClone(value) as unknown as Ruleset;
   if (rules.production) validateProduction(rules);
   else if (rules.technologies.some(t => t.prerequisiteAny || t.helpfulPrerequisites) || Object.values(rules.scenarios).some(s => s.production)) throw new Error('旧规则不能注入新生产机制');

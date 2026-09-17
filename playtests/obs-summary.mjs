@@ -1,5 +1,5 @@
 // Helper: read observe output from stdin (or arg file) and print a compact summary.
-// Usage: node scripts/player.mjs observe --run <id> 2>&1 | node playtests/obs-summary.mjs
+// Usage: node playtests/player.mjs observe --run <id> 2>&1 | node playtests/obs-summary.mjs
 import fs from 'node:fs';
 
 let raw = '';

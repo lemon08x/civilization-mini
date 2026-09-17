@@ -4,6 +4,7 @@ reports/
 *.tmp
 dist/
 artifacts/
+saves/
 
 # Local observations and disposable tool caches
 .grok-obs.json

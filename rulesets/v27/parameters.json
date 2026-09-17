@@ -1,0 +1,106 @@
+{
+  "parameters": {
+    "actionsPerTurn": 3,
+    "turnsPerGeneration": 16,
+    "generations": 3,
+    "initialFood": 6,
+    "initialMoney": 8,
+    "foodPerTurn": 2,
+    "workIncome": 2,
+    "foodPrice": 1,
+    "cropPotential": 4,
+    "channelCost": 3,
+    "channelDurability": 3,
+    "repairCost": 1,
+    "trialCost": 2,
+    "trialSeasons": 2,
+    "trialLandCost": 1,
+    "archiveCost": 1,
+    "studyCost": 0,
+    "trainingCost": 1,
+    "studyMultiplier": 1,
+    "hardshipLimit": 3
+  },
+  "parameterBounds": {
+    "actionsPerTurn": [
+      2,
+      6
+    ],
+    "turnsPerGeneration": [
+      4,
+      24
+    ],
+    "generations": [
+      1,
+      6
+    ],
+    "initialFood": [
+      0,
+      30
+    ],
+    "initialMoney": [
+      0,
+      30
+    ],
+    "foodPerTurn": [
+      1,
+      6
+    ],
+    "workIncome": [
+      1,
+      8
+    ],
+    "foodPrice": [
+      1,
+      5
+    ],
+    "cropPotential": [
+      2,
+      8
+    ],
+    "channelCost": [
+      1,
+      15
+    ],
+    "channelDurability": [
+      1,
+      8
+    ],
+    "repairCost": [
+      1,
+      8
+    ],
+    "trialCost": [
+      1,
+      10
+    ],
+    "trialSeasons": [
+      2,
+      6
+    ],
+    "trialLandCost": [
+      1,
+      2
+    ],
+    "archiveCost": [
+      1,
+      5
+    ],
+    "studyCost": [
+      0,
+      5
+    ],
+    "trainingCost": [
+      0,
+      5
+    ],
+    "studyMultiplier": [
+      1,
+      3
+    ],
+    "hardshipLimit": [
+      2,
+      6
+    ]
+  }
+}

@@ -10,17 +10,22 @@ import { operationsPage } from './operations-view.js';
 import { marketPage } from './shop-view.js';
 import {createSession,observeSession,parseSession,submitCommand} from '../../src/runtime/session.js';
 import type {Session} from '../../src/runtime/records.js';
-import {validateRuleset} from '../../src/game/ruleset.js';
 import {ALL_PRODUCTS as PRODUCTS,ALL_GOODS as GOODS,ALL_TOPICS as TOPICS,SUBJECT_NAMES,WORKER_NAMES,CROPS,ALL_PROCESSES as PROCESSES} from '../../src/game/systems/economy-catalog.js';
 import {esc,needsText,inputsText} from './economy-view.js';
 import type {GameEvent} from '../../src/game/model/events.js';
+import { loadAssembledRules } from './rules.js';
+import { loadSave, writeSave } from './saves.js';
 const $=(id:string)=>document.getElementById(id)!;
-const rules=validateRuleset(await (await fetch('/rulesets/social-eras.v27.json')).json());
-const KEY='civilization-mini.social-eras.v27';let raw=localStorage.getItem(KEY),failed=false,busy=false,page='聚落',guide=false,selectedCourse='',filter='',shopCategory='物资';
-if(!raw){location.replace('/start');await new Promise<never>(()=>{});}
-let session=await createSession({runId:crypto.randomUUID(),ruleset:rules,seed:17,scenarioId:'river'});
+const rules=await loadAssembledRules();
+const requested=new URLSearchParams(location.search).get('save');
+if(!requested){location.replace('/start');throw new Error('missing save');}
+const saveId=requested;
+const loaded=loadSave(saveId);
+if(!loaded){location.replace('/start');throw new Error('missing save');}
+let failed=false,busy=false,page='聚落',guide=false,selectedCourse='',filter='',shopCategory='物资';
+let session=await createSession({runId:saveId,ruleset:rules,seed:17,scenarioId:'river'});
 const error=(message:string)=>{$('error').hidden=!message;$('error').textContent=message;};
-try{if(raw){session=parseSession(JSON.parse(raw));if(session.record.manifest.ruleset.rulesVersion!==rules.rulesVersion)throw new Error('只接受当前规则；请另开新局');}}catch(e){failed=true;error('当前存档无法读取，请新开局：'+(e as Error).message);}
+try{session=parseSession(loaded);if(session.record.manifest.ruleset.rulesVersion!==rules.rulesVersion)throw new Error('只接受当前规则；请另开新局');}catch(e){failed=true;error('当前存档无法读取，请新开局：'+(e as Error).message);}
 function feedback(e:GameEvent):string {
   if(e.type==='era')return e.detail;
   if(e.type==='social-food')return e.detail;
@@ -52,7 +57,7 @@ function feedback(e:GameEvent):string {
   if(e.type==='handed-over')return '后辈接手，实物与雇员状态保留。';
   return '';
 }
-async function save(next:Session){if(localStorage.getItem(KEY)!==raw)throw new Error('另一页面更新了存档，请刷新');const nextRaw=JSON.stringify({record:next.record,state:next.state});localStorage.setItem(KEY,nextRaw);raw=nextRaw;session=next;failed=false;error('');render();}
+async function save(next:Session){writeSave(saveId,next);session=next;failed=false;error('');render();}
 async function act(id:string){if(busy||failed)return;busy=true;try{await save((await submitCommand(session,{commandId:session.record.manifest.runId+':'+session.record.entries.length,expectedRevision:session.record.entries.length,actionId:id})).session);}catch(e){error((e as Error).message);}finally{busy=false;}}
 function render(){
   const o=observeSession(session).game,e=o.economy!,PRODUCTS=e.products,PROCESSES=e.processes;
@@ -84,5 +89,5 @@ function render(){
 }
 function download(name:string,data:unknown){const u=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
 $('export').onclick=()=>download('economy-run.json',{record:session.record,state:session.state});
-$('import').onchange=async ev=>{const file=(ev.target as HTMLInputElement).files?.[0];if(!file||busy)return;busy=true;try{const value=JSON.parse(await file.text());const next=parseSession(value);if(next.record.manifest.ruleset.rulesVersion!==rules.rulesVersion)throw new Error('仅导入当前规则存档');await save(next);}catch(e){error((e as Error).message);}finally{busy=false;}};
+$('import').onchange=async ev=>{const file=(ev.target as HTMLInputElement).files?.[0];if(!file||busy)return;busy=true;try{const value=JSON.parse(await file.text());const next=parseSession(value);if(next.record.manifest.ruleset.rulesVersion!==rules.rulesVersion)throw new Error('仅导入当前规则存档');const id=crypto.randomUUID();writeSave(id,next,`导入 · ${new Date().toLocaleString()}`);location.assign('/play?save='+encodeURIComponent(id));}catch(e){error((e as Error).message);busy=false;}};
 render();
