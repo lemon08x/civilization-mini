@@ -1,14 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { createSession, observeSession, submitCommand } from '../src/runtime/session.js';
-import { validateRuleset } from '../src/game/ruleset.js';
 import { textObservation } from '../apps/cli/text-observation.js';
+import { rules } from './v27.js';
 
 test('AI text preserves visible state and actions without revealing run internals', async () => {
-  const ruleset=validateRuleset(JSON.parse(await readFile('rulesets/recovery-inheritance.v20.json','utf8')));
-  const implementation=JSON.parse(await readFile('dist/implementation.json','utf8'));
-  const session=await createSession({runId:'text-check',ruleset,implementation,seed:17,scenarioId:'river'});
+  const session=await createSession({runId:'text-check',ruleset:rules,seed:17,scenarioId:'river'});
   const observation=observeSession(session), before=JSON.stringify(observation);
   const text=textObservation(observation);
   assert.equal(JSON.stringify(observation),before);

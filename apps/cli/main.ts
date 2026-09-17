@@ -1,17 +1,11 @@
 import { textObservation } from './text-observation.js';
 import type { SessionObservation } from '../../src/runtime/session.js';
 import { compactObservation, formatCompactObservation, observationSection, parseCompactSection } from '../../src/present/compact-observation.js';
-import { mkdir, writeFile, rename } from 'node:fs/promises';
+import { writeFile, rename } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { resolveRuleset, isRecord } from '../../src/game/ruleset.js';
+import { resolveRuleset } from '../../src/game/ruleset.js';
 import { createSession, observeSession } from '../../src/runtime/session.js';
-import { importRecord } from '../../src/runtime/replay.js';
 import { FileRunStore } from '../../src/runtime/file-store.js';
-import { metrics } from '../../src/research/metrics.js';
-import { POLICIES } from '../../src/agents/contract.js';
-import { scriptedAgent } from '../../src/agents/scripted/baseline.js';
-import { runExperiment, validateExperiment } from '../../src/research/runner.js';
-import { reportMarkdown } from '../../src/research/compare.js';
 import { loadCurrentContext, projectRoot, readJson } from './context.js';
 
 function options(args: string[]): Record<string, string> {
@@ -44,77 +38,29 @@ try {
     }
   };
   if (command === 'help') {
-    console.log(`世代规则预研 — 三类升级树规则0.19.0
-  npm run lab -- new --run demo --seed 17 --scenario woodland
-  npm run lab -- new --run farm --rules economy --scenario river
+    console.log(`世代规则预研 — 0.27.0
+  npm run lab -- new --run demo --seed 17 --scenario river
   npm run lab -- observe --run demo
-  npm run lab -- act --run demo --revision 0 --action economy:study:A01
-  npm run lab -- metrics --run demo
-  npm run lab -- export --run demo
-  npm run lab -- import --run imported --file runs/manual.json
-  npm run simulate -- --candidate experiments/storage-capacity.json
-  node experiments/economy-v9-probe.mjs
-运行产物只写 artifacts/。只接受当前规则和实现的存档。`);
+  npm run lab -- act --run demo --revision 0 --action <行动ID>
+运行产物只写 artifacts/runs/。`);
   } else {
-    const context = await loadCurrentContext();
-    if(opts.rules&&opts.rules!=='economy')throw new Error('当前入口只支持新版 --rules economy');
-    const {implementation,base}=context;
-    const store = new FileRunStore(join(projectRoot, 'artifacts/runs'), implementation);
-    if (command === 'simulate') {
-      const raw = await readJson(opts.spec ? resolve(opts.spec) : join(projectRoot, 'experiments/plans/default.json'));
-      if (!isRecord(raw)) throw new Error('实验计划必须是对象');
-      if (opts.seeds) raw.seeds = opts.seeds.split(',').map(Number);
-      if (opts.candidate) {
-        if (!Array.isArray(raw.variants)) throw new Error('计划缺少参数组');
-        raw.variants.push({ id: 'candidate', parameters: await readJson(resolve(opts.candidate)) });
-      }
-      const agents = Object.fromEntries(POLICIES.map(id => [id, scriptedAgent(id)]));
-      const spec = validateExperiment(raw, base, agents);
-      const artifactId = `${spec.id}-${new Date().toISOString().replace(/[:.]/g, '-')}-${crypto.randomUUID().slice(0, 8)}`;
-      const directory = join(projectRoot, 'artifacts/experiments', artifactId);
-      await mkdir(join(projectRoot, 'artifacts/experiments'), { recursive: true });
-      await mkdir(directory, { recursive: false });
-      await mkdir(join(directory, 'runs'));
-      await writeFile(join(directory, 'manifest.json'), JSON.stringify({ spec, implementation, baseRuleset: base }, null, 2), { flag: 'wx' });
-      try {
-        const results = await runExperiment(spec, base, implementation, agents, async (session, result) => {
-          await writeFile(join(directory, 'runs', `${result.runId}.json`), JSON.stringify(session.record), { flag: 'wx' });
-        });
-        await writeFile(join(directory, 'metrics.json'), JSON.stringify(results, null, 2), { flag: 'wx' });
-        await writeFile(join(directory, 'report.md'), reportMarkdown(results), { flag: 'wx' });
-        console.log(JSON.stringify({ runs: results.length, controller: 'scripted', report: join(directory, 'report.md') }));
-      } catch (error) {
-        await writeFile(join(directory, 'failure.json'), JSON.stringify({ error: (error as Error).message }), { flag: 'wx' }); throw error;
-      }
-    } else {
-      if (!opts.run) throw new Error('请指定 --run');
-      if (command === 'new') {
-        const overrides = opts.params ? await readJson(resolve(opts.params)) : {};
-        const session = await createSession({ runId: opts.run, ruleset: resolveRuleset(base, overrides), implementation, seed: Number(opts.seed ?? 1), scenarioId: opts.scenario ?? (base.civilization?'river':base.modern?'canyon':base.production ? 'woodland' : 'river') });
-        await store.create(session); const created = observeSession(session); await publishObservation(created); printObservation(created);
-      } else if (command === 'import') {
-        if (!opts.file) throw new Error('import 需要 --file');
-        const raw = await readJson(resolve(opts.file));
-        if (!isRecord(raw) || !isRecord(raw.manifest) || !isRecord(raw.manifest.ruleset) || raw.manifest.ruleset.rulesVersion !== base.rulesVersion) throw new Error('只接受当前学科经济规则存档，请新开局');
-        const session = await importRecord(raw, implementation, opts.run);
-        await store.create(session); const imported = observeSession(session); await publishObservation(imported); printObservation(imported);
-      } else if (command === 'act') {
-        if (!opts.action || opts.revision === undefined) throw new Error('act 需要 --action 和 --revision');
-        const result = await store.submit(opts.run, { commandId: opts['command-id'] ?? `${opts.run}:${opts.revision}`, expectedRevision: Number(opts.revision), actionId: opts.action, ...(opts.reason === undefined ? {} : { reason: opts.reason }) });
-        const after = observeSession(result.session);
-        await publishObservation(after);
-        printObservation(after, { duplicate: result.duplicate, revision: result.revision });
-      } else {
-        const session = await store.load(opts.run);
-        if (command === 'observe') {
-          const observed = observeSession(session);
-          if (opts.section) console.log(observationSection(observed, parseCompactSection(opts.section)));
-          else printObservation(observed);
-        }
-        else if (command === 'metrics') console.log(JSON.stringify(metrics(session.record, session.state), null, 2));
-        else if (command === 'export') console.log(JSON.stringify(session.record, null, 2));
-        else throw new Error('未知命令');
-      }
-    }
+    const { base } = await loadCurrentContext();
+    const store = new FileRunStore(join(projectRoot, 'artifacts/runs'));
+    if (!opts.run) throw new Error('请指定 --run');
+    if (command === 'new') {
+      const overrides = opts.params ? await readJson(resolve(opts.params)) : {};
+      const session = await createSession({ runId: opts.run, ruleset: resolveRuleset(base, overrides), seed: Number(opts.seed ?? 1), scenarioId: opts.scenario ?? 'river' });
+      await store.create(session); const created = observeSession(session); await publishObservation(created); printObservation(created);
+    } else if (command === 'act') {
+      if (!opts.action || opts.revision === undefined) throw new Error('act 需要 --action 和 --revision');
+      const result = await store.submit(opts.run, { commandId: opts['command-id'] ?? `${opts.run}:${opts.revision}`, expectedRevision: Number(opts.revision), actionId: opts.action, ...(opts.reason === undefined ? {} : { reason: opts.reason }) });
+      const after = observeSession(result.session);
+      await publishObservation(after);
+      printObservation(after, { duplicate: result.duplicate, revision: result.revision });
+    } else if (command === 'observe') {
+      const observed = observeSession(await store.load(opts.run));
+      if (opts.section) console.log(observationSection(observed, parseCompactSection(opts.section)));
+      else printObservation(observed);
+    } else throw new Error('未知命令');
   }
 } catch (error) { console.error(JSON.stringify({ error: (error as Error).message })); process.exitCode = 1; }

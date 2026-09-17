@@ -1,1 +1,1 @@
-export { projectRoot, readJson, loadCurrentContext, loadContext } from '../host/context.js';
+export { projectRoot, readJson, loadCurrentContext } from '../host/context.js';

@@ -1,24 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
+
 import {createInitialState,getAvailableActions,transition} from '../src/game/game.js';
 import {parseActionId} from '../src/game/model/action.js';
-import {activePerson,heir} from '../src/game/model/state.js';
+import {activePerson} from '../src/game/model/state.js';
 import {validateRuleset,resolveRuleset} from '../src/game/ruleset.js';
 import {settleLife,energyCeiling,healthCeiling} from '../src/game/systems/life.js';
 import {reservedLabor} from '../src/game/systems/industry.js';
 import {ancestorKnows} from '../src/game/systems/ancestry.js';
 import {getObservation} from '../src/game/observation.js';
 import {createSession,observeSession,submitCommand} from '../src/runtime/session.js';
-import {replayRecord} from '../src/runtime/replay.js';
-const rules=validateRuleset(JSON.parse(await readFile('rulesets/recovery-inheritance.v20.json','utf8')));
+import {rules} from './v27.js';
 const fresh=()=>structuredClone(createInitialState(rules,17,'river'));
 type State=ReturnType<typeof fresh>;
 const offer=(s:State,id:string)=>getAvailableActions(s,rules).find(a=>a.id==='economy:'+id)!;
 const act=(s:State,id:string)=>transition(s,parseActionId(id==='handover'?id:'economy:'+id),rules);
 function dry(){const s=fresh();s.location.rain=0;s.location.water=3;s.economy!.industry!.instances.hand={id:'hand',enabled:true,commissioned:true,operator:'self'};return s;}
 
-test('v20 configuration is isolated and supports separate candidates',()=>{
+test('renewal parameters stay bounded',()=>{
  assert.throws(()=>validateRuleset({...rules,renewal:undefined}));
  assert.throws(()=>validateRuleset({...rules,rulesVersion:'0.19.0'}));
  assert.throws(()=>resolveRuleset(rules,{'renewal.inheritedTime':0}));
@@ -52,19 +51,7 @@ test('season settlement supplies the deficit streak and resets it when fed',()=>
  s=structuredClone(s);s.household.food=2;s=act(s,'end:season').state;
  assert.equal(s.household.hardship,0);assert.equal(activePerson(s).vitality!.health,97);
 });
-test('ancestral learning costs little but still requires every prerequisite and an action',()=>{
- const s=fresh();s.economy!.branches!.learned[s.household.activePersonId].push('M0','M1','M2');
- assert.equal(ancestorKnows(s,'M2',s.household.heirId),true);
- heir(s).vitality!.ageSeasons=18*4;s.status='handover';
- const handed=act(s,'handover');let n=handed.state;
- assert.ok(!n.economy!.branches!.learned[n.household.activePersonId].includes('M0'));
- assert.deepEqual(handed.events.find(e=>e.type==='handed-over')?.mastered,['A0']);
- assert.equal(offer(n,'branchlearn:M2').enabled,false);
- assert.equal(offer(n,'branchlearn:M0').time,1);assert.equal(offer(n,'branchlearn:M0').energy,1);
- for(const id of ['M0','M1','M2'])n=act(n,'branchlearn:'+id).state;
- assert.equal(n.life!.timeRemaining,9);assert.ok(n.economy!.branches!.learned[n.household.activePersonId].includes('M2'));
- assert.ok(offer(n,'branchlearn:L0').time!>=3);
-});
+
 test('descendant knowledge cannot discount ancestors; deceased ancestor records remain useful',()=>{
  const s=fresh();s.economy!.branches!.learned[s.household.heirId].push('M0');assert.equal(ancestorKnows(s,'M0'),false);
  s.economy!.branches!.learned[s.household.activePersonId].push('L0');activePerson(s).vitality!.alive=false;
@@ -85,15 +72,9 @@ test('manual watering can release reservation; pause remains free',()=>{
  const n=act(s,'farm:wheat');assert.ok(!n.events.some(e=>e.type==='industry'&&e.operation==='worked'&&e.target==='hand'));
  const paused=act(s,'sysrun:hand').state;assert.equal(paused.life!.timeRemaining,3);assert.deepEqual(reservedLabor(paused),{time:0,energy:0});
 });
-test('care is affordable, quotes actual expense and respects health ceiling',()=>{
- const s=fresh();activePerson(s).vitality!.health=50;
- const a=offer(s,'care:self');assert.equal(a.time,2);assert.equal(a.money,1);
- const n=act(s,'care:self').state;assert.equal(activePerson(n).vitality!.health,58);assert.equal(n.household.money,s.household.money-1);
-});
-test('v20 commands replay exactly; observations exclude hidden lifespan and RNG',async()=>{
- const implementation=JSON.parse(await readFile('dist/implementation.json','utf8'));
- let session=await createSession({runId:'renewal-test',ruleset:rules,implementation,seed:17,scenarioId:'river'});
+
+test('observations exclude hidden lifespan and RNG',async()=>{
+ let session=await createSession({runId:'renewal-test',ruleset:rules,seed:17,scenarioId:'river'});
  for(const id of ['farm:wheat','branchlearn:M0','end:season'])session=(await submitCommand(session,{commandId:'test-'+session.record.entries.length,expectedRevision:session.record.entries.length,actionId:'economy:'+id})).session;
- const view=observeSession(session);assert.deepEqual(observeSession(await replayRecord(session.record,implementation)),view);
- assert.doesNotMatch(JSON.stringify(view),/lifespanSeasons|randomState|constitution/);
+ assert.doesNotMatch(JSON.stringify(observeSession(session)),/lifespanSeasons|randomState|constitution/);
 });

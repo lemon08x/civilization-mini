@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const [command, ...args] = process.argv.slice(2);
 try {
-  if (!['observe', 'act', 'metrics'].includes(command)) throw new Error('玩家入口仅允许 observe / act / metrics');
+  if (!['observe', 'act'].includes(command)) throw new Error('玩家入口仅允许 observe / act');
   const options = {};
   for (let i = 0; i < args.length; i += 2) {
     const key = args[i];

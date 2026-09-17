@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
+
 import {createInitialState,getAvailableActions,transition} from '../src/game/game.js';
 import {getObservation} from '../src/game/observation.js';
 import {parseActionId} from '../src/game/model/action.js';
@@ -12,16 +12,9 @@ import {recordEraProduction,renewEraServices,projectEraRemainder} from '../src/g
 import {personalBudget,systemDefinitions,settleIndustry} from '../src/game/systems/industry.js';
 import {socialFoodQuote} from '../src/game/systems/social-food.js';
 import {shopCatalog,renewShop} from '../src/game/systems/shop.js';
-import {technologyVictory} from '../src/game/systems/investment.js';
 import {createSession,observeSession,submitCommand} from '../src/runtime/session.js';
-import {replayRecord} from '../src/runtime/replay.js';
 import type {GameEvent} from '../src/game/model/events.js';
-const v22=validateRuleset(JSON.parse(await readFile('rulesets/social-eras.v22.json','utf8')));
-const v23=validateRuleset(JSON.parse(await readFile('rulesets/social-eras.v23.json','utf8')));
-const v24=validateRuleset(JSON.parse(await readFile('rulesets/social-eras.v24.json','utf8')));
-const v25=validateRuleset(JSON.parse(await readFile('rulesets/social-eras.v25.json','utf8')));
-const base=validateRuleset(JSON.parse(await readFile('rulesets/social-eras.v26.json','utf8')));
-const old=validateRuleset(JSON.parse(await readFile('rulesets/social-food.v21.json','utf8')));
+import {rules as base} from './v27.js';
 const rules=resolveRuleset(base,{'eras.seasons':8,'eras.warning':1});
 const fresh=()=>{const s=structuredClone(createInitialState(rules,17,'river'));s.household.food=100;s.household.money=100;s.era!.card='trade';renewEraServices(s,rules);return s;};
 type State=ReturnType<typeof fresh>;
@@ -29,11 +22,9 @@ const act=(s:State,id:string)=>transition(s,parseActionId(id==='handover'?id:'ec
 const offer=(s:State,id:string)=>getAvailableActions(s,rules).find(a=>a.id==='economy:'+id);
 const know=(s:State,...ids:string[])=>s.economy!.branches!.learned[s.household.activePersonId].push(...ids);
 
-test('v26 version isolation and configurable stage windows without changing old rules',()=>{
- assert.equal(v22.rulesVersion,'0.22.0');assert.equal(v23.rulesVersion,'0.23.0');assert.equal(v24.rulesVersion,'0.24.0');assert.equal(v25.rulesVersion,'0.25.0');assert.equal(base.rulesVersion,'0.26.0');
- assert.throws(()=>validateRuleset({...base,eras:undefined}));assert.throws(()=>validateRuleset({...old,eras:base.eras}));assert.throws(()=>resolveRuleset(base,{'eras.seasons':0}));
+test('stage windows can be overridden on the current ruleset',()=>{
+ assert.throws(()=>validateRuleset({...base,eras:undefined}));assert.throws(()=>resolveRuleset(base,{'eras.seasons':0}));
  assert.equal(base.eras!.seasons,192);assert.equal(rules.eras!.seasons,8);
- const s=createInitialState(old,17,'river');assert.equal(s.era,undefined);assert.equal(branchView(s).nodes.length,21);
 });
 test('stage changes exactly on deadline if the player has not settled, warns in advance, card draw only then',()=>{
  let s=fresh();const original=s.era!.card;const events:GameEvent[]=[];
@@ -108,25 +99,12 @@ test('society card affects actual prices, income, education and metal supply',()
  s.era!.card='industry';renewShop(s,rules,[]);assert.equal(shopCatalog(s,rules).find(x=>x.id==='good-iron')!.stock,4);
  s.era!.index=2;renewShop(s,rules,[]);assert.ok(shopCatalog(s,rules).some(x=>x.id==='good-copper'));
 });
-test('final dungeon absent before modern and preserves independent stage payout even if unfinished',()=>{
- let s=fresh();assert.equal(offer(s,'dungeonstart:family'),undefined);assert.equal(offer(s,'tap:on')!.enabled,false);
- s.era!.index=3;s.era!.elapsed=7;s.era!.rewardEscrow=240;s=structuredClone(act(s,'end:season').state);
- assert.equal(s.status,'complete');assert.equal(s.era!.closed,true);assert.equal(s.household.money,102);assert.equal(technologyVictory(s,rules)!.won,false);
-});
-test('final dungeon supports math and real goods, rejects repeated completion, and settles remaining time at season end',()=>{
- let s=fresh();s.era!.index=3;know(s,'Q0','Q1','L0');s.era!.rules.dungeonTarget=2;
- s=structuredClone(act(s,'dungeonstart:family').state);s=structuredClone(act(s,'dungeonwork:math').state);const food=s.household.food;
- s=structuredClone(act(s,'dungeonwork:food').state);assert.equal(s.household.food,food-4);assert.equal(s.era!.dungeon.complete,true);assert.equal(s.status,'active');
- assert.equal(offer(s,'dungeonwork:food')!.enabled,false);const stay=act(s,'end:season');assert.equal(stay.state.status,'active');
- const n=act(stay.state,'erasettle:stage');assert.equal(n.state.status,'complete');assert.equal(technologyVictory(n.state,rules)!.won,true);
- assert.ok(n.events.some(e=>e.type==='era'&&e.operation==='projected'));
-});
-test('short full social sequence replays with deterministic cards, no future cards or RNG in observations',async()=>{
- const implementation=JSON.parse(await readFile('dist/implementation.json','utf8'));
- const short=resolveRuleset(base,{'eras.seasons':1,'eras.warning':1});let session=await createSession({runId:'eras-replay',ruleset:short,implementation,seed:17,scenarioId:'river'});
+
+test('short social sequence observations hide RNG',async()=>{
+ const short=resolveRuleset(base,{'eras.seasons':1,'eras.warning':1});let session=await createSession({runId:'eras-observe',ruleset:short,seed:17,scenarioId:'river'});
  for(let i=0;i<4;i++)session=(await submitCommand(session,{commandId:'season-'+i,expectedRevision:i,actionId:'economy:end:season'})).session;
  const o=observeSession(session);assert.equal(o.eraSettlements!.length,4);assert.equal(o.game.status,'complete');
- assert.deepEqual(observeSession(await replayRecord(session.record,implementation)),o);assert.doesNotMatch(JSON.stringify(o),/randomState|lifespanSeasons|futureCards/);
+ assert.doesNotMatch(JSON.stringify(o),/randomState|lifespanSeasons|futureCards/);
 });
 function staffWell(s:State,operator:'self'|null='self'){
  s.economy!.industry!.instances.well={id:'well',commissioned:true,enabled:!!operator,operator};

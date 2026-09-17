@@ -44,7 +44,7 @@ node scripts/player.mjs act --run <run ID> --revision <最新 revision> --action
 
 ## 4. 收尾与感受
 
-按需调用 `node scripts/player.mjs metrics --run <run ID>` 获取指标，结合最后观察填写逐局状态和 `feedback.md`。报告同时写明计划、已开始、达到窗口/目标、终局、行动上限、未完成的局数；这些停止分类互斥，不把“玩过”写成“通关”。
+结合最后观察填写逐局状态和 `feedback.md`。报告同时写明计划、已开始、达到窗口/目标、终局、行动上限、未完成的局数；这些停止分类互斥，不把“玩过”写成“通关”。
 
 当前 `lab new` 会将存档代理默认登记为 `human/manual`，这不能证明实际控制方式；本批 `brief.md` 必须如实登记为“当前模型逐步决策”，或实际使用的其他方式。模型名称/版本只有已知时填写，不猜测。
 

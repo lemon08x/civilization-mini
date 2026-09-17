@@ -2,7 +2,7 @@
 
 读者：要一次看清“游戏在玩什么”和“代码怎么结算”的人。
 
-当前默认规则与工程 **0.27.0**（`rulesets/social-eras.v27.json`）。分层约束由 [ARCHITECTURE.md](ARCHITECTURE.md) 维护；本版玩法细节由 [CURRENT_GAMEPLAY_V27.md](CURRENT_GAMEPLAY_V27.md) 维护。本文描述现行默认局的完整业务循环和实现结构，不替代各版本规则说明书，也不把历史实验当成当前结论。
+当前只支持规则 **0.27.0**（`rulesets/social-eras.v27.json`）。分层约束由 [ARCHITECTURE.md](ARCHITECTURE.md) 维护；玩法细节由 [CURRENT_GAMEPLAY_V27.md](CURRENT_GAMEPLAY_V27.md) 维护。没有旧规则档、研究推导或脚本策略模块。
 
 ## 1. 项目定位
 
@@ -104,13 +104,11 @@ flowchart LR
   subgraph 入口
     Board[board 网页]
     CLI[CLI / player.mjs]
-    Host[host 身份与规则加载]
+    Host[host 加载 v27]
   end
   Present[present 精简观察]
-  Runtime[runtime 命令、会话、重放、存档]
+  Runtime[runtime 命令、会话、JSON 存档]
   Game[game.ts 纯规则]
-  Agents[agents 只读观察选行动]
-  Research[research 由事件推导指标]
 
   Board --> Host
   CLI --> Host
@@ -119,20 +117,16 @@ flowchart LR
   CLI --> Present
   Present -.->|只读 SessionObservation| Runtime
   Runtime --> Game
-  Agents --> Runtime
-  Research --> Runtime
 ```
 
 | 层 | 可以做 | 不可以做 |
 | --- | --- | --- |
-| `game` | 确定性规则、合法行动、状态转换、公开投影原料 | 读文件、调模型、算研究分数 |
-| `runtime` | 校验命令、保存、重放、指纹 | 选择行动 |
+| `game` | 确定性规则、合法行动、状态转换、公开投影原料 | 读文件、调模型 |
+| `runtime` | 校验命令、保存当前局 | 选择行动 |
 | `present` | 把公开观察收成 AI 摘要和分区 | 读 GameState 或存档；参与结算 |
-| `agents` | 根据观察返回一个行动 | 改状态 |
-| `research` | 从事件统计、配对比较 | 写入 GameState |
 | `apps` | 组合上述模块 | 自写第二套结算 |
 
-`game` / `runtime` / `present` 不得依赖 `agents`、`research` 或 `apps`。`game` 不得依赖 runtime 或 present。
+`game` / `runtime` / `present` 不得依赖 `apps`。`game` 不得依赖 runtime 或 present。
 
 ## 7. 数据怎么走
 
@@ -142,7 +136,7 @@ flowchart LR
 | --- | --- | --- |
 | Ruleset | 版本、参数及上下限、场景、机制开关与数字块 | 只通过校验后的 JSON；实验用 `resolveRuleset` 生成副本 |
 | GameState | 时钟、天气、家户、人物、经济子状态、随机状态 | 仅 `transition` 返回的新对象 |
-| RunRecord | 实现指纹、完整规则拷贝、种子、命令链、事件、状态哈希、快照 | runtime 顺序追加 |
+| 存档 | 规则拷贝、种子、命令链、当前 state | 朴素 JSON 读写 |
 
 ### 7.2 JSON 规则与 TS 目录
 
@@ -234,15 +228,11 @@ flowchart TB
 
 `player.mjs` 限制子进程只能 `observe / act / metrics`，并收窄可写目录。这不是对仍有任意 shell 的代理的安全沙箱。
 
-## 11. 存档、重放、研究
+## 11. 存档与试玩
 
-CLI 存档在 `artifacts/runs/<runId>/record.json`。每次 `load`/`submit` 用实现指纹从头重放校验。写入带独占锁、历史备份、临时文件替换。同一次命令只生成一次观察，不做跨请求会话缓存。
+CLI 存档在 `artifacts/runs/<runId>/record.json`，同时写入当前 `state`，打开时直接读取，不整链重放。写入用临时文件替换，失败不覆盖原档。
 
-实现指纹是编译后 `src/game` 的哈希。只改 `present`、CLI、网页不改指纹；改结算或目录会改指纹，旧档拒绝在新构建上重放。
-
-研究层从事件算指标，组织有上限的对照实验。脚本策略不是大模型。报告记录实验当时的规则与指纹，不为追齐后来的构建而重跑或改写旧档。
-
-试玩记录在 `playtests/batches/`，原始存档仍在 `artifacts/runs/`。试玩发现不自动变成规则修改。
+试玩记录在 `playtests/batches/`。试玩发现不自动变成规则修改。
 
 ## 12. 仍交叠、以及明确不做
 
@@ -254,10 +244,8 @@ CLI 存档在 `artifacts/runs/<runId>/record.json`。每次 `load`/`submit` 用�
 
 | 文档 | 回答什么 |
 | --- | --- |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | 分层禁令、存档身份、扩展位置 |
-| [ARCHITECTURE_COHESION_PLAN.md](ARCHITECTURE_COHESION_PLAN.md) | 本次内聚改造的阶段与验收 |
-| [CURRENT_GAMEPLAY_V27.md](CURRENT_GAMEPLAY_V27.md) | 电气链与现代验收的实际规则 |
-| [CIVILIZATION_ERAS_V26.md](CIVILIZATION_ERAS_V26.md) | 四阶段社会与公共服务 |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | 分层与存档 |
+| [CURRENT_GAMEPLAY_V27.md](CURRENT_GAMEPLAY_V27.md) | 现行玩法 |
 | [AI_PLAYER.md](AI_PLAYER.md) | AI 命令行接入 |
 | [PLAYER_ENTRIES.md](PLAYER_ENTRIES.md) | 网页入口 |
 | [playtests/START_HERE.md](../playtests/START_HERE.md) | 模型逐步试玩约定 |

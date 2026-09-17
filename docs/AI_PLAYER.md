@@ -33,7 +33,7 @@ node scripts/player.mjs observe --run ai-demo
 node scripts/player.mjs observe --run ai-demo --format text
 ```
 
-`observe` 只读存档。player 入口未传 `--format` 时为 compact；`lab` 默认仍为 JSON。`--format json` / `--format text` 保持原行为。`metrics` 仍输出 JSON。
+`observe` 只读存档。player 入口未传 `--format` 时为 compact；`lab` 默认仍为 JSON。`--format json` / `--format text` 保持原行为。
 
 ## 观察边界与存档
 

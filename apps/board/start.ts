@@ -1,6 +1,5 @@
 import { createSession } from '../../src/runtime/session.js';
 import { validateRuleset } from '../../src/game/ruleset.js';
-import type { ImplementationIdentity } from '../../src/runtime/records.js';
 
 const key='civilization-mini.social-eras.v27';
 const form=document.getElementById('start-form') as HTMLFormElement;
@@ -12,20 +11,18 @@ try {
   document.getElementById('continue-game')!.hidden=!previous;
   document.getElementById('save-notice')!.hidden=!previous;
   const rules=validateRuleset(await (await fetch('/rulesets/social-eras.v27.json')).json());
-  const implementation:ImplementationIdentity=await(await fetch('/implementation.json')).json();
   button.disabled=false;button.textContent='启程 →';
   form.onsubmit=async event=>{
     event.preventDefault();if(busy||!form.reportValidity())return;
     busy=true;button.disabled=true;error.hidden=true;
     try {
       if(localStorage.getItem(key)!==previous)throw new Error('另一页面更新了存档，请刷新开始界面后重试。');
-      const next=await createSession({runId:crypto.randomUUID(),ruleset:rules,implementation,
+      const next=await createSession({runId:crypto.randomUUID(),ruleset:rules,
         seed:Number((document.getElementById('seed') as HTMLInputElement).value),
         scenarioId:(document.getElementById('scenario') as HTMLSelectElement).value});
       if(localStorage.getItem(key)!==previous)throw new Error('另一页面更新了存档，请刷新开始界面后重试。');
-      // Preserve the exact old bytes, including unreadable records; never migrate them.
       if(previous!==null)localStorage.setItem(`${key}.backup.${Date.now()}.${crypto.randomUUID()}`,previous);
-      localStorage.setItem(key,JSON.stringify(next.record));
+      localStorage.setItem(key,JSON.stringify({record:next.record,state:next.state}));
       location.assign('/play');
     } catch(cause) {
       error.textContent=(cause as Error).message;error.hidden=false;busy=false;button.disabled=false;

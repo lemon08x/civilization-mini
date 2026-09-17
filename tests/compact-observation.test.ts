@@ -1,15 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { createSession, observeSession, submitCommand } from '../src/runtime/session.js';
-import { validateRuleset } from '../src/game/ruleset.js';
 import { textObservation } from '../apps/cli/text-observation.js';
 import { compactObservation, formatCompactObservation, observationSection, parseCompactSection } from '../src/present/compact-observation.js';
+import { rules } from './v27.js';
 
 async function sample() {
-  const ruleset = validateRuleset(JSON.parse(await readFile('rulesets/social-eras.v27.json', 'utf8')));
-  const implementation = JSON.parse(await readFile('dist/implementation.json', 'utf8'));
-  const session = await createSession({ runId: 'compact-check', ruleset, implementation, seed: 17, scenarioId: 'river' });
+  const session = await createSession({ runId: 'compact-check', ruleset: rules, seed: 17, scenarioId: 'river' });
   return observeSession(session);
 }
 
@@ -68,9 +65,7 @@ test('sections read the same public observation and disabled actions stay out of
 test('act receipt revision matches compact observation', async () => {
   const observation = await sample();
   const action = observation.game.actions.find(item => item.enabled)!;
-  const ruleset = validateRuleset(JSON.parse(await readFile('rulesets/social-eras.v27.json', 'utf8')));
-  const implementation = JSON.parse(await readFile('dist/implementation.json', 'utf8'));
-  const session = await createSession({ runId: 'compact-act', ruleset, implementation, seed: 17, scenarioId: 'river' });
+  const session = await createSession({ runId: 'compact-act', ruleset: rules, seed: 17, scenarioId: 'river' });
   const next = await submitCommand(session, { commandId: 'compact:0', expectedRevision: 0, actionId: action.id });
   const compact = compactObservation(observeSession(next.session), { receipt: { duplicate: next.duplicate, revision: next.revision } });
   assert.equal(compact.revision, 1);

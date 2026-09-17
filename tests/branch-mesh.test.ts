@@ -1,13 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
 import {createInitialState,getAvailableActions,transition} from '../src/game/game.js';
 import {parseActionId} from '../src/game/model/action.js';
-import {validateRuleset,resolveRuleset} from '../src/game/ruleset.js';
+import {resolveRuleset} from '../src/game/ruleset.js';
 import {branchHas,branchView} from '../src/game/systems/branches.js';
 import {organizationLevel} from '../src/game/systems/economy.js';
 import {ERA_NODES} from '../src/game/model/branches.js';
-const base=validateRuleset(JSON.parse(await readFile('rulesets/social-eras.v26.json','utf8')));
+import {rules as base} from './v27.js';
 const rules=resolveRuleset(base,{'eras.seasons':8,'eras.warning':1});
 const fresh=()=>{const s=structuredClone(createInitialState(rules,17,'river'));s.household.food=100;s.household.money=100;return s;};
 type State=ReturnType<typeof fresh>;
