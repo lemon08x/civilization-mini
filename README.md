@@ -6,6 +6,8 @@
 
 四季一年，每季基础12时间；当季首次供电点灯增加2时间。后辈仍需按前置学习；直系前代学过的节点仅需1时间/1精力，家族产品记录和规程保留。基础农事与人工供水3时间/2精力；偶发缺粮有缓冲，饱食每季恢复5健康。采用新局，不迁移旧档，历史文件保留。旧泵免费灌溉和旧自动生产开关已替换；当前农业播种收获、采购和交付仍需本人操作，外部供粮/维修不算无人化。
 
+完整业务流程与实现架构见 [SYSTEM_OVERVIEW.md](docs/SYSTEM_OVERVIEW.md)。分层约束见 [ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+
 详见 [0.26文明阶段](docs/CIVILIZATION_ERAS_V26.md)、[0.25自由点科技](docs/FREE_TECH_V25.md)、[0.24学科分叉](docs/BRANCH_MESH_V24.md)、[0.23建设结算](docs/SOCIAL_ERAS_V23.md)。旧版文档只描述各自版本。
 
 ## 开始试玩

@@ -1,5 +1,7 @@
 # 重构后的规则实验架构
 
+完整业务流程与现行默认局的模块关系见 [SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md)。
+
 工程 v0.3.0；默认桌游规则 v0.2.0，旧农业 v0.1.0 独立保留。通用生产的因果关系与明确迁移边界见 [PRODUCTION_V2.md](PRODUCTION_V2.md)。下文保留重构架构约束，新机制仍由同一 game.ts 结算。
 
 借鉴 [TAG](https://github.com/GAIGResearch/TabletopGames) 对 GameState、ForwardModel、Action、Parameters、Player 和评估的拆分，以及 [TextArena](https://github.com/LeonGuertler/TextArena) 的环境与代理接口。这里只采用组织经验，不引入它们的运行框架。
