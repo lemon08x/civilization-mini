@@ -1,138 +1,35 @@
 import {electricReady,electricRewardPercent} from '../model/electric.js';
-import { installedIn,settleIndustry,industryView } from './industry.js';
-import {productNeeds} from './industry-products.js';
-import {branchHas,branchProcessNeeds,branchView} from './branches.js';
+import { settleIndustry,industryView } from './industry.js';
+import {branchHas,branchView} from './branches.js';
 import { expeditionView } from './expedition.js';
-import { modernOnline,usePower } from './modern.js';
+import { modernOnline } from './modern.js';
 import { topicsFor,productsFor,processesFor,goodsFor } from './economy-catalog.js';
 import { towerView } from './tower.js';
 import { workshopView } from './workshop.js';
-import { operationsView,planBlocker,steamReady,useSteam } from './operations.js';
-import { made,servicePending,shopView,salePrice } from './shop.js';
-import {activePerson,type GameState} from '../model/state.js';
-import type { EconomyState, Subject, Crop, WorkerKind, Worker } from '../model/economy.js';
+import { operationsView,planBlocker } from './operations.js';
+import { servicePending,shopView,salePrice } from './shop.js';
+import {type GameState} from '../model/state.js';
+import type { EconomyState, Crop, WorkerKind, Worker } from '../model/economy.js';
 import { SUBJECTS } from '../model/economy.js';
 import type { Ruleset } from '../ruleset.js';
 import type { GameEvent } from '../model/events.js';
-import { ALL_GOODS as GOODS, ALL_TOPICS as TOPICS, ALL_PRODUCTS as PRODUCTS, ALL_PROCESSES as PROCESSES, CROPS, SUBJECT_NAMES, WORKER_NAMES, ALL_JOB_NAMES as JOB_NAMES } from './economy-catalog.js';
-import type { ProcessSpec } from './economy-catalog.js';
+import { ALL_PROCESSES as PROCESSES, CROPS, SUBJECT_NAMES, WORKER_NAMES, ALL_JOB_NAMES as JOB_NAMES } from './economy-catalog.js';
+import { amount, changeGoods, consumeEquipment, equipped, foodStock, storage } from './inventory.js';
+import { level, organizationLevel, recordEvidence, wage } from './knowledge.js';
+import { farmBlocker, farmWork, fieldYield, settleOngoingFarm } from './agriculture.js';
+import { finishProcess, processBlockers, runProcess } from './processing.js';
+
+export { amount, changeGoods, consumeEquipment, equipped, foodStock, missingGoods, storage } from './inventory.js';
+export { level, organizationLevel, recordEvidence, requirements, wage } from './knowledge.js';
+export { farmBlocker, farmCycleLabor, farmWork, fieldYield, settleOngoingFarm } from './agriculture.js';
+export { assemblyReady, finishProcess, processBlockers, processInputs, processMultiplier, runProcess } from './processing.js';
 
 export function initialEconomy():EconomyState {
   return {knowledge:{},evidence:{},notes:{},goods:{wood:2,clay:2,seedWheat:1,seedSoy:1,seedFlax:1},equipment:{},workers:{},
     field:{crop:null,planted:0,moisture:0,growth:0,stress:0,fertility:2,lastCrop:null,tended:0,composted:false,bonus:0,duration:2},
     ongoing:{farm:null},project:null,market:4,recruitment:1,industrySupply:4,regional:{iron:false,fiber:false,teaching:{}},published:{},ironBatches:0,fiberBatches:0,poweredTurn:0,equipmentUsed:{}};
 }
-export function level(s:GameState,subject:Subject,person=s.household.activePersonId):number{return s.economy!.knowledge[person]?.[subject]??0;}
-export function amount(s:GameState,id:string):number{return s.economy!.goods[id]??0;}
-export function equipped(s:GameState,id:string):boolean{return (s.economy!.equipment[id]??0)>0&&!servicePending(s,'repair',id);}
-export function consumeEquipment(s:GameState,id:string,events:GameEvent[]):void {
-  s.economy!.equipment[id]--;events.push({type:'economy-equipment-used',product:id,remaining:s.economy!.equipment[id]});
-}
-export function changeGoods(s:GameState,goods:Record<string,number>,sign:number,events:GameEvent[],source:string):void {
-  for(const[id,n]of Object.entries(goods)){const next=amount(s,id)+n*sign;if(next<0)throw new Error('实物不足：'+id);s.economy!.goods[id]=next;}
-  events.push({type:'economy-goods',source,changes:Object.fromEntries(Object.entries(goods).map(([id,n])=>[id,n*sign]))});
-}
-export function requirements(s:GameState,needs:Partial<Record<Subject,number>>):string[]{if(s.economy?.branches)return [];return Object.entries(needs).filter(([d,n])=>level(s,d as Subject)<n).map(([d,n])=>`需${SUBJECT_NAMES[d as Subject]}第${n}阶`);}
-export function missingGoods(s:GameState,needs:Record<string,number>):string[]{return Object.entries(needs).filter(([id,n])=>amount(s,id)<n).map(([id,n])=>`需${n}${GOODS[id]?.name??id}`);}
-export function recordEvidence(s:GameState,subject:Subject,events:GameEvent[],source:string):void{
-  if(s.economy?.branches)return;
-  const n=level(s,subject)+1;if(n>(s.economy?.modern?10:6))return;const t=TOPICS.find(t=>t.subject===subject&&t.level===n)!;
-  const list=s.economy!.evidence[s.household.activePersonId]??=[];
-  if(!list.includes(t.id)){list.push(t.id);events.push({type:'economy-evidence',topic:t.id,source});}
-}
-export function fieldYield(s:GameState):number{
-  const f=s.economy!.field;if(!f.crop)return 0;
-  const late=Math.max(0,f.growth-f.duration-(equipped(s,'U04')?1:0));
-  return Math.max(1,CROPS[f.crop].yield+f.bonus+(s.economy!.modern?.cropBonus??0)+Math.min(1,f.fertility)-f.stress-late);
-}
-export function farmBlocker(s:GameState,crop:Crop,worker?:Worker):string[]{
-  const f=s.economy!.field;
-  if(s.economy!.branches){
-    if(crop==='wheat'&&!branchHas(s,'A0')&&!worker)return ['需掌握基础栽培'];
-    if((crop==='soy'||crop==='flax')&&!branchHas(s,'A4'))return ['需掌握油料与纤维作物'];
-  }
-  if(!f.crop){
-    if(worker?.kind==='laborer'&&worker.experience<8)return ['普通雇工只能照料和收获，播种需要本人或熟练农工'];
-    return [...(worker?[]:requirements(s,{agronomy:CROPS[crop].level})),...missingGoods(s,{[CROPS[crop].seed]:1})];
-  }
-  if(f.growth>=f.duration)return [];
-  if(f.tended===s.clock.absoluteTurn)return ['本季已管理田间'];
-  if(s.location.rain+f.moisture>=2)return ['本季水分充足，等待作物生长'];
-  if(s.location.water<1)return ['公共水不足'];
-  return [];
-}
-export function farmWork(s:GameState,crop:Crop,events:GameEvent[],worker?:Worker):void{
-  const e=s.economy!,f=e.field,actor=worker?WORKER_NAMES[worker.kind]:'本人';
-  if(!f.crop){
-    if(worker?.kind==='farmer'&&e.operations?.farm&&f.fertility<2&&amount(s,'compost')>0){changeGoods(s,{compost:1},-1,events,'农工托管施肥');f.fertility=Math.min(3,f.fertility+1);}
-    if(e.modern)e.modern.cropBonus=0;
-    const c=CROPS[crop];changeGoods(s,{[c.seed]:1},-1,events,actor+'播种');
-    let bonus=worker&&worker.experience>=8?1:0;for(const id of (e.shop?['U01']:['U01','U02']))if(equipped(s,id)){bonus++;consumeEquipment(s,id,events);}
-    if(e.shop&&equipped(s,'U02')&&e.shop.seededTurn!==s.clock.absoluteTurn){e.shop.seededTurn=s.clock.absoluteTurn;consumeEquipment(s,'U02',events);}
-    if(level(s,'agronomy')>=6&&f.lastCrop&&f.lastCrop!==crop)bonus++;
-    let duration=c.duration;if(equipped(s,'U10')){duration=Math.max(1,duration-1);consumeEquipment(s,'U10',events);}
-    Object.assign(f,{crop,planted:s.clock.absoluteTurn,moisture:0,growth:0,stress:0,tended:0,composted:false,bonus,duration});
-    events.push({type:'economy-farm',operation:'sow',crop,actor,amount:0});
-  }else if(f.growth>=f.duration){
-    const c=CROPS[f.crop],n=fieldYield(s),out:Record<string,number>={[f.crop]:n,straw:c.straw,[c.seed]:1};
-    if(level(s,'agronomy')>=5)out[c.seed]++;
-    changeGoods(s,out,1,events,actor+'收获');made(s,f.crop);if(equipped(s,'U04'))consumeEquipment(s,'U04',events);
-    events.push({type:'economy-farm',operation:'harvest',crop:f.crop,actor,amount:n});
-    f.fertility=Math.max(0,Math.min(3,f.fertility+(f.crop==='soy'?1:-1)));f.lastCrop=f.crop;f.crop=null;
-  }else{
-    s.location.water--;f.moisture+=equipped(s,'W01')?2:1;if(equipped(s,'W01'))consumeEquipment(s,'W01',events);
-    f.tended=s.clock.absoluteTurn;events.push({type:'economy-farm',operation:'tend',crop:f.crop,actor,amount:1});
-  }
-  if(!worker)recordEvidence(s,'agronomy',events,'田间实践');
-}
-export function assemblyReady(s:GameState,worker?:Worker):boolean{return !!worker&&!!s.economy!.modern&&organizationLevel(s)>=7&&equipped(s,'T07')&&s.economy!.equipmentUsed.T07!==s.clock.absoluteTurn&&s.economy!.modern.power>=1;}
-export function processMultiplier(s:GameState,p:ProcessSpec,worker?:Worker):number{if(!p.wait&&assemblyReady(s,worker))return 2;if(worker&&worker.experience>=8)return 2;return ['fiber','rope'].includes(p.id)&&equipped(s,'P01')?2:1;}
-export function processInputs(s:GameState,p:ProcessSpec,worker?:Worker):Record<string,number>{const factor=processMultiplier(s,p,worker);return Object.fromEntries(Object.entries(p.inputs).map(([id,n])=>[id,n*factor]));}
-export function processBlockers(s:GameState,p:ProcessSpec,worker?:Worker):string[]{
-  const e=s.economy!;
-  const activeProjects=[e.project,...Object.values(e.workers).map(w=>w?.project)].filter(Boolean);
-  const busy=p.equipment&&activeProjects.some(x=>PROCESSES.find(p=>p.id===x!.good)?.equipment===p.equipment);
-  const power=(p.power??0)*processMultiplier(s,p,worker)+(!p.wait&&assemblyReady(s,worker)?1:0);
-  return [...(e.industry?productNeeds(s,p.id):e.branches?branchProcessNeeds(s,p.id,!!worker):worker&& !Object.values(p.requires).some(n=>n>6)?[]:requirements(s,p.requires)),...(power>(e.modern?.power??0)?['电力不足：本批需要'+power+'电']:[]),...missingGoods(s,processInputs(s,p,worker)),
-    ...(p.equipment&&installedIn(s,p.equipment)?['设备已安装在系统中，先暂停并拆出']:[]),...(p.equipment&&!equipped(s,p.equipment)?['需可用'+PRODUCTS.find(x=>x.id===p.equipment)!.name]:[]),
-    ...(busy||p.equipment&&e.equipmentUsed[p.equipment]===s.clock.absoluteTurn?['对应设备本季或在制工序占用']:[]),
-    ...(!worker&&e.project?['先完成本人在制项目']:[])];
-}
-function completeProcess(s:GameState,p:ProcessSpec,factor:number,events:GameEvent[],actor:string):void{
-  changeGoods(s,Object.fromEntries(Object.entries(p.outputs).map(([id,n])=>[id,n*factor])),1,events,actor+'完成'+p.name);
-  events.push({type:'economy-process',recipe:p.id,actor,stage:'complete',factor});
-  if(actor==='本人'){for(const d of Object.keys(p.requires))recordEvidence(s,d as Subject,events,p.name);}
-  for(const id of Object.keys(p.outputs))made(s,id);
-  if(p.id==='iron')s.economy!.ironBatches++;if(p.id==='fiber')s.economy!.fiberBatches++;
-}
-export function runProcess(s:GameState,p:ProcessSpec,events:GameEvent[],worker?:Worker,rules?:Ruleset):void{
-  const factor=processMultiplier(s,p,worker),actor=worker?WORKER_NAMES[worker.kind]:'本人';
-  const assembly=!p.wait&&assemblyReady(s,worker);
-  if(p.power)usePower(s,p.power*factor,events,p.name);
-  if(s.electric&&p.id==='aluminium')s.economy!.modern!.services.ELECTROLYZER=s.clock.absoluteTurn;
-  if(assembly){usePower(s,1,events,'标准化装配');consumeEquipment(s,'T07',events);s.economy!.equipmentUsed.T07=s.clock.absoluteTurn;}
-  changeGoods(s,Object.fromEntries(Object.entries(p.inputs).map(([id,n])=>[id,n*factor])),-1,events,actor+'开工');
-  if(p.equipment){consumeEquipment(s,p.equipment,events);s.economy!.equipmentUsed[p.equipment]=s.clock.absoluteTurn;}
-  if(factor===2&&['fiber','rope'].includes(p.id)&&equipped(s,'P01')&&(!worker||worker.experience<8))consumeEquipment(s,'P01',events);
-  const accelerated=rules&&['ceramics','brick','iron'].includes(p.id)&&steamReady(s,rules);
-  if(accelerated)useSteam(s,rules!,events);
-  if(p.wait&&!accelerated){const project={good:p.id,amount:factor,started:s.clock.absoluteTurn};if(worker)worker.project=project;else s.economy!.project=project;events.push({type:'economy-process',recipe:p.id,actor,stage:'start',factor});}
-  else completeProcess(s,p,factor,events,actor);
-}
-export function finishProcess(s:GameState,events:GameEvent[],worker?:Worker):void{
-  const project=worker?worker.project:s.economy!.project;if(!project)throw new Error('没有在制品');
-  const p=PROCESSES.find(x=>x.id===project.good)!;
-  completeProcess(s,p,project.amount,events,worker?WORKER_NAMES[worker.kind]:'本人');
-  if(worker)worker.project=null;else s.economy!.project=null;
-}
-export function organizationLevel(s:GameState):number{
-  if(s.economy?.branches){
-    const o0=branchHas(s,'O0'),o1=branchHas(s,'O1'),o2=branchHas(s,'O2');
-    if(o1&&o2)return 3;if(o1||o2)return 2;return o0?1:0;
-  }
-  return Math.max(level(s,'organization'),s.economy!.notes.organization??0);
-}
-export function wage(_s:GameState,rules:Ruleset,w:Worker):number{return rules.economy!.wage+(w.kind==='laborer'?0:w.kind==='manager'?2:1)+(w.experience>=8?1:0);}
+
 export function workerBlocker(s:GameState,w:Worker):string[]{
   if(servicePending(s,'training',w.kind))return ['委托培训中，本季不工作、不扣工资'];
   if(w.project)return s.clock.absoluteTurn>w.project.started?[]:['在制品需跨季'];
@@ -140,33 +37,7 @@ export function workerBlocker(s:GameState,w:Worker):string[]{
   if(['wheat','soy','flax'].includes(w.job))return farmBlocker(s,w.job as Crop,w);
   return processBlockers(s,PROCESSES.find(p=>p.id===w.job)!,w);
 }
-export function farmCycleLabor(s:GameState){
-  const crop=s.economy?.ongoing?.farm;if(!crop||!s.life||s.economy!.workers.farmer?.active)return {time:0,energy:0};
-  const t=s.life.renewal?.farmTime??3,energy=s.life.renewal?.farmEnergy??2,f=s.economy!.field;
-  if(f.crop&&f.growth>=f.duration-1)return {time:t*2,energy:energy*2};
-  if(!f.crop)return {time:t,energy};
-  return {time:0,energy:0};
-}
-export function settleOngoingFarm(s:GameState,rules:Ruleset,events:GameEvent[]):void{
-  const crop=s.economy?.ongoing?.farm;if(!crop)return;
-  const f=s.economy!.field,farmer=s.economy!.workers.farmer?.active?s.economy!.workers.farmer:undefined;
-  const t=s.life?.renewal?.farmTime??3,en=s.life?.renewal?.farmEnergy??2;
-  const pay=(op:string)=>{
-    if(farmer){
-      const cost=wage(s,rules,farmer);if(s.household.money<cost){events.push({type:'economy-farm',operation:'waiting',crop,actor:WORKER_NAMES.farmer,amount:0});return false;}
-      s.household.money-=cost;events.push({type:'economy-worker',worker:'farmer',operation:'worked',money:cost,detail:'持续耕作'+op});return true;
-    }
-    if(!s.life||s.life.timeRemaining<t||activePerson(s).vitality!.energy<en){events.push({type:'economy-farm',operation:'waiting',crop,actor:'本人',amount:0});return false;}
-    s.life.timeRemaining-=t;activePerson(s).vitality!.energy-=en;return true;
-  };
-  if(f.crop&&f.growth>=f.duration){if(!pay('收获'))return;farmWork(s,f.crop,events,farmer);}
-  if(!f.crop){
-    if(amount(s,CROPS[crop].seed)<1){events.push({type:'economy-farm',operation:'waiting',crop,actor:farmer?WORKER_NAMES.farmer:'本人',amount:0});return;}
-    if(!pay('播种'))return;farmWork(s,crop,events,farmer);
-  }
-}
-export function foodStock(s:GameState):number{return s.household.food+['flour','wheat','soy'].reduce((n,id)=>n+amount(s,id),0);}
-export function storage(s:GameState):number{return s.economy!.shop?.assets.includes('granary')?Math.max(equipped(s,'S02')?14:equipped(s,'S01')?8:4,s.economy!.shopGranaryCapacity??0):equipped(s,'S02')?14:equipped(s,'S01')?8:4;}
+
 export function settleEconomy(s:GameState,rules:Ruleset,events:GameEvent[]):void{
   const e=s.economy!,f=e.field;
   if(!e.industry&&f.crop&&(!e.branches||branchHas(s,'A1'))&&s.location.rain+f.moisture<2&&equipped(s,'W03')&&s.location.water>0&&amount(s,'wood')>0){

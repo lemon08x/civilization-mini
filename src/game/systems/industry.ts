@@ -5,7 +5,8 @@ import {industryProductsFor,SYSTEMS,type SystemDefinition,type SystemInstance,ty
 import {activePerson,type GameState} from '../model/state.js';
 import type {GameEvent} from '../model/events.js';
 import {knowledgeNeeds,productName} from './industry-products.js';
-import {changeGoods,consumeEquipment,equipped,farmCycleLabor,missingGoods} from './economy.js';
+import {changeGoods,consumeEquipment,equipped,missingGoods} from './inventory.js';
+import {farmCycleLabor} from './agriculture.js';
 import {servicePending} from './shop.js';
 
 export function systemDefinitions(s:GameState):SystemDefinition[]{
@@ -46,7 +47,8 @@ export function systemLabor(s:GameState,operator:OperatorId='self',exclude?:stri
  return {time,energy};
 }
 export function reservedLabor(s:GameState,operator:OperatorId='self',exclude?:string){
- const systems=systemLabor(s,operator,exclude),food=operator==='self'?foodLabor(s):{time:0,energy:0};
+ const systems=systemLabor(s,operator,exclude);
+ const food=operator==='self'?foodLabor(s,systemLabor(s).time):{time:0,energy:0};
  const farm=operator==='self'?farmCycleLabor(s):{time:0,energy:0};
  return {time:systems.time+food.time+farm.time,energy:systems.energy+food.energy+farm.energy};
 }

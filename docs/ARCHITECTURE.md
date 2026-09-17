@@ -1,83 +1,114 @@
-# 重构后的规则实验架构
+# 现行项目结构
 
-工程 v0.3.0；默认桌游规则 v0.2.0，旧农业 v0.1.0 独立保留。通用生产的因果关系与明确迁移边界见 [PRODUCTION_V2.md](PRODUCTION_V2.md)。下文保留重构架构约束，新机制仍由同一 game.ts 结算。
+当前只支持规则 **0.27.0**。玩法见 [CURRENT_GAMEPLAY_V27.md](CURRENT_GAMEPLAY_V27.md)，改机制或改数值的流程见仓库根 [AGENTS.md](../AGENTS.md)，AI 入口见 [AI_PLAYER.md](AI_PLAYER.md)。
 
-借鉴 [TAG](https://github.com/GAIGResearch/TabletopGames) 对 GameState、ForwardModel、Action、Parameters、Player 和评估的拆分，以及 [TextArena](https://github.com/LeonGuertler/TextArena) 的环境与代理接口。这里只采用组织经验，不引入它们的运行框架。
-
-## 一条行动的路径
-
-```mermaid
-flowchart LR
-  A[网页 / CLI / Agent] -->|Command| R[runtime 命令校验]
-  R -->|状态 + 行动 + 完整规则| G[game 纯规则结算]
-  G --> S[新 GameState + 类型化事件]
-  S --> R
-  R --> O[玩家 Observation]
-  O --> A
-  R --> F[RunRecord / 指纹 / 快照]
-  F --> E[research 指标与对照报告]
-```
-
-`game` 不读取文件、调用模型或计算研究分数。`runtime` 负责可复现执行与保存，不选择策略。`agents` 只接收观察，返回行动；`research` 组织有上限的实验，并从事件推导指标。CLI 和网页是组合这些模块的入口。
-
-## 三份不同的数据
-
-| 数据 | 内容 | 修改方式 |
-| --- | --- | --- |
-| Ruleset | 规则版本、完整参数、参数范围、场景、科技节点及前置 | 从冻结 JSON 校验解析；候选生成独立副本 |
-| GameState | 时钟、世界与地区、家庭、人物、资产、项目、档案、随机状态 | 仅 transition 返回新状态；输入和输出冻结 |
-| RunRecord | 实现身份、完整规则与指纹、种子、场景、代理、命令、事件、状态哈希、快照 | runtime 顺序追加；重放核对 |
-
-人物、渠道、种源和试种项目使用稳定 ID，家庭持有引用。新增 production 子状态保存材料、地区资源/市场、工具、容器与唯一工艺项目；旧规则不创建这个子状态。交接切换经营者，保留资料、设施与项目；不会复制前代全部能力。世界科技与地区教师分别表示社会条件和学习来源，个人节点表示已学会的专精。
-
-能力继续用掌握节点、学习记录和实践条件表达。AP、口粮等资源以及学习所需次数仍是数值。未来增加工艺分支时先定义行动如何改变世界，不以研究评分代替规则因果。
-
-`Observation` 是专门生成的公开 DTO，不暴露随机状态、种子或退役人物全集。网页的人类调试信息可读取运行清单；模型接口只拿 `observeSession()`。
-
-## 目录与扩展位置
+## 目录
 
 ```text
-src/
-  game/
-    model/         状态、行动、事件类型
-    actions/       行动条件、成本及对应效果
-    systems/       学习、生产、项目、时间、传承
-    ruleset.ts     完整配置校验与候选解析
-    observation.ts 玩家观察投影
-    game.ts        初始状态、合法行动、唯一转换入口
-  runtime/         会话、记录、重放、文件保存
-  agents/
-    contract.ts    代理接口
-    scripted/      四种原有脚本基线
-    llm/           JSON 决策校验与可注入模型调用
-  research/        调度、事件统计、配对比较
-apps/
-  cli/             文件与实验命令入口
-  board/           浏览器桌游界面及本地静态服务
-rulesets/           冻结基线
-experiments/        实验计划与参数候选
-artifacts/          自动生成的记录、报告与失败信息
-tests/              旧轨迹基准、运行与依赖边界检查
-docs/               规则、架构和研究协议
+保留范围
+  src/game/              规则结算（唯一权威：game.ts）
+  rulesets/v27/          现行规则（拆开的 JSON）
+  apps/                  人类网页 + 命令行入口
+  playtests/             AI 试玩规则、精简观察、player.mjs
+
+入口胶水（不扩张）
+  src/runtime/           会话、命令校验、JSON 存档
+
+开发与说明（不扩张）
+  tests/                 机制用例，仅用户要求时运行
+  docs/                  本目录
+  AGENTS.md              协作与改规则流程
+  package.json / tsconfig.json
+
+运行产物（不入库）
+  dist/  node_modules/  saves/
 ```
 
-增加节点需要前置、学习来源、实践条件、成本及用途；现有机制无法表达用途时，显式扩充系统和事件。现在不引入插件容器、微服务、ECS 或通用公式解释器。
+试玩笔记在 `playtests/batches/`。网页存档在浏览器（开始界面打开或新开）；命令行存档在 `saves/`。
 
-## 防止后续 AI 意外破坏
+## 一局怎么走
 
-1. **Git 历史**：默认在当前分支工作，只有用户明确要求时才创建或切换分支。重构前实现可从历史提交 `2f0ffbf` 查阅；实际存档和报告保留在原目录。
-2. **独立行为证据**：`tests/fixtures/legacy-v1.json` 是修改前采集的 8 条轨迹、349 个状态，不可为迁就新实现重录。检查逐步资源、行动可用性、成长、传承、事件统计和最终指标。
-3. **不静默混用规则**：v2 存档内嵌完整配置，核对配置 SHA-256、规则实现指纹、命令链、事件和状态。实现指纹取自编译后的 `src/game` 模块。变更规则实现后旧 v2 会拒绝重放，需要对应构建或显式迁移。
-4. **安全执行协议**：命令必须携带 commandId 和 expectedRevision；同命令重试幂等，不同内容复用 ID、过期 revision 和非法行动拒绝。文件写入使用独占锁、旧版本历史备份与临时文件替换。异常残留锁交给人工检查，不自动删除。
-5. **候选与基线分开**：参数白名单、范围和技术依赖校验；实验记录完整配置，按相同种子、场景和代理配对比较。报告没有自动采纳接口。结构改动需新的规则版本、因果测试与迁移说明。
-6. **工具权限由宿主控制**：`scripts/player.mjs` 限制子进程入口和写入目录，但不是对仍有任意 shell 权限的 AI 的安全沙箱。哈希能够发现不一致，不能阻止具有写权限的主体重算哈希。真正隔离须由外部宿主只提供观察/行动工具，并保护基线、测试与审批权限。
+```text
+网页 /play  或  lab new  或  player.mjs
+        │
+        ▼
+  runtime 校验 commandId + expectedRevision
+        │
+        ▼
+  game.ts  createInitialState / getAvailableActions / transition
+        │
+        ▼
+  写档（浏览器存档槽 或 saves/<id>/record.json）
+        │
+        ▼
+  observation.ts 公开观察
+        ├─ 网页：完整观察
+        └─ AI：present 收成 compact
+```
 
-## 兼容与验证
+`src/game` 不读盘、不认玩家、不选行动。`runtime` 不算产量、不改田地。策略只能读 `observeSession()` 的输出。
 
-原 `runs/`、`reports/` 不修改。CLI 用 `import --run 新ID --file 旧文件` 显式复制迁移；v1 强制核对冻结配置，旧 v2 只接受冻结工程 0.2.0 实现和原始农业规则配置，并先完整校验事件、命令链及快照。迁移后仍为旧农业规则，不转换到通用生产。浏览器使用 v3 localStorage 键，不自动读取/覆盖 v1/v2 原文。导入失败不覆盖现存运行。
+## `src/game` 怎么拆
 
-重放验证适用于当前实现，不承诺跨未来版本自动兼容。存档不是签名文件，不提供对恶意作者的真实性认证；本地文件锁也不是多机事务。
+| 位置 | 职责 |
+| --- | --- |
+| `game.ts` | 开局、列出行动、执行一步；季末调用 `systems/time.ts` |
+| `ruleset.ts` | 校验 JSON、有界参数覆盖（`resolveRuleset`） |
+| `model/` | 类型与目录常量（状态形状、学科节点、产品规格） |
+| `systems/` | 世界过程（灌溉、加工、季末顺序、传承） |
+| `actions/` | 玩家可点的行动报价与执行 |
+| `observation.ts` | 从状态生成公开观察 |
 
-开发中按改动运行相关测试，一轮代码改动收尾统一运行一次 `npm test`，包含旧基准、命令/存档保护、分层检查和新生产因果测试。纯文档或格式修改不触发构建、测试或模拟；界面行为/布局变化另做短时试玩。
+机制（怎么抽水、怎么扣劳动、季末谁先结算）在 TypeScript。规则 JSON 里的数字和开关不实现公式。
 
-报告记录实际实验时的指纹，不要求追齐最终构建。后续不影响相关行为的修改无需重跑实验或重新迁移存档；引用旧报告时保留其版本和适用范围。只有行为变化、失败或明确研究问题要求复核时，才对受影响场景/策略做最小必要对照。存档重放仍严格检查指纹，不通过改写历史来省略验证。旧七个节点的历史结论仅属于旧规则，新版包含十二个节点。
+## 现行局实际运行的机制
+
+开局后走经济分支。玩家循环是：生活（粮、田、身体）→ 学科 → 产品/加工 → 工业系统与雇佣 → 商城/供能 → 社会阶段与购粮。
+
+对应代码（改这些不必先确认“是否属于保留范围”）：
+
+- 行动：`economy`、`branches`、`industry`、`life`、`eras`、`social-food`、`shop`、`operations`、`modern`
+- 过程：`time`、`economy`、`economy-catalog`、`agriculture`、`processing`、`inventory`、`knowledge`、`labor`、`industry`、`industry-products`、`branches`、`life`、`eras`、`social-food`、`shop`、`operations`、`modern`、电气/现代目录、`inheritance`、`ancestry`
+- `systems/crafts.ts` 仍负责当地库存回复（野粮、木材、岗位、市场粮），购粮和采集用这份 `production` 子状态
+
+`apps/board` 现行页：聚落、社会、农业、生活、家人、仓库、学科、产品、生产、系统、商城、能源。副本/试炼/作坊页仍在仓库里，观察没有对应 view 时导航不会出现。
+
+## 仍编译、现行局走不到
+
+v27 JSON 仍带若干旧开关。`createInitialState` 会先建 `society` / `development` / `productNetwork` / `expeditions` / `workshops`，再删掉。`tower` 根本不建。
+
+因此下面这些文件还在编译图里，对现行一局没有可观察效果：
+
+- 行动：`livelihood`、`crafts`、`education`、`research`、`society`、`development`、`product-network`、`expedition`、`tower`、`workshop`
+- 过程：远征、试炼、旧作坊、旧社会委托、成长经验、产品网、种源试炼
+- 网页：`expedition-view.ts`、`tower-view.ts`、`workshop-view.ts`
+
+清这些文件会碰到初始化、季末空转调用和规则校验，需单独确认后再做。
+
+## 数字在哪
+
+两处，改之前先定位：
+
+| 位置 | 典型内容 | 怎么改 |
+| --- | --- | --- |
+| `rulesets/v27/parameters.json` | 开局粮钱、每季口粮 | 改 JSON，受 bounds 约束 |
+| `rulesets/v27/systems.json` | 工资、人生、购粮、电气、阶段长度 | 改 JSON，受 bounds 约束 |
+| `rulesets/v27/catalogs.json` | 物价、作物产量、产品投入、配方进出 | 改 JSON；校验时写回 TypeScript 目录对象 |
+| `rulesets/v27/scenarios.json` | 地点旱涝、公共水 | 改 JSON |
+| TypeScript 目录 | 名称、效果、学科节点结构 | 改机制时才动代码 |
+
+JSON 里的 `true` 只表示“这局启用该子系统”，不实现该系统。改“泵抽多少水”动代码；改“雇员工资是 1 还是 2”动 `systems.json`；改作物产量动 `catalogs.json`。
+
+## `apps` / 胶水
+
+| 目录 | 作用 |
+| --- | --- |
+| `apps/board` | 人类浏览器对局。`server.ts` 提供本地静态服务 |
+| `apps/cli` | `list` / `new` / `observe` / `act` / `delete` |
+| `apps/host` | 组装 `rulesets/v27/` 并校验 |
+| `src/runtime` | 命令幂等、revision、写 `saves/<id>/record.json` |
+| `playtests/player.mjs` | AI 只允许 observe / act，默认 compact |
+
+## 测试
+
+只在用户明确要求时运行。`tests/v27.ts` 加载现行规则。现有用例覆盖学科分叉、工业与劳动预留、电气、社会阶段、购粮、饥饿与健康。不测旧版本。新增测试文件须先确认。

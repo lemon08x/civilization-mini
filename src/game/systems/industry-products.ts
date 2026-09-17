@@ -1,6 +1,6 @@
 import {industryProductsFor} from '../model/industry.js';
 import {branchNodesFor} from '../model/branches.js';
-import {changeGoods,consumeEquipment} from './economy.js';
+import {changeGoods,consumeEquipment} from './inventory.js';
 import {ALL_PRODUCTS,ALL_PROCESSES} from './economy-catalog.js';
 import type {GameState} from '../model/state.js';
 import type {GameEvent} from '../model/events.js';

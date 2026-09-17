@@ -1,7 +1,7 @@
 import {branchNodesFor,nodeInEra,BRANCH_NODES} from '../model/branches.js';
 import { TOWER_FLOORS } from './tower.js';
 import { topicsFor } from './economy-catalog.js';
-import { level } from './economy.js';
+import { level } from './knowledge.js';
 import type { GameState } from '../model/state.js';
 import type { GameEvent } from '../model/events.js';
 import type { Ruleset } from '../ruleset.js';

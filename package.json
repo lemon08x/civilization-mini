@@ -9,11 +9,9 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "tsc && node scripts/build-manifest.mjs",
+    "build": "tsc",
     "start": "npm run build && node dist/apps/board/server.js",
     "lab": "node dist/apps/cli/main.js",
-    "simulate": "node dist/apps/cli/main.js simulate",
-    "research:audit": "node scripts/research-audit.mjs",
     "test": "npm run build && node --test dist/tests/*.test.js"
   },
   "devDependencies": {

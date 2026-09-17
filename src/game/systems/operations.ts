@@ -7,7 +7,9 @@ import type { GameEvent } from '../model/events.js';
 import type { OperationsState,RegionalProject } from '../model/operations.js';
 import type { Subject,Crop,Worker } from '../model/economy.js';
 import { ALL_PRODUCTS as PRODUCTS,ALL_PROCESSES as PROCESSES,CROPS,SUBJECT_NAMES } from './economy-catalog.js';
-import { amount,changeGoods,equipped,foodStock,level,organizationLevel,wage,processMultiplier } from './economy.js';
+import { amount,changeGoods,equipped,foodStock } from './inventory.js';
+import { level,organizationLevel,wage } from './knowledge.js';
+import { processMultiplier } from './processing-math.js';
 import { shopCatalog,deliverShop,shopEvent,deviceReserved,repairPrice,salePrice,servicePending } from './shop.js';
 export function initialOperations():OperationsState{return {paused:false,food:false,foodReserved:0,farm:null,production:null,supplies:false,sales:false,maintenance:false,charter:false,mine:false,steam:false,projects:{},activeProject:null,notice:[]};}
 export function opEvent(events:GameEvent[],operation:string,target:string,detail:string,amount=0,money=0){events.push({type:'operations',operation,target,detail,amount,money});}

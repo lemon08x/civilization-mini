@@ -1,0 +1,718 @@
+{
+  "goods": {
+    "wood": {
+      "price": 1,
+      "food": 0
+    },
+    "clay": {
+      "price": 1,
+      "food": 0
+    },
+    "ore": {
+      "price": 2,
+      "food": 0
+    },
+    "iron": {
+      "price": 5,
+      "food": 0
+    },
+    "wheat": {
+      "price": 1,
+      "food": 1
+    },
+    "soy": {
+      "price": 2,
+      "food": 1
+    },
+    "flax": {
+      "price": 2,
+      "food": 0
+    },
+    "straw": {
+      "price": 1,
+      "food": 0
+    },
+    "flour": {
+      "price": 2,
+      "food": 1
+    },
+    "oil": {
+      "price": 4,
+      "food": 0
+    },
+    "fiber": {
+      "price": 4,
+      "food": 0
+    },
+    "rope": {
+      "price": 6,
+      "food": 0
+    },
+    "compost": {
+      "price": 2,
+      "food": 0
+    },
+    "ceramics": {
+      "price": 5,
+      "food": 0
+    },
+    "brick": {
+      "price": 4,
+      "food": 0
+    },
+    "seal": {
+      "price": 5,
+      "food": 0
+    },
+    "valve": {
+      "price": 8,
+      "food": 0
+    },
+    "shaft": {
+      "price": 7,
+      "food": 0
+    },
+    "spring": {
+      "price": 8,
+      "food": 0
+    },
+    "solution": {
+      "price": 6,
+      "food": 0
+    },
+    "seedWheat": {
+      "price": 1,
+      "food": 0
+    },
+    "seedSoy": {
+      "price": 2,
+      "food": 0
+    },
+    "seedFlax": {
+      "price": 2,
+      "food": 0
+    },
+    "copper": {
+      "price": 3,
+      "food": 0
+    },
+    "feedstock": {
+      "price": 3,
+      "food": 0
+    },
+    "mineral": {
+      "price": 2,
+      "food": 0
+    },
+    "silica": {
+      "price": 2,
+      "food": 0
+    },
+    "polymer": {
+      "price": 5,
+      "food": 0
+    },
+    "wire": {
+      "price": 6,
+      "food": 0
+    },
+    "coil": {
+      "price": 9,
+      "food": 0
+    },
+    "cable": {
+      "price": 9,
+      "food": 0
+    },
+    "fuel": {
+      "price": 5,
+      "food": 0
+    },
+    "nutrient": {
+      "price": 4,
+      "food": 0
+    },
+    "battery": {
+      "price": 8,
+      "food": 0
+    },
+    "silicon": {
+      "price": 7,
+      "food": 0
+    },
+    "circuit": {
+      "price": 12,
+      "food": 0
+    },
+    "controller": {
+      "price": 16,
+      "food": 0
+    },
+    "composite": {
+      "price": 10,
+      "food": 0
+    },
+    "alumina": {
+      "price": 2,
+      "food": 0
+    },
+    "aluminium": {
+      "price": 3,
+      "food": 0
+    }
+  },
+  "crops": {
+    "wheat": {
+      "duration": 2,
+      "yield": 6,
+      "straw": 2,
+      "level": 1
+    },
+    "soy": {
+      "duration": 2,
+      "yield": 4,
+      "straw": 1,
+      "level": 2
+    },
+    "flax": {
+      "duration": 3,
+      "yield": 5,
+      "straw": 1,
+      "level": 2
+    }
+  },
+  "products": {
+    "W01": {
+      "inputs": {
+        "wood": 3
+      }
+    },
+    "W03": {
+      "inputs": {
+        "iron": 2,
+        "valve": 1,
+        "seal": 1
+      }
+    },
+    "P01": {
+      "inputs": {
+        "wood": 3,
+        "shaft": 1
+      }
+    },
+    "P03": {
+      "inputs": {
+        "wood": 4,
+        "iron": 1,
+        "shaft": 1
+      }
+    },
+    "T01": {
+      "inputs": {
+        "wood": 1,
+        "iron": 1
+      }
+    },
+    "T03": {
+      "inputs": {
+        "wood": 2,
+        "iron": 2
+      }
+    },
+    "F02": {
+      "inputs": {
+        "clay": 4,
+        "wood": 2
+      }
+    },
+    "F03": {
+      "inputs": {
+        "brick": 3,
+        "wood": 2
+      }
+    },
+    "F04": {
+      "inputs": {
+        "brick": 2,
+        "iron": 2
+      }
+    },
+    "F05": {
+      "inputs": {
+        "ceramics": 2,
+        "seal": 1
+      }
+    },
+    "S01": {
+      "inputs": {
+        "wood": 2
+      }
+    },
+    "S02": {
+      "inputs": {
+        "ceramics": 1,
+        "seal": 1
+      }
+    },
+    "S03": {
+      "inputs": {
+        "brick": 1,
+        "ceramics": 1
+      }
+    },
+    "U01": {
+      "inputs": {
+        "wood": 3,
+        "iron": 1
+      }
+    },
+    "U02": {
+      "inputs": {
+        "wood": 2,
+        "shaft": 1
+      }
+    },
+    "U04": {
+      "inputs": {
+        "wood": 1,
+        "iron": 1
+      }
+    },
+    "U05": {
+      "inputs": {
+        "wood": 3,
+        "shaft": 1
+      }
+    },
+    "U06": {
+      "inputs": {
+        "wood": 2,
+        "ceramics": 1
+      }
+    },
+    "U08": {
+      "inputs": {
+        "wood": 2,
+        "clay": 2
+      }
+    },
+    "U09": {
+      "inputs": {
+        "wood": 2,
+        "clay": 1
+      }
+    },
+    "U10": {
+      "inputs": {
+        "wood": 3,
+        "ceramics": 1
+      }
+    },
+    "W07": {
+      "inputs": {
+        "iron": 2,
+        "coil": 1,
+        "seal": 2
+      }
+    },
+    "E01": {
+      "inputs": {
+        "coil": 2,
+        "shaft": 1,
+        "ceramics": 2
+      }
+    },
+    "E02": {
+      "inputs": {
+        "coil": 1,
+        "valve": 2,
+        "brick": 2
+      }
+    },
+    "E03": {
+      "inputs": {
+        "silicon": 3,
+        "circuit": 1,
+        "cable": 2
+      }
+    },
+    "E04": {
+      "inputs": {
+        "battery": 3,
+        "cable": 1
+      }
+    },
+    "F07": {
+      "inputs": {
+        "iron": 3,
+        "seal": 2,
+        "valve": 1
+      }
+    },
+    "T07": {
+      "inputs": {
+        "shaft": 2,
+        "coil": 1,
+        "iron": 2
+      }
+    },
+    "F09": {
+      "inputs": {
+        "ceramics": 2,
+        "cable": 2,
+        "polymer": 2
+      }
+    },
+    "F10": {
+      "inputs": {
+        "controller": 1,
+        "iron": 2,
+        "cable": 1
+      }
+    },
+    "N08": {
+      "inputs": {
+        "circuit": 1,
+        "cable": 1,
+        "coil": 1
+      }
+    },
+    "N10": {
+      "inputs": {
+        "controller": 2,
+        "cable": 2,
+        "composite": 1
+      }
+    },
+    "S08": {
+      "inputs": {
+        "coil": 1,
+        "seal": 2,
+        "polymer": 1
+      }
+    },
+    "U08M": {
+      "inputs": {
+        "polymer": 2,
+        "coil": 1,
+        "cable": 1
+      }
+    },
+    "U09M": {
+      "inputs": {
+        "circuit": 1,
+        "controller": 1
+      }
+    },
+    "H09": {
+      "inputs": {
+        "copper": 2,
+        "seal": 1,
+        "shaft": 1
+      }
+    },
+    "LAMP": {
+      "inputs": {
+        "wire": 2,
+        "ceramics": 1
+      }
+    },
+    "TELEGRAPH": {
+      "inputs": {
+        "coil": 1,
+        "cable": 1,
+        "wood": 2
+      }
+    },
+    "ELECTROLYZER": {
+      "inputs": {
+        "cable": 2,
+        "seal": 1,
+        "ceramics": 2
+      }
+    }
+  },
+  "processes": {
+    "ceramics": {
+      "inputs": {
+        "wood": 2,
+        "clay": 2
+      },
+      "outputs": {
+        "ceramics": 2
+      },
+      "wait": 1
+    },
+    "brick": {
+      "inputs": {
+        "wood": 2,
+        "clay": 3
+      },
+      "outputs": {
+        "brick": 2
+      },
+      "wait": 1
+    },
+    "iron": {
+      "inputs": {
+        "ore": 2,
+        "wood": 2
+      },
+      "outputs": {
+        "iron": 2
+      },
+      "wait": 1
+    },
+    "fiber": {
+      "inputs": {
+        "flax": 2
+      },
+      "outputs": {
+        "fiber": 2
+      },
+      "wait": 0
+    },
+    "rope": {
+      "inputs": {
+        "fiber": 2
+      },
+      "outputs": {
+        "rope": 1
+      },
+      "wait": 0
+    },
+    "oil": {
+      "inputs": {
+        "soy": 3
+      },
+      "outputs": {
+        "oil": 1
+      },
+      "wait": 0
+    },
+    "seal": {
+      "inputs": {
+        "fiber": 1,
+        "oil": 1
+      },
+      "outputs": {
+        "seal": 2
+      },
+      "wait": 0
+    },
+    "shaft": {
+      "inputs": {
+        "wood": 2,
+        "iron": 1
+      },
+      "outputs": {
+        "shaft": 2
+      },
+      "wait": 0
+    },
+    "valve": {
+      "inputs": {
+        "iron": 1,
+        "seal": 1
+      },
+      "outputs": {
+        "valve": 1
+      },
+      "wait": 0
+    },
+    "spring": {
+      "inputs": {
+        "iron": 1,
+        "wood": 1
+      },
+      "outputs": {
+        "spring": 1
+      },
+      "wait": 0
+    },
+    "solution": {
+      "inputs": {
+        "soy": 1,
+        "wood": 1
+      },
+      "outputs": {
+        "solution": 1
+      },
+      "wait": 0
+    },
+    "thresh": {
+      "inputs": {
+        "wheat": 2
+      },
+      "outputs": {
+        "flour": 2,
+        "straw": 1
+      },
+      "wait": 0
+    },
+    "mill": {
+      "inputs": {
+        "wheat": 2
+      },
+      "outputs": {
+        "flour": 3
+      },
+      "wait": 0
+    },
+    "compost": {
+      "inputs": {
+        "straw": 3
+      },
+      "outputs": {
+        "compost": 2
+      },
+      "wait": 1
+    },
+    "polymer": {
+      "inputs": {
+        "feedstock": 2,
+        "oil": 1
+      },
+      "outputs": {
+        "polymer": 2
+      },
+      "wait": 1
+    },
+    "wire": {
+      "inputs": {
+        "copper": 1,
+        "polymer": 1
+      },
+      "outputs": {
+        "wire": 2
+      },
+      "wait": 0
+    },
+    "coil": {
+      "inputs": {
+        "wire": 2,
+        "iron": 1
+      },
+      "outputs": {
+        "coil": 1
+      },
+      "wait": 0
+    },
+    "cable": {
+      "inputs": {
+        "wire": 2,
+        "seal": 1
+      },
+      "outputs": {
+        "cable": 1
+      },
+      "wait": 0
+    },
+    "fuel": {
+      "inputs": {
+        "feedstock": 2
+      },
+      "outputs": {
+        "fuel": 2
+      },
+      "wait": 1
+    },
+    "nutrient": {
+      "inputs": {
+        "mineral": 2,
+        "solution": 1
+      },
+      "outputs": {
+        "nutrient": 3
+      },
+      "wait": 1
+    },
+    "battery": {
+      "inputs": {
+        "copper": 1,
+        "solution": 1,
+        "polymer": 1
+      },
+      "outputs": {
+        "battery": 1
+      },
+      "wait": 0
+    },
+    "silicon": {
+      "inputs": {
+        "silica": 2,
+        "solution": 1
+      },
+      "outputs": {
+        "silicon": 1
+      },
+      "wait": 1,
+      "power": 2
+    },
+    "circuit": {
+      "inputs": {
+        "silicon": 1,
+        "wire": 1,
+        "polymer": 1
+      },
+      "outputs": {
+        "circuit": 1
+      },
+      "wait": 0,
+      "power": 2
+    },
+    "controller": {
+      "inputs": {
+        "circuit": 2,
+        "cable": 1
+      },
+      "outputs": {
+        "controller": 1
+      },
+      "wait": 0,
+      "power": 2
+    },
+    "composite": {
+      "inputs": {
+        "polymer": 1,
+        "fiber": 2,
+        "iron": 1
+      },
+      "outputs": {
+        "composite": 2
+      },
+      "wait": 0,
+      "power": 1
+    },
+    "recycle": {
+      "inputs": {
+        "battery": 1
+      },
+      "outputs": {
+        "copper": 1
+      },
+      "wait": 0,
+      "power": 1
+    },
+    "aluminium": {
+      "inputs": {
+        "alumina": 2
+      },
+      "outputs": {
+        "aluminium": 2
+      },
+      "wait": 0,
+      "power": 3
+    },
+    "aluminiumwire": {
+      "inputs": {
+        "aluminium": 1,
+        "polymer": 1
+      },
+      "outputs": {
+        "wire": 2
+      },
+      "wait": 0
+    }
+  }
+}

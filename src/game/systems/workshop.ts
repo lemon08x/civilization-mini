@@ -2,7 +2,8 @@ import type { GameState } from '../model/state.js';
 import type { Ruleset } from '../ruleset.js';
 import type { GameEvent } from '../model/events.js';
 import type { WorkshopId,WorkshopState } from '../model/workshop.js';
-import { amount,changeGoods,recordEvidence } from './economy.js';
+import { amount,changeGoods } from './inventory.js';
+import { recordEvidence } from './knowledge.js';
 import { PROCESSES,GOODS } from './economy-catalog.js';
 import { made } from './shop.js';
 

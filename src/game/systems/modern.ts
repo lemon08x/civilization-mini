@@ -3,7 +3,8 @@ import type { GameState } from '../model/state.js';
 import type { GameEvent } from '../model/events.js';
 import { SUBJECTS } from '../model/economy.js';
 import {branchHas} from './branches.js';
-import { amount,equipped,consumeEquipment,changeGoods,level,organizationLevel } from './economy.js';
+import { amount,equipped,consumeEquipment,changeGoods } from './inventory.js';
+import { level,organizationLevel } from './knowledge.js';
 import { ALL_PRODUCTS } from './economy-catalog.js';
 
 export function initializeModern(s:GameState,agriculture=false):void {

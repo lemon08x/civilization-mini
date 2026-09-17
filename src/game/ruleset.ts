@@ -13,6 +13,7 @@ import { SHOP_BOUNDS } from './model/shop.js';
 import type { ShopRules } from "./model/shop.js";
 import type { DevelopmentRules } from './model/development.js';
 import type { ProductionParameters, ProductionRules, ProductionScenario } from './model/production.js';
+import { applyCatalogOverlay, type CatalogOverlay } from './systems/economy-catalog.js';
 export interface Parameters {
   actionsPerTurn: number; turnsPerGeneration: number; generations: number;
   initialFood: number; initialMoney: number; foodPerTurn: number; workIncome: number;
@@ -59,6 +60,7 @@ export interface Ruleset {
   passiveInvestment?: { victoryPercent: number; reportPrice: number };
   technologyFeedback?: { buildActions: number; workbenchWood: number; kilnWood: number; kilnClay: number };
   socialInheritance?: { wage: number; goodsCapacity: number; archiveDiscount: number };
+  catalogs: CatalogOverlay;
 }
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -75,8 +77,8 @@ export function deepFreeze<T>(value: T): T {
 const parameterKeys = ['actionsPerTurn', 'turnsPerGeneration', 'generations', 'initialFood', 'initialMoney', 'foodPerTurn', 'workIncome', 'foodPrice', 'cropPotential', 'channelCost', 'channelDurability', 'repairCost', 'trialCost', 'trialSeasons', 'trialLandCost', 'archiveCost', 'studyCost', 'trainingCost', 'studyMultiplier', 'hardshipLimit'];
 export function validateRuleset(value: unknown): Ruleset {
   if (!isRecord(value) || value.schemaVersion !== 1 || typeof value.id !== 'string' || typeof value.rulesVersion !== 'string' || !isRecord(value.parameters) || !isRecord(value.parameterBounds) || !isRecord(value.scenarios) || !Array.isArray(value.technologies) || !strings(value.worldTechnologies) || !isRecord(value.practiceNames)) throw new Error('规则配置格式不完整');
-  if (!['0.1.0', '0.2.0', '0.3.0', '0.4.0', '0.5.0', '0.6.0', '0.7.0', '0.8.0', '0.9.0', '0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0','0.15.0','0.16.0','0.17.0','0.18.0','0.19.0','0.20.0','0.21.0','0.22.0','0.23.0','0.24.0','0.25.0','0.26.0','0.27.0'].includes(value.rulesVersion) || (value.rulesVersion !== '0.1.0') !== (value.production !== undefined)) throw new Error('规则版本与生产机制不匹配');
-  if (value.rulesVersion !== '0.1.0' && !isRecord(value.production)) throw new Error('新规则必须提供完整生产配置');
+  if (value.rulesVersion !== '0.27.0') throw new Error('只支持规则 0.27.0');
+  if (!isRecord(value.production)) throw new Error('必须提供完整生产配置');
   if (['0.3.0', '0.4.0', '0.5.0', '0.6.0', '0.7.0', '0.8.0', '0.9.0', '0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0','0.15.0','0.16.0','0.17.0','0.18.0','0.19.0','0.20.0','0.21.0','0.22.0','0.23.0','0.24.0','0.25.0','0.26.0','0.27.0'].includes(value.rulesVersion) !== (value.technologyFeedback !== undefined)) throw new Error('科技反馈机制与规则版本不匹配');
   if ((['0.4.0','0.5.0', '0.6.0', '0.7.0', '0.8.0', '0.9.0', '0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0','0.15.0','0.16.0','0.17.0','0.18.0','0.19.0','0.20.0','0.21.0','0.22.0','0.23.0','0.24.0','0.25.0','0.26.0','0.27.0'].includes(value.rulesVersion)) !== (value.socialInheritance !== undefined)) throw new Error('社会传承机制与规则版本不匹配');
   if (value.socialInheritance !== undefined && (!isRecord(value.socialInheritance) || !integerFields(value.socialInheritance, ['wage', 'goodsCapacity', 'archiveDiscount']) || Object.values(value.socialInheritance).some(n => (n as number) < 1))) throw new Error('社会传承配置无效');
@@ -128,7 +130,7 @@ export function validateRuleset(value: unknown): Ruleset {
   }
   if((['0.14.0','0.15.0','0.16.0','0.17.0','0.18.0','0.19.0','0.20.0','0.21.0','0.22.0','0.23.0','0.24.0','0.25.0','0.26.0','0.27.0'].includes(value.rulesVersion))!==(value.modern===true)||(value.modern!==undefined&&value.modern!==true))throw new Error('现代科技版本不匹配');
   if((['0.15.0','0.16.0','0.17.0','0.18.0','0.19.0','0.20.0','0.21.0','0.22.0','0.23.0','0.24.0','0.25.0','0.26.0','0.27.0'].includes(value.rulesVersion))!==(value.civilization===true)||(value.civilization!==undefined&&value.civilization!==true))throw new Error('农业文明版本不匹配');
-  if((value.rulesVersion==='0.16.0')!==(value.householdLineage===true)||(value.householdLineage!==undefined&&value.householdLineage!==true))throw new Error('家学接续版本不匹配');
+  if(value.householdLineage!==undefined)throw new Error('当前规则不使用家学接续开关');
   if((['0.17.0','0.18.0','0.19.0','0.20.0','0.21.0','0.22.0','0.23.0','0.24.0','0.25.0','0.26.0','0.27.0'].includes(value.rulesVersion))!==(value.life!==undefined))throw new Error('人生规则版本不匹配');
   if(value.life!==undefined){
     if(!isRecord(value.life)||Object.keys(value.life).length!==Object.keys(LIFE_BOUNDS).length)throw new Error('人生参数不完整');
@@ -149,6 +151,8 @@ export function validateRuleset(value: unknown): Ruleset {
     if(!isRecord(value.electric)||Object.keys(value.electric).length!==Object.keys(ELECTRIC_BOUNDS).length)throw new Error('电气参数不完整');
     for(const [k,[min,max]] of Object.entries(ELECTRIC_BOUNDS)){const n=value.electric[k];if(!Number.isInteger(n)||(n as number)<min||(n as number)>max)throw new Error('电气参数越界：'+k);}
   }
+  if (!isRecord(value.catalogs) || !isRecord(value.catalogs.goods) || !isRecord(value.catalogs.crops) || !isRecord(value.catalogs.products) || !isRecord(value.catalogs.processes)) throw new Error('目录数值不完整');
+  applyCatalogOverlay(value.catalogs as unknown as CatalogOverlay);
   const rules = structuredClone(value) as unknown as Ruleset;
   if (rules.production) validateProduction(rules);
   else if (rules.technologies.some(t => t.prerequisiteAny || t.helpfulPrerequisites) || Object.values(rules.scenarios).some(s => s.production)) throw new Error('旧规则不能注入新生产机制');

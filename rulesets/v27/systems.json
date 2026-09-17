@@ -1,0 +1,98 @@
+{
+  "economy": {
+    "wage": 1,
+    "hireCost": 2,
+    "durability": 12
+  },
+  "shop": {
+    "transport": 12,
+    "stock": 8,
+    "deviceFee": 4,
+    "importFee": 4,
+    "textbookBase": 2,
+    "lessonBase": 2,
+    "trainingPrice": 4,
+    "trainingExperience": 2,
+    "granaryPrice": 32,
+    "granaryCapacity": 30,
+    "libraryPrice": 40,
+    "repairPercent": 50
+  },
+  "operations": {
+    "foodTarget": 4,
+    "inputBatches": 2,
+    "cashReserve": 4,
+    "outputReserve": 2,
+    "repairThreshold": 1,
+    "commissionSeasons": 3,
+    "requiredAchievements": 2,
+    "projectFee": 4,
+    "mineYield": 2,
+    "steamFuel": 2
+  },
+  "life": {
+    "timePerSeason": 12,
+    "baseEnergy": 10,
+    "recovery": 3,
+    "restRecovery": 5,
+    "careRecovery": 8,
+    "hungerDamage": 15,
+    "adultYears": 18,
+    "birthYears": 30,
+    "agingYears": 55,
+    "lifespanMin": 72,
+    "lifespanMax": 88
+  },
+  "branches": {
+    "electricFee": 4,
+    "metalFee": 3,
+    "basicIronStock": 2,
+    "metalStock": 6
+  },
+  "industry": {
+    "workerTime": 12,
+    "workerEnergy": 8,
+    "workerRecovery": 3,
+    "workerRestTime": 4,
+    "workerRestRecovery": 5,
+    "wageTimeUnit": 4,
+    "archiveDiscount": 1
+  },
+  "renewal": {
+    "fedHealth": 5,
+    "graceSeasons": 1,
+    "minimumEnergy": 4,
+    "farmTime": 3,
+    "farmEnergy": 2,
+    "careTime": 2,
+    "careEnergy": 1,
+    "careMoney": 1,
+    "inheritedTime": 1,
+    "inheritedEnergy": 1
+  },
+  "socialFood": {
+    "storage": 12,
+    "imports": 4,
+    "serviceCapacity": 6,
+    "pickupTime": 1,
+    "defaultBudget": 4,
+    "defaultReserve": 4
+  },
+  "eras": {
+    "seasons": 192,
+    "warning": 12,
+    "rewardDivisor": 12,
+    "dungeonTarget": 6
+  },
+  "electric": {
+    "lampTime": 2,
+    "servicePower": 1,
+    "dryHydroPower": 3,
+    "unpoweredPercent": 85,
+    "dungeonPower": 4,
+    "powerProgress": 2,
+    "applianceProgress": 3
+  },
+  "modern": true,
+  "civilization": true
+}
