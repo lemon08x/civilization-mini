@@ -1,22 +1,52 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>世代 · 开始生活</title><link rel="stylesheet" href="/style.css"></head>
-<body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>世代 · 开启家族旅程</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="chronicle-body">
   <main class="start-screen">
-    <a href="/">← 返回入口</a>
-    <div class="entry-heading"><div class="eyebrow">CIVILIZATION MINI</div><div class="start-emblem" aria-hidden="true">🌾</div><h1>世代</h1><p>一块田，一家人。<br>打开一份存档，或开始新的生活。</p></div>
-    <section class="panel" id="save-panel" hidden>
-      <div class="panel-head"><h2>打开存档</h2></div>
-      <div class="panel-body" id="save-list"></div>
+    <a class="text-btn" href="/">← 返回入口</a>
+    <div class="entry-heading">
+      <div class="eyebrow">CIVILIZATION MINI</div>
+      <p class="brand-mark" aria-hidden="true">记</p>
+      <h1>世代</h1>
+      <p>一块田，一家人。<br>打开一份已有旅程，或写下新的一章。</p>
+    </div>
+    <section class="panel" id="save-panel">
+      <div class="panel-head"><h2>打开已有旅程</h2></div>
+      <div class="panel-body">
+        <div id="save-list"></div>
+        <p class="subtle">导入会建立一份新的本机存档，不会覆盖原文件。仅接受当前规则。</p>
+        <label class="file-button import-label">导入存档
+          <input id="import" type="file" accept=".json,application/json" hidden>
+        </label>
+      </div>
     </section>
-    <section class="panel"><div class="panel-head"><h2>开始新生活</h2></div><div class="panel-body">
-      <form id="start-form" class="start-form">
-        <label>选择起始环境<select id="scenario"><option value="river">河渠农地</option><option value="clay-valley">黏土河谷</option><option value="woodland">林地聚落</option><option value="dry">缺水聚落</option></select></label>
-        <details><summary>世界设置</summary><label>世界编号<input id="seed" type="number" value="17" min="1" max="4294967295" step="1" required></label><p class="subtle">相同编号与环境生成相同的初始世界。</p></details>
-        <div id="error" role="alert" hidden></div>
-        <button id="new-game" type="submit" disabled>准备中…</button>
-      </form>
-    </div></section>
+    <section class="panel">
+      <div class="panel-head"><h2>开启家族旅程</h2></div>
+      <div class="panel-body">
+        <form id="start-form" class="start-form">
+          <label>选择起始环境
+            <select id="scenario">
+              <option value="river">河渠农地</option>
+              <option value="clay-valley">黏土河谷</option>
+              <option value="woodland">林地聚落</option>
+              <option value="dry">缺水聚落</option>
+            </select>
+          </label>
+          <details>
+            <summary>世界设置</summary>
+            <label>世界编号<input id="seed" type="number" value="17" min="1" max="4294967295" step="1" required></label>
+            <p class="subtle">相同编号与环境生成相同的初始世界。种子不会出现在游戏界面或记事里。</p>
+          </details>
+          <div id="error" role="alert" hidden tabindex="-1"></div>
+          <button id="new-game" type="submit" disabled>准备中…</button>
+        </form>
+      </div>
+    </section>
     <p class="entry-note">存档只保存在本机浏览器。每次从这里选择打开或新开，不会自动进入上一局。</p>
   </main>
   <script type="module" src="/modules/apps/board/start.js"></script>

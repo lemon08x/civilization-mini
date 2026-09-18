@@ -1,15 +1,38 @@
 import type { SessionObservation } from '../../src/runtime/session.js';
 import {esc} from './economy-view.js';
-export const pageNames:Record<string,string>={社会:'社会与阶段结算',聚落:'本季总览',农业:'田地',生活:'生活与食品',家人:'家人与传承',仓库:'仓库',学科:'学堂',产品:'产品研发',生产:'加工制作',系统:'生产系统',雇佣:'人员安排',商城:'集市',能源:'供能',家业:'家业',作坊:'作坊',副本:'副本',试炼:'试炼'};
-export function playerGroups(g:SessionObservation['game']) {
+
+export const pageNames:Record<string,string>={
+  社会:'社会历程',聚落:'本季纪事',农业:'田地',生活:'生活安排',家人:'家人与传承',仓库:'仓库',
+  学科:'学堂',产品:'产品研发',生产:'加工制作',系统:'生产系统',雇佣:'人员安排',商城:'集市',
+  能源:'供能',家业:'家业',作坊:'作坊',副本:'副本',试炼:'试炼',
+};
+
+export type PlayerGroup = {name:string;pages:string[];description:string;epigraph:string};
+
+export function playerGroups(g:SessionObservation['game']):PlayerGroup[] {
   const e=g.economy!;
-  return [
-    {name:'本季总览',pages:['聚落',...(g.era?['社会']:[])],description:'先看钱粮与本季安排'},
-    {name:'生活与家人',pages:['农业','生活','家人','仓库'],description:'种田、补给、休养与传承'},
-    {name:'学习与制造',pages:['学科','产品','生产'],description:'学知识、验证产品、加工物资'},
-    {name:'经营与交易',pages:[e.industryView?'系统':'家业','商城',...(e.modern?['能源']:[]),...(e.workshopView?['作坊']:[]),...(e.expeditionView?['副本']:[]),...(e.towerView?['试炼']:[])],description:'安排生产人员、供水与买卖'},
+  const groups:PlayerGroup[]=[
+    {name:'本季',pages:['聚落'],description:'看这一季的日子与缺口',epigraph:'把日子安顿好，才有余裕向前。'},
+    {name:'生活与家人',pages:['农业','生活','家人','仓库'],description:'种田、补给、休养与传承',epigraph:'田里有收成，家里才有下一季。'},
+    {name:'学习与制造',pages:['学科','产品','生产'],description:'学知识、验证产品、加工物资',epigraph:'亲手做成的东西，才算真正留下。'},
+    {name:'经营与交易',pages:[
+      e.industryView?'系统':'家业',
+      ...(e.industryView?[]:['雇佣']),
+      '商城',
+      ...(e.modern?['能源']:[]),
+      ...(e.workshopView?['作坊']:[]),
+      ...(e.expeditionView?['副本']:[]),
+      ...(e.towerView?['试炼']:[]),
+    ],description:'安排生产人员、供水与买卖',epigraph:'家业要有人守，也要有人去换。'},
   ];
+  if(g.era)groups.push({name:'社会历程',pages:['社会'],description:'阶段、服务、回报与最终试炼',epigraph:'社会在变，家里的账还是要自己算。'});
+  return groups;
 }
+
+export function chapterEpigraph(g:SessionObservation['game'],page:string):string {
+  return playerGroups(g).find(x=>x.pages.includes(page))?.epigraph??'先安排这一季的日子。';
+}
+
 export function ruleGuide(g:SessionObservation['game'],page:string):string {
   const e=g.economy!,l=g.life;
   const guides:Record<string,[string,string][]>={
@@ -23,8 +46,8 @@ export function ruleGuide(g:SessionObservation['game'],page:string):string {
     生产:[['加工','先查看配方投入、产出和设备要求。开工投入材料，跨季项目需等待并完成才能获得产品。'],['设备占用','本人和雇员共用设备，不能重复占用。已有制造规程与个人知识是不同条件，以当前行动要求为准。']],
     仓库:[['食物消耗',`每季消耗 ${g.parameters.foodPerTurn} 粮。即食粮不足时，面粉、小麦、大豆依次补生活缺口；种子不当饭吃。`],['保存',`当前保存保护容量 ${e.storage}。超出保护的物资可能发生保存损耗。`]],
     生活:[['社会食品','在生活页选择自给优先、市场生活或保留储备。采购按预算、资金、共享库存与运输部分执行；暂停自动购买后仍可手动买粮。本人赶集占用预留时间，委托配送由社会人员承担。'],['零存粮生活','家中没有粮不等于缺粮；查看预计购粮与生活缺口。工资、其他开支和本季采购会改变报价，季末以实际条件结算。'],['谋生与补给','通过当前开放的采集、做工和补给行动维持生活。每项行动都有实际时间、精力和资源成本。'],['行动受限','条件不足的按钮会显示原因。需要恢复时到家人与传承；需要买粮时到集市。']],
-    能源:[['供能','本季供能需要本人执行；启用设备不等于已经发电。查看当前电力与设备运行状态。'],['季节限制','本版本电力跨季清空，按本季生产需要安排发电与使用。']],
+    能源:[['供能','本季供能需要本人执行；启用设备不等于已经发电。安装、启用和本季实际运行是三种状态。'],['余电与储能','余电可存入已启用的储能设备；未储存的电会在季末耗散。季末不会自动发电。电灯加时与调度都有时间、精力报价。']],
   };
-  const rows=guides[page]??[['一季怎样推进','先安排口粮，再按目标学习或生产。每次行动都会结算成本；结束本季会结算生活消耗、生产和恢复。'],['从哪里开始','生活与家人处理生存；学习与制造处理成长；经营与交易处理系统与买卖。总览只显示当前摘要。']];
-  return `<section class="rules-page"><button data-page="${esc(page)}">← 返回${pageNames[page]??page}</button><h2>${pageNames[page]??page} · 规则详情</h2><p class="subtle">当前规则 ${esc(g.rulesVersion)} · 具体行动以当前报价与条件为准</p>${rows.map(([title,body],i)=>`<article class="rule-section"><span>${i+1}</span><div><h3>${title}</h3><p>${esc(body)}</p></div></article>`).join('')}</section>`;
+  const rows=guides[page]??[['一季怎样推进','先安排口粮，再按目标学习或生产。每次行动都会结算成本；结束本季会结算生活消耗、生产和恢复。'],['从哪里开始','生活与家人处理生存；学习与制造处理成长；经营与交易处理系统与买卖。本季纪事只显示当前摘要。']];
+  return `<section class="rules-page"><button type="button" class="text-btn" data-page="${esc(page)}">← 返回${pageNames[page]??page}</button><h2>${pageNames[page]??page} · 规则详情</h2><p class="subtle">当前规则 ${esc(g.rulesVersion)} · 具体行动以当前报价与条件为准</p>${rows.map(([title,body],i)=>`<article class="rule-section"><span>${i+1}</span><div><h3>${title}</h3><p>${esc(body)}</p></div></article>`).join('')}</section>`;
 }

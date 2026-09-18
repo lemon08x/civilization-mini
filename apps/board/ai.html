@@ -1,2 +1,26 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI 文本入口 · 世代</title><link rel="stylesheet" href="/style.css"></head><body><main class="guide"><p><a href="/">← 选择入口</a></p><div class="eyebrow">CIVILIZATION MINI / AI</div><h1>读观察，选行动</h1><p>AI 通过本地文本玩游戏。这里提供接入说明，实际行动由命令行提交，不需要操作网页。</p><p><a href="/ai-guide.md">打开完整纯文本接入指南 →</a></p><h2>1. 由宿主创建独立新局</h2><pre>npm run lab -- new --run ai-demo --scenario river</pre><h2>2. 用最新摘要决策</h2><pre>node playtests/player.mjs observe --run ai-demo</pre><p>player 入口默认精简观察。成功 act 会返回新摘要并更新 saves/&lt;run&gt;/observation.md。分区详情用 <code>--section branches|industry|systems|social-food|era|catalog|actions-disabled</code>。</p><h2>3. 每次提交一个行动</h2><pre>node playtests/player.mjs act --run ai-demo --revision &lt;最新revision&gt; --action &lt;可用行动ID&gt;</pre><p>完整文本用 <code>--format text</code>。浏览器与命令行分别保存。模型试玩遵循 playtests/AGENTS.md 和 playtests/START_HERE.md。</p></main></body></html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AI 文本入口 · 世代</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="chronicle-body">
+  <main class="guide">
+    <p><a class="text-btn" href="/">← 选择入口</a></p>
+    <div class="eyebrow">CIVILIZATION MINI / AI</div>
+    <h1>读观察，选行动</h1>
+    <p>AI 通过本地文本玩游戏。这里提供接入说明，实际行动由命令行提交，不需要操作网页。</p>
+    <p><a href="/ai-guide.md">打开完整纯文本接入指南 →</a></p>
+    <h2>1. 由宿主创建独立新局</h2>
+    <pre>npm run lab -- new --run ai-demo --scenario river</pre>
+    <h2>2. 用最新摘要决策</h2>
+    <pre>node playtests/player.mjs observe --run ai-demo</pre>
+    <p>player 入口默认精简观察。成功 act 会返回新摘要并更新 saves/&lt;run&gt;/observation.md。分区详情用 <code>--section branches|industry|systems|social-food|era|catalog|actions-disabled</code>。</p>
+    <h2>3. 每次提交一个行动</h2>
+    <pre>node playtests/player.mjs act --run ai-demo --revision &lt;最新revision&gt; --action &lt;可用行动ID&gt;</pre>
+    <p>完整文本用 <code>--format text</code>。浏览器与命令行分别保存。模型试玩遵循 playtests/AGENTS.md 和 playtests/START_HERE.md。</p>
+  </main>
+</body>
+</html>
