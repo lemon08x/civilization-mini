@@ -77,14 +77,14 @@ function restoreFocus(key:string):void {
   if(!key||(document.getElementById('confirm-dialog') as HTMLDialogElement|null)?.open)return;
   const eq=key.indexOf('='); if(eq<0)return;
   const attr=key.slice(0,eq),value=CSS.escape(key.slice(eq+1));
-  document.querySelector<HTMLElement>(`[${attr}="${value}"]`)?.focus();
+  document.querySelector<HTMLElement>(`[${attr}="${value}"]`)?.focus({preventScroll:true});
 }
 function openFolds():string[] {
-  return Array.from(document.querySelectorAll('details[open]')).map(d=>(d.querySelector('summary')?.textContent??'').trim().slice(0,80));
+  return Array.from(document.querySelectorAll<HTMLDetailsElement>('details[open]')).map(d=>d.dataset.fold??(d.querySelector('summary')?.textContent??'').trim().slice(0,80));
 }
 function restoreFolds(keys:string[]):void {
   document.querySelectorAll('details').forEach(d=>{
-    const key=(d.querySelector('summary')?.textContent??'').trim().slice(0,80);
+    const key=d.dataset.fold??(d.querySelector('summary')?.textContent??'').trim().slice(0,80);
     if(keys.includes(key))d.open=true;
   });
 }
@@ -104,11 +104,32 @@ async function act(id:string){
 }
 function bindApp():void {
   document.querySelectorAll<HTMLButtonElement>('[data-page]').forEach(b=>b.onclick=()=>{page=b.dataset.page!;guide=false;filter='';render();});
-  document.querySelectorAll<HTMLButtonElement>('[data-course]').forEach(b=>b.onclick=()=>{selectedCourse=b.dataset.course!;render();});
-  document.querySelectorAll<HTMLButtonElement>('[data-product]').forEach(b=>b.onclick=()=>{selectedProduct=b.dataset.product!;render();});
-  document.querySelectorAll<HTMLButtonElement>('[data-recipe]').forEach(b=>b.onclick=()=>{selectedRecipe=b.dataset.recipe!;render();});
-  document.querySelectorAll<HTMLButtonElement>('[data-system]').forEach(b=>b.onclick=()=>{selectedSystem=b.dataset.system!;render();});
-  document.querySelectorAll<HTMLButtonElement>('[data-device]').forEach(b=>b.onclick=()=>{selectedDevice=b.dataset.device!;render();});
+  const showSelection=()=>{
+    render();
+    if(matchMedia('(max-width: 900px)').matches){
+      const detail=document.querySelector<HTMLElement>('.course-inspector');
+      detail?.focus({preventScroll:true});
+      detail?.scrollIntoView({block:'start'});
+    }
+  };
+  document.querySelectorAll<HTMLButtonElement>('[data-course]').forEach(b=>b.onclick=()=>{selectedCourse=b.dataset.course!;showSelection();});
+  document.querySelectorAll<HTMLButtonElement>('[data-product]').forEach(b=>b.onclick=()=>{selectedProduct=b.dataset.product!;showSelection();});
+  document.querySelectorAll<HTMLButtonElement>('[data-recipe]').forEach(b=>b.onclick=()=>{selectedRecipe=b.dataset.recipe!;showSelection();});
+  document.querySelectorAll<HTMLButtonElement>('[data-system]').forEach(b=>b.onclick=()=>{selectedSystem=b.dataset.system!;showSelection();});
+  document.querySelectorAll<HTMLButtonElement>('[data-device]').forEach(b=>b.onclick=()=>{selectedDevice=b.dataset.device!;showSelection();});
+  document.querySelectorAll<HTMLElement>('.course-inspector').forEach(detail=>{
+    detail.tabIndex=-1;
+    const back=document.createElement('button');
+    back.type='button';back.className='text-btn detail-back';back.textContent='返回选择列表 ↓';
+    back.onclick=()=>{
+      const selected=document.querySelector<HTMLElement>('.lesson-tile.selected, .select-tile.selected');
+      for(let parent=selected?.parentElement;parent;parent=parent.parentElement){
+        if(parent instanceof HTMLDetailsElement)parent.open=true;
+      }
+      selected?.focus({preventScroll:true});selected?.scrollIntoView({block:'center'});
+    };
+    detail.prepend(back);
+  });
   document.querySelectorAll<HTMLButtonElement>('[data-guide]').forEach(b=>b.onclick=()=>{page=b.dataset.guide!;guide=true;render();});
   document.querySelectorAll<HTMLButtonElement>('[data-shop-category]').forEach(b=>b.onclick=()=>{shopCategory=b.dataset.shopCategory!;filter='';render();});
   document.querySelectorAll<HTMLButtonElement>('[data-dismiss-recap]').forEach(b=>b.onclick=()=>{recap=null;render();});
@@ -155,6 +176,13 @@ function render():void {
   if(page==='能源'&&e.modern)body=energyPage(o,button,selectedDevice);
   if(page==='生活')body=socialFoodPage(o,button)+panel('谋生与补给',acts('生活'));
   $('app').innerHTML=humanScreen(o,page,body,button,session.record.entries.at(-1)?.events.map(feedback).filter(Boolean)??[],guide,recap);
+  // Retain the initial default selection when its available/learned group changes.
+  const selection=document.querySelector<HTMLElement>('.lesson-tile.selected, .select-tile.selected')?.dataset;
+  if(selection?.course)selectedCourse=selection.course;
+  if(selection?.product)selectedProduct=selection.product;
+  if(selection?.recipe)selectedRecipe=selection.recipe;
+  if(selection?.system)selectedSystem=selection.system;
+  if(selection?.device)selectedDevice=selection.device;
   bindApp();
   restoreFolds(folds);
   restoreFocus(key);

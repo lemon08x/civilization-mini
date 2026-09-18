@@ -134,10 +134,10 @@ input, select {
 .save-row p { margin: 6px 0 0; }
 .import-label { margin-top: 12px; display: inline-flex; }
 
-.chronicle-shell { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
+.chronicle-shell { max-width: 1280px; margin: 0 auto; padding: 14px 24px 32px; }
 .chronicle-masthead {
   display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;
-  padding-bottom: 16px; border-bottom: 1px solid var(--line);
+  padding-bottom: 8px; border-bottom: 1px solid var(--line);
 }
 .chronicle-masthead h1 { font-size: 28px; margin-bottom: 4px; }
 .chronicle-masthead h1 span { font-size: 16px; font-weight: 400; letter-spacing: 0.12em; margin-left: 8px; }
@@ -145,14 +145,14 @@ input, select {
 .masthead-links { display: flex; gap: 12px; flex-wrap: wrap; }
 .rule-line { font-size: 12px; color: var(--muted); margin: 10px 0 0; }
 
-.chapter-nav { display: flex; flex-wrap: wrap; gap: 4px 18px; padding: 14px 0 6px; border-bottom: 1px solid var(--line); }
+.chapter-nav { display: flex; flex-wrap: wrap; gap: 4px 18px; padding: 6px 0 2px; border-bottom: 1px solid var(--line); }
 .chapter-tab {
   border: 0; background: transparent; border-bottom: 2px solid transparent;
   border-radius: 0; padding: 8px 2px; min-height: 40px; color: var(--muted); font-size: 15px;
 }
 .chapter-tab:hover { background: transparent; color: var(--ink); }
 .chapter-tab[aria-current="page"] { color: var(--accent); border-bottom-color: var(--accent); }
-.chapter-subnav { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 0 16px; }
+.chapter-subnav { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0 6px; }
 .chapter-subnav button {
   display: inline-flex; align-items: center; gap: 8px;
   border: 0; background: transparent; padding: 8px 10px; min-height: 40px; font-size: 13px; color: var(--muted);
@@ -163,22 +163,21 @@ input, select {
 
 .player-hud {
   display: grid; grid-template-columns: 1.5fr repeat(4, minmax(0, 1fr));
-  gap: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 8px 0 20px;
+  gap: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 6px 0 10px;
 }
-.season-card { padding: 16px 8px 16px 0; display: grid; gap: 4px; }
+.season-card { padding: 8px 8px 8px 0; display: grid; gap: 4px; }
 .season-card strong { font-family: var(--title); font-size: 20px; }
 .season-card small, .season-card span { color: var(--muted); font-size: 12px; }
-.hud-item { padding: 16px 12px; display: grid; align-content: center; gap: 6px; border-left: 1px solid var(--line); }
+.hud-item { padding: 8px 12px; display: grid; align-content: center; gap: 6px; border-left: 1px solid var(--line); }
 .hud-item > span { font-size: 12px; color: var(--muted); }
 .hud-item strong { font-size: 22px; font-variant-numeric: tabular-nums; }
 .hud-item small { font-size: 12px; font-weight: 400; color: var(--muted); }
 .resource-warning { background: var(--accent-soft); color: var(--warn); }
 
-.chapter-head { margin-bottom: 20px; }
+.chapter-head { margin-bottom: 16px; }
 .chapter-kicker { font-size: 12px; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
 .chapter-epigraph {
-  font-family: var(--title); font-size: 18px; color: var(--accent); margin: 0 0 16px;
-  padding-bottom: 12px; border-bottom: 1px solid var(--line);
+  font-family: var(--title); font-size: 15px; color: var(--accent); margin: 6px 0 0;
 }
 .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .section-heading h2 { font-size: 28px; margin: 0; }
@@ -368,26 +367,32 @@ summary { cursor: pointer; color: var(--ink); padding: 4px 0; }
 
 @media (max-width: 900px) {
   .spread-body, .school-workbench, .page-workbench { grid-template-columns: 1fr; }
-  .course-inspector { position: static; }
+  .course-inspector { position: static; grid-row: 1; }
   .player-hud { grid-template-columns: 1fr 1fr; }
-  .season-card { grid-column: 1 / -1; padding: 12px 0; }
+  .season-card { grid-column: 1 / -1; padding: 6px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .hud-item { border-left: 0; border-top: 1px solid var(--line); }
   .entry-grid { grid-template-columns: 1fr; }
   .person-spread, .family-grid, .farm-stats { grid-template-columns: 1fr 1fr; }
   .season-bar { grid-template-columns: 1fr; }
-  .chronicle-masthead { flex-direction: column; }
+  .chronicle-masthead { gap: 8px; }
   .masthead-meta { text-align: left; justify-items: start; }
 }
 
 @media (max-width: 600px) {
   .chronicle-shell, .chronicle-footer, .entry-main, .start-screen, .guide { padding-left: 16px; padding-right: 16px; }
   .chapter-nav { flex-wrap: nowrap; overflow-x: auto; }
+  .chapter-tab { flex-shrink: 0; }
+  .chronicle-masthead .eyebrow, .masthead-meta > div:first-child { display: none; }
+  .chronicle-masthead h1 span { display: block; margin-left: 0; font-size: 12px; }
+  .masthead-links { gap: 6px; }
   .player-hud { grid-template-columns: 1fr 1fr; }
   .section-heading h2, .chronicle-masthead h1 { font-size: 24px; }
-  .action-grid, .lesson-grid, .person-spread, .family-grid, .farm-stats, .inventory-grid, .compact-actions {
+  .action-grid, .person-spread, .family-grid, .farm-stats, .inventory-grid, .compact-actions {
     grid-template-columns: 1fr;
   }
   .lesson-state { position: static; }
+  .lesson-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lesson-tile, .select-tile { min-height: 100px; padding: 10px; }
 }
 
 @media (max-width: 390px) {
@@ -396,4 +401,14 @@ summary { cursor: pointer; color: var(--ink); padding: 4px 0; }
   .hud-item { padding: 12px 8px; }
   .game-action { padding: 10px; }
   .save-row { flex-wrap: wrap; }
+}
+
+/* Chapter context and optional action detail. */
+.era-link { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 12px; font-size: 12px; color: var(--muted); }
+.era-link .text-btn { font-size: 12px; min-height: 32px; }
+.action-help { border: 0; padding: 2px 0; }
+.action-help summary { font-size: 12px; color: var(--muted); }
+.detail-back { display: none; }
+@media (max-width: 900px) {
+  .detail-back { display: inline-flex; margin-bottom: 12px; }
 }
