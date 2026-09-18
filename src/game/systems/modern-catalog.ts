@@ -23,7 +23,7 @@ export const MODERN_PRODUCTS:ProductSpec[]=[
  {id:'E02',name:'燃料发电机组',category:'电力与储能',effect:'开启供能后每季最多一次，消耗1精炼燃料和1耐用，产生6电。',requires:{heat:7,mechanics:8,materials:7},inputs:{coil:1,valve:2,brick:2},from:[]},
  {id:'E03',name:'光伏阵列',category:'电力与储能',effect:'开启供能后每季消耗1耐用；丰水季发2电，其他天气发4电，不消耗公共水。',requires:{heat:10,materials:9},inputs:{silicon:3,circuit:1,cable:2},from:[]},
  {id:'E04',name:'储能柜',category:'电力与储能',effect:'季末把最多6份余电存入电池，跨季保留；手动或季末供能时放电，每次充电扣1耐用。',requires:{chemistry:7,materials:7},inputs:{battery:3,cable:1},from:[]},
- {id:'F07',name:'化工反应设备',category:'现代制造',effect:'开放聚合物、燃料、配方肥料和电池生产，逐批扣耐用与原料。',requires:{heat:7,chemistry:8},inputs:{iron:3,seal:2,valve:1},from:['F05']},
+ {id:'F07',name:'化工反应设备',category:'现代制造',effect:'开放精炼燃料与蓄电池单元组装，逐批扣耐用与原料。',requires:{heat:7,chemistry:8},inputs:{iron:3,seal:2,valve:1},from:['F05']},
  {id:'T07',name:'电动标准化装配台',category:'现代制造',effect:'组织7阶时，雇员即时配方按双份原料生产；每批另用1电与1耐用，不与经验叠成四倍。',requires:{organization:7},inputs:{shaft:2,coil:1,iron:2},from:['T03']},
  {id:'F09',name:'电子洁净制造台',category:'现代制造',effect:'开放高纯硅、电子电路、数字控制器，逐批用电；不能用普通工匠绕过现代工艺知识。',requires:{chemistry:9,materials:9},inputs:{ceramics:2,cable:2,polymer:2},from:[]},
  {id:'F10',name:'材料回收与复合设备',category:'现代制造',effect:'回收废料与制造复合结构件，仍耗电和加工材料，不凭空生成资源。',requires:{chemistry:10,materials:10},inputs:{controller:1,iron:2,cable:1},from:[]},

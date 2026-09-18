@@ -24,8 +24,8 @@ export const BRANCH_NODES:BranchNode[]=[
   {id:'O2',name:'采购与交付',subject:'organization',unlockEra:1,parents:['O0'],sample:{},benefit:'补货、销售、维护和经营契约；不必先学生产工序'},
 ];
 export const BRANCH_PRODUCTS:Record<string,string[]>={
-  W01:['L0'],S01:['M3'],T03:['M1'],W03:['L3','M2'],P01:['L1','M1'],P03:['L4','L1','M1'],
-  U06:['L1','M1'],E01:['L6','L1','L4','M1','M5'],U08:['A1','M1'],S02:['M2','M3'],T01:['M1'],U01:['A0','L0','M1'],
+  W01:['L0'],S01:['M3'],T03:['M1'],W03:['L3','M2'],P01:['L1','M1'],P03:['L4','M1'],
+  U06:['L1','M1'],E01:['L6','L4','M1','M5'],U08:['A1','M1'],S02:['M2','M3'],T01:['M1'],U01:['A0','L0','M1'],
 };
 export const BRANCH_PROCESSES:Record<string,string[]>={seal:['M2'],shaft:['L1','M1'],valve:['L2','M1','M2'],wire:['M5'],coil:['M5','M1'],cable:['M5'],mill:['L1','M1']};
 export const BRANCH_PATHS=[

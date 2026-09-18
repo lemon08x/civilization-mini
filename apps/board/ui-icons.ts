@@ -15,4 +15,4 @@ export function uiIcon(name:string):string {
  };
  return `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]??paths.book}</svg>`;
 }
-export const placeIcon=(page:string)=>uiIcon(({聚落:'home',农业:'plant',生活:'plant',家人:'people',仓库:'box',学科:'book',产品:'tool',生产:'tool',系统:'tool',商城:'market',能源:'power'} as Record<string,string>)[page]??'tool');
+export const placeIcon=(page:string)=>uiIcon(({聚落:'home',农业:'plant',生活:'plant',家人:'people',仓库:'box',学科:'book',制造:'tool',系统:'tool',雇佣:'people',家业:'home',商城:'market',能源:'power',社会:'book'} as Record<string,string>)[page]??'tool');

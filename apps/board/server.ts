@@ -5,7 +5,7 @@ import { loadCurrentContext, projectRoot } from '../host/context.js';
 
 await loadCurrentContext();
 const port = Number(process.env.PORT ?? 4317);
-const types: Record<string, string> = { '.md': 'text/plain; charset=utf-8', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
+const types: Record<string, string> = { '.png': 'image/png', '.md': 'text/plain; charset=utf-8', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
 const server = http.createServer(async (req, res) => {
   if (!['GET', 'HEAD'].includes(req.method ?? '')) { res.writeHead(405); res.end(); return; }
   try {
@@ -18,6 +18,7 @@ const server = http.createServer(async (req, res) => {
     else if (path === '/ai') absolute = join(projectRoot, 'apps/board/ai.html');
     else if (path === '/ai-guide.md') absolute = join(projectRoot, 'docs/AI_PLAYER.md');
     else if (path === '/style.css') absolute = join(projectRoot, 'apps/board/style.css');
+    else if (path === '/chronicle-art.png') absolute = join(projectRoot, 'apps/board/chronicle-art.png');
     else if (path === '/rulesets/current.json') {
       const { base } = await loadCurrentContext();
       const body = Buffer.from(JSON.stringify(base), 'utf8');
