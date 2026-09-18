@@ -136,8 +136,8 @@ function village(g:Game,events:string[]):string {
 }
 
 function pageArt(page:string):string {
-  if(['学科','产品'].includes(page))return 'study';
-  if(['生产','系统','雇佣','作坊','家业'].includes(page))return 'workshop';
+  if(['学科'].includes(page))return 'study';
+  if(['制造','系统','雇佣','作坊','家业'].includes(page))return 'workshop';
   if(page==='能源')return 'power';
   if(page==='家人')return 'family';
   if(['生活','商城','仓库'].includes(page))return 'food';
@@ -163,7 +163,7 @@ function attention(g:Game,page:string,button:Button):string {
   return `<h3>当下关注</h3><p>选择一项后，这里会显示条件和报价。</p>`;
 }
 
-const OWN_SPREAD=new Set(['聚落','家人','学科','产品','生产','系统','雇佣','商城','能源','社会','家业','作坊','副本','试炼']);
+const OWN_SPREAD=new Set(['聚落','家人','学科','制造','系统','雇佣','商城','能源','社会','家业','作坊','副本','试炼']);
 
 export function energyPage(g:Game,button:Button,selectedId=''):string {
   const e=g.economy!,m=e.modern; if(!m)return '';

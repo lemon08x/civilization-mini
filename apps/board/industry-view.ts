@@ -1,46 +1,63 @@
 import type {SessionObservation} from '../../src/runtime/session.js';
 import {SYSTEMS} from '../../src/game/model/industry.js';
+import {nodeUnlockEra} from '../../src/game/model/branches.js';
+import {ERAS} from '../../src/game/model/eras.js';
 import {productName} from '../../src/game/systems/industry-products.js';
 import {branchRequirements} from './branch-view.js';
-import {esc,inputsText} from './economy-view.js';
+import {esc,inputsText,needsText} from './economy-view.js';
+import {treeGraph,type TreeNodeSpec} from './tree-view.js';
 const panel=(title:string,body:string)=>`<section class="panel"><div class="panel-head"><h2>${title}</h2></div><div class="panel-body">${body}</div></section>`;
+const MANUFACTURE_LANES=[{id:'field',name:'田间与储存',ids:['W01','U01','U08','S01','S02','U06','mill']},{id:'parts',name:'部件与机械',ids:['T01','T03','seal','shaft','valve','W03','P01','P03']},{id:'power',name:'电力与化工',ids:['wire','coil','cable','F07','fuel','battery','E01','E02','E04','LAMP','TELEGRAPH','ELECTROLYZER','aluminium','aluminiumwire']}];
 
-export function industryProducts(g:SessionObservation['game'],button:(id:string)=>string,selectedId=''):string{
+export function manufacturePage(g:SessionObservation['game'],button:(id:string)=>string,selectedId=''):string{
  const e=g.economy!,x=e.industryView!;
  const selected=x.catalog.find(p=>p.id===selectedId)??x.catalog[0];
- const tile=x.catalog.map(p=>{
+ const laneOf=(id:string)=>MANUFACTURE_LANES.find(l=>l.ids.includes(id))?.id??'其他';
+ const eraTag=(ids:string[])=>{const i=Math.max(0,...ids.map(nodeUnlockEra));return i>0?' · '+ERAS[i].name.slice(0,2):'';};
+ const nodes:TreeNodeSpec[]=x.catalog.map(p=>{
   const record=x.products[p.id];
-  const stock=p.kind==='device'?`耐用 ${e.equipment[p.id]??0}`:`库存 ${e.goods[p.good!]??0}`;
-  return `<button type="button" class="select-tile ${selected?.id===p.id?'selected':''}" data-product="${p.id}" aria-pressed="${selected?.id===p.id}"><strong>${esc(productName(p.id))}</strong><small>实物 ${stock} · 验证 ${record?'已有':'无'} · 规程 ${record?.protocol?'已有':'无'}</small></button>`;
- }).join('');
+  const stock=p.kind==='device'?`耐用${e.equipment[p.id]??0}`:`库存${e.goods[p.good!]??0}`;
+  return {id:p.id,name:productName(p.id),lane:laneOf(p.id),parents:p.parents.filter(id=>x.catalog.some(c=>c.id===id)),selected:selected?.id===p.id,stateClass:record?.protocol?'known':p.parents.every(id=>x.products[id])?'ready':'locked',sub:`${record?'✓验证':'○验证'} ${record?.protocol?'✓规程':'○规程'} · ${stock}${eraTag(p.knowledge)}`,dataAttr:'data-product'};
+ });
  const detail=(()=>{
-  if(!selected)return '<p>暂无产品条目。</p>';
-  const record=x.products[selected.id],device=e.products.find(d=>d.id===selected.id),recipe=e.processes.find(d=>d.id===selected.id);
+  if(!selected)return '<p>暂无制造条目。</p>';
+  const record=x.products[selected.id],spec=e.products.find(d=>d.id===selected.id),recipe=e.processes.find(d=>d.id===selected.id);
+  const lane=MANUFACTURE_LANES.find(l=>l.id===laneOf(selected.id))?.name??'其他';
+  const chip=(id:string)=>`<button type="button" data-product="${id}" class="prerequisite ${x.products[id]?'met':''}">${x.products[id]?'✓':'○'} ${esc(productName(id))}</button>`;
+  const downstream=x.catalog.filter(c=>c.id!==selected.id&&c.parents.includes(selected.id));
+  const asIngredient=e.processes.filter(p=>p.id!==selected.id&&(selected.id in p.inputs||!!selected.good&&selected.good in p.inputs));
+  const asEquipment=e.processes.filter(p=>p.equipment===selected.id);
+  const inSystems=SYSTEMS.filter(s=>s.equipment===selected.id||s.products.includes(selected.id));
+  const meaning=[spec?`<p>${esc(spec.effect)}</p>`:'',recipe?`<p>由配方「${esc(recipe.name)}」制造。</p>`:'',
+   downstream.length?`<p><span class="detail-label">是这些产品的前置验证</span><br>${downstream.map(c=>chip(c.id)).join('')}</p>`:'',
+   asIngredient.length?`<p><span class="detail-label">是这些配方的原料</span><br>${asIngredient.map(p=>chip(p.id)).join('')}</p>`:'',
+   asEquipment.length?`<p><span class="detail-label">是这些配方的设备</span><br>${asEquipment.map(p=>chip(p.id)).join('')}</p>`:'',
+   inSystems.length?`<p>生产系统：${inSystems.map(s=>`${esc(s.name)}（${s.equipment===selected.id?'设备':'验证对象'}）`).join('、')}</p>`:''].join('');
   const stock=selected.kind==='device'?`实物耐用 ${e.equipment[selected.id]??0}`:`实物库存 ${e.goods[selected.good!]??0}`;
   return `<h3>${esc(productName(selected.id))}</h3>
+    <p><span class="detail-label">${lane} · ${selected.kind==='device'?'设备':'部件'}</span></p>
     <div class="production-stages"><span class="${record?'done':''}">${record?'✓':'○'} 产品验证</span><span aria-hidden="true">→</span><span class="${record?.protocol?'done':''}">${record?.protocol?'✓':'○'} 制造规程</span></div>
+    <p class="detail-label">在游戏中的意义</p>${meaning||'<p>暂无下游用途。</p>'}
+    <p class="detail-label">如何获得</p>
+    <p>知识：${branchRequirements(selected.knowledge)}<br>前置验证：${selected.parents.length?selected.parents.map(chip).join(''):'无'}<br>材料投入：${esc(inputsText(spec?.inputs??recipe?.inputs??{}))||'无'}</p>
+    <p>自行试制取得验证和制造规程；购买只获得实物，检验也不赠送规程。${record?(record.protocol?'已验证，并有制造规程。':'已检验外购实物，没有制造规程。'):'尚未验证。'}</p>
+    ${recipe?`<div class="recipe-flow"><span>投入 ${esc(inputsText(recipe.inputs)||'无')}</span><span aria-hidden="true">→</span><span>工序 ${recipe.wait?'跨季等待':'当次完成'}${recipe.power?` · 单批用电 ${recipe.power}`:''}${recipe.equipment?` · ${esc(e.products.find(d=>d.id===recipe.equipment)?.name??recipe.equipment)}`:''}</span><span aria-hidden="true">→</span><span>产出 ${esc(inputsText(recipe.outputs)||'无')}</span></div>`:''}
+    <p class="detail-label">状态与操作</p>
     <p>${stock}</p>
-    <p>${record?(record.protocol?'已验证，并有制造规程。':'已检验外购实物，没有制造规程。购买实物不赠送规程。'):'尚未验证。检验也不能自动获得规程。'}</p>
-    <p>${esc(device?.effect??'')}</p>
-    <p>知识：${branchRequirements(selected.knowledge)}<br>前置产品验证：${selected.parents.map(productName).join(' + ')||'无'}<br>制造材料：${inputsText(device?.inputs??recipe?.inputs??{})}</p>
+    ${selected.kind==='goods'&&recipe?.wait?`<p>本人项目：${e.project?esc(e.processes.find(p=>p.id===e.project?.good)?.name??e.project.good):'暂无'}。跨季项目需等待并完成才能拿到产品。</p>`:''}
     <p><button type="button" class="text-btn" data-page="商城">去集市补缺</button><button type="button" class="text-btn" data-page="学科">去学堂</button></p>
-    <div class="inspector-action">${!record?button('economy:inspect:'+selected.id):''}${button('economy:'+(selected.kind==='device'?'build:':'process:')+selected.id)}</div>`;
+    <div class="inspector-action">${!record?button('economy:inspect:'+selected.id):''}${button('economy:'+(selected.kind==='device'?'build:':'process:')+selected.id)}${recipe?.wait?button('economy:finish:project'):''}</div>`;
  })();
- return `<details><summary>如何获得实物、验证与规程</summary><p>解锁条件是前置知识与已验证产品。自行试制取得验证和制造规程；购买只获得实物，检验不赠送制造规程。验证记录不因实物消耗而失去。已有规程可跨代执行，新研发仍需个人知识。泵和发电机首次试制还需实际试运行。产品关系图不是必须依次造过全部产品。</p></details>
-  <div class="page-workbench"><section><div class="library-heading"><h3>产品目录</h3><span>${x.catalog.length} 项</span></div><div class="lesson-grid">${tile||'<p>暂无产品。</p>'}</div></section><aside class="course-inspector">${detail}</aside></div>`;
+ return `<details><summary>如何获得实物、验证与规程</summary><p>解锁条件是前置知识与已验证产品。自行试制取得验证和制造规程；购买只获得实物，检验不赠送制造规程。验证记录不因实物消耗而失去。已有规程可跨代执行，新研发仍需个人知识。泵和发电机首次试制还需实际试运行。产品关系图不是必须依次造过全部产品。</p><p>部件由对应配方加工：当次完成的立即得到实物，跨季项目需等待并完成才能拿到产品。本人和雇工共用材料与设备，同一设备不能重复占用。</p></details>
+  ${e.operations?.production?'<p>已有持续生产计划；日常进度见「家业」。本页的手动制造与雇员共用材料和设备。</p>':''}
+  <div class="page-workbench"><section><div class="library-heading"><h3>制造目录</h3><span>${x.catalog.length} 项 · 实线 部件前置 / 虚线 设备前置</span></div><p class="tree-legend subtle">✓ 已验证规程 / 实线 部件前置 / 虚线 设备前置 / 虚框 缺前置验证</p>${x.catalog.length?`<div class="tree-network">${treeGraph(nodes,MANUFACTURE_LANES.map(l=>({id:l.id,name:l.name})),{edgeClass:(fromId)=>x.catalog.find(c=>c.id===fromId)?.kind==='device'?'device':'',ariaLabel:'制造树'})}</div>`:'<p>暂无条目。</p>'}</section><aside class="course-inspector">${detail}</aside></div>`;
 }
 
-export function industryProcesses(g:SessionObservation['game'],button:(id:string)=>string,selectedId=''):string{
- const e=g.economy!,processes=e.processes;
- const selected=processes.find(p=>p.id===selectedId)??processes[0];
- const tile=processes.map(p=>`<button type="button" class="select-tile ${selected?.id===p.id?'selected':''}" data-recipe="${p.id}" aria-pressed="${selected?.id===p.id}"><strong>${esc(p.name)}</strong><small>${p.wait?'跨季完成':'当次完成'}${p.equipment?` · ${e.products.find(x=>x.id===p.equipment)?.name??p.equipment}`:''}</small></button>`).join('');
- const detail=selected?`<h3>${esc(selected.name)}</h3>
-   <div class="recipe-flow"><span>投入 ${esc(inputsText(selected.inputs)||'无')}</span><span aria-hidden="true">→</span><span>工序 ${selected.wait?'跨季等待':'当次完成'}${selected.power?` · 单批用电 ${selected.power}`:''}</span><span aria-hidden="true">→</span><span>产出 ${esc(inputsText(selected.outputs)||'无')}</span></div>
-   <p>${e.branchView?`知识与规程：${branchRequirements(e.branchView.processes[selected.id])}`:''}${selected.equipment?` · 设备 ${e.products.find(x=>x.id===selected.equipment)?.name??selected.equipment}，本人和雇工共用，不能重复占用。`:''}</p>
-   <p>本人项目：${e.project?e.processes.find(p=>p.id===e.project?.good)?.name??e.project.good:'暂无'}。跨季项目需等待并完成才能拿到产品。</p>
-   <div class="inspector-action">${button('economy:process:'+selected.id)}${button('economy:finish:project')}</div>`:'<p>暂无配方。</p>';
- return `${e.operations?.production?'<p>已有持续生产计划；日常进度见「家业」。下面的手动加工与雇员共用材料和设备。</p>':''}
-  <div class="page-workbench"><section><div class="library-heading"><h3>配方</h3><span>${processes.length} 项</span></div><div class="lesson-grid">${tile||'<p>暂无配方。</p>'}</div></section><aside class="course-inspector">${detail}</aside></div>`;
+export function manufactureFallback(g:SessionObservation['game'],button:(id:string)=>string):string{
+ const e=g.economy!;
+ const items=[...new Set(e.products.map(p=>p.category))].map(category=>panel(category,e.products.filter(p=>p.category===category).map(p=>`<details><summary>${p.name} · ${e.equipment[p.id]??0}耐用</summary><p>${p.id==='U02'?'每季一次播种节省个人投入；仍扣种子和耐用度，雇工工资不减免':esc(p.effect)}</p><p>知识：${e.branchView?branchRequirements(e.branchView.products[p.id]):needsText(p.requires)}<br>投入：${esc(inputsText(p.inputs))}</p>${button('economy:build:'+p.id)}</details>`).join(''))).join('');
+ const recipes=panel('加工配方',e.processes.map(p=>`<details><summary>${esc(p.name)} → ${esc(inputsText(p.outputs))}</summary><p>投入：${esc(inputsText(p.inputs)||'无')}；${p.wait?'跨季完成':'当次完成'}${p.equipment?'；设备：'+esc(e.products.find(x=>x.id===p.equipment)?.name??p.equipment):''}${p.power?`；单批用电 ${p.power}`:''}。</p>${button('economy:process:'+p.id)}</details>`).join('')||'<p>暂无配方。</p>');
+ return items+recipes;
 }
 
 export function industrySystems(g:SessionObservation['game'],button:(id:string)=>string,selectedId=''):string{

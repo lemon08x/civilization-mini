@@ -2,8 +2,8 @@ import {erasPage} from './eras-view.js';
 import {socialFoodPage} from './social-food-view.js';
 import { actionButton, farm, humanScreen, energyPage, confirmKind, confirmContent } from './human-view.js';
 import type { Recap } from './human-view.js';
-import {industryProducts,industrySystems,industryProcesses,staffPage} from './industry-view.js';
-import {branchPage,branchRequirements} from './branch-view.js';
+import {industrySystems,staffPage,manufacturePage,manufactureFallback} from './industry-view.js';
+import {branchPage} from './branch-view.js';
 import { expeditionPage } from './expedition-view.js';
 import { towerPage } from './tower-view.js';
 import { workshopPage } from './workshop-view.js';
@@ -12,7 +12,6 @@ import { marketPage } from './shop-view.js';
 import {createSession,observeSession,parseSession,submitCommand} from '../../src/runtime/session.js';
 import type {Session} from '../../src/runtime/records.js';
 import {ALL_PRODUCTS as PRODUCTS,ALL_GOODS as GOODS,ALL_TOPICS as TOPICS,SUBJECT_NAMES,WORKER_NAMES,CROPS,ALL_PROCESSES as PROCESSES} from '../../src/game/systems/economy-catalog.js';
-import {needsText,inputsText} from './economy-view.js';
 import type {GameEvent} from '../../src/game/model/events.js';
 import { loadAssembledRules } from './rules.js';
 import { loadSave, writeSave } from './saves.js';
@@ -23,7 +22,7 @@ if(!requested){location.replace('/start');throw new Error('missing save');}
 const saveId=requested;
 const loaded=loadSave(saveId);
 if(!loaded){location.replace('/start');throw new Error('missing save');}
-let failed=false,busy=false,page='聚落',guide=false,selectedCourse='',selectedProduct='',selectedRecipe='',selectedSystem='',selectedDevice='',filter='',shopCategory='物资';
+let failed=false,busy=false,page='聚落',guide=false,selectedCourse='',selectedProduct='',selectedSystem='',selectedDevice='',filter='',shopCategory='物资';
 let recap:Recap|null=null,pendingAction='';
 let session=await createSession({runId:saveId,ruleset:rules,seed:17,scenarioId:'river'});
 const error=(message:string)=>{$('error').hidden=!message;$('error').textContent=message;if(message)$('error').focus();};
@@ -112,18 +111,17 @@ function bindApp():void {
       detail?.scrollIntoView({block:'start'});
     }
   };
-  document.querySelectorAll<HTMLButtonElement>('[data-course]').forEach(b=>b.onclick=()=>{selectedCourse=b.dataset.course!;showSelection();});
-  document.querySelectorAll<HTMLButtonElement>('[data-product]').forEach(b=>b.onclick=()=>{selectedProduct=b.dataset.product!;showSelection();});
-  document.querySelectorAll<HTMLButtonElement>('[data-recipe]').forEach(b=>b.onclick=()=>{selectedRecipe=b.dataset.recipe!;showSelection();});
-  document.querySelectorAll<HTMLButtonElement>('[data-system]').forEach(b=>b.onclick=()=>{selectedSystem=b.dataset.system!;showSelection();});
-  document.querySelectorAll<HTMLButtonElement>('[data-device]').forEach(b=>b.onclick=()=>{selectedDevice=b.dataset.device!;showSelection();});
+  document.querySelectorAll<HTMLButtonElement>('[data-course]').forEach(b=>{const go=()=>{selectedCourse=b.dataset.course!;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
+  document.querySelectorAll<HTMLButtonElement>('[data-product]').forEach(b=>{const go=()=>{selectedProduct=b.dataset.product!;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
+  document.querySelectorAll<HTMLButtonElement>('[data-system]').forEach(b=>{const go=()=>{selectedSystem=b.dataset.system!;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
+  document.querySelectorAll<HTMLButtonElement>('[data-device]').forEach(b=>{const go=()=>{selectedDevice=b.dataset.device!;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
   document.querySelectorAll<HTMLElement>('.course-inspector').forEach(detail=>{
     detail.tabIndex=-1;
-    if(!document.querySelector('.lesson-tile.selected, .select-tile.selected'))return;
+    if(!document.querySelector('.lesson-tile.selected, .select-tile.selected, .tree-node.selected'))return;
     const back=document.createElement('button');
     back.type='button';back.className='text-btn detail-back';back.textContent='返回选择列表 ↓';
     back.onclick=()=>{
-      const selected=document.querySelector<HTMLElement>('.lesson-tile.selected, .select-tile.selected');
+      const selected=document.querySelector<HTMLElement>('.lesson-tile.selected, .select-tile.selected, .tree-node.selected');
       for(let parent=selected?.parentElement;parent;parent=parent.parentElement){
         if(parent instanceof HTMLDetailsElement)parent.open=true;
       }
@@ -157,7 +155,7 @@ function openConfirm(id:string):void {
 }
 function render():void {
   const key=focusKey(),folds=openFolds();
-  const o=observeSession(session).game,e=o.economy!,PRODUCTS=e.products;
+  const o=observeSession(session).game,e=o.economy!;
   const button=(id:string)=>actionButton(o,id,failed);
   const panel=(title:string,body:string)=>`<section class="panel"><div class="panel-head"><h2>${title}</h2></div><div class="panel-body">${body}</div></section>`;
   const acts=(group:string)=>o.actions.filter(a=>a.group===group&&(!filter||a.label.includes(filter))).map(a=>`<div class="family-item">${button(a.id)}</div>`).join('');
@@ -169,9 +167,8 @@ function render():void {
   if(page==='家业')body=operationsPage(o,button)+(e.workshopView?'<section class="panel"><div class="panel-body"><h2>作坊协作</h2><p>建立纤维与绳索工序，配置跨季供货，观察库存与运输瓶颈。</p><button type="button" data-page="作坊">查看生产网络 →</button></div></section>':'');
   if(page==='作坊')body=workshopPage(o,button,observeSession(session).recentEvents);
   if(page==='学科')body=e.branchView?branchPage(o,button,selectedCourse):e.disciplines.map(d=>panel(d.name+` · 本人${d.level}阶 / 后辈${d.heirLevel}阶`, `<p>家族记录${d.notes}阶；下一阶可通过固定研究、生产证据或购买教材学习；家学书室可合并记录与教导。各学科内部暂按单主干顺序学习。</p><div class="flow">${d.topics.map(t=>`<span class="tag">${t.known?'✓ ':''}${t.level} ${t.name}</span>`).join(' → ')}</div>${d.topics.filter(t=>t.level===d.level+1).map(t=>button('economy:study:'+t.id)+(t.level>1?button('economy:research:'+t.id):'')).join('')}${button('economy:archive:'+d.subject)}${button('economy:teach:'+d.subject)}${button('economy:publish:'+d.subject)}`)).join('');
-  if(page==='产品')body=e.industryView?industryProducts(o,button,selectedProduct):[...new Set(PRODUCTS.map(p=>p.category))].map(category=>panel(category,PRODUCTS.filter(p=>p.category===category).map(p=>`<details><summary>${p.name} · ${e.equipment[p.id]??0}耐用</summary><p>${p.id==='U02'?'每季一次播种节省个人投入；仍扣种子和耐用度，雇工工资不减免':p.effect}</p><p>知识：${e.branchView?branchRequirements(e.branchView.products[p.id]):needsText(p.requires)}<br>投入：${inputsText(p.inputs)}</p>${button('economy:build:'+p.id)}</details>`).join(''))).join('');
+  if(page==='制造')body=e.industryView?manufacturePage(o,button,selectedProduct):manufactureFallback(o,button);
   if(page==='农业')body=farm(o,button);
-  if(page==='生产')body=industryProcesses(o,button,selectedRecipe);
   if(page==='雇佣')body=staffPage(o,button);
   if(page==='商城')body=marketPage(o,shopCategory,filter,button);
   if(page==='能源'&&e.modern)body=energyPage(o,button,selectedDevice);
@@ -181,7 +178,6 @@ function render():void {
   const selection=document.querySelector<HTMLElement>('.lesson-tile.selected, .select-tile.selected')?.dataset;
   if(selection?.course)selectedCourse=selection.course;
   if(selection?.product)selectedProduct=selection.product;
-  if(selection?.recipe)selectedRecipe=selection.recipe;
   if(selection?.system)selectedSystem=selection.system;
   if(selection?.device)selectedDevice=selection.device;
   bindApp();

@@ -333,6 +333,23 @@ summary { cursor: pointer; color: var(--ink); padding: 4px 0; }
 .recipe-flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; margin: 8px 0 14px; }
 .recipe-flow span { padding: 6px 8px; background: var(--page); border-radius: 4px; }
 
+.tree-network { overflow-x: auto; }
+.tree-node { cursor: pointer; }
+.tree-node rect { fill: var(--paper); stroke: var(--line); }
+.tree-name { font-size: 13px; font-weight: 600; }
+.tree-sub { font-size: 11px; fill: var(--muted); }
+.tree-node.known rect { fill: #e7efe6; stroke: var(--ok); }
+.tree-node.ready rect { stroke: var(--accent); }
+.tree-node.locked { opacity: .62; }
+.tree-node.locked rect { stroke-dasharray: 5 4; }
+.tree-node.inactive { opacity: .42; }
+.tree-node.selected rect { stroke: var(--accent); stroke-width: 2.4px; }
+.tree-edge { fill: none; stroke: #70816d; stroke-width: 1.4px; }
+.tree-edge.device { stroke-dasharray: 5 4; }
+.tree-edge.dim { opacity: .28; }
+.tree-edge-label { font-size: 10px; fill: var(--muted); }
+.tree-lane-label { font-size: 13px; font-weight: 600; fill: var(--muted); }
+
 .shop-search { display: flex; gap: 8px; margin: 12px 0; }
 .shop-search input { min-width: 0; flex: 1; }
 .shop-item h3 { margin-top: 0; }
