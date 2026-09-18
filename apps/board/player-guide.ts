@@ -2,7 +2,7 @@ import type { SessionObservation } from '../../src/runtime/session.js';
 import {esc} from './economy-view.js';
 
 export const pageNames:Record<string,string>={
-  社会:'社会历程',聚落:'本季纪事',农业:'田地',生活:'生活安排',家人:'家人与传承',仓库:'仓库',
+  社会:'社会历程',聚落:'本季看板',农业:'田地',生活:'生活安排',家人:'家人与传承',仓库:'仓库',
   学科:'学堂',产品:'产品研发',生产:'加工制作',系统:'生产系统',雇佣:'人员安排',商城:'集市',
   能源:'供能',家业:'家业',作坊:'作坊',副本:'副本',试炼:'试炼',
 };

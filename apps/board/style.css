@@ -367,7 +367,8 @@ summary { cursor: pointer; color: var(--ink); padding: 4px 0; }
 
 @media (max-width: 900px) {
   .spread-body, .school-workbench, .page-workbench { grid-template-columns: 1fr; }
-  .course-inspector { position: static; grid-row: 1; }
+  .course-inspector { position: static; }
+  .school-workbench > .course-inspector, .page-workbench:has(.select-tile) > .course-inspector { grid-row:1; }
   .player-hud { grid-template-columns: 1fr 1fr; }
   .season-card { grid-column: 1 / -1; padding: 6px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .hud-item { border-left: 0; border-top: 1px solid var(--line); }
@@ -412,3 +413,146 @@ summary { cursor: pointer; color: var(--ink); padding: 4px 0; }
 @media (max-width: 900px) {
   .detail-back { display: inline-flex; margin-bottom: 12px; }
 }
+
+/* Illustrated chronicle: artwork is decorative; values and actions remain live HTML. */
+:root { --page:#f0eadc; --paper:#fffaf0; --line:#d9ceba; --accent:#805037; --ok:#56764c; }
+body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 45%),radial-gradient(ellipse at 100% 30%,#ceb88b20,transparent 50%); }
+.painted-art { background-image:url('/chronicle-art.png'); background-size:300% 200%; aspect-ratio:1; flex-shrink:0; mix-blend-mode:multiply; pointer-events:none; }
+.art-home { background-position:0 0; }
+.art-food { background-position:50% 0; }
+.art-family { background-position:100% 0; }
+.art-study { background-position:0 100%; }
+.art-workshop { background-position:50% 100%; }
+.art-power { background-position:100% 100%; }
+.chronicle-shell { max-width:1440px; }
+.chronicle-masthead { align-items:center; }
+.chronicle-masthead h1 { font-size:34px; letter-spacing:4px; }
+.chronicle-masthead h1::after { content:'记'; display:inline-grid; place-items:center; margin-left:14px; width:30px; height:35px; border-radius:7px 5px 9px 4px; background:#a34f3d; color:#fff7e5; font-size:20px; transform:rotate(-5deg); vertical-align:middle; }
+.chronicle-masthead .eyebrow { font-size:10px; }
+.chapter-nav { gap:6px 24px; }
+.chapter-tab { font-family:var(--title); font-size:17px; }
+.chapter-head h2 { font-size:30px; }
+.illustrated-heading { position:relative; min-height:126px; display:flex; align-items:center; overflow:hidden; border-bottom:1px solid var(--line); padding:12px 210px 16px 0; }
+.illustrated-heading > .painted-art { position:absolute; width:195px; right:12px; top:-28px; opacity:.9; mask-image:linear-gradient(to right,transparent,#000 20%,#000 85%,transparent); }
+.illustrated-heading .section-heading { width:100%; }
+.panel,.course-inspector,.person-card,.attention-pane,.rules-page,.dashboard-card { background-color:var(--paper); box-shadow:0 2px 8px #61462b08; border-radius:7px; }
+.panel-head { border-bottom-style:solid; background:linear-gradient(100deg,#eee1c649,transparent); }
+.panel-head h2,.dashboard-card h3 { font-family:var(--title); font-size:19px; }
+.panel-body { padding:20px; }
+.page-workbench,.school-workbench { grid-template-columns:minmax(0,1fr) minmax(290px,340px); }
+.course-inspector { border-top:3px solid #af9270; }
+.inspector-head { color:var(--accent); }
+.lesson-tile,.select-tile { background:#fffaf0; border-radius:5px; box-shadow:0 2px 3px #63432608; }
+.lesson-tile.selected,.select-tile.selected { background:#f4ead7; border-color:#aa8764; box-shadow:inset 3px 0 var(--accent); }
+.lesson-symbol { background:#e9e1ce; border-radius:50%; }
+.family-item { background:#f6f0e4; border:1px solid #e3d8c5; }
+.shop-item { padding:18px; }
+.shop-item h3 { border-bottom:1px solid var(--line); padding-bottom:10px; }
+.shop-item strong { color:var(--accent); }
+.person-card { border-top:3px solid #aeb596; padding:24px; }
+.person-card h3 { font-size:20px; }
+.resource-meter progress { accent-color:var(--ok); }
+.inventory-item { grid-template-columns:1fr auto; align-items:center; border-bottom:1px solid var(--line); background:transparent; padding:14px 10px; }
+.inventory-item strong { color:var(--accent); }
+.era-progress { height:8px; }
+.chapter-recap { border-left:4px solid var(--ok); background:#f7f4e8; }
+.rules-page { max-width:960px; margin-inline:auto; }
+.rule-section > span { background:#a35440; color:var(--paper); border-radius:5px; font-family:var(--title); }
+.chronicle-dialog { background:var(--paper); border-top:5px solid var(--accent); box-shadow:0 20px 70px #2e211b44; }
+.chronicle-footer { max-width:1440px; }
+.season-dashboard { display:grid; grid-template-columns:minmax(0,2.2fr) minmax(260px,1fr); gap:16px; align-items:start; }
+.dashboard-main,.dashboard-side { display:grid; gap:16px; min-width:0; }
+.dashboard-pair { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.dashboard-card { border:1px solid var(--line); padding:22px; position:relative; min-width:0; overflow:hidden; }
+.dashboard-card h3 { margin-bottom:18px; }
+.estate-board { display:grid; grid-template-columns:minmax(190px,.85fr) minmax(0,1.2fr); align-items:center; background:var(--paper); border:1px solid var(--line); border-radius:7px; overflow:hidden; min-height:260px; }
+.estate-copy { padding:26px; z-index:1; }
+.estate-copy h3 { font-family:var(--title); font-size:34px; margin:12px 0; }
+.estate-copy p { font-size:14px; }
+.estate-board .painted-art { width:100%; max-height:310px; mask-image:linear-gradient(to right,transparent,#000 18%); }
+.status-pill { display:inline-block; background:var(--ok); color:#fffaf0; padding:3px 12px; border-radius:20px; font-size:13px; }
+.status-warning { background:#a35440; }
+.board-number { font-family:var(--title); font-size:40px; margin:12px 0 0; }
+.board-number small { font:13px var(--body); margin-left:8px; }
+.food-board > .painted-art { position:absolute; right:5px; top:42px; width:45%; max-width:165px; opacity:.85; }
+.food-board h3,.food-board .board-number,.food-board > p,.food-board .status-pill { position:relative; }
+.board-ledger { margin:20px 0 8px; }
+.board-ledger > div { display:flex; align-items:center; justify-content:space-between; gap:12px; border-top:1px solid var(--line); padding:9px 0; font-size:14px; }
+.board-ledger dd { margin:0; font-variant-numeric:tabular-nums; }
+.family-board > .painted-art { width:160px; margin:-12px auto 8px; mask-image:linear-gradient(to bottom,#000 65%,transparent); }
+.family-snapshot { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.family-snapshot strong { font-size:13px; }
+.family-snapshot .resource-meter { margin-top:8px; font-size:12px; }
+.family-snapshot .resource-meter > div { display:flex; justify-content:space-between; gap:4px; flex-wrap:wrap; }
+.family-snapshot progress { width:100%; height:7px; }
+.family-board .text-btn,.food-board .text-btn { float:right; margin-top:8px; }
+.task-count { background:#a35440; color:#fffaf0; font:14px var(--body); padding:3px 9px; border-radius:50%; margin-left:8px; }
+.board-task { border-top:1px solid var(--line); padding:14px 0; }
+.board-task strong { font-family:var(--title); font-size:17px; }
+.board-task p { color:var(--muted); font-size:13px; margin:6px 0 10px; }
+.board-task button { background:var(--accent); color:var(--accent-ink); width:100%; }
+.time-heading { margin-top:22px; }
+.time-track { display:flex; background:#7b956a; height:9px; border-radius:6px; overflow:hidden; }
+.time-track span:first-child { background:#bba991; }
+.time-track span:last-child { background:#d5be95; }
+.time-labels { font-size:12px; color:var(--muted); margin:8px 0 0; }
+.board-history { padding-left:18px; margin:0; }
+.board-history li { padding:9px 0; border-bottom:1px solid var(--line); font-size:13px; }
+.is-dashboard .chapter-head { margin-top:12px; }
+.is-dashboard .season-bar { background:#fffaf077; padding:16px; border-bottom:1px solid var(--line); }
+.is-dashboard .season-bar .budget-details { display:none; }
+.entry-art { width:210px; margin:0 auto; mask-image:radial-gradient(ellipse,#000 45%,transparent 72%); }
+.entry-heading h1 { font-size:44px; }
+.entry-heading .brand-mark { display:none; }
+.entry-card { position:relative; overflow:hidden; min-height:220px; padding-right:130px; }
+.entry-card .painted-art { position:absolute; width:155px; right:-24px; bottom:-10px; opacity:.6; }
+.entry-card h2,.entry-card p,.entry-card strong { position:relative; }
+.start-screen { max-width:760px; }
+.start-screen .entry-heading { display:grid; grid-template-columns:140px 1fr; align-items:center; text-align:left; column-gap:24px; }
+.start-screen .entry-art { grid-row:1 / 4; width:160px; }
+.start-screen .entry-heading h1 { font-size:36px; margin-bottom:4px; }
+.start-screen .entry-heading p { margin-bottom:0; }
+.guide .painted-art { float:right; width:160px; margin:0 0 12px 20px; }
+@media(max-width:1000px) { .season-dashboard { grid-template-columns:minmax(0,1.7fr) minmax(240px,1fr); } .dashboard-pair { grid-template-columns:1fr; } }
+@media(max-width:900px) {
+  .page-workbench,.school-workbench,.season-dashboard { grid-template-columns:1fr; }
+  .dashboard-pair,.dashboard-side { grid-template-columns:1fr 1fr; }
+  .illustrated-heading { min-height:110px; padding-right:130px; }
+  .illustrated-heading > .painted-art { width:145px; right:-15px; top:-12px; }
+  .illustrated-heading .section-heading { display:block; }
+  .course-inspector { position:static; }
+}
+@media(max-width:600px) {
+  .dashboard-pair,.dashboard-side { grid-template-columns:1fr; }
+  .estate-board { grid-template-columns:1fr 1fr; min-height:200px; }
+  .estate-copy { padding:18px; }
+  .estate-copy h3 { font-size:26px; }
+  .estate-board .painted-art { min-width:0; }
+  .dashboard-card { padding:18px; }
+  .chronicle-masthead h1 { font-size:28px; }
+  .chronicle-masthead h1::after { display:none; }
+  .chapter-head h2 { font-size:26px; }
+  .entry-card { padding:22px 110px 22px 22px; }
+  .start-screen .entry-heading { grid-template-columns:90px 1fr; gap:12px; }
+  .start-screen .entry-art { width:105px; }
+  .guide .painted-art { width:110px; }
+  .food-board > .painted-art { opacity:.55; }
+}
+
+/* Keep the illustrated dashboard within a working screen, not a cover page. */
+.chronicle-masthead .eyebrow,.chronicle-masthead .rule-line { display:none; }
+.chronicle-masthead h1 { font-size:29px; margin:0; }
+.chronicle-masthead { min-height:50px; }
+.player-hud .season-card { display:flex; flex-wrap:wrap; align-content:center; align-items:center; gap:6px 12px; }
+.player-hud .season-card strong { font-size:18px; }
+.player-hud .hud-item strong { font-size:20px; }
+.is-dashboard .player-hud { grid-template-columns:1.5fr repeat(3,minmax(0,1fr)); }
+.is-dashboard .hud-item:nth-child(4) { display:none; }
+.is-dashboard .estate-board { min-height:220px; }
+.is-dashboard .estate-board .painted-art { max-height:250px; }
+.is-dashboard .era-link { display:none; }
+.is-dashboard .chapter-head .section-heading { align-items:center; }
+.is-dashboard .chapter-head .section-heading > div { display:flex; align-items:baseline; flex-wrap:wrap; gap:6px 20px; }
+.is-dashboard .chapter-epigraph { margin:0; }
+@media(max-width:900px) { .is-dashboard .player-hud { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:600px) { .chronicle-masthead h1 { font-size:26px; } .is-dashboard .estate-board .painted-art { max-height:none; } }

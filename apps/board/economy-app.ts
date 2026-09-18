@@ -119,6 +119,7 @@ function bindApp():void {
   document.querySelectorAll<HTMLButtonElement>('[data-device]').forEach(b=>b.onclick=()=>{selectedDevice=b.dataset.device!;showSelection();});
   document.querySelectorAll<HTMLElement>('.course-inspector').forEach(detail=>{
     detail.tabIndex=-1;
+    if(!document.querySelector('.lesson-tile.selected, .select-tile.selected'))return;
     const back=document.createElement('button');
     back.type='button';back.className='text-btn detail-back';back.textContent='返回选择列表 ↓';
     back.onclick=()=>{

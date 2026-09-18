@@ -115,27 +115,33 @@ function family(g:Game,button:Button):string {
     <div class="compact-actions">${button('economy:rest:self')}${button('economy:care:self')}</div></div>`;
 }
 
-function nextSteps(g:Game,button:Button):string {
-  const e=g.economy!,items:string[]=[];
-  if(!e.field.crop)items.push(`<button type="button" data-page="农业">田地空着，去播种</button>`);
-  else if(e.field.growth>=e.field.duration)items.push(`<button type="button" data-page="农业">${esc(CROPS[e.field.crop].name)}已成熟，可以收获</button>`);
-  else items.push(`<button type="button" data-page="农业">${esc(CROPS[e.field.crop].name)}生长中 ${e.field.growth}/${e.field.duration} 季</button>`);
-  if(foodWarning(g))items.push(`<button type="button" data-page="生活">${g.socialFood?`生活缺口 ${g.socialFood.missing} 份，查看购粮`:'可食储备低于季耗，去安排生活'}</button>`);
-  items.push(`<button type="button" data-page="家人">查看身体与传承</button>`);
-  const acts=g.actions.filter(a=>a.enabled&&['农业','生活'].includes(a.group)&&!confirmKind(a.id)).slice(0,2);
-  for(const a of acts)items.push(button(a.id));
-  return `<div class="next-steps">${items.slice(0,5).join('')}</div>`;
+function village(g:Game,events:string[]):string {
+  const e=g.economy!,l=g.life,f=e.field,food=g.socialFood;
+  const tasks:{title:string;detail:string;page:string}[]=[];
+  if(foodWarning(g))tasks.push({title:'本季口粮不足',detail:`还缺 ${food?.missing??Math.max(0,g.parameters.foodPerTurn-e.foodTotal)} 份口粮`,page:'生活'});
+  if(!f.crop)tasks.push({title:'田地还空着',detail:'选择作物，安排这一季的耕作。',page:'农业'});
+  else if(f.growth>=f.duration)tasks.push({title:'作物成熟待收',detail:`${CROPS[f.crop].name}已经成熟，及时收获。`,page:'农业'});
+  for(const system of e.industryView?.systems??[])if(system.instance&&system.blockers.length)tasks.push({title:system.name+'待处理',detail:system.blockers.join('；'),page:'系统'});
+  if(l?.pendingRetirement||g.status==='handover')tasks.push({title:'等待家族交接',detail:successionState(g),page:'家人'});
+  const fieldTitle=!f.crop?'空田待播':f.growth>=f.duration?'成熟待收':CROPS[f.crop].name+'生长中';
+  const time=l?.budget;
+  const total=Math.max(1,l?.timePerSeason??g.parameters.actionsPerTurn);
+  const history=events.length?events.slice(-3):['一家人从一块田开始。'];
+  return `<div class="season-dashboard"><div class="dashboard-main">
+    <section class="estate-board"><div class="estate-copy"><span class="chapter-kicker">家里的田地</span><h3>${fieldTitle}</h3><p>肥力 ${f.fertility}/3 · ${f.crop?`生长 ${f.growth}/${f.duration} 季`:'尚未播种'}</p>${f.crop?`<p>预计收成 ${e.harvest} · 水分 ${f.moisture}</p>`:''}<button type="button" data-page="农业">去田地 →</button></div><div class="painted-art art-home" aria-hidden="true"></div></section>
+    <div class="dashboard-pair"><section class="dashboard-card food-board"><div class="painted-art art-food" aria-hidden="true"></div><h3>生活保障</h3><span class="status-pill ${foodWarning(g)?'status-warning':''}">${foodWarning(g)?'需要补给':'本季够吃'}</span><p class="board-number">${e.foodTotal}<small>份可食储备</small></p><p>季耗 ${g.parameters.foodPerTurn} 份</p><dl class="board-ledger"><div><dt>预计购粮</dt><dd>${food?.purchase??0} 份</dd></div><div><dt>预计花费</dt><dd>${food?.cost??0} 钱</dd></div><div><dt>生活缺口</dt><dd>${food?.missing??Math.max(0,g.parameters.foodPerTurn-e.foodTotal)} 份</dd></div></dl><button class="text-btn" type="button" data-page="生活">调整生活安排 →</button></section>
+    <section class="dashboard-card family-board"><h3>家人与成长</h3><div class="painted-art art-family" aria-hidden="true"></div><div class="family-snapshot"><div><strong>经营者${l?` · ${l.person.ageYears}岁`:''}</strong>${l?meter('健康',l.person.health,l.person.maxHealth??100):''}</div><div><strong>${l?.heir?`后辈 · ${l.heir.ageYears}岁`:'尚无后辈'}</strong>${l?.heir?meter(l.heir.alive?'健康':'已故',l.heir.health,l.heir.maxHealth??100):''}</div></div><button class="text-btn" type="button" data-page="家人">查看家人 →</button></section></div>
+    ${e.industryView?.systems.some(x=>x.instance)?`<section class="dashboard-card"><h3>家业运行</h3><div class="board-ledger">${e.industryView.systems.filter(x=>x.instance).map(x=>`<div><span>${esc(x.name)}</span><span>${!x.instance?.enabled?'已停用':x.blockers.length?'条件不足':x.instance?.operator?'已安排人员':'待安排'}</span></div>`).join('')}</div><button type="button" class="text-btn" data-page="系统">管理生产 →</button></section>`:''}
+    </div><aside class="dashboard-side"><section class="dashboard-card"><h3>等你安排 <span class="task-count">${tasks.length}</span></h3>${tasks.length?tasks.map(t=>`<article class="board-task"><strong>${esc(t.title)}</strong><p>${esc(t.detail)}</p><button type="button" data-page="${t.page}">去处理 →</button></article>`).join(''):'<p class="subtle">当前没有待处理事项。</p>'}<h3 class="time-heading">时间安排</h3><div class="time-track" aria-hidden="true"><span style="width:${Math.min(100,(time?.spentTime??0)/total*100)}%"></span><span style="width:${Math.min(100,(time?.reservedTime??0)/total*100)}%"></span></div><p class="time-labels">已用 ${time?.spentTime??0} · 预留 ${time?.reservedTime??0} · 可用 ${time?.freeTime??g.ap}</p></section><section class="dashboard-card"><h3>最近记事</h3><ol class="board-history">${history.map(t=>`<li>${esc(t)}</li>`).join('')}</ol>${events.length>3?`<details><summary>全部变化</summary>${events.map(t=>`<p>${esc(t)}</p>`).join('')}</details>`:''}</section></aside></div>`;
 }
 
-function village(g:Game):string {
-  const e=g.economy!,l=g.life,f=e.field;
-  const crop=f.crop?CROPS[f.crop].name:'尚未播种';
-  return `<section class="overview-intro">
-    <h3>家里的这一季</h3>
-    <p>田里${f.crop?`种着${esc(crop)}，${f.growth>=f.duration?'已经成熟':`生长 ${f.growth}/${f.duration} 季`}`:'还是空田'}。${g.socialFood?`预计购粮 ${g.socialFood.purchase} 份 / ${g.socialFood.cost} 钱，生活缺口 ${g.socialFood.missing} 份。`:''}</p>
-    ${l?`<p>${esc(successionState(g))}</p>`:''}
-  </section>
-  ${panel('田地摘要', `<p>${esc(crop)} · 肥力 ${f.fertility}/3 · 水分 ${f.moisture} · 预计收成 ${f.crop?e.harvest:'—'}</p><button type="button" data-page="农业">打开田地</button>`)}`;
+function pageArt(page:string):string {
+  if(['学科','产品'].includes(page))return 'study';
+  if(['生产','系统','雇佣','作坊','家业'].includes(page))return 'workshop';
+  if(page==='能源')return 'power';
+  if(page==='家人')return 'family';
+  if(['生活','商城','仓库'].includes(page))return 'food';
+  return 'home';
 }
 
 function inventory(g:Game):string {
@@ -146,7 +152,6 @@ function inventory(g:Game):string {
 
 function attention(g:Game,page:string,button:Button):string {
   const e=g.economy!,l=g.life;
-  if(page==='聚落')return `<h3>当下关注</h3>${foodWarning(g)?`<p class="blocked-reason">${g.socialFood?'当前库存与预计购粮还补不上本季消耗。':'可食储备低于季耗。'}</p>`:'<p>当前口粮与预计购粮可覆盖本季消耗。</p>'}<h3>接下来可做什么</h3>${nextSteps(g,button)}`;
   if(page==='农业'){
     const f=e.field;
     const note=!f.crop?'空田需要播种或安排持续耕作。':f.growth>=f.duration?'作物已成熟，收获才会变成实际收成。':'作物还在生长，预计收成不是库存。';
@@ -158,7 +163,7 @@ function attention(g:Game,page:string,button:Button):string {
   return `<h3>当下关注</h3><p>选择一项后，这里会显示条件和报价。</p>`;
 }
 
-const OWN_SPREAD=new Set(['家人','学科','产品','生产','系统','雇佣','商城','能源','社会','家业','作坊','副本','试炼']);
+const OWN_SPREAD=new Set(['聚落','家人','学科','产品','生产','系统','雇佣','商城','能源','社会','家业','作坊','副本','试炼']);
 
 export function energyPage(g:Game,button:Button,selectedId=''):string {
   const e=g.economy!,m=e.modern; if(!m)return '';
@@ -201,9 +206,9 @@ export function humanScreen(g:Game,page:string,body:string,button:Button,events:
     ${group.pages.length>1?`<nav class="chapter-subnav" aria-label="${esc(group.name)}分页">${group.pages.map(p=>`<button type="button" data-page="${p}" class="${page===p?'selected':''}" aria-current="${page===p?'page':'false'}">${placeIcon(p)}<span>${pageNames[p]??p}</span></button>`).join('')}</nav>`:''}`;
   const hud=`<section class="player-hud"><div class="season-card"><small>第 ${g.clock.generation} 代</small><strong>${l?`第 ${l.calendar.year} 年 · ${l.calendar.season}`:`第 ${g.clock.turn} 季`}</strong><span>${esc(g.world.weatherName)}</span></div><div class="hud-item"><span>可用时间 / 总预算</span><strong class="num">${l?l.budget.freeTime:g.ap}<small> / ${l?l.timePerSeason:g.parameters.actionsPerTurn}</small></strong></div><div class="hud-item"><span>可用精力</span><strong class="num">${l?l.budget.freeEnergy:'—'}</strong></div><div class="hud-item ${low?'resource-warning':''}"><span>可食储备 / 季耗${g.socialFood?` · 预计购 ${g.socialFood.purchase}`:''}</span><strong class="num">${e.foodTotal}<small> / ${g.parameters.foodPerTurn}</small></strong></div><div class="hud-item"><span>钱财</span><strong class="num">${g.family.money}</strong></div></section>`;
   const recapHtml=recap?`<section class="chapter-recap" aria-live="polite"><h2>${esc(recap.title)}</h2>${recap.lines.map(t=>`<p>${esc(t)}</p>`).join('')}<button type="button" class="text-btn" data-dismiss-recap>关闭回顾</button></section>`:'';
-  const main=guide?ruleGuide(g,page):page==='聚落'?village(g):page==='家人'?family(g,button):page==='仓库'?inventory(g):body;
+  const main=guide?ruleGuide(g,page):page==='聚落'?village(g,events):page==='家人'?family(g,button):page==='仓库'?inventory(g):body;
   const spread=guide||OWN_SPREAD.has(page)?main:`<div class="spread-body"><div class="reading-pane">${main}</div><aside class="attention-pane">${attention(g,page,button)}</aside></div>`;
   const budget=l?`<details class="budget-details"><summary>查看本季劳动安排 · 预留 ${l.budget.reservedTime} 时间 / ${l.budget.reservedEnergy} 精力</summary><p>已用时间 ${l.budget.spentTime} · 剩余时间 ${l.timeRemaining}</p>${l.budget.tasks.map(t=>`<p>${esc(t.name)} <span class="tag">时间 ${t.time} / 精力 ${t.energy}</span></p>`).join('')||'<p>暂无系统任务</p>'}</details>`:'';
   const season=end?`<div><h3>${g.status==='ended'?'家族经营终止':g.victory?.won?'旅程胜利':'旅程结束'}</h3><p>${esc(endingCopy(g))}</p><p><a class="text-btn" href="/start">回到开始界面</a></p></div>`:g.status==='handover'?`<div><h3>后辈接手</h3><p>本季已结束。提交交接后才会换成后辈继续经营。</p></div><div class="action-primary">${button('handover')}</div>`:`<div><h3>季末检查</h3><ul class="check-list">${seasonCheck(g).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="action-primary">${button('economy:end:season')}</div>${budget}`;
-  return `<div class="chronicle-shell">${masthead}${nav}${hud}${g.era&&page!=='社会'?`<div class="era-link"><span>${esc(g.era.card.name)} · 剩余 ${g.era.remaining} 季</span><button type="button" class="text-btn" data-page="社会">社会历程 · 预计回报 ${g.era.expectedReward} 钱 →</button></div>`:''}${low?'<div class="food-alert" role="status">当前库存与预计购粮不足以覆盖本季消耗。<button type="button" data-page="农业">去田地</button><button type="button" data-page="商城">买补给</button><button type="button" data-page="生活">找生计</button></div>':''}<div class="chronicle-spread">${recapHtml}<header class="chapter-head"><div class="section-heading"><div><h2>${pageNames[page]??page}</h2><p class="chapter-epigraph">${esc(chapterEpigraph(g,page))}</p></div>${!guide?`<button type="button" class="text-btn" data-guide="${esc(page)}">${pageNames[page]??page}规则</button>`:''}</div></header>${spread}<section class="event-log" aria-live="polite"><h3>最近记事</h3>${events.length?events.slice(-3).map(t=>`<p>${esc(t)}</p>`).join(''):'<p>一家人从一块田开始。先安排口粮，再发展技艺。</p>'}${events.length>3?`<details><summary>查看本次全部变化</summary>${events.map(t=>`<p>${esc(t)}</p>`).join('')}</details>`:''}</section><div class="season-bar">${season}</div></div></div>`;
+  return `<div class="chronicle-shell page-${pageArt(page)} ${page==='聚落'?'is-dashboard':''}">${masthead}${nav}${hud}${g.era&&page!=='社会'?`<div class="era-link"><span>${esc(g.era.card.name)} · 剩余 ${g.era.remaining} 季</span><button type="button" class="text-btn" data-page="社会">社会历程 · 预计回报 ${g.era.expectedReward} 钱 →</button></div>`:''}${low?'<div class="food-alert" role="status">当前库存与预计购粮不足以覆盖本季消耗。<button type="button" data-page="农业">去田地</button><button type="button" data-page="商城">买补给</button><button type="button" data-page="生活">找生计</button></div>':''}<div class="chronicle-spread">${recapHtml}<header class="chapter-head ${page!=='聚落'?'illustrated-heading':''}">${page!=='聚落'?`<div class="painted-art art-${pageArt(page)}" aria-hidden="true"></div>`:''}<div class="section-heading"><div><h2>${page==='聚落'?'本季看板':pageNames[page]??page}</h2><p class="chapter-epigraph">${esc(chapterEpigraph(g,page))}</p></div>${!guide?`<button type="button" class="text-btn" data-guide="${esc(page)}">${pageNames[page]??page}规则</button>`:''}</div></header>${spread}<section ${page==='聚落'?'hidden':''} class="event-log" aria-live="polite"><h3>最近记事</h3>${events.length?events.slice(-3).map(t=>`<p>${esc(t)}</p>`).join(''):'<p>一家人从一块田开始。先安排口粮，再发展技艺。</p>'}${events.length>3?`<details><summary>查看本次全部变化</summary>${events.map(t=>`<p>${esc(t)}</p>`).join('')}</details>`:''}</section><div class="season-bar">${season}</div></div></div>`;
 }

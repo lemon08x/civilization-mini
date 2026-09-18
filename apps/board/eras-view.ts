@@ -4,7 +4,7 @@ export function erasPage(o:SessionObservation,button:(id:string)=>string):string
  const e=o.game.era;if(!e)return '';
  const p=e.projection;
  const dungeon=e.dungeon;
- const reading=`<p>这是文明背景，不是另一条“下一章”进度条。结束本季、结算当前社会、结束现代旅程是三件不同的事。</p>
+ const reading=`<p>回看这一阶段的积累，选择何时进入下一社会。现代阶段结算后，旅程结束。</p>
    <p>本阶段已过 ${e.elapsed}/${e.duration} 季，时间预算还剩 ${e.remaining} 季。越早结算，剩余产能推算越长。</p>
    <progress class="era-progress" aria-label="社会阶段进度" max="${e.duration}" value="${e.elapsed}"></progress>
    <p>${esc(e.stage.description)}</p>
