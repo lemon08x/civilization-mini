@@ -868,3 +868,75 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .cultivation-inspector .check-list li { margin:10px 0; }
 .cultivation-inspector .game-action { max-width:100%; }
 .cultivation-footer { display:flex; justify-content:space-between; border-top:1px solid var(--line); margin-top:25px; padding-top:16px; }
+
+/* Sect artwork is decorative; all progress and costs remain observation-driven HTML. */
+.sect-art { background-image:url('/illustrations/sect-atlas.png'); background-size:300% 100%; background-repeat:no-repeat; aspect-ratio:1; flex-shrink:0; mix-blend-mode:multiply; }
+.sect-art-gate { background-position:0 50%; }
+.sect-art-practice { background-position:50% 50%; }
+.sect-art-teaching { background-position:100% 50%; }
+.sect-start-art { width:300px; }
+.sect-cover-art { width:min(72vh,680px); margin:auto; }
+.sect-theme { --accent:#365e56; --accent-soft:#e4ece4; --line:#d6d8c8; }
+.sect-theme .art-family { background-image:url('/illustrations/sect-atlas.png'); background-size:300% 100%; background-position:100% 50%; }
+.sect-banner { display:flex; align-items:center; gap:26px; padding:4px 28px 4px 8px; margin-bottom:24px; border:1px solid var(--line); border-radius:12px; background:linear-gradient(110deg,#f2f0df,#f7f8f0); overflow:hidden; }
+.sect-banner .sect-art { width:178px; }
+.sect-banner h3 { font-size:28px; letter-spacing:.08em; margin:6px 0 12px; }
+.sect-banner p { color:var(--muted); margin-bottom:10px; }
+.sect-workbench { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:24px; align-items:start; }
+.sect-lineages { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin-bottom:24px; }
+.sect-lineage { padding:22px; background:var(--paper); border:1px solid var(--line); border-radius:10px; }
+.sect-lineage.is-active { border-color:#668779; box-shadow:inset 0 3px #668779; }
+.sect-lineage-head { display:flex; align-items:center; gap:12px; color:var(--muted); font-size:12px; margin-bottom:18px; }
+.sect-seal { border:1px solid #8c5545; border-radius:3px; color:#8c5545; padding:4px 7px; font:20px var(--title); }
+.sect-lineage h3 { font-size:25px; }
+.sect-stats { display:grid; grid-template-columns:repeat(3,1fr); padding:12px 0 18px; gap:12px; }
+.sect-stats span { display:flex; flex-direction:column; font-size:12px; color:var(--muted); }
+.sect-stats strong { font-size:26px; color:var(--ink); font-weight:500; }
+.sect-active-label { color:#365e56; font-size:13px; padding:12px 0; }
+.sect-disciple { border-top:1px dashed #b8c3ae; margin-top:18px; padding:18px 0 0; }
+.sect-disciple h4 { font:21px var(--title); margin:10px 0; }
+.sect-disciple p { font-size:13px; color:var(--muted); margin:0; }
+.sect-action-row { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.sect-candidate { border-left:3px solid #a18851; padding:10px 16px; background:#f4f0df; margin-bottom:16px; }
+.sect-handover-mark { color:#8c5545; margin-bottom:10px; }
+.sect-handover-mark .ui-icon { width:36px; height:36px; }
+.action-name .ui-icon { width:20px; height:20px; vertical-align:middle; margin-right:8px; }
+.sect-theme .game-action { transition:background .16s,border-color .16s,transform .16s; }
+.sect-theme .game-action:not(:disabled):hover { transform:translateY(-2px); }
+.sect-theme .game-action:not(:disabled):active { transform:translateY(1px); }
+.cultivation-workbench { grid-template-columns:minmax(0,1fr) 300px; }
+.cultivation-node { transition:border-color .18s,box-shadow .18s,transform .18s; }
+.cultivation-node:hover { transform:translateY(-3px); box-shadow:0 5px 14px #283b3112; }
+.cultivation-number { display:grid; place-items:center; width:40px; height:40px; border:1px solid #a9b8a7; border-radius:50%; background:#f5f4e8; }
+.cultivation-node.known .cultivation-number { color:#fff; background:#557361; }
+.sect-feedback { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); z-index:50; width:max-content; max-width:min(620px,90vw); padding:15px 24px; background:#284c43; color:#fffdf2; border:1px solid #abb997; border-radius:10px; box-shadow:0 10px 35px #203b3333; pointer-events:none; }
+.sect-feedback.is-visible { animation:sect-feedback-in .28s ease-out; }
+.sect-action-flash { animation:sect-action-glow .85s ease-out; }
+@keyframes sect-feedback-in { from { opacity:0; translate:0 12px; } to { opacity:1; translate:0 0; } }
+@keyframes sect-action-glow { from { box-shadow:0 0 0 5px #bca36388; } to { box-shadow:0 0 0 0 transparent; } }
+@media (prefers-reduced-motion:reduce) {
+ .sect-theme *, .sect-feedback { animation:none!important; transition:none!important; }
+ .sect-theme .game-action:not(:disabled):hover,.cultivation-node:hover { transform:none; }
+}
+
+.sect-chapter-heading { min-height:0; padding-block:18px; }
+.sect-banner .sect-art { border-radius:8px; mask-image:linear-gradient(to right,#000 78%,transparent); }
+.action-name .ui-icon { display:inline-block; }
+
+/* One watercolor object language for navigation, actions, and progression. */
+.sect-picture { display:inline-block; width:72px; height:72px; flex-shrink:0; background-image:url('/illustrations/sect-elements-v2.png'); background-size:400% 400%; background-repeat:no-repeat; vertical-align:middle; pointer-events:none; }
+.chapter-tab .sect-navigation-picture { width:64px; height:64px; }
+.sect-button-picture { width:32px; height:32px; margin-right:8px; }
+.sect-person-picture { float:right; width:100px; height:100px; margin:-8px -4px 4px 12px; }
+.sect-disciple-picture { float:right; width:76px; height:76px; margin-left:10px; }
+.sect-disciple { display:flow-root; }
+.sect-panel-picture { display:block; width:86px; height:86px; margin:0 auto 12px; }
+.sect-node-picture { display:block; width:82px; height:82px; align-self:center; }
+.cultivation-node { padding:12px; gap:6px; }
+.cultivation-node .cultivation-number { position:absolute; top:8px; left:9px; width:auto; height:auto; border:0; border-radius:0; background:transparent; font:12px var(--body); color:var(--muted); }
+.cultivation-node.known .cultivation-number { color:var(--ok); background:transparent; }
+.cultivation-nodes:before { top:55px; }
+.sect-detail-picture { display:block; width:132px; height:132px; margin:-10px auto 12px; }
+.sect-inline-picture { width:42px; height:42px; margin-right:10px; }
+.sect-theme .action-name { display:flex; align-items:center; }
+.sect-theme .action-name .ui-icon { flex-shrink:0; }

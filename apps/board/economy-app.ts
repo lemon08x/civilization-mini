@@ -27,6 +27,18 @@ const loaded=loadSave(saveId);
 if(!loaded){location.replace('/start');throw new Error('missing save');}
 let failed=false,busy=false,page='聚落',guide=false,selectedCultivation='',selectedCourse='',selectedProduct='',selectedSystem='',selectedDevice='',filter='',shopCategory='物资';
 let recap:Recap|null=null,pendingAction='';
+let feedbackTimer:ReturnType<typeof setTimeout>|undefined;
+function sectFeedback(id:string,lines:string[]):void {
+  if(!observeSession(session).game.sect||(!id.includes(':sect')&&!['handover','economy:retire:family'].includes(id)))return;
+  const box=$('sect-feedback');
+  clearTimeout(feedbackTimer);
+  box.textContent=lines.at(-1)??'行动已结算，请查看当前状态。';
+  box.hidden=false;box.classList.remove('is-visible');
+  void box.offsetWidth;box.classList.add('is-visible');
+  const target=document.querySelector(id.includes('sectswitch')?'.sect-lineage.is-active, .cultivation-toolbar':'.cultivation-inspector, .sect-workbench');
+  target?.classList.add('sect-action-flash');
+  feedbackTimer=setTimeout(()=>{box.hidden=true;},5000);
+}
 let session=await createSession({runId:saveId,ruleset:rules,seed:17,scenarioId:'river'});
 const error=(message:string)=>{$('error').hidden=!message;$('error').textContent=message;if(message)$('error').focus();};
 try{session=parseSession(loaded);if(session.record.manifest.ruleset.rulesVersion!==rules.rulesVersion)throw new Error('只接受当前规则；请另开新局');}catch(e){failed=true;error('当前存档无法读取，请新开局：'+(e as Error).message);}
@@ -102,6 +114,7 @@ async function act(id:string){
     recap=next.record.entries.length>before?recapFor(id,lines):recap;
     if(id.startsWith('economy:sectswitch:')||id==='economy:sectpractice:dao'||id==='economy:sectimprove:dao')selectedCultivation='';
     await save(next);
+    if(next.record.entries.length>before)sectFeedback(id,lines);
     if(page==='农业'&&next.record.entries.length>before){
       const events=next.record.entries.slice(before).flatMap(entry=>entry.events);
       playFarmFeedback(document,events.flatMap(event=>event.type==='economy-farm'&&['sow','harvest','tend'].includes(event.operation)?[{kind:event.operation as 'sow'|'harvest'|'tend',label:feedback(event)}]:[]));

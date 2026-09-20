@@ -26,3 +26,8 @@ export function shopImage(item:{kind:string;target:string}):string {
 
 // Small, eager-loaded images for navigation and live status; labels remain real text.
 export const chromeImage=(name:string,className='chrome-image')=>`<img class="${esc(className)}" src="${artUrl('ui-'+name)}" alt="" aria-hidden="true" width="128" height="128" decoding="async">`;
+
+// Decorative watercolor atlas; cell choice conveys a topic, never an unlocked state.
+export function sectImage(cell:number,className=''):string {
+  return `<span class="sect-picture ${className}" aria-hidden="true" style="background-position:${cell%4*100/3}% ${[2.5,35.5,66.6667,100][Math.floor(cell/4)]}%"></span>`;
+}
