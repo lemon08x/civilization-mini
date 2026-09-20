@@ -1,6 +1,8 @@
+import {farm} from './farm-view.js';
+import {bindFarmScene,playFarmFeedback} from './farm-animation/controller.js';
 import {erasPage} from './eras-view.js';
 import {socialFoodPage} from './social-food-view.js';
-import { actionButton, farm, humanScreen, energyPage, confirmKind, confirmContent } from './human-view.js';
+import { actionButton, humanScreen, energyPage, confirmKind, confirmContent } from './human-view.js';
 import type { Recap } from './human-view.js';
 import {industrySystems,staffPage,manufacturePage,manufactureFallback} from './industry-view.js';
 import {branchPage} from './branch-view.js';
@@ -8,6 +10,7 @@ import { expeditionPage } from './expedition-view.js';
 import { towerPage } from './tower-view.js';
 import { workshopPage } from './workshop-view.js';
 import { operationsPage } from './operations-view.js';
+import { arrangementsPage } from './arrangements-view.js';
 import { marketPage } from './shop-view.js';
 import {createSession,observeSession,parseSession,submitCommand} from '../../src/runtime/session.js';
 import type {Session} from '../../src/runtime/records.js';
@@ -98,10 +101,15 @@ async function act(id:string){
     const lines=(next.record.entries.at(-1)?.events.map(feedback).filter(Boolean)??[]) as string[];
     recap=next.record.entries.length>before?recapFor(id,lines):recap;
     await save(next);
+    if(page==='农业'&&next.record.entries.length>before){
+      const events=next.record.entries.slice(before).flatMap(entry=>entry.events);
+      playFarmFeedback(document,events.flatMap(event=>event.type==='economy-farm'&&['sow','harvest','tend'].includes(event.operation)?[{kind:event.operation as 'sow'|'harvest'|'tend',label:feedback(event)}]:[]));
+    }
   }catch(e){error((e as Error).message);}
   finally{busy=false;$('app').removeAttribute('aria-busy');}
 }
 function bindApp():void {
+  bindFarmScene(document);
   document.querySelectorAll<HTMLButtonElement>('[data-page]').forEach(b=>b.onclick=()=>{page=b.dataset.page!;guide=false;filter='';render();});
   const showSelection=()=>{
     render();
@@ -172,7 +180,8 @@ function render():void {
   if(page==='雇佣')body=staffPage(o,button);
   if(page==='商城')body=marketPage(o,shopCategory,filter,button);
   if(page==='能源'&&e.modern)body=energyPage(o,button,selectedDevice);
-  if(page==='生活')body=socialFoodPage(o,button)+panel('谋生与补给',acts('生活'));
+  if(page==='生活')body=socialFoodPage(o)+panel('谋生与补给',acts('生活'));
+  if(page==='安排')body=arrangementsPage(o,button);
   $('app').innerHTML=humanScreen(o,page,body,button,session.record.entries.at(-1)?.events.map(feedback).filter(Boolean)??[],guide,recap);
   // Retain the initial default selection when its available/learned group changes.
   const selection=document.querySelector<HTMLElement>('.lesson-tile.selected, .select-tile.selected')?.dataset;

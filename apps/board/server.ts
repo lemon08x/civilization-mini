@@ -5,7 +5,7 @@ import { loadCurrentContext, projectRoot } from '../host/context.js';
 
 await loadCurrentContext();
 const port = Number(process.env.PORT ?? 4317);
-const types: Record<string, string> = { '.png': 'image/png', '.md': 'text/plain; charset=utf-8', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
+const types: Record<string, string> = { '.jpg': 'image/jpeg', '.webp': 'image/webp', '.png': 'image/png', '.md': 'text/plain; charset=utf-8', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
 const server = http.createServer(async (req, res) => {
   if (!['GET', 'HEAD'].includes(req.method ?? '')) { res.writeHead(405); res.end(); return; }
   try {
@@ -18,7 +18,8 @@ const server = http.createServer(async (req, res) => {
     else if (path === '/ai') absolute = join(projectRoot, 'apps/board/ai.html');
     else if (path === '/ai-guide.md') absolute = join(projectRoot, 'docs/AI_PLAYER.md');
     else if (path === '/style.css') absolute = join(projectRoot, 'apps/board/style.css');
-    else if (path.startsWith('/illustrations/') && path.endsWith('.png')) {
+    else if (path === '/farm-animation/scene.css') absolute = join(projectRoot, 'apps/board/farm-animation/scene.css');
+    else if (path.startsWith('/illustrations/') && ['.png','.jpg','.webp'].includes(extname(path))) {
       const root = join(projectRoot, 'apps/board/illustrations');
       absolute = resolve(root, path.slice('/illustrations/'.length));
       if (!absolute.startsWith(root + sep)) { res.writeHead(404); res.end(); return; }

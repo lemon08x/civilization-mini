@@ -1,0 +1,63 @@
+/* Farm scene: original vector art and visual feedback, isolated from game rules. */
+.field-stage{border:1px solid #c4cda9;border-radius:18px;overflow:hidden;background:#f6f5df;margin-bottom:0;box-shadow:0 10px 26px #334b2610}
+.field-scene-toolbar{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;font-size:13px;background:#f7f6e8;color:#567047}
+.field-scene-toolbar label{display:flex;align-items:center;gap:7px;font-size:12px;cursor:pointer}
+.field-scene-toolbar input{width:auto;accent-color:#537844}
+.farm-season-note{opacity:.65;margin-left:6px}
+.farm-weather-dot,.farm-scene-footer i{display:inline-block;width:8px;height:8px;background:#c5a351;border-radius:50%;margin-right:8px}
+.farm-canvas{position:relative;isolation:isolate}
+.farm-canvas .field-scene{display:block;width:100%;height:auto;max-height:none}
+.farm-crop{transform-box:fill-box;transform-origin:50% 100%;animation:farm-sway 3.8s ease-in-out infinite alternate;animation-delay:var(--delay)}
+.farm-cloud{animation:farm-drift 46s linear infinite;animation-delay:var(--delay,0s)}
+.farm-cloudshadow{animation:farm-drift 46s linear infinite}
+.farm-rain{animation:farm-rain 1.5s linear infinite;pointer-events:none}
+.farm-rain.rain-b{animation-duration:2.2s;animation-delay:-.9s}
+.field-stage.weather-dry .field-scene{filter:sepia(.22) saturate(1.15)}
+.field-stage.weather-wet .field-scene{filter:brightness(.92)}
+.weather-dry .farm-sun{animation:farm-sunglow 4s ease-in-out infinite}
+.weather-dry .farm-sun-halo{animation:farm-halopulse 4s ease-in-out infinite}
+.farm-wetsheen{animation:farm-sheen 3.4s ease-in-out infinite alternate}
+.farm-canopy{transform-box:fill-box;transform-origin:50% 90%;animation:farm-flutter 5.4s ease-in-out infinite alternate;animation-delay:var(--delay)}
+.farm-grass{transform-box:fill-box;transform-origin:50% 100%;animation:farm-flutter 3.2s ease-in-out infinite alternate;animation-delay:var(--delay)}
+.is-ripe .farm-crop{animation:farm-sway 3.8s ease-in-out infinite alternate,farm-ripeglow 2.6s ease-in-out infinite;animation-delay:var(--delay),0s}
+.field-stage .farm-land-hit{position:absolute;left:21%;top:31%;width:55%;height:43%;border:0;border-radius:45%;background:transparent;padding:0;min-height:0;display:flex;justify-content:center;align-items:flex-end}
+.field-stage .farm-land-hit:hover{background:#f5efb91a}
+.field-stage .farm-land-hit:focus-visible{outline:3px dashed #fff8c4;outline-offset:-5px}
+.farm-land-label{display:block;border:1px solid #c0aa76;border-radius:8px;background:#fff8e9ef;padding:7px 19px;box-shadow:0 4px 10px #39492725;font-size:14px;color:#4c5e38;transform:translateY(15px)}
+.farm-land-label small{display:block;font-size:11px;margin-top:1px;color:#7d805a}
+.is-ripe .farm-land-label{background:#fff1b9;border-color:#c7a84d}
+.field-stage .farm-building-link{position:absolute;left:72%;top:17%;width:13%;height:29%;padding:0 4px 4px;display:flex;gap:9px;align-items:flex-end;justify-content:center;background:transparent;border:0;font-size:13px;font-weight:700;color:#594629;text-shadow:0 1px #fff2c6}
+.field-stage .farm-building-link:hover{background:#fff5bd22;border-radius:12px}
+.farm-scene-footer{display:flex;justify-content:space-between;padding:10px 17px;font-size:12px;color:#738062;background:#f7f6e8}
+.farm-scene-footer i{background:#80a15c}
+.farm-effect-layer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.farm-feedback{position:absolute;left:50%;top:12%;transform:translateX(-50%);max-width:80%;width:max-content;border:1px solid #b6c58d;border-radius:9px;background:#fffbedf5;padding:10px 18px;color:#4c673b;font-size:13px;box-shadow:0 6px 20px #52634122}
+.farm-particle{position:absolute;font-size:30px;color:#f9d264;text-shadow:0 2px #9a7e35}
+.farm-particle-harvest{text-shadow:0 0 9px #ffe9a0,0 2px #9a7e35}
+.farm-particle-tend{color:#b9e6eb;text-shadow:0 1px #618e99}
+.farm-particle-sow{color:#795330;font-size:45px}
+.season-summer .sky-top{stop-color:#cfe4d2}
+.season-summer .sky-bot{stop-color:#f0eecb}
+.season-summer .meadow-top{stop-color:#a9cd8b}
+.season-summer .meadow-bot{stop-color:#7ea75f}
+.season-summer .farm-tree{filter:hue-rotate(8deg)}
+.season-autumn .sky-top{stop-color:#e8ddc4}
+.season-autumn .sky-bot{stop-color:#f2e3bc}
+.season-autumn .meadow-top{stop-color:#c9bd85}
+.season-autumn .meadow-bot{stop-color:#a3905a}
+.season-autumn .farm-tree{filter:hue-rotate(-40deg) saturate(1.15)}
+.season-winter .sky-top{stop-color:#dfe4e6}
+.season-winter .sky-bot{stop-color:#efeee2}
+.season-winter .meadow-top{stop-color:#c2ccb4}
+.season-winter .meadow-bot{stop-color:#9fae90}
+.season-winter .farm-tree{filter:saturate(.5) brightness(1.08)}
+.field-stage:has(.scene-pause:checked) *{animation-play-state:paused!important}
+@keyframes farm-sway{from{transform:rotate(-3deg)}to{transform:rotate(4deg)}}
+@keyframes farm-drift{from{transform:translateX(-800px)}to{transform:translateX(1200px)}}
+@keyframes farm-flutter{from{transform:rotate(-1.5deg)}to{transform:rotate(1.8deg)}}
+@keyframes farm-ripeglow{0%,100%{filter:drop-shadow(0 0 2px #f3cd6a66)}50%{filter:drop-shadow(0 0 9px #f3cd6acc)}}
+@keyframes farm-sunglow{0%,100%{filter:drop-shadow(0 0 4px #ffd76e88)}50%{filter:drop-shadow(0 0 18px #ffd76e)}}
+@keyframes farm-halopulse{0%,100%{opacity:.15}50%{opacity:.45}}
+@keyframes farm-sheen{from{opacity:.14}to{opacity:.36}}
+@keyframes farm-rain{from{transform:translate(0,-20px);opacity:.2}50%{opacity:.8}to{transform:translate(-20px,30px);opacity:.2}}
+@media(prefers-reduced-motion:reduce){.field-stage *{animation:none!important}}

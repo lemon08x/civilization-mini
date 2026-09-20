@@ -573,3 +573,169 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .is-dashboard .chapter-epigraph { margin:0; }
 @media(max-width:900px) { .is-dashboard .player-hud { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media(max-width:600px) { .chronicle-masthead h1 { font-size:26px; } .is-dashboard .estate-board .painted-art { max-height:none; } }
+/* Standalone illustrations: contain the complete artwork instead of cropping the old atlas. */
+.painted-art { background-size:contain; background-position:center; background-repeat:no-repeat; }
+.art-home { background-image:url('/illustrations/chronicle-homestead-ui.webp'); }
+.art-food { background-image:url('/illustrations/chronicle-pantry-ui.webp'); }
+.art-family { background-image:url('/illustrations/chronicle-inheritance-ui.webp'); }
+.art-study { background-image:url('/illustrations/chronicle-study-ui.webp'); }
+.art-workshop { background-image:url('/illustrations/chronicle-workbench-ui.webp'); }
+.art-power { background-image:url('/illustrations/chronicle-power-ui.webp'); }
+.art-farming { background-image:url('/illustrations/chronicle-farming-ui.webp'); }
+.art-market { background-image:url('/illustrations/market-stall-ui.webp'); }
+.art-journal { background-image:url('/illustrations/chronicle-journal-ui.webp'); }
+.illustrated-heading { display:flex; align-items:center; gap:20px; min-height:110px; }
+.illustrated-heading > .painted-art { position:static; order:2; width:120px; height:110px; margin-left:auto; opacity:1; mask-image:none; }
+.illustrated-heading > .section-heading { flex:1; min-width:0; }
+.illustrated-categories { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:0 0 22px; }
+.product-categories { grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:18px; }
+.category-card { display:flex; align-items:center; gap:12px; padding:10px; text-align:left; background:var(--paper); border:1px solid var(--line); color:var(--ink); border-radius:12px; min-width:0; }
+.category-card:hover,.category-card.selected { background:#f6f1e4; border-color:var(--accent); }
+.category-card.selected { box-shadow:inset 0 -3px var(--accent); }
+.category-card strong,.category-card small { display:block; }
+.category-card strong { font-size:15px; margin-bottom:6px; }
+.category-card small { font-size:12px; color:var(--muted); line-height:1.5; }
+.category-illustration { width:72px; height:72px; object-fit:contain; flex-shrink:0; mix-blend-mode:multiply; }
+.detail-illustration { display:block; width:128px; height:128px; object-fit:contain; margin:0 auto 12px; mix-blend-mode:multiply; }
+.tree-network { border:1px solid var(--line); border-radius:12px; background:#fffaf0a6; padding:8px; margin-bottom:16px; overscroll-behavior-x:contain; }
+.tree-node image { mix-blend-mode:multiply; pointer-events:none; }
+.tree-node.locked,.tree-node.inactive { opacity:1; }
+.tree-node.inactive rect { fill:#edeae3; }
+.tree-node.inactive text { fill:#716b60; }
+.tree-node.inactive image { opacity:.5; }
+.tree-node:focus rect { stroke:var(--accent); stroke-width:3px; }
+.tree-node:focus { outline:none; }
+.school-workbench > section,.page-workbench > section { min-width:0; }
+@media(max-width:900px) {
+ .illustrated-categories { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .category-illustration { width:60px; height:60px; }
+ .detail-illustration { float:right; width:90px; height:90px; margin:0 0 12px 12px; }
+ .course-inspector::after { content:''; display:block; clear:both; }
+}
+@media(max-width:480px) {
+ .illustrated-heading { gap:8px; min-height:88px; }
+ .illustrated-heading > .painted-art { width:76px; height:76px; }
+ .illustrated-categories { gap:8px; }
+ .category-card { flex-direction:column; align-items:flex-start; gap:4px; padding:10px; }
+ .category-illustration { align-self:center; width:64px; height:64px; }
+ .category-card strong { font-size:14px; }
+ .library-heading { flex-wrap:wrap; }
+}
+/* Field and storehouse: scene illustration beside the live ledger. */
+.art-warehouse { background-image:url('/illustrations/warehouse-ui.webp'); }
+.place-overview { display:grid; grid-template-columns:minmax(150px,1fr) minmax(180px,1fr); align-items:center; gap:24px; padding:4px 0 20px; margin-bottom:18px; border-bottom:1px solid var(--line); }
+.place-illustration { display:block; width:100%; height:auto; aspect-ratio:3/2; object-fit:contain; mix-blend-mode:multiply; }
+.place-overview h3 { font-family:var(--title); font-size:24px; margin:8px 0 12px; }
+.place-overview p { line-height:1.8; }
+.stock-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:18px 0; }
+.stock-summary dt { color:var(--muted); font-size:12px; }
+.stock-summary dd { margin:8px 0 0; font-size:25px; color:var(--accent); font-variant-numeric:tabular-nums; }
+.stock-summary small { font-size:12px; margin-left:4px; }
+.stock-group { margin-top:22px; }
+.stock-group h3 { display:flex; justify-content:space-between; align-items:center; font-size:16px; border-bottom:1px solid var(--line); padding-bottom:10px; }
+.stock-group h3 small { font-size:12px; font-weight:400; color:var(--muted); }
+.stock-group .inventory-grid { grid-template-columns:repeat(2,minmax(0,1fr)); margin:0; gap:0 20px; }
+.stock-group .inventory-item { margin:0; }
+.stock-group dt { overflow-wrap:anywhere; }
+.stock-group dd { margin:0; font-size:20px; color:var(--accent); }
+.stock-links { display:flex; flex-wrap:wrap; gap:12px; margin-top:16px; }
+.stock-empty { padding:24px; text-align:center; border:1px dashed var(--line); }
+.estate-board .field-dashboard-art { aspect-ratio:3/2; mask-image:none; }
+@media(max-width:600px) {
+ .place-overview { grid-template-columns:1fr; gap:8px; }
+ .place-illustration { max-width:300px; max-height:180px; margin:auto; }
+ .place-overview h3 { font-size:22px; }
+ .stock-summary { gap:8px; }
+ .stock-group .inventory-grid { grid-template-columns:1fr; }
+ .farm-stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+.item-illustration { width:64px; height:64px; object-fit:contain; mix-blend-mode:multiply; flex:none; border-radius:8px; }
+.stock-group .inventory-item dt { display:flex; align-items:center; gap:14px; }
+.stock-group .inventory-item { border:1px solid var(--line); background:var(--paper); border-radius:12px; padding:12px 16px; }
+.stock-group .inventory-grid { gap:12px; }
+.stock-summary .item-illustration { display:none; }
+.seed-shelf { margin:24px 0; }
+.seed-cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.seed-card { border:1px solid var(--line); border-radius:12px; background:var(--paper); padding:16px; min-width:0; }
+.seed-card > .item-illustration { display:block; margin:auto; width:100px; height:100px; }
+.seed-card h4 { margin:12px 0 8px; font-size:16px; }
+.seed-card p { font-size:13px; }
+.field-caption .place-illustration { display:none; }
+.field-caption h3 { display:inline-block; margin-right:12px; }
+.field-caption p { margin:6px 0; }
+.field-caption .chapter-kicker { display:block; margin-bottom:6px; }
+.field-caption h3 { margin-top:0; }
+/* Desktop field workflow: current crop on the left, recurring plan on the right. */
+.farm-workspace { display:grid; grid-template-columns:minmax(0,1fr) 350px; gap:24px; align-items:start; }
+.farm-main,.farm-planning { min-width:0; }
+.farm-main > .panel,.farm-planning > .panel { margin-bottom:18px; }
+.farm-workspace .field-scene { max-height:300px; }
+.farm-workspace .field-stage { margin-bottom:16px; }
+.farm-state-line { display:flex; align-items:center; gap:12px; margin:14px 0; }
+.farm-state-line h3 { font-size:22px; margin:0; }
+.farm-metrics { display:grid; grid-template-columns:1.4fr 1fr .7fr .7fr; gap:22px; align-items:center; }
+.farm-section-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.farm-section-heading h3 { margin:6px 0 14px; }
+.farm-current-action,.farm-sowing { margin-top:22px; padding-top:20px; border-top:1px solid var(--line); }
+.farm-current-action > .action-option { max-width:420px; }
+.farm-current-action h3 { margin:8px 0; }
+.farm-current-action p,.farm-planning p { line-height:1.8; }
+.farm-planning h3 { margin:10px 0; font-size:20px; }
+.farm-plan-steps { padding-left:22px; line-height:2; color:var(--muted); }
+.farm-reservation { padding:12px; background:var(--page); border-radius:8px; font-size:13px; }
+.farm-plan-settings { margin-top:14px; border-top:1px solid var(--line); }
+.farm-plan-settings .action-option { margin-top:10px; }
+.farm-plan-selected { padding:12px; color:var(--ok); background:#e7efe6; border-radius:8px; }
+.farm-plan-stop { border-top:1px solid var(--line); margin-top:16px; padding-top:14px; }
+.farm-plan-stop .game-action { background:transparent; color:var(--accent); border-color:var(--line); }
+.farm-seed-stock > div { display:grid; grid-template-columns:48px 1fr auto; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); }
+.farm-seed-stock .item-illustration { width:48px; height:48px; }
+.farm-seed-stock small { font-weight:400; color:var(--muted); }
+.farm-maintenance { border:1px solid var(--line); border-radius:12px; background:var(--paper); padding:18px; }
+.farm-maintenance summary { display:flex; justify-content:space-between; gap:12px; }
+.farm-maintenance summary span { color:var(--muted); font-size:12px; }
+.page-farming .illustrated-heading { min-height:0; }
+.page-farming .illustrated-heading > .painted-art { display:none; }
+
+/* Desktop farm page. Scene artwork and animation live in farm-animation/. */
+.farm-workspace.farm-estate{grid-template-columns:minmax(0,1fr) 286px;gap:24px}
+.farm-estate .farm-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:16px}
+.farm-heading .eyebrow{color:#7b885d;margin-bottom:6px;font-size:10px}
+.farm-heading h2{font-size:24px;margin:0;letter-spacing:.04em}
+.farm-heading-tag{flex:none;padding:5px 13px;border:1px solid #c7cba7;border-radius:20px;font-size:12px;color:#5d7446;background:#eef0da}
+.farm-estate .field-stage{margin-bottom:0}
+.farm-estate .field-scene{max-height:none}
+.farm-tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;padding:10px 5px;background:#f7f2df;border:1px solid #d7cfaf;border-radius:12px;margin:14px 0 20px}
+.farm-tools button{display:grid;grid-template-columns:32px 1fr;align-items:center;column-gap:6px;border:0;background:transparent;border-radius:8px;padding:8px;text-align:left;min-width:0}
+.farm-tools button:hover{background:#e9e9cc}
+.farm-tools button>span{grid-row:span 2;font-size:27px;text-align:center;color:#7b8b4e}
+.farm-tools strong{font-size:13px;font-weight:600}
+.farm-tools small{font-size:10px;color:#8a886e;white-space:nowrap}
+.farm-drawer{border:1px solid var(--line);border-radius:12px;background:var(--paper);margin:12px 0}
+.farm-drawer>summary{display:flex;justify-content:space-between;padding:16px 20px;cursor:pointer;font-weight:600}
+.farm-drawer>summary small{font-size:12px;color:var(--muted);font-weight:400}
+.farm-drawer-body{padding:0 20px 20px}
+.farm-drawer-body>.action-option{max-width:460px;margin-bottom:16px}
+.farm-seed-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.farm-seed-card{min-width:0;padding:14px;border:1px solid #dedcc1;border-radius:10px;background:#faf9ec}
+.farm-seed-card>svg{display:block;width:65px;height:82px;margin:auto}
+.farm-seed-card h4{margin:10px 0 4px;font-size:16px}
+.farm-seed-card p{font-size:12px}
+.farm-seed-card .game-action{font-size:12px;padding:9px;min-height:44px}
+.farm-seed-card .action-cost{font-size:10px}
+.farm-seed-card .blocked-reason{line-height:1.7}
+.farm-info-card{background:#fcfaee;border:1px solid #dcd6bf;border-radius:14px;padding:20px;margin-bottom:16px}
+.farm-info-card .eyebrow{font-size:10px;color:#8c8d6e}
+.farm-info-card h3{font-size:19px;margin:8px 0 18px}
+.farm-info-card .subtle{font-size:12px;margin:12px 0 0;line-height:1.8}
+.farm-crop-summary{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.farm-crop-summary>svg{width:58px;height:72px;background:#edf0d7;border-radius:10px;padding:5px}
+.farm-crop-summary strong{display:block;font-size:15px}
+.farm-crop-summary small{display:block;color:#83906b;font-size:11px;margin-top:5px}
+.farm-facts{margin:18px 0 0}
+.farm-facts>div{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed #dcdcc8;font-size:12px}
+.farm-facts dt{color:#7d806b}.farm-facts dd{margin:0;font-weight:600}
+.farm-estate .farm-plan-settings{margin-top:14px;padding-top:12px}
+.farm-estate .farm-plan-selected{font-size:12px;padding:10px;background:#eaf0d9;color:#5c7744}
+.farm-seed-ledger>div{display:flex;align-items:center;gap:12px;border-bottom:1px solid #ece9d9;padding:5px 0;font-size:12px}
+.farm-seed-ledger svg{width:32px;height:40px}.farm-seed-ledger strong{margin-left:auto}.farm-seed-ledger small{font-weight:400;color:#858871}

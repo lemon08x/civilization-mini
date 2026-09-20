@@ -1,0 +1,25 @@
+import type {SessionObservation} from '../../src/runtime/session.js';
+import {CROPS} from '../../src/game/systems/economy-catalog.js';
+import {esc} from './economy-view.js';
+import {meter} from './human-view.js';
+import {fieldScene,seedIcon} from './farm-animation/scene.js';
+
+type Game=SessionObservation['game'];
+type Button=(id:string)=>string;
+
+export function farm(g:Game,button:Button):string {
+ const e=g.economy!,f=e.field,planned=e.ongoing?.farm;
+ const ripe=!!f.crop&&f.growth>=f.duration,crop=f.crop?CROPS[f.crop].name:'家庭田地';
+ const manual=f.crop?g.actions.find(a=>a.id==='economy:farm:'+f.crop):undefined;
+ const care=g.actions.filter(a=>a.group==='农业'&&!a.id.startsWith('economy:farm:')&&!a.id.startsWith('economy:farmcycle:'));
+ const reserved=g.life?.budget.tasks.find(t=>t.id==='farm-cycle');
+ const crops=Object.entries(CROPS);
+ const seedCards=crops.map(([id,c])=>`<article class="farm-seed-card">${seedIcon(id)}<h4>${esc(c.name)}</h4><p>种子 <strong>${e.goods[c.seed]??0}</strong> 份</p>${button('economy:farm:'+id)||'<p class="subtle">本阶段尚未开放</p>'}</article>`).join('');
+ return `<div class="farm-workspace farm-estate"><section class="farm-main"><div class="farm-heading"><div><span class="eyebrow">FAMILY FARM · 家庭农场</span><h2>照料一方田，收获一季粮</h2></div><span class="farm-heading-tag">${f.crop?esc(crop):'等待播种'}</span></div>${fieldScene({crop:f.crop,cropName:crop,growth:f.growth,duration:f.duration,weather:g.world.weather,weatherName:g.world.weatherName,moisture:f.moisture,season:g.life?.calendar.season??'春'})}
+ <nav class="farm-tools" aria-label="农场工具"><button type="button" data-farm-open="work"><span aria-hidden="true">${!f.crop?'♧':ripe?'✦':'♧'}</span><strong>${!f.crop?'选择种子':ripe?'收获作物':'照料作物'}</strong><small>${!f.crop?'播种一茬新作物':ripe?'查看收成与花费':'查看灌溉条件'}</small></button><button type="button" data-farm-open="care"><span aria-hidden="true">♨</span><strong>土壤养护</strong><small>施肥与田间维护</small></button><button type="button" data-page="商城"><span aria-hidden="true">▧</span><strong>种子集市</strong><small>采购种子与物资</small></button><button type="button" data-page="仓库"><span aria-hidden="true">⌂</span><strong>我的仓库</strong><small>查看收获与库存</small></button></nav>
+ <details class="farm-drawer" data-farm-panel="work" data-fold="farm-work"><summary><span>${!f.crop?'种子袋':ripe?'收获这茬'+crop:'照料这茬'+crop}</span><small>${!f.crop?'选择作物后播种':ripe?'成熟待收':'还需 '+Math.max(0,f.duration-f.growth)+' 季'} ＋</small></summary><div class="farm-drawer-body">${!f.crop?`<p class="subtle">选择一种作物，播种整块家庭田。种子从仓库扣除。</p><div class="farm-seed-cards">${seedCards}</div>`:`<p>${ripe?'作物已经成熟。收获后进入仓库，田地重新空出。':'作物在季末生长。缺水时可灌溉；水分充足时等待下一季。'}</p>${manual?button(manual.id).replace(esc(manual.label),esc((ripe?'收获':'灌溉')+crop)):'<p class="subtle">当前没有可用操作。</p>'}`}<p class="subtle">${planned?'季末安排：持续种植'+esc(CROPS[planned].name)+'。手动播种不会改变这项安排。':'手动操作只处理当前这一茬。'}</p></div></details>
+ <details class="farm-drawer" data-farm-panel="care" data-fold="farm-care"><summary><span>土壤与田间维护</span><small>${care.filter(a=>a.enabled).length} 项可执行 ＋</small></summary><div class="farm-drawer-body">${care.length?care.map(a=>button(a.id)).join(''):'<p class="subtle">当前阶段尚无维护操作。</p>'}</div></details></section>
+ <aside class="farm-planning"><section class="farm-info-card"><span class="eyebrow">这一季 · FIELD NOTES</span><h3>${!f.crop?'留一片希望':ripe?'丰收的时候':'万物正在生长'}</h3><div class="farm-crop-summary">${seedIcon(f.crop??'wheat')}<div><strong>${!f.crop?'空田待播':esc(crop)}</strong><small>${!f.crop?'点击田地，打开种子袋':ripe?'已经成熟，可以收获':'第 '+f.growth+' / '+f.duration+' 季'}</small></div></div>${f.crop?meter('生长进度',Math.min(f.growth,f.duration),f.duration):'<p class="subtle">种子备好，就可以开始这一茬。</p>'}<dl class="farm-facts"><div><dt>预计收成</dt><dd>${f.crop?e.harvest+' 份':'—'}</dd></div><div><dt>土壤肥力</dt><dd>${f.fertility} / 3</dd></div><div><dt>水分补充</dt><dd>${f.moisture}</dd></div><div><dt>天气</dt><dd>${esc(g.world.weatherName)}</dd></div></dl><p class="subtle">预计收成随条件变化，收获后才计入仓库。</p></section>
+ <section class="farm-info-card"><span class="eyebrow">耕作安排 · NEXT SEASON</span><h3>${planned?'持续种植'+esc(CROPS[planned].name):'亲自打理每一茬'}</h3><p class="subtle">${planned?'季末尝试收获并补种；缺种子或劳力时等待。':'开启持续耕作后，季末自动尝试收获和补种。'}</p>${planned?`<div class="farm-plan-selected">已安排 · ${esc(CROPS[planned].name)}</div><p class="subtle">本人预留 ${reserved?.time??0} 时间 / ${reserved?.energy??0} 精力；农工按实际作业领工资。</p>${(e.goods[CROPS[planned].seed]??0)<1&&!f.crop?'<p class="notice">种子不足，请先到集市补充。</p>':''}`:''}<details class="farm-plan-settings" data-fold="farm-plan"><summary>${planned?'调整耕作安排':'设置持续耕作'}</summary>${crops.map(([id,c])=>id===planned?`<p class="subtle">当前：${esc(c.name)}</p>`:button('economy:farmcycle:'+id)).join('')}${planned?button('economy:farmcycle:off'):''}<p class="subtle">调整计划不会立即播种，也不会替换田里的作物。</p></details></section>
+ <section class="farm-info-card"><span class="eyebrow">种子储备</span><div class="farm-seed-ledger">${crops.map(([id,c])=>`<div>${seedIcon(id)}<span>${esc(c.name)}</span><strong>${e.goods[c.seed]??0}<small> 份</small></strong></div>`).join('')}</div><button type="button" class="text-btn" data-page="商城">去集市补给 →</button></section></aside></div>`;
+}

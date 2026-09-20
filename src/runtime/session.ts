@@ -30,7 +30,8 @@ export async function submitCommand(session: Session, input: unknown): Promise<{
   }
   const revision = session.record.entries.length;
   if (command.expectedRevision !== revision) throw new Error(`过期命令：当前 revision=${revision}`);
-  const limit = session.state.era ? session.state.era.rules.seasons * 4 * (session.state.life!.rules.timePerSeason + 5) + 100 : 1500;
+  // 行动上限按代际口径估算：前三个限代时代各 generationLimit 代（每代 birthYears×4 季），外加现代两代人的余量。
+  const limit = session.state.era ? (3 * session.state.era.rules.generationLimit * session.state.life!.rules.birthYears * 4 + 2 * session.state.life!.rules.lifespanMax * 4) * (session.state.life!.rules.timePerSeason + 5) + 100 : 1500;
   if (revision >= limit) throw new Error(`实验已达到 ${limit} 条行动的运行上限`);
   const result = transition(session.state, parseActionId(command.actionId), session.record.manifest.ruleset);
   const entry = { revision: revision + 1, command, events: result.events };

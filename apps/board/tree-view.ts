@@ -5,6 +5,7 @@ export interface TreeNodeSpec {
   stateClass?:''|'known'|'ready'|'locked'|'inactive';
   stateText?:string;
   sub?:string;
+  image?:string;
   dataAttr:string;
 }
 export function treeGraph(
@@ -12,7 +13,8 @@ export function treeGraph(
   lanes:{id:string;name:string}[],
   opts?:{edgeLabel?:(fromId:string,toId:string)=>string;edgeClass?:(fromId:string,toId:string)=>string;ariaLabel?:string}
 ):string{
- const W=168,H=56,COL=210,ROW=78,TOP=26;
+ const illustrated=nodes.some(n=>n.image);
+ const W=illustrated?248:168,H=illustrated?76:56,COL=illustrated?288:210,ROW=illustrated?98:78,TOP=26;
  const byId=new Map(nodes.map(n=>[n.id,n]));
  const laneList=[...lanes];
  for(const n of nodes)if(!laneList.some(l=>l.id===n.lane))laneList.push({id:n.lane,name:n.lane});
@@ -36,7 +38,7 @@ export function treeGraph(
  })).join('');
  const boxes=nodes.map(n=>{
   const p=positions.get(n.id)!,sub=[n.stateText,n.sub].filter(Boolean).join(' · ');
-  return `<g class="tree-node ${n.stateClass??''}${n.selected?' selected':''}" role="button" tabindex="0" ${n.dataAttr}="${esc(n.id)}" transform="translate(${p.x},${p.y})"><rect width="${W}" height="${H}" rx="6"/><text class="tree-name" x="12" y="23">${esc(n.name)}</text>${sub?`<text class="tree-sub" x="12" y="42">${esc(sub)}</text>`:''}</g>`;
+  return `<g class="tree-node ${n.stateClass??''}${n.selected?' selected':''}" role="button" tabindex="0" aria-label="${esc(n.name+'，'+sub)}" aria-pressed="${!!n.selected}" ${n.dataAttr}="${esc(n.id)}" transform="translate(${p.x},${p.y})"><title>${esc(n.name+' · '+sub)}</title><rect width="${W}" height="${H}" rx="10"/>${n.image?`<image href="${esc(n.image)}" x="8" y="8" width="52" height="52" preserveAspectRatio="xMidYMid meet" aria-hidden="true"/>`:''}<text class="tree-name" x="${n.image?68:12}" y="${illustrated?29:23}">${esc(n.name)}</text>${sub?`<text class="tree-sub" x="${n.image?68:12}" y="${illustrated?51:42}">${esc(sub.length>23?sub.slice(0,22)+'…':sub)}</text>`:''}</g>`;
  }).join('');
  const laneLabels=laneBands.map(l=>`<text class="tree-lane-label" x="24" y="${l.y-8}">${esc(l.name)}</text>`).join('');
  return `<svg style="width:${width}px;max-width:none" viewBox="0 0 ${width} ${height}" role="group" aria-label="${esc(opts?.ariaLabel??'依赖关系图')}"><defs><marker id="tree-arrow" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6" fill="#70816d"/></marker></defs>${laneLabels}${edges}${boxes}</svg>`;

@@ -4,6 +4,7 @@ import type { GameState } from '../model/state.js';
 import type { Ruleset } from '../ruleset.js';
 import type { GameEvent } from '../model/events.js';
 import { newSeason } from './time.js';
+import { advanceEra, eraEvent } from './eras.js';
 import { SUBJECTS } from '../model/economy.js';
 import { level } from './knowledge.js';
 
@@ -23,6 +24,10 @@ export function handover(state: GameState, rules: Ruleset, events: GameEvent[]):
   state.household.activePersonId = child.id;
   child.name = '本代经营者';
   state.clock.generation++; state.clock.turn = 1; state.clock.absoluteTurn++;
+  if(state.era&&state.era.index<3){
+    if(state.clock.generation-state.era.startGeneration>=state.era.rules.generationLimit)advanceEra(state,events,'本时代代际预算用尽，交接时强制结算');
+    if(state.era.index<3&&state.clock.generation-state.era.startGeneration===state.era.rules.generationLimit-1)eraEvent(state,events,'warning','这是本时代能住的最后一代，下一代将强制结算并进入新社会。');
+  }
   if(state.life){
     if(!child.vitality?.alive||child.vitality.ageSeasons<state.life.rules.adultYears*4)throw new Error('没有成年继任者');
     state.persons[fromPersonId].name=state.persons[fromPersonId].vitality!.alive?'退休长辈':'已故长辈';

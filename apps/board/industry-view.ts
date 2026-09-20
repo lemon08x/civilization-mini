@@ -1,3 +1,4 @@
+import {productArt,artUrl,illustration} from './illustration.js';
 import type {SessionObservation} from '../../src/runtime/session.js';
 import {SYSTEMS} from '../../src/game/model/industry.js';
 import {nodeUnlockEra} from '../../src/game/model/branches.js';
@@ -17,7 +18,7 @@ export function manufacturePage(g:SessionObservation['game'],button:(id:string)=
  const nodes:TreeNodeSpec[]=x.catalog.map(p=>{
   const record=x.products[p.id];
   const stock=p.kind==='device'?`耐用${e.equipment[p.id]??0}`:`库存${e.goods[p.good!]??0}`;
-  return {id:p.id,name:productName(p.id),lane:laneOf(p.id),parents:p.parents.filter(id=>x.catalog.some(c=>c.id===id)),selected:selected?.id===p.id,stateClass:record?.protocol?'known':p.parents.every(id=>x.products[id])?'ready':'locked',sub:`${record?'✓验证':'○验证'} ${record?.protocol?'✓规程':'○规程'} · ${stock}${eraTag(p.knowledge)}`,dataAttr:'data-product'};
+  return {id:p.id,name:productName(p.id),image:artUrl(productArt(p.id)),lane:laneOf(p.id),parents:p.parents.filter(id=>x.catalog.some(c=>c.id===id)),selected:selected?.id===p.id,stateClass:record?.protocol?'known':p.parents.every(id=>x.products[id])?'ready':'locked',sub:`${record?'✓验证':'○验证'} ${record?.protocol?'✓规程':'○规程'} · ${stock}${eraTag(p.knowledge)}`,dataAttr:'data-product'};
  });
  const detail=(()=>{
   if(!selected)return '<p>暂无制造条目。</p>';
@@ -34,7 +35,7 @@ export function manufacturePage(g:SessionObservation['game'],button:(id:string)=
    asEquipment.length?`<p><span class="detail-label">是这些配方的设备</span><br>${asEquipment.map(p=>chip(p.id)).join('')}</p>`:'',
    inSystems.length?`<p>生产系统：${inSystems.map(s=>`${esc(s.name)}（${s.equipment===selected.id?'设备':'验证对象'}）`).join('、')}</p>`:''].join('');
   const stock=selected.kind==='device'?`实物耐用 ${e.equipment[selected.id]??0}`:`实物库存 ${e.goods[selected.good!]??0}`;
-  return `<h3>${esc(productName(selected.id))}</h3>
+  return `${illustration(productArt(selected.id))}<h3>${esc(productName(selected.id))}</h3>
     <p><span class="detail-label">${lane} · ${selected.kind==='device'?'设备':'部件'}</span></p>
     <div class="production-stages"><span class="${record?'done':''}">${record?'✓':'○'} 产品验证</span><span aria-hidden="true">→</span><span class="${record?.protocol?'done':''}">${record?.protocol?'✓':'○'} 制造规程</span></div>
     <p class="detail-label">在游戏中的意义</p>${meaning||'<p>暂无下游用途。</p>'}
@@ -50,7 +51,7 @@ export function manufacturePage(g:SessionObservation['game'],button:(id:string)=
  })();
  return `<details><summary>如何获得实物、验证与规程</summary><p>解锁条件是前置知识与已验证产品。自行试制取得验证和制造规程；购买只获得实物，检验不赠送制造规程。验证记录不因实物消耗而失去。已有规程可跨代执行，新研发仍需个人知识。泵和发电机首次试制还需实际试运行。产品关系图不是必须依次造过全部产品。</p><p>部件由对应配方加工：当次完成的立即得到实物，跨季项目需等待并完成才能拿到产品。本人和雇工共用材料与设备，同一设备不能重复占用。</p></details>
   ${e.operations?.production?'<p>已有持续生产计划；日常进度见「家业」。本页的手动制造与雇员共用材料和设备。</p>':''}
-  <div class="page-workbench"><section><div class="library-heading"><h3>制造目录</h3><span>${x.catalog.length} 项 · 实线 部件前置 / 虚线 设备前置</span></div><p class="tree-legend subtle">✓ 已验证规程 / 实线 部件前置 / 虚线 设备前置 / 虚框 缺前置验证</p>${x.catalog.length?`<div class="tree-network">${treeGraph(nodes,MANUFACTURE_LANES.map(l=>({id:l.id,name:l.name})),{edgeClass:(fromId)=>x.catalog.find(c=>c.id===fromId)?.kind==='device'?'device':'',ariaLabel:'制造树'})}</div>`:'<p>暂无条目。</p>'}</section><aside class="course-inspector">${detail}</aside></div>`;
+  <div class="illustrated-categories product-categories">${MANUFACTURE_LANES.map(l=>{const group=x.catalog.filter(p=>laneOf(p.id)===l.id);return group.length?`<button type="button" class="category-card ${laneOf(selected?.id??'')===l.id?'selected':''}" data-product="${group[0].id}">${illustration(l.id==='field'?'product-tools':l.id==='parts'?'tech-mechanics':'chronicle-power','category-illustration')}<span><strong>${l.name}</strong><small>${group.filter(p=>x.products[p.id]?.protocol).length} / ${group.length} 项已有规程</small></span></button>`:'';}).join('')}</div><div class="page-workbench"><section><div class="library-heading"><h3>制造目录</h3><span>${x.catalog.length} 项 · 实线 部件前置 / 虚线 设备前置</span></div><p class="tree-legend subtle">✓ 已验证规程 / 实线 部件前置 / 虚线 设备前置 / 虚框 缺前置验证</p>${x.catalog.length?`<div class="tree-network" tabindex="0" role="region" aria-label="制造树，可横向滚动">${treeGraph(nodes,MANUFACTURE_LANES.map(l=>({id:l.id,name:l.name})),{edgeClass:(fromId)=>x.catalog.find(c=>c.id===fromId)?.kind==='device'?'device':'',ariaLabel:'制造树'})}</div>`:'<p>暂无条目。</p>'}</section><aside class="course-inspector">${detail}</aside></div>`;
 }
 
 export function manufactureFallback(g:SessionObservation['game'],button:(id:string)=>string):string{
