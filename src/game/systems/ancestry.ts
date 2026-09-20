@@ -5,7 +5,7 @@ export function ancestorKnows(s:GameState,node:string,person=s.household.activeP
  if(!s.life?.renewal||!nodeInEra(s,node))return false;
  const seen=new Set<string>();let current=person;
  while(!seen.has(current)){
-  seen.add(current);const parent=Object.values(s.persons).find(p=>p.vitality?.childId===current);
+  seen.add(current);const parent=s.sect?(s.sect.members[current]?.masterId?s.persons[s.sect.members[current].masterId!]:undefined):Object.values(s.persons).find(p=>p.vitality?.childId===current);
   if(!parent)return false;
   if(s.economy?.branches?.learned[parent.id]?.includes(node))return true;
   current=parent.id;

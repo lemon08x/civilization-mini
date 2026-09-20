@@ -3,31 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>世代 · 开启家族旅程</title>
+  <title>隐士修所 · 开启传承旅程</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body class="chronicle-body">
-  <main class="start-screen">
-    <a class="text-btn" href="/">← 返回入口</a>
-    <div class="entry-heading"><div class="painted-art art-home entry-art" aria-hidden="true"></div>
-      <div class="eyebrow">CIVILIZATION MINI</div>
-      <p class="brand-mark" aria-hidden="true">记</p>
-      <h1>世代</h1>
-      <p>以家为根，潜龙养志。<br>将一代人的修行，续成人类危难时的底气。</p>
-      <a class="text-btn" href="#legacy">读门派缘起与传承之志 ↓</a>
-    </div>
-    <section class="panel" id="save-panel">
-      <div class="panel-head"><h2>打开已有旅程</h2></div>
-      <div class="panel-body">
-        <div id="save-list"></div>
-        <p class="subtle">导入会建立一份新的本机存档，不会覆盖原文件。仅接受当前规则。</p>
-        <label class="file-button import-label">导入存档
-          <input id="import" type="file" accept=".json,application/json" hidden>
-        </label>
-      </div>
-    </section>
-    <section class="panel">
-      <div class="panel-head"><h2>开启家族旅程</h2></div>
+  <main class="start-screen legacy-start">
+    <header class="start-masthead"><a class="start-brand" href="/" aria-label="隐士修所 · 返回入口"><span>隐士修所</span><small>师徒相承 · 潜龙养志</small></a><nav aria-label="开始页导航"><a href="#journey-desk">开启旅程</a><a href="#legacy">门派缘起 ↓</a><a href="/">返回入口 ↗</a></nav></header>
+    <section class="journey-desk" id="journey-desk" aria-labelledby="journey-title">
+      <header class="journey-heading"><div><span class="legacy-overline">卷首 · 你的旅程</span><h1 id="journey-title">续一段师承，写一代人生。</h1><p>从这里启程，或接续尚未写完的故事。</p></div><span class="sect-picture journey-token" style="background-position:100% 66.6667%" aria-hidden="true"></span></header>
+      <div class="journey-options">
+    <section class="panel journey-new">
+      <div class="panel-head"><div><span class="legacy-overline">启程 · 新的旅程</span><h2>写下新章</h2></div></div>
       <div class="panel-body">
         <form id="start-form" class="start-form">
           <label>选择起始环境
@@ -48,32 +34,67 @@
         </form>
       </div>
     </section>
-    <p class="entry-note">存档只保存在本机浏览器。每次从这里选择打开或新开，不会自动进入上一局。</p>
-    <section class="panel legacy-story" id="legacy" aria-labelledby="legacy-title">
-      <div class="panel-head"><h2 id="legacy-title">门派缘起 · 以家为根，以世为任</h2></div>
+    <section class="panel journey-saves" id="save-panel">
+      <div class="panel-head"><div><span class="legacy-overline">接续 · 已有旅程</span><h2>续写旧章</h2></div></div>
       <div class="panel-body">
-        <blockquote>人类掌握力量的速度，超过了学会驾驭力量的速度。</blockquote>
-        <p>墨家济世的失败，促使一支传人重新思考如何守住兼爱、非攻之志。他们吸收鬼谷一脉隐世与韬光养晦的处世之道。掌门令门人化整为零，散居各地，以家为单位独立发展，保存学问，修身养性，紧跟每个时代的前沿。</p>
-        <p>你便是其中一支的传人。从一家人的生计开始，耕作、求学、制造、养育，将自己的能力一点点壮大。门派不以平定每次纷争、救济每场灾荒为使命；即使目睹苦难，也以观察、思考和积累为常。只有当人类走到灭绝的边缘，门派才承担最后的兜底之责。</p>
-        <details>
-          <summary>传承之志 · 兼爱非攻，潜龙养志</summary>
-          <p>兼爱，是将人类整体的存续放在最终使命之中；非攻，是不以侵略和掠夺为志。允许一时的自私，允许为家人谋求更好的生活，但须恪守无私的信念，在最终的责任面前不只顾一家。</p>
-          <p>提升自身能力是贯穿世代的主线，偏离这条主线的事不获得奖励；能够兼顾成长与善行，则值得额外的机缘。</p>
-          <p><strong>潜龙勿用：</strong>平日隐世积累。<strong>见龙在田：</strong>有限施展，验证所学。<strong>飞龙在天：</strong>唯有进入现代、面对必须解决的副本任务，才全面施展历代积累的力量。</p>
-        </details>
-        <details>
-          <summary>家族信物 · 命定之人与气运</summary>
-          <p>家族信物赋予每代唯一一位命定之人特殊的联系：他的决定影响家庭气运，气运又影响随机机遇与下一代的天赋。拥有这份力量的人，永远无法摆脱门派的联系，门主总能找到他。</p>
-          <p>古人称其为气运，现代门人则尝试用概率分布来理解它：信物能够偏置某些可能结果出现的概率。这是本作借量子概率构想的虚构规律。抽卡将消耗气运，气运同时影响抽取概率；如何使用这份机缘，也是传承中的取舍。</p>
-        </details>
-        <details>
-          <summary>现代之约 · 为拥有“上帝之力”的人类兜底</summary>
-          <p>漫长的积累延续到现代。人类的认知与自我约束尚未跟上，手中却已有足以毁灭自身的“上帝之力”：失去约束的 AI 与生物技术、相互猜疑中被滥用的核武器、一触即发的世界大战，以及环境恶化与极端气候叠加的生存危机。</p>
-          <p>当危机越过人类存续的底线，信物传来召集，隐世的各支终于需要出手。现代副本是必须承担的任务，也是最终分数的唯一来源；同一副本设置不同难度，对应不同等级的奖励分。世代经营的成果，将在这些任务中得到检验。</p>
-          <p>散居各地的同门是否会与你同行，留待未来的旅程揭晓。</p>
-        </details>
-        <p class="subtle legacy-status">设定与后续方向：信物、命定之人、气运抽卡、危机副本难度与同门同行尚未实装。当前 0.27.0 可经营、学习与传承，现代按现有副本任务计分；跨时代仍按现行规则开启新人物与家族。</p>
+        <div id="save-list"></div>
+        <p class="subtle">导入会建立一份新的本机存档，不会覆盖原文件。仅接受当前规则。</p>
+        <label class="file-button import-label">导入存档
+          <input id="import" type="file" accept=".json,application/json" hidden>
+        </label>
       </div>
+    </section>
+      </div>
+    <p class="entry-note">存档只保存在本机浏览器。每次从这里选择打开或新开，不会自动进入上一局。</p>
+    </section>
+    <div class="journey-book-divider"><span>入门之前，读一读来处</span><a href="#legacy">门派缘起 ↓</a></div>
+    <section class="legacy-story legacy-book" id="legacy" aria-labelledby="legacy-title">
+      <header class="legacy-cover">
+        <div class="legacy-cover-landscape sect-art sect-art-gate" aria-hidden="true"></div>
+        <div class="legacy-cover-copy"><span class="legacy-overline">隐士修所 · 门派缘起</span><h2 id="legacy-title">道以传志<br><span>术以济世</span></h2><p>隐于世间，学在时代前沿。<br>把一代人的所知，续成后来者的底气。</p><a class="legacy-read-link" href="#legacy-origin">展开这一卷 <span aria-hidden="true">↓</span></a></div>
+        <span class="legacy-cover-seal" aria-hidden="true">相<br>承</span>
+        <p class="legacy-cover-quote">人类获得力量的速度，<br>走在了学会驾驭力量的前面。</p>
+      </header>
+      <nav class="legacy-chapters" aria-label="门派缘起篇章">
+        <a href="#legacy-origin"><small>壹</small> 缘起</a><a href="#legacy-vow"><small>贰</small> 立志</a><a href="#legacy-lineage"><small>叁</small> 传道</a><a href="#legacy-mission"><small>肆</small> 赴约</a>
+      </nav>
+      <article class="legacy-chapter legacy-origin" id="legacy-origin">
+        <div class="legacy-section-heading"><span class="legacy-chapter-number">壹</span><div><span class="legacy-overline">从济世之心，到隐世之道</span><h3>志未改，路当变</h3></div></div>
+        <div class="legacy-origin-grid"><div class="legacy-quotation"><span aria-hidden="true">“</span><p>兼爱、非攻之志不改。<br>先让所学，跟得上时代。</p><small>潜龙养志 · 隐于世间</small></div><div><p>昔年墨家因力有不逮而败。一支传人取鬼谷一脉隐世蓄志之法，保存学问，修身养性，以师徒接续志向。</p><p>你是其中一位传人。从安顿生计，到修道、求学、制造、授徒，让每一代都有能力继续向前。</p><details><summary>继续读 · 门派的来处与边界</summary><p>昔年墨家以兼爱、非攻之志济世，终因力有不逮而败。一支传人由此自省：济世之心不改，处世之道当变。他们取鬼谷一脉隐世蓄志之法，隐于世间，以师徒相承保存学问，修身养性，使所学始终跟上每一个时代的前沿。你所在的流派每代只有两位传人，每人各收一名徒弟，续成下一代。</p><p>你便是其中一位传人。从安顿生计开始，修道、求学、制造、授徒，把能力一代代积蓄壮大。门人可以结婚生子，也可以不婚育；家人的血缘不决定门派的传承。门派不以平定每一次纷争、救济每一场灾荒为使命；纵然目睹苦难，也以观察、思考与积累为常。唯有当人类走到存续的边缘，这门隐世之学才承担最后的兜底之责。</p></details></div></div>
+      </article>
+      <article class="legacy-chapter" id="legacy-vow">
+        <div class="legacy-section-heading"><span class="legacy-chapter-number">贰</span><div><span class="legacy-overline">兼爱非攻 · 潜龙养志</span><h3>有所积蓄，才有所担当</h3></div></div>
+        <div class="legacy-path">
+          <section class="legacy-path-card"><div class="sect-art sect-art-gate" aria-hidden="true"></div><span class="legacy-step">01 · 隐世积累</span><h4>潜龙勿用</h4><p>安顿生计，修道习术。<br>先让自己有能力。</p></section>
+          <section class="legacy-path-card"><div class="sect-art sect-art-practice" aria-hidden="true"></div><span class="legacy-step">02 · 实践所学</span><h4>见龙在田</h4><p>有限施展，亲身验证。<br>把知识变成能做成的事。</p></section>
+          <section class="legacy-path-card"><img src="/illustrations/ui-nav-society-ui.webp" alt="" width="128" height="128" loading="lazy"><span class="legacy-step">03 · 承担使命</span><h4>飞龙在天</h4><p>进入现代，直面危机。<br>让历代积蓄接受检验。</p></section>
+        </div>
+        <details><summary>继续读 · 传承之志</summary>
+          <p>兼爱，是把人类整体的存续置于最终使命之上；非攻，是不以侵略与掠夺为志。门人允许一时的自私，允许为家人谋求更好的生活；但须恪守无私的信念，在最终的责任面前，不只顾一家。</p>
+          <p>提升自身能力，是贯穿世代的主线：偏离主线的事不获奖励；能够兼顾成长与善行者，另有机缘。</p>
+          <p><strong>潜龙勿用</strong>，平日隐世积累；<strong>见龙在田</strong>，有限施展，验证所学；<strong>飞龙在天</strong>——唯有进入现代、直面必须解决的副本任务时，才全面施展历代积蓄的力量。</p>
+        </details>
+      </article>
+      <article class="legacy-chapter legacy-lineage" id="legacy-lineage">
+        <div class="legacy-section-heading"><span class="legacy-chapter-number">叁</span><div><span class="legacy-overline">师徒相承 · 每代两人</span><h3>传下方法，修为亲得</h3></div></div>
+        <div class="legacy-lineage-grid"><div class="legacy-teaching-art sect-art sect-art-teaching" aria-hidden="true"></div><div><p>每位传人各收一徒。连接门派的是师承与志向，血缘不决定传承。</p><div class="legacy-family-tree" aria-label="两位传人各收一徒，接续下一代"><div><span>传人 · 一</span><b aria-hidden="true">↓</b><span>弟子 · 一</span></div><div><span>传人 · 二</span><b aria-hidden="true">↓</b><span>弟子 · 二</span></div></div><div class="legacy-duality"><p><strong>道 · 修炼内在</strong><span>个人修为从零开始，改进的心法跨代保留。</span></p><p><strong>术 · 学以致用</strong><span>科技与技艺亲自学习，不能由气运替代。</span></p></div></div></div>
+        <details><summary>继续读 · 心法、信物与机缘</summary>
+          <p>门派最重要的传承是“道”：通过心法、冥想等修炼内在，使做其他事情更有成效；科技与技艺则是“术”。每个人入门都要从头学道，师父的修为不能直接交给徒弟。若能艰难地改进本门之道，便能留下永久的提升，让后来者在更好的方法上重新起步。</p>
+          <p>信物连系师门，修道日深，亦偶得机缘。每代两位传人各授一徒，传下的是道法与志向。门人始终与门派相连——门主能够找到他们。</p>
+          <p>所谓气运，是修道带来的些许机缘，只对可能发生的好结果稍作偏移。它不是修行的目的，也不能替人学会本领。积下的气运可以用于抽取辅助机缘，消耗之后，道的修为与本门改进仍在；即使不求这些机缘，也能循修道习术之路承担使命。</p>
+        </details>
+      </article>
+      <article class="legacy-chapter legacy-mission" id="legacy-mission">
+        <div class="legacy-section-heading"><span class="legacy-chapter-number">肆</span><div><span class="legacy-overline">现代之约 · 信物传来召集</span><h3>直到人类需要这份底气</h3></div></div>
+        <div class="legacy-mission-lead"><span class="sect-picture legacy-token" style="background-position:100% 66.6667%" aria-hidden="true"></span><div><p class="legacy-mission-quote">当力量走在自我约束之前，<br>隐世之学，终须承担兜底之责。</p><p>平日观察、思考与积累；当危机越过人类存续的底线，历代所学才迎来最终使命。</p></div></div>
+        <div class="legacy-stakes"><p><strong>240 <small>季</small></strong><span>现代准备期限</span></p><p><strong>四类危机</strong><span>每类至少完成兜底</span></p><p><strong>最高完成难度</strong><span>各副本据此计分</span></p></div>
+        <details><summary>继续读 · 现代使命与未来旅程</summary>
+          <p>漫长的积累延续到现代。人类的认知与自我约束尚未跟上，手中却已握有足以毁灭自身的“上帝之力”：失去约束的 AI 与生物技术、在相互猜疑中被滥用的核武器、一触即发的大战，以及环境恶化与极端气候叠加的生存危机。</p>
+          <p>当危机越过人类存续的底线，信物传来召集，隐世各支终须出手。现代副本是必须承担的任务，也是最终分数的唯一来源；同一副本设有不同难度，对应不同等级的奖励分。世代经营的成果，将在这些任务中接受检验。</p>
+          <p>散居各地的同门，是否会与你同行——留待未来的旅程揭晓。</p>
+        </details>
+      </article>
+      <footer class="legacy-book-end"><span class="legacy-overline">这一卷，从你开始</span><h3>把一代人的修行，续下去。</h3><a class="cover-cta" href="#start-form">返回开局，写下新章 ↑</a><details><summary>现行玩法与范围</summary><p class="subtle">现行玩法：每代两位传人，各收一徒；从零修道、习术与实践，艰难改进本门心法。气运仅供可选辅助。师徒跨时代延续，现代在240季内应对四类危机，各按最高完成难度计分。私人婚育不进入本轮模拟，远征同行留待后续。</p></details></footer>
     </section>
   </main>
   <script type="module" src="/modules/apps/board/start.js"></script>

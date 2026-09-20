@@ -18,6 +18,7 @@ export function branchProcessNeeds(s:GameState,id:string,worker=false):string[]{
 export function branchActionNeeds(s:GameState,id:string):string[]{
   if(!s.economy?.branches||id==='handover')return [];
   const [,op,target]=id.split(':');
+  if(s.sect&&['sectswitch','sectseek','sectadmit','sectpractice','sectteach','sectimprove','sectdraw','crisis'].includes(op))return [];
   if(s.era&&['tap','dungeonstart','dungeonwork','erasettle','publicmill'].includes(op))return [];
   if(s.socialFood&&['foodpolicy','foodbudget','foodreserve','foodplan'].includes(op))return [];
   if(s.economy.industry){
@@ -25,7 +26,7 @@ export function branchActionNeeds(s:GameState,id:string):string[]{
     if(['assign','pause','farmplan','productionplan','supplyplan','salesplan','careplan','charter'].includes(op))return ['旧经营方式尚未纳入三类树，请使用系统安排与手动采购交付'];
     if(['build','process'].includes(op))return [...productNeeds(s,target),...(op==='build'?productTrialNeeds(s,target):[])];
   }
-  if(['branchlearn','branchteach','brancharchive','channel','rest','care','retire','company','consult','end','cartadd','cartremove','clearcart','checkout','gather','work','sell','sellfood','repair','finish','resumeplans','pause','fertilize','farmcycle'].includes(op))return [];
+  if(['bond','branchlearn','branchteach','brancharchive','channel','rest','care','retire','company','consult','end','cartadd','cartremove','clearcart','checkout','gather','work','sell','sellfood','repair','finish','resumeplans','pause','fertilize','farmcycle'].includes(op))return [];
   if(target==='off'&&['foodplan','farmplan','productionplan','supplyplan','salesplan','careplan'].includes(op))return [];
   if(op==='build')return BRANCH_PRODUCTS[target]?branchNeeds(s,BRANCH_PRODUCTS[target]):['该设备尚未纳入试点'];
   if(op==='process')return branchProcessNeeds(s,target);
@@ -47,6 +48,7 @@ export function branchActionNeeds(s:GameState,id:string):string[]{
 export function recordBranchWork(s:GameState,events:GameEvent[]):void {
   const b=s.economy?.branches;if(!b)return;
   for(const e of [...events]){
+    if(s.sect){const kind=e.type==='economy-farm'&&e.actor==='本人'&&['harvest','sow','tend'].includes(e.operation)?'farm':e.type==='economy-process'&&e.actor==='本人'&&e.stage==='complete'||e.type==='industry'&&e.actor==='self'&&e.operation==='worked'?'craft':e.type==='branch'&&e.operation==='taught'?'teach':null;const records=s.persons[s.household.activePersonId].practices;if(kind&&!records.includes('dao:'+kind))records.push('dao:'+kind);}
     if(e.type==='economy-process'&&e.stage==='complete'&&e.actor==='本人'&&!b.protocols.includes(e.recipe)){
       b.protocols.push(e.recipe);events.push({type:'branch',operation:'protocol',node:e.recipe,detail:'真实试制完成，工艺规程可供雇员跨代接续'});
     }

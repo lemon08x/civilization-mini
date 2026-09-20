@@ -385,3 +385,13 @@ Use the reference ONLY for face identity, painterly style, six-cell grid alignme
 ### 后续维护
 
 导航和人物都只改呈现，不改变游戏世界。桌面检查重点是：七张导航加载、选中底色下无方形色块、头像不串格，以及少年和中年能区分。后续只需检查相关桌面页面，不新增手机适配或窄屏验收。完整 96 个肖像已按图集目视检查；无需通过推进游戏到全部时代来检查静态素材。
+
+
+## 开始页故事素材（2026-09-20）
+
+经本机 Grok CLI（`artifacts/image-gen/gen.mjs`，提示词在 `prompts.json`）新增两张开始页主题图：
+
+- `story-veil.jpg`（1248×832）→ `story-veil-ui.webp`（960×640，q84）：入口页横幅。薄雾山谷中的隐世家宅与梯田、一条蜿蜒小径，呼应「化整为零、散居各地」。纯装饰，不代表任何存档场景。
+- `story-token.jpg`（1024×1024）→ `story-token-ui.webp`（384×384，q84）：开始页题图。无字素玉佩、编绳与银杏叶静物，呼应家族信物。信物机制尚未实装，图片只是主题示意。
+
+两图均为不透明暖纸底，页面以 `mix-blend-mode:multiply` 融入纸色容器；已目视检查主题、风格与无文字。

@@ -25,10 +25,16 @@ const server = http.createServer(async (req, res) => {
       if (!absolute.startsWith(root + sep)) { res.writeHead(404); res.end(); return; }
     }
     else if (path === '/rulesets/current.json') {
-      const { base } = await loadCurrentContext();
-      const body = Buffer.from(JSON.stringify(base), 'utf8');
-      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
-      res.end(req.method === 'HEAD' ? undefined : body);
+      try {
+        const { base } = await loadCurrentContext();
+        const body = Buffer.from(JSON.stringify(base), 'utf8');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+        res.end(req.method === 'HEAD' ? undefined : body);
+      } catch (cause) {
+        console.error('规则加载失败：', cause);
+        res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+        res.end(req.method === 'HEAD' ? undefined : JSON.stringify({ error: '规则加载失败，请重启游戏服务并检查终端错误。' }));
+      }
       return;
     }
     else if (path.startsWith('/modules/') && path.endsWith('.js')) {

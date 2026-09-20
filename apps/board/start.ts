@@ -9,6 +9,25 @@ const saveList = document.getElementById('save-list')!;
 const importInput = document.getElementById('import') as HTMLInputElement;
 let busy = false;
 
+// Progressive enhancement: chapter text and anchor navigation work without JavaScript.
+const chapters=Array.from(document.querySelectorAll<HTMLElement>('.legacy-chapter'));
+const chapterLinks=Array.from(document.querySelectorAll<HTMLAnchorElement>('.legacy-chapters a'));
+if('IntersectionObserver' in window){
+  const observer=new IntersectionObserver(entries=>{
+    for(const entry of entries){
+      if(entry.isIntersecting){
+        entry.target.classList.add('legacy-arrived');
+        chapterLinks.forEach(link=>{
+          if(link.hash==='#'+entry.target.id)link.setAttribute('aria-current','location');
+          else link.removeAttribute('aria-current');
+        });
+      }
+    }
+  },{rootMargin:'-12% 0px -45% 0px',threshold:0});
+  chapters.forEach(chapter=>observer.observe(chapter));
+}
+
+
 function showError(message: string): void {
   error.textContent = message;
   error.hidden = false;

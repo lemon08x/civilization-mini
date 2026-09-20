@@ -2,7 +2,7 @@ import {farm} from './farm-view.js';
 import {bindFarmScene,playFarmFeedback} from './farm-animation/controller.js';
 import {erasPage} from './eras-view.js';
 import {socialFoodPage} from './social-food-view.js';
-import { actionButton, humanScreen, energyPage, confirmKind, confirmContent } from './human-view.js';
+import { cultivationPage, actionButton, humanScreen, energyPage, confirmKind, confirmContent } from './human-view.js';
 import type { Recap } from './human-view.js';
 import {industrySystems,staffPage,manufacturePage,manufactureFallback} from './industry-view.js';
 import {branchPage} from './branch-view.js';
@@ -25,8 +25,20 @@ if(!requested){location.replace('/start');throw new Error('missing save');}
 const saveId=requested;
 const loaded=loadSave(saveId);
 if(!loaded){location.replace('/start');throw new Error('missing save');}
-let failed=false,busy=false,page='聚落',guide=false,selectedCourse='',selectedProduct='',selectedSystem='',selectedDevice='',filter='',shopCategory='物资';
+let failed=false,busy=false,page='聚落',guide=false,selectedCultivation='',selectedCourse='',selectedProduct='',selectedSystem='',selectedDevice='',filter='',shopCategory='物资';
 let recap:Recap|null=null,pendingAction='';
+let feedbackTimer:ReturnType<typeof setTimeout>|undefined;
+function sectFeedback(id:string,lines:string[]):void {
+  if(!observeSession(session).game.sect||(!id.includes(':sect')&&!['handover','economy:retire:family'].includes(id)))return;
+  const box=$('sect-feedback');
+  clearTimeout(feedbackTimer);
+  box.textContent=lines.at(-1)??'行动已结算，请查看当前状态。';
+  box.hidden=false;box.classList.remove('is-visible');
+  void box.offsetWidth;box.classList.add('is-visible');
+  const target=document.querySelector(id.includes('sectswitch')?'.sect-lineage.is-active, .cultivation-toolbar':'.cultivation-inspector, .sect-workbench');
+  target?.classList.add('sect-action-flash');
+  feedbackTimer=setTimeout(()=>{box.hidden=true;},5000);
+}
 let session=await createSession({runId:saveId,ruleset:rules,seed:17,scenarioId:'river'});
 const error=(message:string)=>{$('error').hidden=!message;$('error').textContent=message;if(message)$('error').focus();};
 try{session=parseSession(loaded);if(session.record.manifest.ruleset.rulesVersion!==rules.rulesVersion)throw new Error('只接受当前规则；请另开新局');}catch(e){failed=true;error('当前存档无法读取，请新开局：'+(e as Error).message);}
@@ -70,7 +82,7 @@ function recapFor(id:string,lines:string[]):Recap|null {
 function focusKey():string {
   const el=document.activeElement as HTMLElement|null;
   if(!el)return '';
-  for(const attr of ['data-action','data-page','data-course','data-product','data-recipe','data-system','data-device','data-shop-category','data-guide','id'] as const){
+  for(const attr of ['data-action','data-page','data-cultivation','data-course','data-product','data-recipe','data-system','data-device','data-shop-category','data-guide','id'] as const){
     const value=el.getAttribute(attr); if(value)return attr+'='+value;
   }
   return '';
@@ -100,7 +112,9 @@ async function act(id:string){
     const next=(await submitCommand(session,{commandId:session.record.manifest.runId+':'+session.record.entries.length,expectedRevision:session.record.entries.length,actionId:id})).session;
     const lines=(next.record.entries.at(-1)?.events.map(feedback).filter(Boolean)??[]) as string[];
     recap=next.record.entries.length>before?recapFor(id,lines):recap;
+    if(id.startsWith('economy:sectswitch:')||id==='economy:sectpractice:dao'||id==='economy:sectimprove:dao')selectedCultivation='';
     await save(next);
+    if(next.record.entries.length>before)sectFeedback(id,lines);
     if(page==='农业'&&next.record.entries.length>before){
       const events=next.record.entries.slice(before).flatMap(entry=>entry.events);
       playFarmFeedback(document,events.flatMap(event=>event.type==='economy-farm'&&['sow','harvest','tend'].includes(event.operation)?[{kind:event.operation as 'sow'|'harvest'|'tend',label:feedback(event)}]:[]));
@@ -121,6 +135,7 @@ $('import').onchange=async ev=>{const file=(ev.target as HTMLInputElement).files
       detail?.scrollIntoView({block:'start'});
     }
   };
+  document.querySelectorAll<HTMLButtonElement>('[data-cultivation]').forEach(b=>b.onclick=()=>{selectedCultivation=b.dataset.cultivation!;render();});
   document.querySelectorAll<HTMLButtonElement>('[data-course]').forEach(b=>{const go=()=>{selectedCourse=b.dataset.course!;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
   document.querySelectorAll<HTMLButtonElement>('[data-product]').forEach(b=>{const go=()=>{selectedProduct=b.dataset.product!;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
   document.querySelectorAll<HTMLButtonElement>('[data-system]').forEach(b=>{const go=()=>{selectedSystem=b.dataset.system!;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
@@ -170,6 +185,7 @@ function render():void {
   const panel=(title:string,body:string)=>`<section class="panel"><div class="panel-head"><h2>${title}</h2></div><div class="panel-body">${body}</div></section>`;
   const acts=(group:string)=>o.actions.filter(a=>a.group===group&&!a.id.startsWith('economy:buyfood:')&&(!filter||a.label.includes(filter))).map(a=>`<div class="family-item">${button(a.id)}</div>`).join('');
   let body='';
+  if(page==='修炼')body=cultivationPage(o,button,selectedCultivation);
   if(page==='社会')body=erasPage(observeSession(session),button);
   if(page==='副本')body=expeditionPage(observeSession(session),button);
   if(page==='试炼')body=towerPage(observeSession(session),button);

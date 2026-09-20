@@ -20,6 +20,9 @@ export interface CompactActionQuote {
 }
 
 export interface CompactObservation {
+  seasonalEvents: SessionObservation['game']['seasonalEvents'];
+  sect?: SessionObservation['game']['sect'];
+  crises?: NonNullable<SessionObservation['game']['era']>['crises'];
   runId: string;
   revision: number;
   status: string;
@@ -129,6 +132,8 @@ export function compactObservation(
   const farm = cropName(economy?.ongoing);
   const eraStage = record(era?.stage);
   return {
+    seasonalEvents:observation.game.seasonalEvents,
+    sect:observation.game.sect,crises:observation.game.era?.crises,
     runId: observation.runId,
     revision: observation.revision,
     status: str(game.status) ?? 'unknown',
@@ -211,7 +216,10 @@ export function formatCompactObservation(compact: CompactObservation): string {
     lines.push(`预算: 时间 ${budget.timeRemaining}（预留 ${budget.reservedTime}，可用 ${budget.availableTime}） / 精力 ${budget.energy}（预留 ${budget.reservedEnergy}，可用 ${budget.availableEnergy}） / 困境 ${budget.hardship}`
       + (budget.health !== undefined ? ` / 健康 ${budget.health}` : ''));
   }
-  if (compact.family) {
+  lines.push(`季末经历：${JSON.stringify(compact.seasonalEvents)}`);
+  if(compact.sect)lines.push(`师徒与道：${JSON.stringify(compact.sect)}`);
+  if(compact.crises)lines.push(`现代使命：${JSON.stringify(compact.crises)}`);
+  if (compact.family&&!compact.sect) {
     const f = compact.family;
     lines.push(`家人: ${[
       f.personIdentity ? `经营者${f.personIdentity.name}（${f.personIdentity.sex==='male'?'男':'女'}，${f.personIdentity.talent}）` : '',

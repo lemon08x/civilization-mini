@@ -1,3 +1,4 @@
+import {sectCosts} from './life.js';
 import type {GameState} from '../model/state.js';
 import type {GameEvent} from '../model/events.js';
 import {publicWaterFee} from './eras.js';
@@ -21,7 +22,7 @@ export function socialFoodQuote(s:GameState,afterProduction=false,productionTime
  const transport=s.economy!.shop!.transport;
  const quantity=Math.min(need,available,funds,cap,f.serviceRemaining,transport);
  const timeAvailable=Math.max(0,s.life!.timeRemaining-(afterProduction?0:productionTime));
- const time=quantity>0&&!delivery?f.rules.pickupTime:0;
+ const time=quantity>0&&!delivery?sectCosts(s,'economy:food:pickup',{time:f.rules.pickupTime,energy:0}).time:0;
  const reasons:string[]=[];
  if(need>0){
   if(funds<need)reasons.push(`资金不足：需${need*f.price}钱，现有${s.household.money}`);
@@ -37,15 +38,15 @@ export function socialFoodQuote(s:GameState,afterProduction=false,productionTime
 // This is a forecast, not a debit. It is included in the shared personal labor budget.
 export function foodLabor(s:GameState,productionTime=0):{time:number;energy:number}{
  if(!s.socialFood)return {time:0,energy:0};
- const f=s.socialFood,q=socialFoodQuote(s,false,productionTime);
- return {time:q.need>0&&q.purchase>0&&!q.delivery?f.rules.pickupTime:0,energy:0};
+ const q=socialFoodQuote(s,false,productionTime);
+ return {time:q.purchase>0?q.time:0,energy:0};
 }
 export function settleSocialFood(s:GameState,events:GameEvent[]):void{
  const f=s.socialFood;if(!f)return;
  const q=socialFoodQuote(s,true);
  if(q.purchase){
   s.household.money-=q.cost;s.household.food+=q.purchase;s.production!.market.food-=q.purchase;
-  s.economy!.shop!.transport-=q.purchase;f.serviceRemaining-=q.purchase;s.life!.timeRemaining-=q.time;
+  s.economy!.shop!.transport-=q.purchase;f.serviceRemaining-=q.purchase;s.life!.timeRemaining=Math.round((s.life!.timeRemaining-q.time)*100)/100;
   events.push({type:'food-purchased',amount:q.purchase,money:q.cost});
   socialFoodEvent(events,'purchased',`${q.policyName}：${q.delivery?'社会人员配送':'本人赶集'}${q.purchase}份食品，支付${q.cost}钱${q.time?'，耗时'+q.time:''}`,q.purchase,q.cost,q.time);
  }

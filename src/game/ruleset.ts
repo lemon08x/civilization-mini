@@ -4,7 +4,7 @@ import type { SocialFoodRules } from './model/social-food.js';
 import type { RenewalRules } from './model/renewal.js';
 import type { IndustryRules } from './model/industry.js';
 import type { BranchRules } from './model/branches.js';
-import { LIFE_BOUNDS, type LifeRules } from './model/life.js';
+import { LIFE_BOUNDS, SECT_BOUNDS, type SectRules, type LifeRules } from './model/life.js';
 import { TOWER_BOUNDS,type TowerRules } from './model/tower.js';
 import { WORKSHOP_BOUNDS, type WorkshopRules } from './model/workshop.js';
 import { OPERATIONS_BOUNDS } from './model/operations.js';
@@ -46,6 +46,7 @@ export interface Ruleset {
   civilization?: true;
   householdLineage?: true;
   life?: LifeRules;
+  sect?: SectRules;
   renewal?: RenewalRules;
   socialFood?: SocialFoodRules;
   eras?: EraRules;
@@ -132,6 +133,9 @@ export function validateRuleset(value: unknown): Ruleset {
   if((['0.15.0','0.16.0','0.17.0','0.18.0','0.19.0','0.20.0','0.21.0','0.22.0','0.23.0','0.24.0','0.25.0','0.26.0','0.27.0'].includes(value.rulesVersion))!==(value.civilization===true)||(value.civilization!==undefined&&value.civilization!==true))throw new Error('农业文明版本不匹配');
   if(value.householdLineage!==undefined)throw new Error('当前规则不使用家学接续开关');
   if((['0.17.0','0.18.0','0.19.0','0.20.0','0.21.0','0.22.0','0.23.0','0.24.0','0.25.0','0.26.0','0.27.0'].includes(value.rulesVersion))!==(value.life!==undefined))throw new Error('人生规则版本不匹配');
+  if(!isRecord(value.sect)||Object.keys(value.sect).length!==Object.keys(SECT_BOUNDS).length)throw new Error('缺少师徒与道术规则，请新开游戏；旧存档不修改');
+  for(const [key,[min,max]] of Object.entries(SECT_BOUNDS)){const n=value.sect[key];if(!Number.isInteger(n)||(n as number)<min||(n as number)>max)throw new Error('道术参数越界：'+key);}
+  if((value.sect.drawCost as number)>(value.sect.fortuneCap as number))throw new Error('气运抽取消耗不能超过储备上限');
   if(value.life!==undefined){
     if(!isRecord(value.life)||Object.keys(value.life).length!==Object.keys(LIFE_BOUNDS).length)throw new Error('人生参数不完整');
     for(const [key,[min,max]] of Object.entries(LIFE_BOUNDS)){const n=value.life[key];if(!Number.isInteger(n)||(n as number)<min||(n as number)>max)throw new Error('人生参数越界：'+key);}
@@ -181,6 +185,7 @@ export function resolveRuleset(base: Ruleset, overrides: unknown = {}): Ruleset 
   const eras=base.eras?structuredClone(base.eras):undefined;
   const socialFood=base.socialFood?structuredClone(base.socialFood):undefined;
   const renewal=base.renewal?structuredClone(base.renewal):undefined;
+  const sect=base.sect?structuredClone(base.sect):undefined;
   const life=base.life?structuredClone(base.life):undefined;
   const shop=base.shop?structuredClone(base.shop):undefined;
   const development = base.development ? structuredClone(base.development) : undefined;
@@ -191,6 +196,7 @@ export function resolveRuleset(base: Ruleset, overrides: unknown = {}): Ruleset 
     if(renewal&&key.startsWith('renewal.')){const name=key.slice(8) as keyof RenewalRules;if(!Object.hasOwn(renewal,name)||!Number.isInteger(value)||(value as number)<1||(value as number)>12)throw new Error('恢复与传承参数无效');renewal[name]=value as number;continue;}
     if(industry&&key.startsWith('industry.')){const name=key.slice(9) as keyof IndustryRules;if(!Object.hasOwn(industry,name)||!Number.isInteger(value)||(value as number)<1||(value as number)>24)throw new Error('系统劳动参数无效');industry[name]=value as number;continue;}
     if(branches&&key.startsWith('branches.')){const name=key.slice(9) as keyof BranchRules;if(!Object.hasOwn(branches,name)||!Number.isInteger(value)||(value as number)<1||(value as number)>20)throw new Error('分支渠道参数无效');branches[name]=value as number;continue;}
+    if(sect&&key.startsWith('sect.')){const name=key.slice(5) as keyof SectRules;if(!Object.hasOwn(SECT_BOUNDS,name))throw new Error('未知道术参数');const [min,max]=SECT_BOUNDS[name];if(!Number.isInteger(value)||(value as number)<min||(value as number)>max)throw new Error('道术参数越界');sect[name]=value as number;continue;}
     if(life&&key.startsWith('life.')){const name=key.slice(5) as keyof LifeRules;if(!Object.hasOwn(LIFE_BOUNDS,name))throw new Error('未知人生参数');const [min,max]=LIFE_BOUNDS[name];if(!Number.isInteger(value)||(value as number)<min||(value as number)>max)throw new Error('人生参数越界');life[name]=value as number;continue;}
     if(tower&&key.startsWith('tower.')){const name=key.slice(6) as keyof TowerRules;if(!Object.hasOwn(TOWER_BOUNDS,name))throw new Error('未知试炼参数');const [min,max]=TOWER_BOUNDS[name];if(!Number.isInteger(value)||(value as number)<min||(value as number)>max)throw new Error('试炼参数越界');tower[name]=value as number;continue;}
     if(workshops&&key.startsWith('workshops.')){const name=key.slice(10) as keyof WorkshopRules;if(!Object.hasOwn(WORKSHOP_BOUNDS,name))throw new Error('未知作坊参数');const [min,max]=WORKSHOP_BOUNDS[name];if(!Number.isInteger(value)||(value as number)<min||(value as number)>max)throw new Error('作坊参数越界');workshops[name]=value as number;continue;}
@@ -216,7 +222,7 @@ export function resolveRuleset(base: Ruleset, overrides: unknown = {}): Ruleset 
     if (!Number.isInteger(value) || (value as number) < min || (value as number) > max) throw new Error(`参数超出范围：${key}`);
     parameters[key as keyof Parameters] = value as number;
   }
-  return validateRuleset({ ...base, parameters, ...(electric?{electric}:{}), ...(eras?{eras}:{}), ...(socialFood?{socialFood}:{}), ...(renewal?{renewal}:{}), ...(industry?{industry}:{}), ...(branches?{branches}:{}), ...(life?{life}:{}), ...(tower?{tower}:{}), ...(workshops?{workshops}:{}), ...(operations?{operations}:{}), ...(shop?{shop}:{}), ...(development ? {development} : {}), ...(production ? { production } : {}) });
+  return validateRuleset({ ...base, parameters, ...(sect?{sect}:{}), ...(electric?{electric}:{}), ...(eras?{eras}:{}), ...(socialFood?{socialFood}:{}), ...(renewal?{renewal}:{}), ...(industry?{industry}:{}), ...(branches?{branches}:{}), ...(life?{life}:{}), ...(tower?{tower}:{}), ...(workshops?{workshops}:{}), ...(operations?{operations}:{}), ...(shop?{shop}:{}), ...(development ? {development} : {}), ...(production ? { production } : {}) });
 }
 
 const productionKeys = ['gatherFood', 'gatherWood', 'gatherClay', 'baseStorage', 'woodenStorage', 'potteryStorage', 'spoilDivisor', 'toolDurability', 'toolBonus', 'woodRecipeCost', 'potteryClayCost', 'potteryFuelCost', 'woodenwarePrice', 'potteryPrice', 'methodPrice'];

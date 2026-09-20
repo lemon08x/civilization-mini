@@ -60,7 +60,7 @@ export function serveModern(s:GameState,events:GameEvent[]):void {
    const cost=s.electric.rules.servicePower;
    if(m.power<cost){modernEvent(events,id,'停电：可用电不足，保留手动与次季订货退路');continue;}
    usePower(s,cost,events,id);consumeEquipment(s,id,events);s.economy!.equipmentUsed[id]=s.clock.absoluteTurn;m.services[id]=s.clock.absoluteTurn;
-   if(id==='LAMP')s.life!.timeRemaining+=s.electric.rules.lampTime;
+   if(id==='LAMP'){s.life!.timeRemaining+=s.electric.rules.lampTime;if(s.sect)for(const peer of s.sect.current)if(peer!==s.household.activePersonId)s.sect.members[peer].time+=s.electric.rules.lampTime;}
    modernEvent(events,id,id==='LAMP'?`夜间照明已供电，可用时间增加${s.electric.rules.lampTime}`:'电报在线，本季新订货即时交付');
   }
   return;

@@ -1,7 +1,7 @@
 import { quoteReservedLabor } from '../systems/labor.js';
 import { branchActionNeeds } from '../systems/branches.js';
 import { activePerson } from '../model/state.js';
-import { lifeCost } from '../systems/life.js';
+import { lifeCost, sectCosts } from '../systems/life.js';
 import { parseActionId } from '../model/action.js';
 import type { ActionCost, ActionOffer } from '../model/action.js';
 import type { GameState } from '../model/state.js';
@@ -14,7 +14,7 @@ export function defineAction(state: GameState, id: string, label: string, group:
   const { ap: requestedAp = 1, money = 0, food = 0 } = costs;
   const ap=state.life?0:requestedAp;
   const baseLife=state.life?lifeCost(state,id,requestedAp):undefined;
-  const life=baseLife?{time:costs.time??baseLife.time,energy:costs.energy??baseLife.energy}:undefined;
+  const life=baseLife?sectCosts(state,id,{time:costs.time??baseLife.time,energy:costs.energy??baseLife.energy}):undefined;
   const reasons = [...blockers.map(reason=>state.economy?.branches?reason.replace(/需生产组织第?1阶或家族记录/g,'需掌握劳动分工').replace(/需生产组织第?2阶或家族记录/g,'需掌握生产工序').replace(/需生产组织第?3阶或家族记录/g,'需掌握采购与交付'):reason),...branchActionNeeds(state,id)];
   // Quote on an isolated draft: farming changes water demand; income, purchases and
   // household policies change shopping demand. Never mutate the real state or advance a season.

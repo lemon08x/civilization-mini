@@ -3,6 +3,7 @@ import { getObservation } from '../game/observation.js';
 import { parseActionId } from '../game/model/action.js';
 import { deepFreeze, isRecord, validateRuleset } from '../game/ruleset.js';
 import type { Ruleset } from '../game/ruleset.js';
+import { CRISES } from '../game/model/eras.js';
 import { canonical } from './records.js';
 import type { Command, RunRecord, Session } from './records.js';
 
@@ -50,6 +51,40 @@ export function parseSession(value: unknown): Session {
   if (record.format !== 'civilization-mini-run' || record.formatVersion !== 3 || !isRecord(record.manifest) || !Array.isArray(record.entries)) throw new Error('存档格式无效，原文件应保留');
   validateRunId(record.manifest.runId);
   validateRuleset(record.manifest.ruleset);
+  // Current save shape is deliberately not migrated: preserve incompatible files.
+  const sect=value.state.sect,persons=value.state.persons;
+  const invalid=()=>{throw new Error('存档缺少有效人物经历、生平、师徒、道术或现代使命数据，请新开游戏；原存档不修改。');};
+  const finite=(n:unknown)=>typeof n==='number'&&Number.isFinite(n)&&n>=0;
+  if(!isRecord(sect)||!isRecord(persons)||!isRecord(sect.members)||!Array.isArray(sect.current)||sect.current.length!==2||new Set(sect.current).size!==2||!isRecord(sect.rules)||canonical(sect.rules)!==canonical(record.manifest.ruleset.sect))invalid();
+  const q=sect as Record<string,any>,people=persons as Record<string,any>;
+  if(!['doctrine','research','fortune','draws','seasonChance'].every(k=>finite(q[k]))||!Array.isArray(q.improvements)||!isRecord(q.cards)||!['study','craft','teach','prepare'].every(k=>Number.isInteger(q.cards[k])&&q.cards[k]>=0&&q.cards[k]<=q.rules.cardMax)||q.doctrine>q.rules.doctrineMax||q.research>=q.rules.doctrineSteps||q.fortune>q.rules.fortuneCap)invalid();
+  const generations=new Map<number,number>();
+  for(const [id,raw] of Object.entries(q.members)){
+    if(!isRecord(raw)||!people[id]||!['generation','practice','rewardedStage','time'].every(k=>finite(raw[k]))||!Number.isInteger(raw.generation)||typeof raw.admitted!=='boolean'||!Array.isArray(raw.consulted))invalid();
+    const m=raw as Record<string,any>;
+    const experience=people[id]?.vitality?.experiences;
+    if(!isRecord(experience)||!Number.isInteger(experience.learning)||Number(experience.learning)<0||Number(experience.learning)>12||!Number.isInteger(experience.outlook)||Math.abs(Number(experience.outlook))>record.manifest.ruleset.life!.eventPersonalityThreshold||typeof experience.lastEvent!=='string'||!Array.isArray(experience.talents)||!Array.isArray(experience.actions)||!Array.isArray(experience.contacts)||!isRecord(experience.relationships))invalid();
+    const exp=experience as Record<string,any>;
+    if(exp.talents.some((t:unknown)=>!['strong','scholar','mentor','organizer','resilient'].includes(String(t)))||new Set(exp.talents).size!==exp.talents.length||exp.actions.some((a:unknown)=>typeof a!=='string')||exp.contacts.some((other:unknown)=>typeof other!=='string'||!people[other]))invalid();
+    for(const [other,trust] of Object.entries(exp.relationships))if(other===id||!people[other]||!Number.isInteger(trust)||Math.abs(Number(trust))>5||people[other]?.vitality?.experiences?.relationships?.[id]!==trust)invalid();
+    const character=people[id]?.vitality?.character;
+    if(!isRecord(character)||!['style','temperament','background','attachment','aspiration','occupation','mood'].every(k=>typeof character[k]==='string'&&character[k].length>0)||!Number.isInteger(character.vocation)||Number(character.vocation)<0||Number(character.vocation)>5||!Number.isInteger(character.originEra)||Number(character.originEra)<0||Number(character.originEra)>3||!Array.isArray(character.memories))invalid();
+    const memories=(character as Record<string,any>).memories;
+    if(memories.some((v:unknown)=>!isRecord(v)||typeof v.key!=='string'||!Number.isInteger(v.age)||Number(v.age)<0||typeof v.text!=='string')||new Set(memories.map((v:{key:string})=>v.key)).size!==memories.length)invalid();
+    if(m.practice>q.rules.maxStage*q.rules.stageProgress||m.rewardedStage>q.rules.maxStage)invalid();
+    for(const key of ['masterId','discipleId','candidateId'])if(m[key]!==null&&(typeof m[key]!=='string'||!q.members[m[key]]))invalid();
+    if(m.masterId&&(q.members[m.masterId].generation!==m.generation-1||![q.members[m.masterId].discipleId,q.members[m.masterId].candidateId].includes(id)))invalid();
+    if(m.discipleId&&(q.members[m.discipleId].masterId!==id||!q.members[m.discipleId].admitted))invalid();
+    if(m.admitted)generations.set(m.generation,(generations.get(m.generation)??0)+1);
+  }
+  if([...generations.values()].some(n=>n>2)||q.current.some((id:unknown)=>typeof id!=='string'||!q.members[id]?.admitted))invalid();
+  const household=value.state.household,clock=value.state.clock;
+  if(!isRecord(household)||!isRecord(clock)||!q.current.includes(household.activePersonId)||q.current.some((id:string)=>q.members[id].generation!==clock.generation))invalid();
+  if(isRecord(value.state.era)&&value.state.era.index===3){
+    const c=value.state.era.crises;if(!isRecord(c)||!finite(c.remaining)||!isRecord(c.entries)||![null,true,false].includes(c.won as null|boolean))invalid();
+    const entries=(c as Record<string,any>).entries;
+    for(const spec of CRISES){const p=entries[spec.id];if(!isRecord(p)||!Number.isInteger(p.level)||(p.level as number)<0||(p.level as number)>3||!Number.isInteger(p.step)||(p.step as number)<0||(p.step as number)>2||!Number.isInteger(p.lastTurn)||!['','technical','coordination'].includes(p.route as string))invalid();}
+  }
   if (value.state.life) {
     if (!isRecord(value.state.persons) || Object.values(value.state.persons).some(person => {
       if (!isRecord(person) || !isRecord(person.vitality)) return true;

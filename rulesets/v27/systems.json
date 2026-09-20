@@ -31,6 +31,11 @@
     "steamFuel": 2
   },
   "life": {
+    "eventMoney": 4,
+    "eventLearning": 2,
+    "eventHealth": 5,
+    "eventTalentPercent": 5,
+    "eventPersonalityThreshold": 4,
     "timePerSeason": 12,
     "baseEnergy": 10,
     "recovery": 3,
@@ -97,5 +102,31 @@
     "applianceProgress": 3
   },
   "modern": true,
-  "civilization": true
+  "civilization": true,
+  "sect": {
+    "practiceTime": 4,
+    "practiceEnergy": 2,
+    "practiceGain": 2,
+    "stageProgress": 8,
+    "maxStage": 5,
+    "doctrineMax": 4,
+    "doctrineSteps": 8,
+    "doctrineMoney": 6,
+    "doctrineCourses": 4,
+    "fortuneCap": 30,
+    "fortunePerStage": 3,
+    "drawCost": 6,
+    "cardMax": 3,
+    "candidateAge": 16,
+    "recruitMoney": 2,
+    "modernSeasons": 240,
+    "daoPercent": 4,
+    "doctrinePercent": 1,
+    "cardPercent": 1,
+    "eventPercent": 4,
+    "crisisSupply": 4,
+    "crisisFee": 8,
+    "crisisPower": 2,
+    "crisisScore": 10
+  }
 }

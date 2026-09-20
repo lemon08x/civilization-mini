@@ -24,7 +24,7 @@ try {
   };
   const printObservation = (o: SessionObservation, receipt?: { duplicate: boolean; revision: number }) => console.log(renderObservation(o, receipt));
   if (command === 'help') {
-    console.log(`世代规则预研 — 0.27.0
+    console.log(`隐士修所 — 0.27.0
   npm run lab -- list
   npm run lab -- new --run demo --seed 17 --scenario river
   npm run lab -- observe --run demo
