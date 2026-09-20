@@ -24,7 +24,7 @@ export function makeVitality(s:GameState,r:LifeRules,age:number):Vitality {
   const unused=portraits.filter(id=>!Object.values(s.persons).some(p=>p.vitality?.portrait===id));
   const pool=unused.length?unused:portraits;
   const portrait=pool[Math.floor(draw(s)*pool.length)];
-  return {sex,portrait,portraitEra:s.era?.index??0,ageSeasons:age*4,lifespanSeasons,constitution,energy:constitution,health:100,talent,alive:true,childId:null};
+  return {experiences:{learning:0,talents:[],outlook:0,actions:[],contacts:[],relationships:{},lastEvent:"尚未经历季末事件"},sex,portrait,portraitEra:s.era?.index??0,ageSeasons:age*4,lifespanSeasons,constitution,energy:constitution,health:100,talent,alive:true,childId:null};
 }
 export function namePerson(s:GameState,p:Person):void {
   const surnames=['沈','陆','温','顾','许','程','叶','宋','苏','江','林','周'];
@@ -122,7 +122,7 @@ export function healthCeiling(v:Vitality,r:LifeRules):number {return Math.max(30
 export function energyCeiling(v:Vitality):number {return Math.max(v.minimumEnergy??2,Math.floor(v.constitution*(0.4+v.health*0.006)));}
 export function lifeView(p:Person,r?:LifeRules) {
   const v=p.vitality;
-  return v?{sex:v.sex,portrait:v.portrait,portraitEra:v.portraitEra,ageYears:Math.floor(v.ageSeasons/4),ageQuarter:v.ageSeasons%4,health:v.health,...(r?{maxHealth:healthCeiling(v,r)}:{}),energy:v.energy,maxEnergy:energyCeiling(v),alive:v.alive,character:v.character?structuredClone(v.character):null,talent:TALENTS[v.talent],upbringing:v.upbringing?{...v.upbringing}:null}:undefined;
+  return v?{sex:v.sex,portrait:v.portrait,portraitEra:v.portraitEra,ageYears:Math.floor(v.ageSeasons/4),ageQuarter:v.ageSeasons%4,health:v.health,...(r?{maxHealth:healthCeiling(v,r)}:{}),energy:v.energy,maxEnergy:energyCeiling(v),alive:v.alive,character:v.character?structuredClone(v.character):null,talent:TALENTS[v.talent],experiences:v.experiences?structuredClone(v.experiences):null,earnedTalents:(v.experiences?.talents??[]).map(t=>TALENTS[t]),upbringing:v.upbringing?{...v.upbringing}:null}:undefined;
 }
 // Living direct ancestors of the active person; retired elders stay consultable while alive.
 export function livingElders(s:GameState):Person[] {
@@ -147,7 +147,7 @@ const physical=new Set(['farm','gather','work','build','process','finish','ferti
 const learning=new Set(['study','research','tuition','branchlearn']);
 const management=new Set(['channel','hire','checkout','assign','resumeplans','charter','foodplan','farmplan','farmcycle','productionplan','supplyplan','salesplan','careplan','mineplan','steamplan']);
 // Cost categories describe personal involvement, not the number of UI clicks.
-export function lifeCost(s:GameState,id:string,oldAp:number):{time:number;energy:number} {
+export function lifeCost(s:GameState,id:string,oldAp:number,useLearningPoint=true):{time:number;energy:number} {
   const [,op,target]=id.split(':');
   if(id==='handover'||op==='end'||op==='erasettle'||op==='retire')return {time:0,energy:0};
   if(op==='rest')return {time:4,energy:0};
@@ -159,16 +159,17 @@ export function lifeCost(s:GameState,id:string,oldAp:number):{time:number;energy
   let time=physical.has(op)||learning.has(op)||op==='teach'||op==='branchteach'?4:2;
   let energy=physical.has(op)?4:learning.has(op)||op==='teach'||op==='branchteach'?2:1;
   if(s.life?.renewal&&op==='farm'){time=s.life.renewal.farmTime;energy=s.life.renewal.farmEnergy;}
-  const talent=activePerson(s).vitality!.talent;
+  const v=activePerson(s).vitality!;
   if(s.era&&learning.has(op))time=Math.max(1,time-(eraCard(s)?.learning??0));
   if(s.era&&op==='process'&&s.economy!.branches!.learned[s.household.activePersonId]?.includes('Q1'))energy=Math.max(0,energy-1);
-  if(talent==='strong'&&physical.has(op))energy--;
+  if(hasTalent(v,'strong')&&physical.has(op))energy--;
   if(s.economy?.industry&&op==='branchlearn'&&s.economy.branches!.archives.includes(target))time=Math.max(1,time-s.economy.industry.rules.archiveDiscount);
-  if(talent==='scholar'&&learning.has(op))time=Math.max(1,time-1);
-  if(talent==='mentor'&&(op==='teach'||op==='branchteach')){time--;energy--;}
-  if(talent==='organizer'&&management.has(op))time=Math.max(1,time-1);
+  if(hasTalent(v,'scholar')&&learning.has(op))time=Math.max(1,time-1);
+  if(hasTalent(v,'mentor')&&(op==='teach'||op==='branchteach')){time--;energy--;}
+  if(hasTalent(v,'organizer')&&management.has(op))time=Math.max(1,time-1);
   if(s.life?.renewal&&op==='branchlearn'&&ancestorKnows(s,target)){time=Math.min(time,s.life.renewal.inheritedTime);energy=Math.min(energy,s.life.renewal.inheritedEnergy);}
   if(s.life?.renewal&&op==='branchlearn'&&s.life.consultPending===target)time=Math.max(1,time-s.life.renewal.consultDiscount);
+  if(useLearningPoint&&learning.has(op)&&v.experiences?.learning)time=Math.max(1,time-1);
   return {time,energy};
 }
 export function canSucceed(s:GameState):boolean {if(s.sect)return sectSuccessors(s).length===2;const v=heir(s).vitality;return s.household.heirId!==s.household.activePersonId&&!!v?.alive&&v.ageSeasons>=s.life!.rules.adultYears*4;}
@@ -190,7 +191,7 @@ export function settleLife(s:GameState,missing:number,events:GameEvent[],foodReq
     const deficit=Math.min(1,missing/Math.max(1,foodRequired));
     const damage=renewal?Math.ceil(r.hungerDamage*deficit*Math.min(1,Math.max(0,s.household.hardship-renewal.graceSeasons)/2)):r.hungerDamage;
     v.health=Math.max(0,Math.min(healthCeiling(v,r),v.health+(missing?-damage:(renewal?.fedHealth??1))));
-    const recovery=renewal?Math.max(1,Math.ceil(r.recovery*(1-deficit*0.75)))+(v.talent==='resilient'?1:0):missing?0:Math.max(1,Math.floor(r.recovery*v.health/100))+(v.talent==='resilient'?1:0);
+    const recovery=renewal?Math.max(1,Math.ceil(r.recovery*(1-deficit*0.75)))+(hasTalent(v,'resilient')?1:0):missing?0:Math.max(1,Math.floor(r.recovery*v.health/100))+(hasTalent(v,'resilient')?1:0);
     v.energy=Math.min(energyCeiling(v),v.energy+recovery);
     if(v.health===0||v.ageSeasons>=v.lifespanSeasons){v.alive=false;v.energy=0;lifeEvent(events,person.id,'death',`${person.name}因${v.health===0?'健康耗尽':'自然衰老'}离世`);}
     else lifeEvent(events,person.id,'season',`${person.name}：${Math.floor(v.ageSeasons/4)}岁，健康${v.health}，精力${v.energy}/${energyCeiling(v)}`);
@@ -310,6 +311,117 @@ export function sectView(s:GameState){
   const x=s.sect;if(!x)return null;
   return {doctrine:x.doctrine,research:x.research,improvements:structuredClone(x.improvements),rules:{...x.rules},
     current:[...x.current],activeId:s.household.activePersonId,ready:sectSuccessors(s).length===2,
-    members:Object.entries(x.members).map(([id,m])=>({id,name:s.persons[id].name,practiceEvidence:s.persons[id].practices.filter(v=>v.startsWith('dao:')),...m,consulted:[...m.consulted],time:id===s.household.activePersonId?s.life!.timeRemaining:m.time,stage:sectStage(s,id),effect:Math.round(sectStrength(s,id)*100),life:lifeView(s.persons[id],s.life!.rules)})),
+    members:Object.entries(x.members).map(([id,m])=>({id,name:s.persons[id].name,practiceEvidence:s.persons[id].practices.filter(v=>v.startsWith('dao:')),...m,consulted:[...m.consulted],time:id===s.household.activePersonId?s.life!.timeRemaining:m.time,stage:sectStage(s,id),effect:Math.round(sectStrength(s,id)*100),relationships:Object.entries(s.persons[id].vitality?.experiences?.relationships??{}).map(([otherId,value])=>({name:s.persons[otherId]?.name??otherId,value})),life:lifeView(s.persons[id],s.life!.rules)})),
     fortune:x.fortune,odds:sectDrawOdds(s),cards:Object.entries(x.cards).map(([id,level])=>({id,name:SECT_CARDS[id as SectCard],level,effect:level*x.rules.cardPercent})),lastDraw:x.lastDraw,draws:x.draws,lastEvent:x.lastEvent,seasonBonus:x.seasonBonus};
+}
+export function hasTalent(v:Vitality,talent:Talent):boolean {
+  return v.talent===talent||!!v.experiences?.talents.includes(talent);
+}
+
+// Record the paying actor before execution: switching people cannot transfer choices.
+export function recordSeasonChoice(s:GameState,id:string,events:GameEvent[]):void {
+  const v=activePerson(s).vitality,e=v?.experiences;if(!e)return;
+  const op=id.split(':')[1];
+  if(['end','erasettle','retire','sectswitch'].includes(op)||id==='handover')return;
+  if(learning.has(op)&&e.learning>0&&lifeCost(s,id,1,false).time>1){
+    e.learning--;
+    lifeEvent(events,s.household.activePersonId,'learning-point','消耗1学习点，基础学习时间减少1；剩余'+e.learning+'点');
+  }
+  if(!e.actions.includes(op))e.actions.push(op);
+}
+
+export function settleSeasonEncounter(s:GameState,missing:number,events:GameEvent[]):void {
+  if(!s.life)return;
+  const people=(s.sect?s.sect.current:s.household.memberIds).map(id=>s.persons[id]).filter(p=>p.vitality?.alive&&p.vitality.experiences);
+  if(!people.length)return;
+  const p=people[Math.floor(draw(s)*people.length)],v=p.vitality!,e=v.experiences!,r=s.life.rules;
+  const has=(ops:string[])=>e.actions.some(a=>ops.includes(a));
+  const studying=has(['study','research','tuition','branchlearn','sectpractice']);
+  const working=has(['farm','gather','work','process','build','sysrun','finish']);
+  const caring=has(['company','consult','teach','branchteach','sectteach','bond']);
+  const rested=has(['rest','care']);
+  const others=Object.values(s.persons).filter(q=>q.id!==p.id&&q.vitality?.alive&&q.vitality.experiences&&(!s.sect||s.sect.members[q.id]?.admitted));
+  const contacted=others.filter(q=>e.contacts.includes(q.id));
+  const pool=contacted.length?contacted:others;
+  const other=pool.length?pool[Math.floor(draw(s)*pool.length)]:undefined;
+  const trust=other?(e.relationships[other.id]??0):0;
+  const strained=missing>0||v.health<50||v.energy<2;
+  // Choices change both which encounter is drawn and its outcome, without guaranteeing success.
+  const candidates=[{kind:'daily',weight:2},{kind:'study',weight:studying?6:1},{kind:'work',weight:working?6:1},{kind:'body',weight:strained?6:1},...(other?[{kind:'bond',weight:caring?6:2}]:[])];
+  let roll=draw(s)*candidates.reduce((n,c)=>n+c.weight,0);
+  const kind=candidates.find(c=>(roll-=c.weight)<0)!.kind;
+  // Content stays in the life system; all variants use the same bounded settlement.
+  // Eligibility describes a real circumstance, while preparation changes the outcome odds.
+  const scenes:{kind:string;eligible:boolean;prepared:boolean;positive:[string,string];negative:[string,string]}[]=[
+    {kind:'study',eligible:true,prepared:studying,positive:['札记中的顿悟','重读旧日札记时，几个零散的问题终于接在了一起。'],negative:['思路陷入瓶颈','试着梳理旧问题，却发现原先的解释彼此矛盾，只能暂缓推演。']},
+    {kind:'study',eligible:has(['teach','branchteach','sectteach','consult']),prepared:caring,positive:['问答相长','一次授业问答迫使自己重新解释熟悉的道理，反而看清了遗漏之处。'],negative:['解答留下疑窦','授业问答中的追问触到了理解的空白，原有思路需要重新整理。']},
+    {kind:'study',eligible:has(['sectpractice']),prepared:true,positive:['静坐闻新意','静修之后重新看待困扰已久的问题，浮躁退去，思路渐明。'],negative:['静修杂念生','静修中反复想起未竟之事，越想求一个答案，越难集中精神。']},
+    {kind:'study',eligible:(s.economy?.branches?.learned[p.id]?.length??0)>1,prepared:studying,positive:['旧学互相印证','不同课程中的知识在一件小事上互相印证，终于能举一反三。'],negative:['旧说彼此冲突','把两门学问放在一起思考，却发现适用条件并不相同，先前的理解需要修正。']},
+    {kind:'study',eligible:(s.era?.index??0)>=2,prepared:studying,positive:['新刊打开眼界','读到关于新技术的公开资料，认出了其中与自己所学相通的线索。'],negative:['新术名词迷阵','新资料中的名词与旧日用法相差太远，一番比对后仍难理清脉络。']},
+    {kind:'work',eligible:true,prepared:working,positive:['辛劳得到酬谢','一份零散活计顺利交付，对方按约送来了酬劳。'],negative:['临工结算折损','零散活计在结算时出了差错，为了补齐交付只能承担一笔开支。']},
+    {kind:'work',eligible:has(['farm','fertilize']),prepared:true,positive:['田间经验获谢','邻人借鉴了本季的田间经验，特意送来一份谢钱。'],negative:['田间补修支出','田间劳作暴露出一些需要补修的小问题，只好另付费用处理。']},
+    {kind:'work',eligible:has(['build','process','finish','sysbuild']),prepared:true,positive:['手艺赢得口碑','本季做活的细致之处被人看见，额外的酬谢随之而来。'],negative:['返工赔付','交付时发现一处疏漏，需要花钱补救，手艺上的教训也记在了心里。']},
+    {kind:'work',eligible:has(['gather']),prepared:true,positive:['识材受到赏识','采集时辨识材料的经验帮上了旁人的忙，换来一笔报酬。'],negative:['采集行装损耗','采集途中随身行装受损，回程后不得不支付修补费用。']},
+    {kind:'work',eligible:has(['sysrun','syscommission']),prepared:true,positive:['设备经验获酬','亲自操作设备积累的经验解决了旁人的疑问，对方付钱致谢。'],negative:['操作疏漏赔补','设备操作中的疏漏带来了额外赔补，必须从公用钱财中支付。']},
+    {kind:'daily',eligible:true,prepared:caring,positive:['意外的谢礼','曾经顺手帮过的人送来谢礼，一件早已淡忘的小事得到了回应。'],negative:['临时开支','日常用物突然需要替换，一笔计划之外的开支打乱了安排。']},
+    {kind:'daily',eligible:s.household.money<=r.eventMoney,prepared:has(['work','sell','checkout']),positive:['周转得到援手','手头紧张时，有人送来一笔不必偿还的资助，暂时缓解了周转压力。'],negative:['拮据又逢支出','钱财本已紧张，又遇上不得不处理的小额开支，心中更添焦虑。']},
+    {kind:'daily',eligible:s.location.weather!=='normal',prepared:has(['care','rest','checkout']),positive:['邻里应候相助','天气扰乱了日常生活，邻里互相照应，也送来了一份应急资助。'],negative:['天气添了花销','异常天气带来了日常修缮与出行开支，原有预算不再宽裕。']},
+    {kind:'daily',eligible:v.ageSeasons>=35*4,prepared:caring,positive:['故人托来薄礼','多年未见的故人托人送来一份薄礼，也让人想起过去相助的日子。'],negative:['旧物修缮','一件用了多年的旧物终于需要修缮，舍不得丢弃，便花钱留住这段旧日记忆。']},
+    {kind:'daily',eligible:has(['buy','sell','checkout','sellfood']),prepared:true,positive:['集市退回余款','集市对账时查出此前多收的款项，对方主动将余款送回。'],negative:['集市账目差错','集市对账发现自己先前漏算了一笔费用，只能补上差额。']},
+    {kind:'body',eligible:true,prepared:rested,positive:['身心渐复','这段日子的作息渐渐安稳，身体也慢慢缓过劲来。'],negative:['偶感不适','换季时有些不适，平日习以为常的小事也显得费力。']},
+    {kind:'body',eligible:rested,prepared:true,positive:['休养见效','本季专门留出的休养时间有了回应，醒来时比往日轻松。'],negative:['休养仍有反复','虽然花了时间休养，身体仍有反复，还需要继续照料自己。']},
+    {kind:'body',eligible:working||v.energy<2,prepared:rested,positive:['劳后调息得法','劳作后的调息渐渐找到了节奏，紧绷的身体得到舒展。'],negative:['积劳不适','连续劳作留下的疲乏显现出来，身体提醒自己不能一直硬撑。']},
+    {kind:'body',eligible:missing>0,prepared:rested||caring,positive:['饥困中得到照护','缺粮的日子里得到了一些照护，身体稍感宽慰；本季欠下的口粮仍须结算。'],negative:['饥困难安眠','口粮不足让人难以安眠，疲惫也更难消退；之后仍照常承受缺粮影响。']},
+    {kind:'body',eligible:v.ageSeasons>=r.agingYears*4,prepared:rested,positive:['暮年调养有方','学着接受身体的变化，日常调养终于有些成效，但岁月并没有倒流。'],negative:['旧疾随岁月反复','年岁渐长，一些旧日的不适又出现了，需要更耐心地照护自己。']},
+    {kind:'bond',eligible:!!other,prepared:caring,positive:['谈话解开心结','与{对方}说起近日的挂念，原来彼此都有尚未说出口的体谅。'],negative:['一场未解的争执','与{对方}谈起一件小事，却越说越急，许多真正的想法反而没能表达。']},
+    {kind:'bond',eligible:!!other&&e.contacts.includes(other.id),prepared:true,positive:['坦诚之后更亲近','本季的谈心有了回响，{对方}愿意再多说一点自己的难处。'],negative:['好意被误解','本季谈心中的一句建议被{对方}听成了责备，好意暂时没能抵达。']},
+    {kind:'bond',eligible:!!other&&(s.sect?.members[p.id]?.masterId===other.id||s.sect?.members[p.id]?.discipleId===other.id),prepared:has(['teach','branchteach','sectteach','consult','bond']),positive:['师徒互相体谅','与{对方}聊起求学的不易，师徒都看见了对方努力之外的顾虑。'],negative:['师徒期许错位','与{对方}对成长的快慢有了不同期待，关切不经意间变成了压力。']},
+    {kind:'bond',eligible:!!other&&trust<0,prepared:caring,positive:['旧怨渐渐松动','与{对方}重新说起旧日的不快，虽然尚未完全释怀，至少愿意再听一句。'],negative:['旧怨又被提起','与{对方}的旧事被重新提起，话里的防备让隔阂又深了一层。']},
+    {kind:'bond',eligible:!!other&&trust>0,prepared:caring,positive:['托付得到回应','一件小小的托付得到了{对方}认真回应，彼此的信任因此更稳。'],negative:['熟稔生出疏忽','因为与{对方}太过熟悉，反而忽略了应有的解释，对方难免失落。']},
+  ];
+  const eligible=scenes.filter(scene=>scene.kind===kind&&scene.eligible);
+  const fresh=eligible.filter(scene=>!e.lastEvent.includes(scene.positive[0])&&!e.lastEvent.includes(scene.negative[0]));
+  const available=fresh.length?fresh:eligible;
+  const scene=available[Math.floor(draw(s)*available.length)];
+  const relevant=scene.prepared;
+  const optimistic=v.character?.temperament==='坦率热忱'||v.character?.temperament==='温厚耐心';
+  const chance=Math.max(0.15,Math.min(0.9,0.5+(relevant?0.2:0)-(strained?0.2:0)+(optimistic?0.05:0)+(kind==='bond'?trust*0.03:0)));
+  const good=draw(s)<chance,large=draw(s)<0.15,factor=large?2:1;
+  const reasons=[relevant?'本季相关投入提高了顺利的机会':'本季缺少相关投入',strained?'缺粮、疲惫或健康不佳增加了波折':'身体与生活尚能支撑',...(kind==='bond'?[`与${other!.name}的原有关系${trust}`]:[]),...(optimistic?['开朗或温厚的性格帮助应对变故']:[])];
+  const [title,narrative]=good?scene.positive:scene.negative;
+  const story=narrative.replaceAll('{对方}',other?.name??'同行者');
+  let effect='',talent:Talent='resilient';
+  if(kind==='study'){
+    talent='scholar';
+    const before=e.learning;e.learning=Math.max(0,Math.min(12,e.learning+(good?1:-1)*r.eventLearning*factor));
+    effect=`学习点${e.learning-before>=0?'+':''}${e.learning-before}（现有${e.learning}）`;
+  }else if(kind==='work'||kind==='daily'){
+    talent=kind==='work'?'strong':'organizer';
+    const before=s.household.money;s.household.money=Math.max(0,before+(good?1:-1)*r.eventMoney*factor);
+    effect=`钱财${s.household.money-before>=0?'+':''}${s.household.money-before}`;
+  }else if(kind==='body'){
+
+    const before=v.health;v.health=Math.max(1,Math.min(healthCeiling(v,r),v.health+(good?1:-1)*r.eventHealth*factor));
+    v.energy=Math.min(v.energy,energyCeiling(v));effect=`健康${v.health-before>=0?'+':''}${v.health-before}`;
+  }else{
+    talent='mentor';
+    const q=other!,qe=q.vitality!.experiences!,before=trust;
+    const after=Math.max(-5,Math.min(5,before+(good?1:-1)*factor));
+    e.relationships[q.id]=after;qe.relationships[p.id]=after;
+    effect=`与${q.name}的关系${after-before>=0?'+':''}${after-before}（${after}，范围-5至5）`;
+    if(q.vitality!.character)characterMemory(s,q.id,`encounter:${s.clock.absoluteTurn}`,`${title}：${narrative.replaceAll('{对方}',p.name)}`,good?'感到被理解。':'还有一些委屈需要说开。',events);
+  }
+  if(good&&relevant&&draw(s)*100<r.eventTalentPercent&&!hasTalent(v,talent)){
+    e.talents.push(talent);effect+=`；获得终身天赋「${TALENTS[talent].name}」：${TALENTS[talent].effect}`;
+  }
+  e.outlook=Math.max(-r.eventPersonalityThreshold,Math.min(r.eventPersonalityThreshold,e.outlook+(good?1:-1)));
+  if(v.character&&Math.abs(e.outlook)>=r.eventPersonalityThreshold){
+    const temperament=good?(kind==='bond'?'温厚耐心':'坦率热忱'):'谨慎认真';
+    if(v.character.temperament!==temperament){v.character.temperament=temperament;effect+=`；经历积累，性格转为${temperament}`;}
+    e.outlook=0;
+  }
+  e.lastEvent=`第${s.clock.absoluteTurn}季 · ${title}${large?'（重大）':''}：${story} ${reasons.join('；')}。结果：${effect}。`;
+  lifeEvent(events,p.id,'season-encounter',`${p.name}：${e.lastEvent}`);
+  characterMemory(s,p.id,`encounter:${s.clock.absoluteTurn}`,`${title}：${story} ${effect}。`,good?'这份经历让人欣慰。':'心中仍有失落，想重新整理生活。',events);
+  for(const person of Object.values(s.persons)){const x=person.vitality?.experiences;if(x){x.actions=[];x.contacts=[];}}
 }

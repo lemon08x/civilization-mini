@@ -26,7 +26,7 @@ export function branchActionNeeds(s:GameState,id:string):string[]{
     if(['assign','pause','farmplan','productionplan','supplyplan','salesplan','careplan','charter'].includes(op))return ['旧经营方式尚未纳入三类树，请使用系统安排与手动采购交付'];
     if(['build','process'].includes(op))return [...productNeeds(s,target),...(op==='build'?productTrialNeeds(s,target):[])];
   }
-  if(['branchlearn','branchteach','brancharchive','channel','rest','care','retire','company','consult','end','cartadd','cartremove','clearcart','checkout','gather','work','sell','sellfood','repair','finish','resumeplans','pause','fertilize','farmcycle'].includes(op))return [];
+  if(['bond','branchlearn','branchteach','brancharchive','channel','rest','care','retire','company','consult','end','cartadd','cartremove','clearcart','checkout','gather','work','sell','sellfood','repair','finish','resumeplans','pause','fertilize','farmcycle'].includes(op))return [];
   if(target==='off'&&['foodplan','farmplan','productionplan','supplyplan','salesplan','careplan'].includes(op))return [];
   if(op==='build')return BRANCH_PRODUCTS[target]?branchNeeds(s,BRANCH_PRODUCTS[target]):['该设备尚未纳入试点'];
   if(op==='process')return branchProcessNeeds(s,target);

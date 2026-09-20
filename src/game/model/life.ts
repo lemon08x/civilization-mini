@@ -1,4 +1,6 @@
 export interface LifeRules {
+  eventMoney: number; eventLearning: number; eventHealth: number;
+  eventTalentPercent: number; eventPersonalityThreshold: number;
   timePerSeason: number;
   baseEnergy: number;
   recovery: number;
@@ -13,6 +15,7 @@ export interface LifeRules {
   growthConstitutionBonus: number;
 }
 export const LIFE_BOUNDS: Record<keyof LifeRules, readonly [number, number]> = {
+  eventMoney:[1,20],eventLearning:[1,5],eventHealth:[1,15],eventTalentPercent:[1,20],eventPersonalityThreshold:[3,12],
   timePerSeason:[8,20],baseEnergy:[6,16],recovery:[1,6],restRecovery:[2,8],careRecovery:[2,12],
   hungerDamage:[5,30],adultYears:[16,20],birthYears:[24,36],agingYears:[45,65],lifespanMin:[66,80],lifespanMax:[81,100],
   growthConstitutionBonus:[1,6],
@@ -20,6 +23,11 @@ export const LIFE_BOUNDS: Record<keyof LifeRules, readonly [number, number]> = {
 export type Talent = 'strong' | 'scholar' | 'mentor' | 'organizer' | 'resilient';
 export interface Upbringing { fedSeasons: number; companySeasons: number; taughtSeasons: number }
 export interface Vitality {
+  experiences?: {
+    learning: number; talents: Talent[]; outlook: number;
+    actions: string[]; contacts: string[]; relationships: Record<string,number>;
+    lastEvent: string;
+  };
   character?: CharacterProfile;
   sex: 'male' | 'female';
   portrait: string;

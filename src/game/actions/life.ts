@@ -2,20 +2,32 @@ import {eraCard} from '../systems/eras.js';
 import { activePerson, blankPerson, heir, type GameState } from '../model/state.js';
 import { branchNodesFor } from '../model/branches.js';
 import { branchName, branchNeeds } from '../systems/branches.js';
-import { canSucceed, consultableNodes, energyCeiling, healthCeiling, lifeEvent, livingElders, makeVitality, namePerson, initializeCharacter, characterMemory, selectSectPerson, gainPractice, sectStage, sectStrength, sectDrawOdds, SECT_CARDS, draw } from '../systems/life.js';
+import { hasTalent, canSucceed, consultableNodes, energyCeiling, healthCeiling, lifeEvent, livingElders, makeVitality, namePerson, initializeCharacter, characterMemory, selectSectPerson, gainPractice, sectStage, sectStrength, sectDrawOdds, SECT_CARDS, draw } from '../systems/life.js';
 import { defineAction, type ActionDefinition } from './definition.js';
 
 export function lifeActions(s:GameState):ActionDefinition[] {
   if(!s.life)return [];
   const v=activePerson(s).vitality!,r=s.life.rules;
   const actions:ActionDefinition[]=[
-    defineAction(s,'economy:rest:self','休息','身体',{},v.energy>=energyCeiling(v)?['精力已满']:[],`用4时间恢复${r.restRecovery+(v.talent==='resilient'?1:0)}精力，不超过健康决定的上限。`,(d,ev)=>{
-      const x=activePerson(d).vitality!,before=x.energy;x.energy=Math.min(energyCeiling(x),x.energy+r.restRecovery+(x.talent==='resilient'?1:0));lifeEvent(ev,d.household.activePersonId,'rest',`休息恢复${x.energy-before}精力`);
+    defineAction(s,'economy:rest:self','休息','身体',{},v.energy>=energyCeiling(v)?['精力已满']:[],`用4时间恢复${r.restRecovery+(hasTalent(v,'resilient')?1:0)}精力，不超过健康决定的上限。`,(d,ev)=>{
+      const x=activePerson(d).vitality!,before=x.energy;x.energy=Math.min(energyCeiling(x),x.energy+r.restRecovery+(hasTalent(x,'resilient')?1:0));lifeEvent(ev,d.household.activePersonId,'rest',`休息恢复${x.energy-before}精力`);
     }),
     defineAction(s,'economy:care:self','营养疗养','身体',{money:Math.max(0,(s.life.renewal?.careMoney??2)-(eraCard(s)?.care??0))},v.health>=healthCeiling(v,r)?['健康已达到当前年龄上限']:[],`用${s.life.renewal?.careTime??4}时间、${s.life.renewal?.careEnergy??1}精力、${Math.max(0,(s.life.renewal?.careMoney??2)-(eraCard(s)?.care??0))}钱购买营养照护，恢复${r.careRecovery}健康；不能逆转衰老。`,(d,ev)=>{
       const x=activePerson(d).vitality!,before=x.health;x.health=Math.min(healthCeiling(x,r),x.health+r.careRecovery);lifeEvent(ev,d.household.activePersonId,'care',`疗养恢复${x.health-before}健康`);
     }),
   ];
+  for(const [index,person] of Object.values(s.persons).entries()){
+    if(person.id===s.household.activePersonId||!person.vitality?.alive||!person.vitality.experiences||(s.sect&&!s.sect.members[person.id]?.admitted))continue;
+    actions.push(defineAction(s,'economy:bond:'+index,'与'+person.name+'谈心','身体',{time:2,energy:1},v.experiences?.contacts.includes(person.id)?['本季已与此人谈心']:[],
+      '倾听与表达：改善双方关系1点（上限5），本季双方遇到关系事件时优先涉及彼此；关系影响季末和解或争执的机会。',(d,ev)=>{
+        const mine=activePerson(d).vitality!.experiences!,theirs=d.persons[person.id].vitality!.experiences!;
+        const before=mine.relationships[person.id]??0,after=Math.min(5,before+1);
+        mine.relationships[person.id]=after;theirs.relationships[d.household.activePersonId]=after;
+        mine.contacts.push(person.id);theirs.contacts.push(d.household.activePersonId);
+        if(!theirs.actions.includes('bond'))theirs.actions.push('bond');
+        lifeEvent(ev,d.household.activePersonId,'bond','与'+person.name+'谈心，关系+'+(after-before)+'（'+after+'）');
+      }));
+  }
   const child=heir(s),cv=s.household.heirId!==s.household.activePersonId?child.vitality:undefined;
   actions.push(defineAction(s,'economy:company:heir','陪伴成长','身体',{},[
     ...(!cv?['尚无后辈']:[]),

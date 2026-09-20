@@ -1,7 +1,7 @@
 import {initializeEras,recordEraProduction} from './systems/eras.js';
 import {recordProducts} from './systems/industry-products.js';
 import { recordBranchWork } from './systems/branches.js';
-import { initializeLife, initializeSect, recordCharacterGrowth } from './systems/life.js';
+import { initializeLife, initializeSect, recordCharacterGrowth, recordSeasonChoice } from './systems/life.js';
 import { initialExpeditions,recordExpeditionEvidence } from './systems/expedition.js';
 import { initializeModern } from './systems/modern.js';
 import { initialTower,recordTowerEvidence } from './systems/tower.js';
@@ -74,6 +74,7 @@ export function transition(state: GameState, action: GameAction, rules: Ruleset)
   next.ap -= ap; next.household.money -= money; next.household.food -= food;
   if (materials) for (const [material, amount] of Object.entries(materials)) next.production!.inventory[material as Material] -= amount;
   events.push({ type: 'action-paid', action: structuredClone(definition.offer.action), cost: { ap, ...(next.life?{time,energy}:{}), money, food, ...(materials ? { materials: { ...materials } } : {}) } });
+  recordSeasonChoice(next,id,events);
   definition.execute(next, events);
   recordProducts(next,events);
   recordProjectEvidence(next,events);

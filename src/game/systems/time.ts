@@ -2,7 +2,7 @@ import {recordBranchWork} from './branches.js';
 import {renewSocialFood,settleSocialFood} from './social-food.js';
 import {renewEraServices,operateEraServices,recordEraProduction,settleEra} from './eras.js';
 import { renewIndustry } from './industry.js';
-import { canSucceed, recordLifeGeneration, settleLife, renewSect, settleSect } from './life.js';
+import { settleSeasonEncounter, canSucceed, recordLifeGeneration, settleLife, renewSect, settleSect } from './life.js';
 import { arriveExpeditions,recordExpeditionEvidence,settleExpeditions } from './expedition.js';
 import { resetModern,generateModern,serveModern,storeModern } from './modern.js';
 import { arriveTower,dispatchTower,recordTowerEvidence,settleTower } from './tower.js';
@@ -86,6 +86,7 @@ function settleDistantWork(state: GameState, rules: Ruleset, events: GameEvent[]
 
 function settleLifeAndEra(state: GameState, rules: Ruleset, events: GameEvent[], missing: number, foodPerTurn: number): boolean {
   if(state.life){
+    settleSeasonEncounter(state,missing,events);
     settleLife(state,missing,events,foodPerTurn);
     settleSect(state,events);
     settleEra(state,rules,events);

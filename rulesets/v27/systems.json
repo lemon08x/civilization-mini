@@ -31,6 +31,11 @@
     "steamFuel": 2
   },
   "life": {
+    "eventMoney": 4,
+    "eventLearning": 2,
+    "eventHealth": 5,
+    "eventTalentPercent": 5,
+    "eventPersonalityThreshold": 4,
     "timePerSeason": 12,
     "baseEnergy": 10,
     "recovery": 3,

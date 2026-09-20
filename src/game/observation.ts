@@ -30,6 +30,12 @@ export function getObservation(state: GameState, rules: Ruleset) {
     ...(state.socialFood?{socialFood:socialFoodQuote(state,false,state.economy?.industry?systemLabor(state).time:0)}:{}),
     ...(state.era?{era:eraView(state,rules)}:{}),
     sect:sectView(state),
+    seasonalEvents: Object.values(state.persons).filter(p=>p.vitality?.experiences).map(p=>({
+      personId:p.id,name:p.name,lastEvent:p.vitality!.experiences!.lastEvent,
+      learning:p.vitality!.experiences!.learning,earnedTalents:lifeView(p)?.earnedTalents??[],
+      mood:p.vitality!.character?.mood??'',temperament:p.vitality!.character?.temperament??'',
+      relationships:Object.entries(p.vitality!.experiences!.relationships).map(([id,value])=>({name:state.persons[id]?.name??id,value})),
+    })),
     rulesVersion: rules.rulesVersion,
     victory: technologyVictory(state,rules),
     status: state.status,
