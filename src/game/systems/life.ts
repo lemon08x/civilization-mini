@@ -19,20 +19,46 @@ export function makeVitality(s:GameState,r:LifeRules,age:number):Vitality {
   const constitution=r.baseEnergy+Math.floor(draw(s)*5)-2;
   const lifespanSeasons=(r.lifespanMin+Math.floor(draw(s)*(r.lifespanMax-r.lifespanMin+1)))*4;
   const talent=(Object.keys(TALENTS) as Talent[])[Math.floor(draw(s)*5)];
-  return {ageSeasons:age*4,lifespanSeasons,constitution,energy:constitution,health:100,talent,alive:true,childId:null};
+  const sex=draw(s)<0.5?'male':'female';
+  const portraits=[`${sex}-01`,`${sex}-02`];
+  const unused=portraits.filter(id=>!Object.values(s.persons).some(p=>p.vitality?.portrait===id));
+  const pool=unused.length?unused:portraits;
+  const portrait=pool[Math.floor(draw(s)*pool.length)];
+  return {sex,portrait,portraitEra:s.era?.index??0,ageSeasons:age*4,lifespanSeasons,constitution,energy:constitution,health:100,talent,alive:true,childId:null};
+}
+function namePerson(s:GameState,p:Person):void {
+  const names=p.vitality!.sex==='male'?['林禾','林川','林松','林远','林安','林青']:['林穗','林溪','林棠','林宁','林岚','林秋'];
+  const unused=names.filter(name=>!Object.values(s.persons).some(other=>other.name===name));
+  const pool=unused.length?unused:names;
+  p.name=pool[Math.floor(draw(s)*pool.length)];
 }
 export function initializeLife(s:GameState,r:LifeRules):void {
   s.life={rules:structuredClone(r),timeRemaining:r.timePerSeason};
   activePerson(s).vitality=makeVitality(s,r,40);heir(s).vitality=makeVitality(s,r,16);
   activePerson(s).vitality!.childId=s.household.heirId;
-  heir(s).name='成长中的后辈';
+  namePerson(s,activePerson(s));namePerson(s,heir(s));
   heir(s).vitality!.upbringing={fedSeasons:0,companySeasons:0,taughtSeasons:0};
+}
+export function beginEraLife(s:GameState,events:GameEvent[]):void {
+  if(!s.life)return;
+  const id=`person:${Object.keys(s.persons).length+1}`,person=blankPerson(id,'新时代经营者');
+  person.vitality=makeVitality(s,s.life.rules,s.life.rules.adultYears);
+  if(s.life.renewal)person.vitality.minimumEnergy=s.life.renewal.minimumEnergy;
+  s.persons[id]=person;namePerson(s,person);
+  s.household.activePersonId=id;s.household.heirId=id;s.household.memberIds=[id];
+  if(s.economy?.branches)s.economy.branches.learned[id]=['A0'];
+  delete s.life.pendingRetirement;delete s.life.consultPending;
+  delete s.life.seasonCompany;delete s.life.seasonTaught;s.life.consulted=[];
+  s.clock.generation++;s.clock.turn=0;s.status='active';
+  // Equipment remains, but a new person must choose what to operate personally.
+  if(s.economy?.industry)for(const machine of Object.values(s.economy.industry.instances))if(machine?.operator==='self')machine.enabled=false;
+  lifeEvent(events,id,'era-start',`新时代从${person.name}开始：${person.vitality.sex==='male'?'男':'女'}，${s.life.rules.adultYears}岁，天赋「${TALENTS[person.vitality.talent].name}」。与上一时代没有亲属关系，个人知识从基础开始。`);
 }
 export function healthCeiling(v:Vitality,r:LifeRules):number {return Math.max(30,100-Math.max(0,Math.floor(v.ageSeasons/4)-r.agingYears)*2);}
 export function energyCeiling(v:Vitality):number {return Math.max(v.minimumEnergy??2,Math.floor(v.constitution*(0.4+v.health*0.006)));}
 export function lifeView(p:Person,r?:LifeRules) {
   const v=p.vitality;
-  return v?{ageYears:Math.floor(v.ageSeasons/4),ageQuarter:v.ageSeasons%4,health:v.health,...(r?{maxHealth:healthCeiling(v,r)}:{}),energy:v.energy,maxEnergy:energyCeiling(v),alive:v.alive,talent:TALENTS[v.talent],upbringing:v.upbringing?{...v.upbringing}:null}:undefined;
+  return v?{sex:v.sex,portrait:v.portrait,portraitEra:v.portraitEra,ageYears:Math.floor(v.ageSeasons/4),ageQuarter:v.ageSeasons%4,health:v.health,...(r?{maxHealth:healthCeiling(v,r)}:{}),energy:v.energy,maxEnergy:energyCeiling(v),alive:v.alive,talent:TALENTS[v.talent],upbringing:v.upbringing?{...v.upbringing}:null}:undefined;
 }
 // Living direct ancestors of the active person; retired elders stay consultable while alive.
 export function livingElders(s:GameState):Person[] {
@@ -93,7 +119,7 @@ export function recordLifeGeneration(s:GameState,events:GameEvent[]):void {
 }
 export function settleLife(s:GameState,missing:number,events:GameEvent[],foodRequired=2):void {
   const r=s.life!.rules;
-  for(const person of Object.values(s.persons)) {
+  for(const person of s.household.memberIds.map(id=>s.persons[id])) {
     const v=person.vitality;if(!v?.alive)continue;
     v.ageSeasons++;
     const renewal=s.life!.renewal;
@@ -106,8 +132,8 @@ export function settleLife(s:GameState,missing:number,events:GameEvent[],foodReq
     else lifeEvent(events,person.id,'season',`${person.name}：${Math.floor(v.ageSeasons/4)}岁，健康${v.health}，精力${v.energy}/${energyCeiling(v)}`);
   }
   // Childhood upbringing: each season fed / accompanied / taught is recorded and
-  // settled once into constitution and talent when the child comes of age.
-  for(const person of Object.values(s.persons)) {
+  // settled once into constitution at adulthood; birth talent remains unchanged.
+  for(const person of s.household.memberIds.map(id=>s.persons[id])) {
     const v=person.vitality;if(!v?.alive||!v.upbringing)continue;
     if(v.ageSeasons<r.adultYears*4){
       if(!missing)v.upbringing.fedSeasons++;
@@ -119,11 +145,7 @@ export function settleLife(s:GameState,missing:number,events:GameEvent[],foodReq
       const up=v.upbringing,span=r.adultYears*4;
       const bonus=Math.round(r.growthConstitutionBonus*Math.min(1,(up.fedSeasons+up.companySeasons)/span));
       v.constitution+=bonus;v.energy=Math.min(energyCeiling(v),v.energy+bonus);
-      let grown:Talent|null=null;
-      if(up.taughtSeasons>=3&&up.taughtSeasons*2>=up.fedSeasons+up.companySeasons)grown=draw(s)<0.5?'scholar':'mentor';
-      else if(up.fedSeasons+up.companySeasons>=span/2)grown=draw(s)<0.5?'strong':'resilient';
-      if(grown)v.talent=grown;
-      lifeEvent(events,person.id,'adulthood',`${person.name}成年：饱食${up.fedSeasons}季、陪伴${up.companySeasons}季、受教${up.taughtSeasons}季；体质+${bonus}${grown?`，养成「${TALENTS[grown].name}」天赋`:'，天赋维持出生时的倾向'}`);
+      lifeEvent(events,person.id,'adulthood',`${person.name}成年：饱食${up.fedSeasons}季、陪伴${up.companySeasons}季、受教${up.taughtSeasons}季；体质+${bonus}，保留出生天赋「${TALENTS[v.talent].name}」`);
     }
   }
   delete s.life!.seasonCompany;delete s.life!.seasonTaught;
@@ -135,7 +157,8 @@ export function settleLife(s:GameState,missing:number,events:GameEvent[],foodReq
     const id=`person:${Object.keys(s.persons).length+1}`,child=blankPerson(id,'成长中的后辈');
     child.vitality=makeVitality(s,r,0);if(s.life!.renewal)child.vitality.minimumEnergy=s.life!.renewal.minimumEnergy;child.vitality.upbringing={fedSeasons:0,companySeasons:0,taughtSeasons:0};s.persons[id]=child;s.household.memberIds.push(id);v.childId=id;
     if(person.id===s.household.activePersonId&&s.household.heirId===person.id)s.household.heirId=id;
-    lifeEvent(events,id,'birth','家族迎来新生后辈，从零岁成长，不自动获得知识');
+    namePerson(s,child);
+    lifeEvent(events,id,'birth',`家族迎来${child.vitality.sex==='male'?'男孩':'女孩'}${child.name}，出生天赋「${TALENTS[child.vitality.talent].name}」，从零岁成长，不自动获得知识`);
   }
   if(!activePerson(s).vitality!.alive){
     s.status=canSucceed(s)?'handover':'ended';

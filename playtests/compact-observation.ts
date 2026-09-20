@@ -36,6 +36,8 @@ export interface CompactObservation {
     hardship: number;
   };
   family?: {
+    personIdentity?: {name:string;sex:string;talent:string};
+    heirIdentity?: {name:string;sex:string;talent:string};
     heirAgeYears?: number;
     seasonsToAdult?: number;
     upbringing?: { fed: number; company: number; taught: number };
@@ -153,6 +155,8 @@ export function compactObservation(
         hardship: num(family.hardship),
       },
       family: {
+        personIdentity: {name:String(record(game.person)?.name??''),sex:String(person?.sex??''),talent:String(record(person?.talent)?.name??'')},
+        ...(heirView?{heirIdentity:{name:String(record(game.heir)?.name??''),sex:String(heirView.sex??''),talent:String(record(heirView.talent)?.name??'')}}:{}),
         ...(typeof heirView?.ageYears === 'number' ? { heirAgeYears: heirView.ageYears } : {}),
         ...(heirView && adultYears ? { seasonsToAdult: Math.max(0, (adultYears - num(heirView.ageYears)) * 4 - num(heirView.ageQuarter)) } : {}),
         ...(upbringing ? { upbringing: { fed: num(upbringing.fedSeasons), company: num(upbringing.companySeasons), taught: num(upbringing.taughtSeasons) } } : {}),
@@ -210,6 +214,8 @@ export function formatCompactObservation(compact: CompactObservation): string {
   if (compact.family) {
     const f = compact.family;
     lines.push(`家人: ${[
+      f.personIdentity ? `经营者${f.personIdentity.name}（${f.personIdentity.sex==='male'?'男':'女'}，${f.personIdentity.talent}）` : '',
+      f.heirIdentity ? `后辈${f.heirIdentity.name}（${f.heirIdentity.sex==='male'?'男':'女'}，出生天赋${f.heirIdentity.talent}）` : '',
       f.heirAgeYears !== undefined ? `后辈${f.heirAgeYears}岁` : '尚无后辈',
       f.seasonsToAdult ? `距成年${f.seasonsToAdult}季` : '',
       f.upbringing ? `养育 饱食${f.upbringing.fed}/陪伴${f.upbringing.company}/受教${f.upbringing.taught}` : '',

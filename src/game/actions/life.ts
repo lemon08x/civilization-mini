@@ -22,7 +22,7 @@ export function lifeActions(s:GameState):ActionDefinition[] {
     ...(cv&&!cv.alive?['后辈已故']:[]),
     ...(cv?.alive&&cv.ageSeasons>=r.adultYears*4?['后辈已成年，养育已在成年时结算']:[]),
     ...(s.life.seasonCompany?['本季已陪伴过后辈']:[]),
-  ],`用${s.life.renewal?.companyTime??2}时间、${s.life.renewal?.companyEnergy??1}精力陪伴后辈。季末连同饱食、受教一起记入养育；后辈成年时按养育记录结算体质加成与天赋倾向。`,(d,ev)=>{
+  ],`用${s.life.renewal?.companyTime??2}时间、${s.life.renewal?.companyEnergy??1}精力陪伴后辈。季末连同饱食、受教一起记入养育；后辈成年时按养育记录结算体质加成，出生天赋终身保留。`,(d,ev)=>{
     d.life!.seasonCompany=true;lifeEvent(ev,d.household.heirId,'company','本季陪伴了成长中的后辈');
   }));
   for(const elder of livingElders(s)){
@@ -40,6 +40,6 @@ export function lifeActions(s:GameState):ActionDefinition[] {
   actions.push(defineAction(s,'economy:retire:family','安排季末交接','身体',{ap:0},[
     ...(!canSucceed(s)?[s.household.heirId===s.household.activePersonId?'尚无后辈':`后辈须存活并满${r.adultYears}岁，当前${Math.floor(heir(s).vitality!.ageSeasons/4)}岁`]:[]),
     ...(s.life.pendingRetirement?['已安排本季交接']:[]),
-  ],'本季正常结算后交给成年后辈；不会额外生成一季时间或自动复制个人知识。',(d,ev)=>{d.life!.pendingRetirement=true;lifeEvent(ev,d.household.activePersonId,'retire','已安排季末交接');}));
+  ],'本季正常结算后进入交接。同一时代由成年后辈接手；若已是本时代最后一代，则结清回报并在新时代生成无亲属关系的新人物。',(d,ev)=>{d.life!.pendingRetirement=true;lifeEvent(ev,d.household.activePersonId,'retire','已安排季末交接');}));
   return actions;
 }

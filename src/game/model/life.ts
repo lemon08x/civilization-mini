@@ -20,6 +20,9 @@ export const LIFE_BOUNDS: Record<keyof LifeRules, readonly [number, number]> = {
 export type Talent = 'strong' | 'scholar' | 'mentor' | 'organizer' | 'resilient';
 export interface Upbringing { fedSeasons: number; companySeasons: number; taughtSeasons: number }
 export interface Vitality {
+  sex: 'male' | 'female';
+  portrait: string;
+  portraitEra: number;
   ageSeasons: number;
   lifespanSeasons: number;
   constitution: number;

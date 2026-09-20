@@ -9,7 +9,7 @@ import {ERAS,DUNGEON_TASKS} from '../model/eras.js';
 import {eraEvent} from '../systems/eras.js';
 export function eraActions(s:GameState):ActionDefinition[]{
  const e=s.era;if(!e)return [];const out:ActionDefinition[]=[];
- out.push(defineAction(s,'economy:erasettle:stage','结算当前社会并进入下一段','社会阶段',{ap:0},e.closed?['社会历程已结束']:[],'结束本季，按当前产能推算剩余代际并兑现本阶段回报。不要求建成水井或泵。现代社会不限代数，结算即结束旅程并按副本任务计分；家业试炼只影响胜负判定。',(d)=>{d.era!.pendingSettle=true;}));
+ out.push(defineAction(s,'economy:erasettle:stage','结算当前社会并进入下一段','社会阶段',{ap:0},e.closed?['社会历程已结束']:[],'结束本季，按当前产能推算剩余代际并兑现本阶段回报。进入下一时代时从刚成年的新随机人物开始，不延续上一时代亲属关系或个人知识；资产与公共记录保留。不要求建成水井或泵。现代社会不限代数，结算即结束旅程并按副本任务计分；家业试炼只影响胜负判定。',(d)=>{d.era!.pendingSettle=true;}));
  for(const on of [true,false])out.push(defineAction(s,'economy:tap:'+(on?'on':'off'),on?'接入家庭田自来水服务':'暂停自来水服务','社会阶段',{ap:0},[...(e.index!==3?['现代社会才提供公共自来水']:[]),...(e.tap===on?['已经是此安排']:[])],'每个确实缺水的季节支付1钱，由公共服务人员为家庭田补2水分。无需求不收费，无钱时保留自家供水退路。',(d,ev)=>{d.era!.tap=on;eraEvent(d,ev,'tap',on?'已接入自来水服务':'已暂停自来水服务');}));
  out.push(defineAction(s,'economy:publicmill:grain','使用公共磨坊','社会阶段',{time:1,energy:0,money:1},[
   ...(!ERAS[e.index].publicMill?['工业城镇以后才有公共磨坊']:[]),

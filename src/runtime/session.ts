@@ -50,5 +50,13 @@ export function parseSession(value: unknown): Session {
   if (record.format !== 'civilization-mini-run' || record.formatVersion !== 3 || !isRecord(record.manifest) || !Array.isArray(record.entries)) throw new Error('存档格式无效，原文件应保留');
   validateRunId(record.manifest.runId);
   validateRuleset(record.manifest.ruleset);
+  if (value.state.life) {
+    if (!isRecord(value.state.persons) || Object.values(value.state.persons).some(person => {
+      if (!isRecord(person) || !isRecord(person.vitality)) return true;
+      const v=person.vitality;
+      return (v.sex!=='male'&&v.sex!=='female') || typeof v.portrait!=='string' || !new RegExp(`^${v.sex}-0[12]$`).test(v.portrait)
+        || typeof v.portraitEra!=='number' || !Number.isInteger(v.portraitEra) || v.portraitEra<0 || v.portraitEra>3;
+    })) throw new Error('此存档缺少当前人物性别、肖像或时代数据，请新开游戏；原存档不修改。');
+  }
   return deepFreeze({ state: value.state as unknown as Session['state'], record });
 }

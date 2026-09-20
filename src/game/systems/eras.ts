@@ -1,4 +1,5 @@
 import {electricRewardPercent} from '../model/electric.js';
+import {beginEraLife} from './life.js';
 import {ERAS,ERA_CARDS,DUNGEON_TASKS} from '../model/eras.js';
 import {branchNodesFor,nodeInEra} from '../model/branches.js';
 import {ALL_PROCESSES,CROPS} from './economy-catalog.js';
@@ -144,7 +145,7 @@ function dungeonTaskWeight(s:GameState,id:string):number{
  return t.progress;
 }
 export function dungeonScore(s:GameState):number{return (s.era?.dungeon.tasks??[]).reduce((sum,id)=>sum+dungeonTaskWeight(s,id),0);}
-// 共用结算：兑现凭证、记录事件并进入下一时代（重抽社会卡，startGeneration 记为当前代）；现代为旅程终点。
+// 共用结算：兑现凭证、记录事件并进入下一时代（重抽社会卡、开启独立人物，startGeneration 记为新人物首代）；现代为旅程终点。
 export function advanceEra(s:GameState,events:GameEvent[],how:string):void{
  const e=s.era!;
  const percent=electricRewardPercent(s);
@@ -159,11 +160,12 @@ export function advanceEra(s:GameState,events:GameEvent[],how:string):void{
   eraEvent(s,events,'journey-ended',`副本任务：${names.join('、')||'无'}；总分${score}/${target}。${won?'最终副本完成，家族旅程结束':'现代阶段结束；最终副本未达标，保留已获阶段回报'}`);
   return;
  }
- e.index++;e.elapsed=0;e.startGeneration=s.clock.generation;e.card=drawCard(s);
+ e.index++;e.elapsed=0;e.card=drawCard(s);
+ beginEraLife(s,events);e.startGeneration=s.clock.generation;
  eraEvent(s,events,'revealed',`进入${ERAS[e.index].name}。${ERAS[e.index].description} 社会卡「${eraCard(s)!.name}」：${eraCard(s)!.description}`);
 }
 export function settleEra(s:GameState,rules:Ruleset,events:GameEvent[]):void{
- const e=s.era;if(!e||e.closed)return;e.elapsed++;
+ const e=s.era;if(!e||e.closed||s.status==='ended')return;e.elapsed++;
  const chosen=e.pendingSettle,timedOut=e.index<ERAS.length-1&&s.clock.generation-e.startGeneration>=e.rules.generationLimit;
  if(!chosen&&!timedOut)return;
  let how=timedOut?'本时代代际预算用尽':'玩家主动结算';
