@@ -297,3 +297,30 @@ food: modest bowl of cooked grain
 田地专用场景在 `field-scene.ts`：使用 SVG 与 CSS，观察中的 crop/growth/duration 决定植株种类、大小与成熟色彩，公开 weather 决定雨滴装饰。45 株植株仅为示意布局，不代表产量。微风、云朵与雨滴是装饰，不推进季节或改变世界。提供暂停复选框，尊重 prefers-reduced-motion。没有引入视频、动画依赖或新增机制。场景替代田地页的旧静态阶段图；原 JPG 与本季看板阶段图继续保留。
 
 已构建并检查桌面田地场景、暂停/恢复、种子卡和仓库图标；按 ALL_GOODS 清单核对 41 项展示文件全部存在。未运行 tests/，不保存试玩记录。
+
+
+## 人物年龄与时代肖像
+
+本机 Grok Build 的 image_gen 生成人物图。男女各两个身份，每个身份覆盖六个年龄段和四个时代，共 16 张六格年龄图、96 个肖像。每张为 1248×832 JPEG，按从左到右、从上到下排列幼年、儿童、少年、青年、中年、老年；页面按 3×2 网格显示当前年龄格。
+
+文件命名为 `person-<male|female>-<01|02><时代后缀>.jpg`：农业村落无后缀，集镇分工 `-town`，工业城镇 `-industry`，现代社会 `-modern`。时代主要通过日常衣着与发式区分，没有职业制服或能力加成。每个时代从独立的新随机人物开始；人物在本时代随年龄切换肖像，旧时代人物保留历史形象，不跨时代换装继任。
+
+生成以原人物的脸型、五官、体型与水彩纸感描述约束身份；当前 Grok image_gen 不支持直接输入参考图，因此跨图面貌仍有轻微差异。集镇采用整齐织物、领口与盘扣，工业采用衬衫和日常夹克，现代采用 T 恤、针织衫与轻便外套。原始农业肖像保留。
+
+
+## 顶部导航与状态素材
+
+`ui-navigation-preview.jpg` 与 `ui-status-preview.jpg` 是 Grok 生成的素材样张。页面使用裁切并优化后的 15 张 WebP：`ui-nav-*-ui.webp` 对应六个主导航；`ui-status-*-ui.webp` 对应时间、精力、钱财、季节、晴雨、粮食、存档与帮助。纸色归一后用 multiply 混合融入页面，社会历程保留横向建筑组合以便辨认。图片只负责呈现，导航标签与动态数值仍为真实文本。
+
+
+## 商城商品图与「集市」导航（2026-09-20）
+
+「商城」从「经营与交易」篇章移出，成为顶部独立篇章「集市」；商城全部商品条目与采购清单行配图，经 `shopImage()`（`apps/board/illustration.ts`）接入：物资复用既有 `item-<id>-ui.webp`，设备用本轮新生成的 `device-<ID>-ui.webp`，教材统一用 `item-book-ui.webp`，家庭资产用 `item-granary-ui.webp` / `item-library-ui.webp`；缺图时回退到既有主题图。生活页的「买入4口粮」行动移到商城「物资」分类顶部。
+
+本轮经本机 Grok CLI（ACP stdio 无头模式）image_gen 新增 38 张 JPG 原图，并导出 WebP 展示图（商品最长边 192px、导航 128px、quality 84）：
+
+- 34 张设备图 `device-<ID>`：W01,W03,P01,P03,T01,T03,F02,F03,S01,S02,S03,U01,U02,U04,U05,U06,U08,U09,U10（农工业）；W07,E01,E02,E04,F07,T07,F09,N08,S08,U08M,U09M,H09,LAMP,TELEGRAPH,ELECTROLYZER（现代/电力）。F04/F05/E03/F10/N10 商店不出售，未生成。
+- `item-book`（全部教材共用）、`item-granary`（家庭粮仓）、`item-library`（家学书室）。
+- `ui-nav-market`：顶部「集市」篇章标签图标，风格对齐既有 `ui-nav-*`。
+
+生成提示词存档于 `artifacts/image-gen/prompts.json`（通用段沿用 41 张物品图的暖纸水彩静物规范），驱动脚本 `artifacts/image-gen/gen.mjs`、转换脚本 `artifacts/image-gen/convert.py`。图片均为不透明背景、静物示意，不代表已拥有设备或实时库存。

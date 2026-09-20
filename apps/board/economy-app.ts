@@ -109,6 +109,8 @@ async function act(id:string){
   finally{busy=false;$('app').removeAttribute('aria-busy');}
 }
 function bindApp():void {
+$('export').onclick=()=>download('economy-run.json',{record:session.record,state:session.state});
+$('import').onchange=async ev=>{const file=(ev.target as HTMLInputElement).files?.[0];if(!file||busy)return;busy=true;try{const value=JSON.parse(await file.text());const next=parseSession(value);if(next.record.manifest.ruleset.rulesVersion!==rules.rulesVersion)throw new Error('仅导入当前规则存档');const id=crypto.randomUUID();writeSave(id,next,`导入 · ${new Date().toLocaleString()}`);location.assign('/play?save='+encodeURIComponent(id));}catch(e){error((e as Error).message);busy=false;}};
   bindFarmScene(document);
   document.querySelectorAll<HTMLButtonElement>('[data-page]').forEach(b=>b.onclick=()=>{page=b.dataset.page!;guide=false;filter='';render();});
   const showSelection=()=>{
@@ -166,7 +168,7 @@ function render():void {
   const o=observeSession(session).game,e=o.economy!;
   const button=(id:string)=>actionButton(o,id,failed);
   const panel=(title:string,body:string)=>`<section class="panel"><div class="panel-head"><h2>${title}</h2></div><div class="panel-body">${body}</div></section>`;
-  const acts=(group:string)=>o.actions.filter(a=>a.group===group&&(!filter||a.label.includes(filter))).map(a=>`<div class="family-item">${button(a.id)}</div>`).join('');
+  const acts=(group:string)=>o.actions.filter(a=>a.group===group&&!a.id.startsWith('economy:buyfood:')&&(!filter||a.label.includes(filter))).map(a=>`<div class="family-item">${button(a.id)}</div>`).join('');
   let body='';
   if(page==='社会')body=erasPage(observeSession(session),button);
   if(page==='副本')body=expeditionPage(observeSession(session),button);
@@ -208,6 +210,4 @@ confirmForm.addEventListener('submit',ev=>{
 confirmDialog.addEventListener('click',ev=>{if(ev.target===confirmDialog)confirmDialog.close();});
 confirmDialog.addEventListener('close',()=>{pendingAction='';});
 function download(name:string,data:unknown){const u=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
-$('export').onclick=()=>download('economy-run.json',{record:session.record,state:session.state});
-$('import').onchange=async ev=>{const file=(ev.target as HTMLInputElement).files?.[0];if(!file||busy)return;busy=true;try{const value=JSON.parse(await file.text());const next=parseSession(value);if(next.record.manifest.ruleset.rulesVersion!==rules.rulesVersion)throw new Error('仅导入当前规则存档');const id=crypto.randomUUID();writeSave(id,next,`导入 · ${new Date().toLocaleString()}`);location.assign('/play?save='+encodeURIComponent(id));}catch(e){error((e as Error).message);busy=false;}};
 render();

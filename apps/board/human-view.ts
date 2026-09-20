@@ -1,5 +1,5 @@
 
-import {artUrl,itemImage} from './illustration.js';
+import {artUrl,itemImage,chromeImage} from './illustration.js';
 import {placeIcon} from './ui-icons.js';
 import {pageNames,playerGroups,ruleGuide,chapterEpigraph} from './player-guide.js';
 import type { SessionObservation } from '../../src/runtime/session.js';
@@ -50,7 +50,7 @@ export function seasonCheck(g:Game):string[] {
   if(stopped?.length)items.push(`已知停机：${stopped.map(s=>`${s.name}（${s.blockers.join('；')}）`).join('、')}`);
   if(l?.pendingRetirement)items.push('已安排本季交接；结束本季后才会进入交接，人物尚未切换。');
   if(l){
-    if(l.heir?.alive&&l.heir.ageYears<l.adultYears&&!l.seasonCompany)items.push('后辈本季尚未陪伴；饱食、陪伴与受教会在后辈成年时结算体质与天赋。');
+    if(l.heir?.alive&&l.heir.ageYears<l.adultYears&&!l.seasonCompany)items.push('后辈本季尚未陪伴；饱食与陪伴在成年时增加体质；教导帮助学习，出生天赋终身保留。');
     const consults=(l.elders??[]).reduce((n,x)=>n+x.consultable,0);
     if(consults>0)items.push(`在世长辈可请教 ${consults} 门课程（见家人页）。`);
   }
@@ -67,11 +67,11 @@ export function confirmContent(g:Game, id:string):{title:string;body:string;subm
   if(kind==='era'&&g.era){
     const e=g.era,p=e.projection;
     const modern=e.generationLimit===null;
-    return {title:'结算当前社会',submitLabel:'确认结算',body:`<p>${modern?'这会结束本季、结束这次旅程，并按副本任务计分。':`这会结束本季并进入下一社会；剩余约 ${e.remaining} 季（按代际估计）将推算兑现。`}预估会受当季实际结果影响，最终金额以结算事件为准。</p><ul class="check-list"><li>现在结算预计兑现 ${e.expectedReward} 钱</li>${modern?`<li>副本总分 ${e.dungeon?.score??0} / ${e.dungeon?.target??0}${e.dungeon?.powered===false?'；通电验收尚未完成':''}</li>`:`<li>已取得回报凭证 ${e.rewardClaims} 份；剩余约 ${p.remaining} 季（按代际估计）推算 ${p.claims} 份</li>`}${p.notes.map(n=>`<li>${esc(n)}</li>`).join('')}${e.electricRewardPercent!==undefined?`<li>当前回报比例 ${e.electricRewardPercent}%。${esc(e.electricRequirement??'')}</li>`:''}</ul>${a?`<p class="action-note">${esc(a.description)}</p>`:''}`};
+    return {title:'结算当前社会',submitLabel:'确认结算',body:`<p>${modern?'这会结束本季、结束这次旅程，并按副本任务计分。':`这会结束本季并进入下一社会，由无亲属关系的新随机人物开始；剩余约 ${e.remaining} 季（按代际估计）将推算兑现。`}预估会受当季实际结果影响，最终金额以结算事件为准。</p><ul class="check-list"><li>现在结算预计兑现 ${e.expectedReward} 钱</li>${modern?`<li>副本总分 ${e.dungeon?.score??0} / ${e.dungeon?.target??0}${e.dungeon?.powered===false?'；通电验收尚未完成':''}</li>`:`<li>已取得回报凭证 ${e.rewardClaims} 份；剩余约 ${p.remaining} 季（按代际估计）推算 ${p.claims} 份</li>`}${p.notes.map(n=>`<li>${esc(n)}</li>`).join('')}${e.electricRewardPercent!==undefined?`<li>当前回报比例 ${e.electricRewardPercent}%。${esc(e.electricRequirement??'')}</li>`:''}</ul>${a?`<p class="action-note">${esc(a.description)}</p>`:''}`};
   }
   if(kind==='retire'&&g.life){
     const l=g.life;
-    return {title:'安排季末交接',submitLabel:'确认安排交接',body:`<p>本季结束后，再由成年后辈接手。</p><ul class="check-list"><li>${l.heir?`后辈 ${l.heir.ageYears} 岁，成年线 ${l.adultYears} 岁，${l.heir.alive?'在世':'已故'}`:'尚无后辈'}</li><li>家族实物、记录和员工经验保留</li><li>后辈的个人知识仍需学习</li><li>${esc(successionWork(g))}</li></ul>`};
+    return {title:'安排季末交接',submitLabel:'确认安排交接',body:`<p>${g.era?.lastGeneration?'本季结束后进入时代结算，下一时代从无亲属关系的新随机人物开始。':'本季结束后，再由成年后辈接手。'}</p><ul class="check-list"><li>${l.heir?`后辈 ${l.heir.ageYears} 岁，成年线 ${l.adultYears} 岁，${l.heir.alive?'在世':'已故'}`:'尚无后辈'}</li><li>家族实物、记录和员工经验保留</li><li>后辈的个人知识仍需学习</li><li>${esc(successionWork(g))}</li></ul>`};
   }
   return {title:a?.label??'确认行动',submitLabel:'确认提交',body:`<p>${esc(a?.description??'提交后按现行规则结算。')}</p>`};
 }
@@ -88,11 +88,11 @@ function successionState(g:Game):string {
   const l=g.life; if(!l)return '';
   if(g.status==='ended')return '家族经营已经结束。';
   if(g.status==='complete')return g.victory?.won?'旅程已经胜利结束。':'旅程已经结束。';
-  if(g.status==='handover')return '本季已结束，后辈可以接手。人物尚未切换。';
-  if(!l.heir)return '尚未有后辈。满 30 岁且尚无子嗣时迎来新生后辈。';
+  if(g.status==='handover')return g.era?.lastGeneration?'本时代已到最后一代；确认后结清回报，下一时代从新随机人物开始。':'本季已结束，后辈可以接手。人物尚未切换。';
+  if(!l.heir)return `尚未有后辈。满 ${l.birthYears} 岁且尚无子嗣时迎来新生后辈。`;
   if(!l.heir.alive)return '后辈已故，当前不可继任。';
   if(l.heir.ageYears<l.adultYears)return `后辈尚未成年（${l.heir.ageYears} / ${l.adultYears} 岁）。`;
-  if(l.pendingRetirement)return '已安排季末交接。结束本季后，由后辈接手。';
+  if(l.pendingRetirement)return g.era?.lastGeneration?'已安排季末交接；确认交接后结束本时代，由新随机人物开启下一时代。':'已安排季末交接。结束本季后，由后辈接手。';
   return '后辈已成年，可以安排季末交接。';
 }
 
@@ -103,19 +103,26 @@ function knownNames(g:Game, heir=false):string {
   return list.length?list.join('、'):'尚未掌握课程';
 }
 
+function personPortrait(p:{portrait:string;portraitEra:number;ageYears:number;alive:boolean},name:string):string {
+  const stage=p.ageYears<6?0:p.ageYears<12?1:p.ageYears<18?2:p.ageYears<35?3:p.ageYears<55?4:5;
+  const ages=['幼年','儿童','少年','青年','中年','老年'];
+  const eraNames=['农业村落','集镇分工','工业城镇','现代社会'];
+  const eraSuffix=['','-town','-industry','-modern'][p.portraitEra];
+  return `<div class="person-portrait${p.alive?'':' is-deceased'}" role="img" aria-label="${esc(name)} · ${eraNames[p.portraitEra]} · ${ages[stage]}肖像" style="background-image:url('/illustrations/person-${esc(p.portrait)}${eraSuffix}.jpg');background-position:${stage%3*50}% ${stage<3?0:100}%"></div>`;
+}
 function family(g:Game,button:Button):string {
   const l=g.life; if(!l)return '';
   const person=(who:'self'|'heir',actions='')=>{
     const p=who==='self'?l.person:l.heir;
     if(!p)return `<article class="person-card"><h3>后辈</h3><p>尚未有后辈。</p></article>`;
     const name=who==='self'?g.person.name:g.heir.name;
-    const raising=who==='heir'&&p.upbringing?`<p class="subtle">养育记录：饱食 ${p.upbringing.fedSeasons} 季 · 陪伴 ${p.upbringing.companySeasons} 季 · 受教 ${p.upbringing.taughtSeasons} 季${p.ageYears<l.adultYears?`（成年时按记录结算体质与天赋${l.seasonCompany?'；本季已陪伴':'；本季尚未陪伴'}）`:'（成年评估已完成）'}</p>`:'';
-    return `<article class="person-card"><h3>${esc(name)} <small>${p.ageYears} 岁 · ${p.alive?'在世':'已故'}</small></h3><p><span class="tag">${esc(p.talent.name)}</span> ${esc(p.talent.effect)}</p>${meter('健康',p.health,p.maxHealth??100,'health')}${meter('精力',p.energy,p.maxEnergy,'energy')}${raising}<p class="subtle">已知学习：${esc(knownNames(g,who==='heir'))}</p>${actions?`<div class="compact-actions">${actions}</div>`:''}</article>`;
+    const raising=who==='heir'&&p.upbringing?`<p class="subtle">养育记录：饱食 ${p.upbringing.fedSeasons} 季 · 陪伴 ${p.upbringing.companySeasons} 季 · 受教 ${p.upbringing.taughtSeasons} 季${p.ageYears<l.adultYears?`（成年时按记录结算体质，出生天赋终身保留${l.seasonCompany?'；本季已陪伴':'；本季尚未陪伴'}）`:'（成年评估已完成）'}</p>`:'';
+    return `<article class="person-card">${personPortrait(p,name)}<h3>${esc(name)} <small>${who==='self'?'本代经营者':'后辈'} · ${p.sex==='male'?'男':'女'} · ${p.ageYears} 岁 · ${p.alive?'在世':'已故'}</small></h3><p><span class="tag">出生天赋 · ${esc(p.talent.name)}</span> ${esc(p.talent.effect)}</p>${meter('健康',p.health,p.maxHealth??100,'health')}${meter('精力',p.energy,p.maxEnergy,'energy')}${raising}<p class="subtle">已知学习：${esc(knownNames(g,who==='heir'))}</p>${actions?`<div class="compact-actions">${actions}</div>`:''}</article>`;
   };
   const elders=l.elders??[];
   const consults=g.actions.filter(a=>a.id.startsWith('economy:consult:')).slice(0,4).map(a=>button(a.id)).join('');
-  const elderCard=`<article class="person-card"><h3>在世长辈 <small>${elders.length?`可请教 ${elders.reduce((n,x)=>n+x.consultable,0)} 门课程`:'暂无'}</small></h3>${elders.length?elders.map(e=>`<p><strong>${esc(e.name)}</strong> · ${e.ageYears} 岁<br><span class="subtle">${e.consultable>0?`可请教 ${e.consultable} 门本人未学的课程；请教后下一次学习该课程时间减少，每门每代一次。`:'没有本人未学且可请教的课程。'}</span></p>`).join(''):'<p>交接后退休长辈仍在世时，可请教其掌握的课程。</p>'}${consults?`<div class="compact-actions">${consults}</div>`:''}</article>`;
-  const handoverCard=`<article class="person-card"><h3>交接 <small>代际传承</small></h3><p>${esc(successionState(g))}</p><p>家族实物和记录会保留；后辈仍要亲自学习。安排交接不会立刻切换人物。</p><p class="subtle">${esc(successionWork(g))}</p><div class="action-primary">${button('economy:retire:family')}</div></article>`;
+  const elderCard=`<article class="person-card"><h3>在世长辈 <small>${elders.length?`可请教 ${elders.reduce((n,x)=>n+x.consultable,0)} 门课程`:'暂无'}</small></h3>${elders.length?elders.map(e=>`<div class="elder-person">${personPortrait(e,e.name)}<p><strong>${esc(e.name)}</strong> · ${e.sex==='male'?'男':'女'} · ${e.ageYears} 岁 · 退休长辈<br><span class="tag">${esc(e.talent.name)}</span><br><span class="subtle">${e.consultable>0?`可请教 ${e.consultable} 门本人未学的课程；请教后下一次学习该课程时间减少，每门每代一次。`:'没有本人未学且可请教的课程。'}</span></p></div>`).join(''):'<p>交接后退休长辈仍在世时，可请教其掌握的课程。</p>'}${consults?`<div class="compact-actions">${consults}</div>`:''}</article>`;
+  const handoverCard=`<article class="person-card"><h3>交接 <small>代际传承</small></h3><p>${esc(successionState(g))}</p><p>同一时代内由后辈传承；跨时代从新随机人物开始，个人知识从基础学习。实物和公共记录保留。安排交接不会立刻切换人物。</p><p class="subtle">${esc(successionWork(g))}</p><div class="action-primary">${button('economy:retire:family')}</div></article>`;
   return `<div class="person-spread">${person('self',button('economy:rest:self')+button('economy:care:self'))}${person('heir',button('economy:company:heir'))}${elderCard}${handoverCard}</div>`;
 }
 
@@ -208,14 +215,17 @@ export function humanScreen(g:Game,page:string,body:string,button:Button,events:
   const e=g.economy!,l=g.life,end=g.status==='complete'||g.status==='ended';
   const groups=playerGroups(g),group=groups.find(x=>x.pages.includes(page))??groups[0];
   const low=foodWarning(g);
-  const masthead=`<header class="chronicle-masthead"><div><div class="eyebrow">CIVILIZATION MINI</div><h1>世代 <span>家族编年史</span></h1><p class="rule-line">规则 ${esc(g.rulesVersion)} · ${esc(g.scenario.name)}</p></div><div class="masthead-meta"><div>${l?esc(g.person.name):'当前家族'}${g.era?` · ${esc(g.era.stage.name)}`:''}</div><div class="masthead-links"><a class="text-btn" href="/start">旅程与存档</a><button type="button" class="text-btn" data-guide="${esc(page)}">帮助</button></div></div></header>`;
-  const nav=`<nav class="chapter-nav" aria-label="篇章">${groups.map(x=>`<button type="button" class="chapter-tab" data-page="${x.pages.includes(page)?page:x.pages[0]}" aria-current="${x===group?'page':'false'}">${esc(x.name)}</button>`).join('')}</nav>
+  const masthead=`<header class="chronicle-masthead"><div><div class="eyebrow">CIVILIZATION MINI</div><h1>世代 <span>家族编年史</span></h1><p class="rule-line">规则 ${esc(g.rulesVersion)} · ${esc(g.scenario.name)}</p></div><div class="masthead-meta"><div>${l?esc(g.person.name):'当前家族'}${g.era?` · ${esc(g.era.stage.name)}`:''}</div><div class="masthead-links"><details class="options-menu"><summary class="text-btn">${chromeImage('status-save','utility-image')}<span>选项</span></summary><div class="options-panel"><a href="/start">打开其他旅程</a><a href="/">入口</a><a href="/ai">AI 文本玩法</a><button type="button" id="export">导出存档</button><label class="file-button">导入存档<input id="import" type="file" accept=".json,application/json" hidden></label><p class="subtle">结果由固定规则结算；浏览器存档在开始界面打开或新开，命令行存档在 saves/。</p></div></details><button type="button" class="text-btn" data-guide="${esc(page)}">${chromeImage('status-help','utility-image')}<span>帮助</span></button></div></div></header>`;
+  const navigationArt:Record<string,string>={本季:'season',农场:'farm',家人与传承:'family',学习与制造:'study',集市:'market',经营与交易:'trade',社会历程:'society'};
+  const nav=`<nav class="chapter-nav" aria-label="篇章" style="--chapter-count:${groups.length}">${groups.map(x=>`<button type="button" class="chapter-tab" data-page="${x.pages.includes(page)?page:x.pages[0]}" aria-current="${x===group?'page':'false'}" title="${esc(x.description)}">${chromeImage('nav-'+navigationArt[x.name],navigationArt[x.name]==='society'?'chapter-image chapter-image-society':'chapter-image')}<span>${esc(x.name)}</span></button>`).join('')}</nav>
     ${group.pages.length>1?`<nav class="chapter-subnav" aria-label="${esc(group.name)}分页">${group.pages.map(p=>`<button type="button" data-page="${p}" class="${page===p?'selected':''}" aria-current="${page===p?'page':'false'}">${placeIcon(p)}<span>${pageNames[p]??p}</span></button>`).join('')}</nav>`:''}`;
-  const hud=`<section class="player-hud"><div class="season-card"><small>第 ${g.clock.generation} 代</small><strong>${l?`第 ${l.calendar.year} 年 · ${l.calendar.season}`:`第 ${g.clock.turn} 季`}</strong><span>${esc(g.world.weatherName)}</span></div><div class="hud-item"><span>可用时间 / 总预算</span><strong class="num">${l?l.budget.freeTime:g.ap}<small> / ${l?l.timePerSeason:g.parameters.actionsPerTurn}</small></strong></div><div class="hud-item"><span>可用精力</span><strong class="num">${l?l.budget.freeEnergy:'—'}</strong></div><div class="hud-item ${low?'resource-warning':''}"><span>可食储备 / 季耗${g.socialFood?` · 预计购 ${g.socialFood.purchase}`:''}</span><strong class="num">${e.foodTotal}<small> / ${g.parameters.foodPerTurn}</small></strong></div><div class="hud-item"><span>钱财</span><strong class="num">${g.family.money}</strong></div></section>`;
+  const weatherArt=g.world.weather==='wet'?'rain':g.world.weather==='dry'?'sun':null;
+  const hudItem=(icon:string,label:string,value:string,warning=false,detail='')=>`<div class="hud-item ${warning?'resource-warning':''}" title="${esc(detail||label)}">${chromeImage('status-'+icon)}<div class="hud-copy"><span>${esc(label)}</span><strong class="num">${value}</strong>${detail?`<small class="hud-detail">${esc(detail)}</small>`:''}</div></div>`;
+  const hud=`<section class="player-hud" aria-label="本季状态"><div class="season-card">${chromeImage('status-season')}<div class="season-copy"><small>第 ${g.clock.generation} 代</small><strong>${l?`第 ${l.calendar.year} 年 · ${l.calendar.season}`:`第 ${g.clock.turn} 季`}</strong><span class="weather-status">${weatherArt?chromeImage('status-'+weatherArt,'weather-image'):''}${esc(g.world.weatherName)}</span></div></div>${hudItem('time','可用时间 / 总预算',`${l?l.budget.freeTime:g.ap}<small> / ${l?l.timePerSeason:g.parameters.actionsPerTurn}</small>`)}${hudItem('energy','可用精力',`${l?l.budget.freeEnergy:'—'}`)}${hudItem('food','可食储备 / 季耗',`${e.foodTotal}<small> / ${g.parameters.foodPerTurn}</small>`,low,g.socialFood?`预计购 ${g.socialFood.purchase}`:'')}${hudItem('money','钱财',`${g.family.money}`)}</section>`;
   const recapHtml=recap?`<section class="chapter-recap" aria-live="polite"><h2>${esc(recap.title)}</h2>${recap.lines.map(t=>`<p>${esc(t)}</p>`).join('')}<button type="button" class="text-btn" data-dismiss-recap>关闭回顾</button></section>`:'';
   const main=guide?ruleGuide(g,page):page==='聚落'?village(g,events):page==='家人'?family(g,button):page==='仓库'?inventory(g):body;
   const spread=guide||OWN_SPREAD.has(page)?main:`<div class="spread-body"><div class="reading-pane">${main}</div><aside class="attention-pane">${attention(g,page)}</aside></div>`;
   const budget=l?`<details class="budget-details"><summary>查看本季劳动安排 · 预留 ${l.budget.reservedTime} 时间 / ${l.budget.reservedEnergy} 精力</summary><p>已用时间 ${l.budget.spentTime} · 剩余时间 ${l.timeRemaining}</p>${l.budget.tasks.map(t=>`<p>${esc(t.name)} <span class="tag">时间 ${t.time} / 精力 ${t.energy}</span></p>`).join('')||'<p>暂无系统任务</p>'}</details>`:'';
-  const season=end?`<div><h3>${g.status==='ended'?'家族经营终止':g.victory?.won?'旅程胜利':'旅程结束'}</h3><p>${esc(endingCopy(g))}</p><p><a class="text-btn" href="/start">回到开始界面</a></p></div>`:g.status==='handover'?`<div><h3>后辈接手</h3><p>本季已结束。提交交接后才会换成后辈继续经营。</p></div><div class="action-primary">${button('handover')}</div>`:`<div><h3>季末检查</h3><ul class="check-list">${seasonCheck(g).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="action-primary">${button('economy:end:season')}</div>${budget}`;
-  return `<div class="chronicle-shell page-${pageArt(page)} ${page==='聚落'?'is-dashboard':''}">${masthead}${nav}${hud}${g.era&&page!=='社会'?`<div class="era-link"><span>${esc(g.era.card.name)} · ${g.era.generationLimit===null?'不限代':`第 ${g.era.generationsLived+1}/${g.era.generationLimit} 代`}${g.era.lastGeneration?' · 最后一代':''}</span><button type="button" class="text-btn" data-page="社会">社会历程 · 预计回报 ${g.era.expectedReward} 钱 →</button></div>`:''}${low?'<div class="food-alert" role="status">当前库存与预计购粮不足以覆盖本季消耗。<button type="button" data-page="农业">去田地</button><button type="button" data-page="商城">买补给</button><button type="button" data-page="生活">找生计</button></div>':''}<div class="chronicle-spread">${recapHtml}<header class="chapter-head ${page!=='聚落'?'illustrated-heading':''}">${page!=='聚落'?`<div class="painted-art art-${pageArt(page)}" aria-hidden="true"></div>`:''}<div class="section-heading"><div><h2>${page==='聚落'?'本季看板':pageNames[page]??page}</h2><p class="chapter-epigraph">${esc(chapterEpigraph(g,page))}</p></div>${!guide?`<button type="button" class="text-btn" data-guide="${esc(page)}">${pageNames[page]??page}规则</button>`:''}</div></header>${spread}<section ${page==='聚落'?'hidden':''} class="event-log" aria-live="polite"><h3>最近记事</h3>${events.length?events.slice(-3).map(t=>`<p>${esc(t)}</p>`).join(''):'<p>一家人从一块田开始。先安排口粮，再发展技艺。</p>'}${events.length>3?`<details><summary>查看本次全部变化</summary>${events.map(t=>`<p>${esc(t)}</p>`).join('')}</details>`:''}</section><div class="season-bar">${season}</div></div></div>`;
+  const season=end?`<div><h3>${g.status==='ended'?'家族经营终止':g.victory?.won?'旅程胜利':'旅程结束'}</h3><p>${esc(endingCopy(g))}</p><p><a class="text-btn" href="/start">回到开始界面</a></p></div>`:g.status==='handover'?`<div><h3>${g.era?.lastGeneration?'新时代人物':'后辈接手'}</h3><p>${esc(successionState(g))}</p></div><div class="action-primary">${button('handover')}</div>`:`<div><h3>季末检查</h3><ul class="check-list">${seasonCheck(g).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="action-primary">${button('economy:end:season')}</div>${budget}`;
+  return `<div class="chronicle-shell page-${pageArt(page)} ${page==='聚落'?'is-dashboard':''}">${masthead}${nav}${hud}${g.era&&page!=='社会'?`<div class="era-link"><span>${esc(g.era.card.name)} · ${g.era.generationLimit===null?'不限代':`第 ${g.era.generationsLived+1}/${g.era.generationLimit} 代`}${g.era.lastGeneration?' · 最后一代':''}</span><button type="button" class="text-btn" data-page="社会">社会历程 · 预计回报 ${g.era.expectedReward} 钱 →</button></div>`:''}${low?'<div class="food-alert" role="status">当前库存与预计购粮不足以覆盖本季消耗。<button type="button" data-page="农业">去田地</button><button type="button" data-page="商城">买补给</button><button type="button" data-page="生活">找生计</button></div>':''}<div class="chronicle-spread">${recapHtml}<header class="chapter-head ${page!=='聚落'?'illustrated-heading':''}">${page!=='聚落'?`<div class="painted-art art-${pageArt(page)}" aria-hidden="true"></div>`:''}<div class="section-heading"><div><h2>${page==='聚落'?'本季看板':pageNames[page]??page}</h2><p class="chapter-epigraph">${esc(chapterEpigraph(g,page))}</p></div>${!guide?`<button type="button" class="text-btn" data-guide="${esc(page)}">${pageNames[page]??page}规则</button>`:''}</div></header>${spread}${page==='聚落'||end||g.status==='handover'?`<div class="season-bar">${season}</div>`:''}</div></div>`;
 }

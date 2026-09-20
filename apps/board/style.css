@@ -260,9 +260,6 @@ summary { cursor: pointer; color: var(--ink); padding: 4px 0; }
 .person-card h3 small { font-size: 13px; color: var(--muted); font-weight: 400; }
 .succession-box { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
 
-.event-log { border-top: 1px solid var(--line); padding: 18px 0 8px; margin: 24px 0 0; }
-.event-log h3 { font-size: 14px; letter-spacing: 0.06em; }
-.event-log p { font-size: 13px; line-height: 1.8; margin: 4px 0; }
 .season-bar {
   margin-top: 16px; padding: 16px 0 0; border-top: 1px solid var(--line);
   display: grid; grid-template-columns: 1fr minmax(200px, 0.7fr); gap: 16px; align-items: start;
@@ -285,7 +282,6 @@ summary { cursor: pointer; color: var(--ink); padding: 4px 0; }
 }
 .rule-section h3 { font-size: 16px; margin: 4px 0 8px; }
 .rule-section p { font-size: 14px; line-height: 1.9; margin: 0; color: var(--muted); }
-.chronicle-spread:has(.rules-page) > .event-log,
 .chronicle-spread:has(.rules-page) > .season-bar { display: none; }
 
 .school-toolbar, .workbench-toolbar {
@@ -373,9 +369,15 @@ summary { cursor: pointer; color: var(--ink); padding: 4px 0; }
 .chronicle-dialog::backdrop { background: rgba(40, 32, 24, 0.45); }
 .chronicle-dialog h2 { font-size: 22px; font-family: var(--title); }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
-.chronicle-footer { max-width: 1280px; margin: 0 auto; padding: 20px 24px 32px; border-top: 1px solid var(--line); }
-.chronicle-footer p { color: var(--muted); font-size: 12px; line-height: 1.8; margin-top: 12px; }
-.tools { display: flex; gap: 10px; flex-wrap: wrap; }
+.options-menu { position: relative; }
+.options-menu > summary { list-style: none; cursor: pointer; }
+.options-menu > summary::-webkit-details-marker { display: none; }
+.options-menu[open] > summary { color: var(--accent); }
+.options-panel { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; display: grid; gap: 10px; min-width: 200px; padding: 16px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 24px #63432622; text-align: left; }
+.options-panel a { color: var(--accent); text-decoration: none; }
+.options-panel a:hover { text-decoration: underline; }
+.options-panel .file-button { text-align: center; }
+.options-panel .subtle { font-size: 12px; margin: 4px 0 0; }
 #app[aria-busy="true"] .game-action { pointer-events: none; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -397,7 +399,7 @@ summary { cursor: pointer; color: var(--ink); padding: 4px 0; }
 }
 
 @media (max-width: 600px) {
-  .chronicle-shell, .chronicle-footer, .entry-main, .start-screen, .guide { padding-left: 16px; padding-right: 16px; }
+  .chronicle-shell, .entry-main, .start-screen, .guide { padding-left: 16px; padding-right: 16px; }
   .chapter-nav { flex-wrap: nowrap; overflow-x: auto; }
   .chapter-tab { flex-shrink: 0; }
   .chronicle-masthead .eyebrow, .masthead-meta > div:first-child { display: none; }
@@ -466,6 +468,13 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .shop-item { padding:18px; }
 .shop-item h3 { border-bottom:1px solid var(--line); padding-bottom:10px; }
 .shop-item strong { color:var(--accent); }
+.shop-item-head { display:flex; align-items:center; gap:14px; }
+.shop-item-head h3 { flex:1; margin:0; }
+.shop-item-head .shop-item-image { width:72px; height:72px; }
+.shop-cart-lines { list-style:none; padding-left:0; }
+.shop-cart-lines li { display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid var(--line); }
+.shop-cart-lines li > span { flex:1; }
+.shop-cart-lines .shop-item-image { width:36px; height:36px; }
 .person-card { border-top:3px solid #aeb596; padding:24px; }
 .person-card h3 { font-size:20px; }
 .resource-meter progress { accent-color:var(--ok); }
@@ -476,7 +485,6 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .rules-page { max-width:960px; margin-inline:auto; }
 .rule-section > span { background:#a35440; color:var(--paper); border-radius:5px; font-family:var(--title); }
 .chronicle-dialog { background:var(--paper); border-top:5px solid var(--accent); box-shadow:0 20px 70px #2e211b44; }
-.chronicle-footer { max-width:1440px; }
 .season-dashboard { display:grid; grid-template-columns:minmax(0,2.2fr) minmax(260px,1fr); gap:16px; align-items:start; }
 .dashboard-main,.dashboard-side { display:grid; gap:16px; min-width:0; }
 .dashboard-pair { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
@@ -739,3 +747,32 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .farm-estate .farm-plan-selected{font-size:12px;padding:10px;background:#eaf0d9;color:#5c7744}
 .farm-seed-ledger>div{display:flex;align-items:center;gap:12px;border-bottom:1px solid #ece9d9;padding:5px 0;font-size:12px}
 .farm-seed-ledger svg{width:32px;height:40px}.farm-seed-ledger strong{margin-left:auto}.farm-seed-ledger small{font-weight:400;color:#858871}
+
+.person-portrait{width:176px;aspect-ratio:1;background-size:300% 200%;background-repeat:no-repeat;border-radius:16px;margin:0 auto 16px;background-color:#f4eddf}
+.person-portrait.is-deceased{filter:grayscale(1)}
+.elder-person{display:flex;align-items:center;gap:18px;margin:16px 0}.elder-person .person-portrait{width:104px;flex:none;margin:0}
+
+/* Illustrated desktop navigation and live status. */
+.chronicle-shell .chapter-nav{display:grid;grid-template-columns:repeat(var(--chapter-count,6),minmax(0,1fr));gap:8px;padding:10px 0 8px}
+.chronicle-shell .chapter-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;min-height:106px;padding:6px 10px 10px;border:1px solid transparent;border-bottom:3px solid transparent;border-radius:10px;color:var(--muted);font-size:15px;line-height:1.3}
+.chronicle-shell .chapter-tab:hover{background:rgba(255,255,255,.28);color:var(--ink);border-color:var(--line)}
+.chronicle-shell .chapter-tab[aria-current="page"]{background:var(--accent-soft);border-color:var(--line);border-bottom-color:var(--accent);color:var(--accent);font-weight:600}
+.chronicle-shell .chapter-tab:focus-visible,.masthead-links .text-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.chapter-image{display:block;width:68px;height:68px;object-fit:contain;mix-blend-mode:multiply;pointer-events:none}
+.chrome-image{display:block;width:48px;height:48px;flex:none;object-fit:contain;mix-blend-mode:multiply;pointer-events:none}
+.utility-image{width:25px;height:25px;object-fit:contain;mix-blend-mode:multiply;pointer-events:none}
+.masthead-links .text-btn{display:inline-flex;align-items:center;gap:5px}
+.chronicle-shell .player-hud{margin-top:6px}
+.chronicle-shell .player-hud .season-card{display:flex;flex-wrap:nowrap;align-items:center;gap:10px;padding:10px 12px 10px 0}
+.season-copy{display:grid;gap:2px;min-width:0}
+.chronicle-shell .season-copy strong{white-space:nowrap}
+.season-card .weather-status{display:flex;align-items:center;gap:4px;min-height:22px}
+.weather-image{width:23px;height:23px;object-fit:contain;mix-blend-mode:multiply}
+.chronicle-shell .player-hud .hud-item{display:flex;align-items:center;gap:8px;padding:10px 12px;min-width:0}
+.chronicle-shell.is-dashboard .hud-item:nth-child(4){display:none}
+.hud-copy{display:grid;gap:3px;min-width:0}
+.hud-copy>span{font-size:12px;color:var(--muted);line-height:1.5}
+.hud-copy .num{white-space:nowrap}
+.hud-copy .hud-detail{font-size:11px;line-height:1.4}
+
+.chapter-image-society{width:136px;max-width:100%;height:68px}
