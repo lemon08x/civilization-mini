@@ -301,16 +301,16 @@ food: modest bowl of cooked grain
 
 ## 人物年龄与时代肖像
 
-本机 Grok Build 的 image_gen 生成人物图。男女各两个身份，每个身份覆盖六个年龄段和四个时代，共 16 张六格年龄图、96 个肖像。每张为 1248×832 JPEG，按从左到右、从上到下排列幼年、儿童、少年、青年、中年、老年；页面按 3×2 网格显示当前年龄格。
+2026-09-20 使用内置 imagegen 重新生成全部人物图。男女各两个身份，每个身份覆盖六个年龄段和四个时代，共 16 张六格年龄图、96 个肖像。每张为 1536×1024 JPEG，按从左到右、从上到下排列幼年、儿童、少年、青年、中年、老年；页面按无间隔的 3×2 网格显示当前年龄格，每格 512×512。
 
 文件命名为 `person-<male|female>-<01|02><时代后缀>.jpg`：农业村落无后缀，集镇分工 `-town`，工业城镇 `-industry`，现代社会 `-modern`。时代主要通过日常衣着与发式区分，没有职业制服或能力加成。每个时代从独立的新随机人物开始；人物在本时代随年龄切换肖像，旧时代人物保留历史形象，不跨时代换装继任。
 
-生成以原人物的脸型、五官、体型与水彩纸感描述约束身份；当前 Grok image_gen 不支持直接输入参考图，因此跨图面貌仍有轻微差异。集镇采用整齐织物、领口与盘扣，工业采用衬衫和日常夹克，现代采用 T 恤、针织衫与轻便外套。原始农业肖像保留。
+新版先生成四套农业形象，再将各自农业图作为输入参考生成其余时代，维持五官、头肩构图和年龄顺序。集镇采用整齐织物、领口与盘扣，工业采用衬衫和日常夹克，现代采用 T 恤、针织衫与轻便外套。农业图透明区域在 JPEG 导出时以 #f4eddf 填底；其余时代保留生成的暖灰褐色背景。旧农业图也已替换，人物身份、年龄阈值、时代映射及存档结构不变。
 
 
 ## 顶部导航与状态素材
 
-`ui-navigation-preview.jpg` 与 `ui-status-preview.jpg` 是 Grok 生成的素材样张。页面使用裁切并优化后的 15 张 WebP：`ui-nav-*-ui.webp` 对应六个主导航；`ui-status-*-ui.webp` 对应时间、精力、钱财、季节、晴雨、粮食、存档与帮助。纸色归一后用 multiply 混合融入页面，社会历程保留横向建筑组合以便辨认。图片只负责呈现，导航标签与动态数值仍为真实文本。
+`ui-navigation-preview.jpg` 是旧版 Grok 样张，不再代表当前导航。当前七张 `ui-nav-*-ui.webp` 已由内置 imagegen 重绘为透明底独立插图，导出为 256×256 WebP，页面统一以 68×68 显示，移除导航图的 multiply 混合。社会历程改为紧凑的三阶段建筑组合；集市使用摊位，经营与交易使用轮具、齿轮和货包，避免两个入口含义重复。`ui-status-preview.jpg` 及 `ui-status-*-ui.webp` 状态图沿用原版本。本轮不改状态图。图片只负责呈现，导航标签与动态数值仍为真实文本。
 
 
 ## 商城商品图与「集市」导航（2026-09-20）
@@ -323,4 +323,65 @@ food: modest bowl of cooked grain
 - `item-book`（全部教材共用）、`item-granary`（家庭粮仓）、`item-library`（家学书室）。
 - `ui-nav-market`：顶部「集市」篇章标签图标，风格对齐既有 `ui-nav-*`。
 
-生成提示词存档于 `artifacts/image-gen/prompts.json`（通用段沿用 41 张物品图的暖纸水彩静物规范），驱动脚本 `artifacts/image-gen/gen.mjs`、转换脚本 `artifacts/image-gen/convert.py`。图片均为不透明背景、静物示意，不代表已拥有设备或实时库存。
+该旧批次的生成提示词存档于 `artifacts/image-gen/prompts.json`（通用段沿用 41 张物品图的暖纸水彩静物规范），驱动脚本 `artifacts/image-gen/gen.mjs`、转换脚本 `artifacts/image-gen/convert.py`。该批商品图片为不透明背景、静物示意，不代表已拥有设备或实时库存；当前导航已替换为下述透明底版本。
+
+## 导航与人物重绘说明（2026-09-20，当前版本）
+
+本节覆盖上文旧批次中有关导航与人物的生成来源、尺寸及背景说明；商品图不受影响。现有文件原位更新，可通过 Git 查看旧版。
+
+### 文件与用途
+
+- 导航：`ui-nav-{season,farm,family,study,market,trade,society}-ui.webp`，七张透明底 256×256 WebP；沿用 `chromeImage()` 引用。
+- 人物：`person-{male,female}-{01,02}{,-town,-industry,-modern}.jpg`，16 张 1536×1024 六格图集；沿用 `personPortrait()` 引用。不得给图集增加边框或格间距，否则百分比定位会偏移。
+- 年龄分格保持原规则：小于 6、12、18、35、55 岁依次取前五格，55 岁起取最后一格。绘图中的代表年龄只是视觉参照，不改变阈值。
+- `ui-navigation-preview.jpg`、`person-era-preview.jpg` 为历史样张，不代表本次成品。当前成品以实际引用文件为准。
+- 图像生成与换装使用内置 imagegen。Sharp 仅作部署格式导出、导航缩小和 JPEG 透明区域填底，没有程序绘制人物或替代生成。
+- 四套基础形象按脸型和体型区分；时代版本以各自基础图作参考。生成式肖像仍会有细节差异，不将外貌解释为人物能力或亲缘判定依据。
+
+### 导航提示词
+
+每张请求由以下通用段加主题段组成。
+
+```text
+Use case: illustration-story. Generate ONE isolated square navigation illustration for a Chinese family chronicle desktop game. TRUE TRANSPARENT BACKGROUND with alpha, no paper square, no backdrop, no shadow rectangle, no border, no lettering or numbers. Hand-painted gouache, elegant simplified shapes, subtle brush texture, muted sage green and warm walnut brown with small ochre accents. Not photorealistic, not 3D, not cartoon emoji. Clear bold silhouette readable at 64px. Center the compact subject, occupying about 78 percent of square width and height with equal transparent margins. Minimal detail, consistent visual weight, no tiny scenery.
+```
+
+- `season`：A small upright spiral desk calendar, a single cream blank page and a tiny ochre sun peeking above the top corner. No marks on the page.
+- `farm`：A single modest Chinese tiled-roof farmhouse beside a prominent upright sheaf of wheat and two simple green leaves. Compact triangular composition.
+- `family`：A warm compact bust-length group of three Chinese family members: adult woman, adult man, and one child centered in front. Simple distinct faces, sage and umber everyday clothes. The three heads create a readable triangular silhouette. No full bodies.
+- `study`：An open cream blank book with sage cover and one small wooden gear tucked at the lower right. Strong open-book silhouette. No text, no markings.
+- `market`：One charming small wooden market stall, broad sage canvas awning above a counter with exactly two simple baskets of produce. Compact frontal three-quarter view, big awning silhouette. No people, no sign.
+- `trade`：A compact wooden workshop wheel with one small iron gear and a tied cloth parcel at its foot. Express production and trade, not a market stall. Strong wheel silhouette, no building.
+- `society`：Three compact ascending architectural silhouettes grouped tightly: a rural tiled-roof home, a brick workshop with short chimney, and a simple modest modern building. Sage, umber, ivory. No skyline panorama, no smoke, no tiny windows. Balanced nearly square silhouette.
+
+### 人物提示词
+
+每张基础年龄图由通用段、身份段、农业时代段组成。其余时代使用对应农业图作为参考，要求保留身份、年龄格和构图，只变更发型及衣着；背景提示改为与参考协调的暖灰褐色。提示词表达生成意图，实际交付背景见上文。
+
+```text
+Use case: illustration-story. Create a production-ready character age sprite sheet for a Chinese family chronicle game. EXACTLY 3 equal columns and 2 equal rows on a landscape 3:2 canvas; SIX equal square cells tile the entire canvas with NO gutters, NO borders, NO panel frames, NO labels. Every cell has identical solid warm ivory background #f4eddf. Each cell contains exactly one centered head-and-shoulders portrait, entire hairstyle visible with 8% top clearance, shoulders cut only at that cell's bottom. Head scale consistent, no portrait crosses cell boundaries. Painterly gouache with clear elegant shapes and subtle pencil detail, warm natural skin, sage and umber clothing, readable kind expressive faces at 176px, NOT photorealistic, not anime, no glamour retouching. SAME Chinese person aging naturally in all six cells. In strict left-to-right top-to-bottom order ages: 3-year-old toddler, 8-year-old child, 15-year-old teenager, 27-year-old young adult, 45-year-old middle-aged adult, 70-year-old elder. Teenager must visibly be adolescent and distinct from adult, middle-aged face has subtle aging, elder has grey hair and wrinkles. Natural restrained expressions, no props, no hands, no text, no watermark.
+```
+
+身份段：
+
+- `male-01`：Male identity A: slim oval face, straight brows, almond eyes, defined but gentle cheekbones, warm tan complexion, thoughtful subtle smile.
+- `male-02`：Male identity B: broader round face, thick slightly arched brows, a wider nose, warm medium complexion, friendly open smile; stockier shoulders than identity A.
+- `female-01`：Female identity A: slim oval face, gently arched brows, almond eyes, softly defined cheekbones, warm medium complexion, thoughtful subtle smile.
+- `female-02`：Female identity B: round face, straight brows, bright smiling eyes, wider cheeks, warm tan complexion, sturdy build, friendly open smile distinct from identity A.
+
+时代段：
+
+- 农业：pre-industrial Chinese agrarian village. Simple worn cotton cross-collar or plain wrap garments, natural undyed linen, muted sage and brown, age-appropriate traditional tied hair, no hats, no modern clothes. No costume opulence.
+- `town`：Chinese market-town craft era before industrialization: neatly woven plain cotton garments, simple standing collar and cloth knot closures, orderly age-appropriate tied hair or braids. No opulent silk, no jewelry, no occupational uniform.
+- `industry`：Chinese early industrial town, mid twentieth century everyday civilian life: short practical hair for males, neat short bob or tied braids for females, plain cotton shirts, simple collared everyday jackets in muted blue-grey, sage and brown. No uniforms, badges, hats, text or logos.
+- `modern`：Present-day ordinary Chinese civilian daily life: natural age-appropriate contemporary hair, simple T-shirts, soft cardigans and lightweight everyday jackets, muted sage, ivory and warm brown. No traditional topknots or wrap robes, no logos, no uniforms.
+
+参考图约束：
+
+```text
+Use the reference ONLY for face identity, painterly style, six-cell grid alignment and portrait scale. Create a new separate era variant sheet. Preserve exactly the same six age stages and identity. Change clothing and hair according to the era below.
+```
+
+### 后续维护
+
+导航和人物都只改呈现，不改变游戏世界。桌面检查重点是：七张导航加载、选中底色下无方形色块、头像不串格，以及少年和中年能区分。后续只需检查相关桌面页面，不新增手机适配或窄屏验收。完整 96 个肖像已按图集目视检查；无需通过推进游戏到全部时代来检查静态素材。
