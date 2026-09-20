@@ -27,10 +27,73 @@ export function makeVitality(s:GameState,r:LifeRules,age:number):Vitality {
   return {sex,portrait,portraitEra:s.era?.index??0,ageSeasons:age*4,lifespanSeasons,constitution,energy:constitution,health:100,talent,alive:true,childId:null};
 }
 export function namePerson(s:GameState,p:Person):void {
-  const names=p.vitality!.sex==='male'?['林禾','林川','林松','林远','林安','林青']:['林穗','林溪','林棠','林宁','林岚','林秋'];
-  const unused=names.filter(name=>!Object.values(s.persons).some(other=>other.name===name));
-  const pool=unused.length?unused:names;
-  p.name=pool[Math.floor(draw(s)*pool.length)];
+  const surnames=['沈','陆','温','顾','许','程','叶','宋','苏','江','林','周'];
+  const given=['知微','清和','望舒','怀瑾','照野','听澜','行舟','予安','见山','疏桐','明川','初宁','守拙','云岫','时雨','怀远'];
+  const names=surnames.flatMap(surname=>given.map(name=>surname+name));
+  const used=new Set(Object.values(s.persons).filter(other=>other.id!==p.id).map(other=>other.name));
+  const pool=names.filter(name=>!used.has(name));
+  p.name=pool.length?pool[Math.floor(draw(s)*pool.length)]:names[Math.floor(draw(s)*names.length)]+'·'+p.id.split(':').at(-1);
+
+}
+
+const CHARACTER_JOBS=[
+  ['种植人','木作匠','药草采集人','渡口记账人','乡塾教习','行商'],
+  ['园圃经营者','器具匠','药铺伙计','货栈账房','私塾教习','商队联络人'],
+  ['农事技术员','机修工','卫生员','仓储调度员','夜校教师','报馆采访员'],
+  ['生态调查员','设备维护员','社区健康协助员','物流协调员','社区教师','资料整理员'],
+];
+export function initializeCharacter(s:GameState,p:Person):void {
+  const choose=<T>(items:readonly T[]):T=>items[Math.floor(draw(s)*items.length)];
+  const era=s.era?.index??0,v=p.vitality!;
+  const origins=[
+    ['在河谷村落长大，曾随邻人连夜修补被水冲坏的堤口。','幼时常在山村之间搬运粮种，习惯把沿途水源记在纸上。','在乡塾窗外听课，靠替人整理旧册换来识字的机会。'],
+    ['在集镇货栈旁长大，见过一纸失信如何让几户人家断了生计。','曾随长辈往来各地市集，对不同地方的做事方法格外好奇。','在作坊街住了多年，记得每次停工时街坊相互借粮的情景。'],
+    ['在工厂聚集的街区长大，曾帮夜校抄写给晚班工人的讲义。','亲历过一次供水中断，此后总想弄清日常设施为何会失灵。','从乡间来到工业城镇，仍保存着家乡寄来的种子和书信。'],
+    ['在城市社区长大，参与过一次物资互助，见过系统遗漏的普通人。','曾帮助整理一批无人问津的旧档案，从中发现技术进步的代价。','少年时经历过极端天气停课，自此习惯为邻里检查应急物资。'],
+  ];
+  const vocation=Math.floor(draw(s)*CHARACTER_JOBS[era].length);
+  v.character={
+    style:choose(['素衣简行，随身只留一本小册','衣着整洁，物件总按次序收好','偏爱旧物，袖口常有亲手补过的针脚','装束利落，说话时目光明亮','喜用温和颜色，举止从容','不拘小节，出门总带一只装满杂物的布袋']),
+    temperament:choose(['内敛细察','坦率热忱','沉静坚韧','谨慎认真','洒脱好奇','温厚耐心']),
+    background:choose(origins[era]),
+    attachment:choose(['挂念故乡的一位旧友，却不知该如何开口写信。','一直珍藏启蒙者赠送的小物，遇到难题时会拿出来看看。','盼着远行的亲人归来，因此格外珍惜每次相聚。','对曾经辜负过的一次信任心怀歉意，想用往后的行动弥补。','习惯先照顾旁人的感受，却不善于说出自己的疲惫。','向往独处，也希望有人愿意耐心听完自己的见闻。']),
+    aspiration:choose(['愿把复杂的学问讲给普通人听。','想让依赖他人的人也能拥有选择。','希望亲手做成一件经得住岁月的东西。','想弄清事情的根由，再决定该如何出手。','盼望下一代不必重复自己走过的弯路。','希望在保全自身与照顾旁人之间找到长久之道。']),
+    occupation:CHARACTER_JOBS[era][vocation],vocation,originEra:era,
+    mood:choose(['对陌生的门中生活既期待又拘谨。','想证明自己，也担心让人失望。','暂时把疑问藏在心里，先认真观察。','愿意尝试新的生活，但仍挂念来处。']),memories:[],
+  };
+}
+
+export function characterMemory(s:GameState,id:string,key:string,text:string,mood:string,events:GameEvent[]):void {
+  const p=s.persons[id],v=p?.vitality,c=v?.character;if(!c||c.memories.some(m=>m.key===key))return;
+  c.memories.push({key,age:Math.floor(v!.ageSeasons/4),text});
+  const responses:Record<string,string>={'内敛细察':'把这些感受写进札记，暂不急着说出口。','坦率热忱':'想找信任的人谈谈此刻的感受。','沉静坚韧':'打算先把眼前的事做好，让行动说明心意。','谨慎认真':'反复斟酌自己的选择，才慢慢放下顾虑。','洒脱好奇':'又生出新的疑问，想看看下一段路。','温厚耐心':'想到同行者的处境，愿意听听他们的心声。'};
+  c.mood=key==='death'?mood:mood+(responses[c.temperament]??'');
+  lifeEvent(events,id,'character',`${p.name}：${text}`);
+}
+
+// Only actual milestones change the character's story; observing or switching never rerolls it.
+export function recordCharacterGrowth(s:GameState,events:GameEvent[]):void {
+  if(!s.sect)return;
+  for(const [id,m] of Object.entries(s.sect.members)){
+    if(!m.admitted)continue;
+    const p=s.persons[id],v=p.vitality!,c=v.character;if(!c)continue;
+    if(!v.alive){characterMemory(s,id,'death','人生止于此处，门中留下了这份生平。','生平已定。',events);continue;}
+    const age=Math.floor(v.ageSeasons/4),known=s.economy?.branches?.learned[id]??[];
+    if(age>=s.life!.rules.adultYears)characterMemory(s,id,'adult',`开始独立承担门中事务，也重新思量自己的志向：${c.aspiration}`,'比初来时笃定，仍愿意承认自己有所不知。',events);
+    if(known.some(k=>k!=='A0'))characterMemory(s,id,'study','把第一份新学问写进随身札记，第一次觉得疑问有了着落。','因为学有所获而欣喜，想把理解付诸实践。',events);
+    if(m.practice>=s.sect.rules.stageProgress)characterMemory(s,id,'cultivation','修行渐有根基，开始分辨一时冲动与长久心愿。','能够稍稍安顿心绪，也更在意自己的取舍。',events);
+    if(m.discipleId)characterMemory(s,id,'teacher',`收下${s.persons[m.discipleId].name}，发现教人之前也要重新审视自己。`,'期待弟子走出自己的路，也担心教得不够好。',events);
+    if(s.persons[id].practices.includes('dao:teach'))characterMemory(s,id,'teaching','第一次把所学真正教给弟子，才察觉自己也在受教。','因彼此理解而温暖，愿意多一点耐心。',events);
+    if(s.sect.improvements.some(i=>i.personId===id))characterMemory(s,id,'doctrine','把多年研证写成本门心法，留给尚未相识的后来者。','感到欣慰，也提醒自己不要把经验当成唯一答案。',events);
+    if(age>=35)characterMemory(s,id,'mature',`走过一段岁月，再看当年的心愿：${c.aspiration}`,'少了一些急切，更珍惜能够同行的人。',events);
+    if(!s.sect.current.includes(id)&&m.generation<s.clock.generation)characterMemory(s,id,'retired','把门中事务交给弟子，仍愿在被问及时细说旧日经验。','有卸下重担的轻松，也有不愿惊动后辈的牵挂。',events);
+    if(age>=s.life!.rules.agingYears)characterMemory(s,id,'elder',`开始整理散落的书信与札记。${c.attachment}`,'对未竟之事仍有牵挂，愿把时间留给重要的人。',events);
+    const era=s.era?.index??0;
+    if(era!==c.originEra&&!c.memories.some(n=>n.key==='era:'+era)){
+      c.occupation=CHARACTER_JOBS[era][c.vocation];
+      characterMemory(s,id,'era:'+era,`时代变迁，开始以${c.occupation}的身份接触新的社会事务。`,'面对新的生活有些陌生，仍愿从头学起。',events);
+    }
+  }
 }
 export function initializeLife(s:GameState,r:LifeRules):void {
   s.life={rules:structuredClone(r),timeRemaining:r.timePerSeason};
@@ -59,7 +122,7 @@ export function healthCeiling(v:Vitality,r:LifeRules):number {return Math.max(30
 export function energyCeiling(v:Vitality):number {return Math.max(v.minimumEnergy??2,Math.floor(v.constitution*(0.4+v.health*0.006)));}
 export function lifeView(p:Person,r?:LifeRules) {
   const v=p.vitality;
-  return v?{sex:v.sex,portrait:v.portrait,portraitEra:v.portraitEra,ageYears:Math.floor(v.ageSeasons/4),ageQuarter:v.ageSeasons%4,health:v.health,...(r?{maxHealth:healthCeiling(v,r)}:{}),energy:v.energy,maxEnergy:energyCeiling(v),alive:v.alive,talent:TALENTS[v.talent],upbringing:v.upbringing?{...v.upbringing}:null}:undefined;
+  return v?{sex:v.sex,portrait:v.portrait,portraitEra:v.portraitEra,ageYears:Math.floor(v.ageSeasons/4),ageQuarter:v.ageSeasons%4,health:v.health,...(r?{maxHealth:healthCeiling(v,r)}:{}),energy:v.energy,maxEnergy:energyCeiling(v),alive:v.alive,character:v.character?structuredClone(v.character):null,talent:TALENTS[v.talent],upbringing:v.upbringing?{...v.upbringing}:null}:undefined;
 }
 // Living direct ancestors of the active person; retired elders stay consultable while alive.
 export function livingElders(s:GameState):Person[] {
@@ -183,6 +246,7 @@ export function initializeSect(s:GameState,r:SectRules):void {
   for(const id of ids){
     const p=s.persons[id];p.vitality=makeVitality(s,s.life!.rules,s.life!.rules.adultYears+2);namePerson(s,p);
     if(s.life!.renewal)p.vitality.minimumEnergy=s.life!.renewal.minimumEnergy;
+    initializeCharacter(s,p);
     s.sect.members[id]={generation:1,masterId:null,discipleId:null,candidateId:null,admitted:true,practice:0,rewardedStage:0,time:s.life!.rules.timePerSeason,consulted:[]};
   }
   s.household.heirId=s.household.activePersonId;

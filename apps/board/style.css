@@ -940,3 +940,12 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .sect-inline-picture { width:42px; height:42px; margin-right:10px; }
 .sect-theme .action-name { display:flex; align-items:center; }
 .sect-theme .action-name .ui-icon { flex-shrink:0; }
+
+/* 人物生平嵌入现有水彩师徒卡。 */
+.character-identity { text-align:left; margin:14px 0; font-size:14px; }
+.character-identity p { line-height:1.75; }
+.character-identity .tag { display:inline-block; margin:2px 3px 2px 0; }
+.character-feeling { padding:10px 13px; border-left:2px solid var(--ok); color:var(--muted); background:var(--paper); }
+.character-identity details { border-top:1px solid var(--line); padding-top:10px; }
+.character-identity li { margin:9px 0; }
+.sect-lineage > .person-portrait, .sect-disciple > .person-portrait, .sect-candidate > .person-portrait { margin:12px auto; }

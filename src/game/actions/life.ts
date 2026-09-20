@@ -2,7 +2,7 @@ import {eraCard} from '../systems/eras.js';
 import { activePerson, blankPerson, heir, type GameState } from '../model/state.js';
 import { branchNodesFor } from '../model/branches.js';
 import { branchName, branchNeeds } from '../systems/branches.js';
-import { canSucceed, consultableNodes, energyCeiling, healthCeiling, lifeEvent, livingElders, makeVitality, namePerson, selectSectPerson, gainPractice, sectStage, sectStrength, sectDrawOdds, SECT_CARDS, draw } from '../systems/life.js';
+import { canSucceed, consultableNodes, energyCeiling, healthCeiling, lifeEvent, livingElders, makeVitality, namePerson, initializeCharacter, characterMemory, selectSectPerson, gainPractice, sectStage, sectStrength, sectDrawOdds, SECT_CARDS, draw } from '../systems/life.js';
 import { defineAction, type ActionDefinition } from './definition.js';
 
 export function lifeActions(s:GameState):ActionDefinition[] {
@@ -57,7 +57,7 @@ function sectActions(s:GameState):ActionDefinition[]{
     const q=d.sect!,master=q.members[id],pid=`person:${Object.keys(d.persons).length+1}`,p=blankPerson(pid,'候选弟子');
     p.vitality=makeVitality(d,d.life!.rules,r.candidateAge);if(d.life!.renewal)p.vitality.minimumEnergy=d.life!.renewal.minimumEnergy;
     if(draw(d)<sectStrength(d)*0.1)p.vitality.constitution++;
-    d.persons[pid]=p;namePerson(d,p);master.candidateId=pid;
+    d.persons[pid]=p;namePerson(d,p);initializeCharacter(d,p);master.candidateId=pid;
     q.members[pid]={generation:master.generation+1,masterId:id,discipleId:null,candidateId:null,admitted:false,practice:0,rewardedStage:0,time:d.life!.rules.timePerSeason,consulted:[]};
     say(d,ev,`寻得${p.name}，${r.candidateAge}岁；入门须从零修道`);
   }));
@@ -67,6 +67,7 @@ function sectActions(s:GameState):ActionDefinition[]{
   ],'每师一徒、每代两席；徒弟从零修道，课程按前置学习，不受私人婚育影响。',(d,ev)=>{
     const master=d.sect!.members[id],pid=master.candidateId!;master.discipleId=pid;master.candidateId=null;
     d.sect!.members[pid].admitted=true;d.household.memberIds.push(pid);d.household.heirId=pid;
+    characterMemory(d,pid,'admitted',`拜${d.persons[id].name}为师，从今日开始修道习术。`,'对新的师承心怀期待，也还惦念原来的生活。',ev);
     d.economy!.branches!.learned[pid]=[];say(d,ev,`${d.persons[pid].name}正式入门，师父${d.persons[id].name}`);
   }));
   out.push(defineAction(s,'economy:sectpractice:dao','静心修道','道',{time:r.practiceTime,energy:r.practiceEnergy},sectStage(s)>=r.maxStage?['个人修为已至当前上限']:[],`修为+${r.practiceGain}；每${r.stageProgress}进度一境。每境首次衍生${r.fortunePerStage}气运，最多储备${r.fortuneCap}。道改善其他行动效率。`,(d,ev)=>gainPractice(d,id,r.practiceGain,ev)));

@@ -1,7 +1,7 @@
 import {initializeEras,recordEraProduction} from './systems/eras.js';
 import {recordProducts} from './systems/industry-products.js';
 import { recordBranchWork } from './systems/branches.js';
-import { initializeLife, initializeSect } from './systems/life.js';
+import { initializeLife, initializeSect, recordCharacterGrowth } from './systems/life.js';
 import { initialExpeditions,recordExpeditionEvidence } from './systems/expedition.js';
 import { initializeModern } from './systems/modern.js';
 import { initialTower,recordTowerEvidence } from './systems/tower.js';
@@ -58,6 +58,7 @@ export function createInitialState(rules: Ruleset, seed: number, scenarioId: str
   if(rules.sect&&state.life)initializeSect(state,rules.sect);
   initializeEras(state,rules);
   newSeason(state, rules, []);
+  recordCharacterGrowth(state,[]);
   return deepFreeze(state);
 }
 export function getAvailableActions(state: GameState, rules: Ruleset): ActionOffer[] {
@@ -84,5 +85,6 @@ export function transition(state: GameState, action: GameAction, rules: Ruleset)
   recordEraProduction(next,events,[...events]);
   recordBranchWork(next,events);
   if (action.type !== 'handover' && (action.type === 'end-turn' || action.type==='economy'&&(action.operation==='end'||action.operation==='erasettle') || (!next.sect&&(next.life?next.life.timeRemaining===0:next.ap === 0)))) finishSeason(next, rules, events);
+  recordCharacterGrowth(next,events);
   return { state: deepFreeze(next), events: deepFreeze(events) };
 }

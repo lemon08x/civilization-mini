@@ -53,7 +53,7 @@ export function parseSession(value: unknown): Session {
   validateRuleset(record.manifest.ruleset);
   // Current save shape is deliberately not migrated: preserve incompatible files.
   const sect=value.state.sect,persons=value.state.persons;
-  const invalid=()=>{throw new Error('存档缺少有效师徒、道术或现代使命数据，请新开游戏；原存档不修改。');};
+  const invalid=()=>{throw new Error('存档缺少有效人物生平、师徒、道术或现代使命数据，请新开游戏；原存档不修改。');};
   const finite=(n:unknown)=>typeof n==='number'&&Number.isFinite(n)&&n>=0;
   if(!isRecord(sect)||!isRecord(persons)||!isRecord(sect.members)||!Array.isArray(sect.current)||sect.current.length!==2||new Set(sect.current).size!==2||!isRecord(sect.rules)||canonical(sect.rules)!==canonical(record.manifest.ruleset.sect))invalid();
   const q=sect as Record<string,any>,people=persons as Record<string,any>;
@@ -62,6 +62,10 @@ export function parseSession(value: unknown): Session {
   for(const [id,raw] of Object.entries(q.members)){
     if(!isRecord(raw)||!people[id]||!['generation','practice','rewardedStage','time'].every(k=>finite(raw[k]))||!Number.isInteger(raw.generation)||typeof raw.admitted!=='boolean'||!Array.isArray(raw.consulted))invalid();
     const m=raw as Record<string,any>;
+    const character=people[id]?.vitality?.character;
+    if(!isRecord(character)||!['style','temperament','background','attachment','aspiration','occupation','mood'].every(k=>typeof character[k]==='string'&&character[k].length>0)||!Number.isInteger(character.vocation)||Number(character.vocation)<0||Number(character.vocation)>5||!Number.isInteger(character.originEra)||Number(character.originEra)<0||Number(character.originEra)>3||!Array.isArray(character.memories))invalid();
+    const memories=(character as Record<string,any>).memories;
+    if(memories.some((v:unknown)=>!isRecord(v)||typeof v.key!=='string'||!Number.isInteger(v.age)||Number(v.age)<0||typeof v.text!=='string')||new Set(memories.map((v:{key:string})=>v.key)).size!==memories.length)invalid();
     if(m.practice>q.rules.maxStage*q.rules.stageProgress||m.rewardedStage>q.rules.maxStage)invalid();
     for(const key of ['masterId','discipleId','candidateId'])if(m[key]!==null&&(typeof m[key]!=='string'||!q.members[m[key]]))invalid();
     if(m.masterId&&(q.members[m.masterId].generation!==m.generation-1||![q.members[m.masterId].discipleId,q.members[m.masterId].candidateId].includes(id)))invalid();
