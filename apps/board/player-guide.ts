@@ -2,7 +2,7 @@ import type { SessionObservation } from '../../src/runtime/session.js';
 import {esc} from './economy-view.js';
 
 export const pageNames:Record<string,string>={
-  社会:'社会历程',聚落:'本季看板',农业:'田地',生活:'补给与谋生',家人:'师徒与修道',仓库:'仓库',安排:'安排与计划',
+  社会:'社会历程',聚落:'本季看板',农业:'田地',生活:'补给与谋生',家人:'师徒',修炼:'修炼图',仓库:'仓库',安排:'安排与计划',
   学科:'学堂',制造:'制造',系统:'生产系统',雇佣:'人员安排',商城:'集市',
   能源:'供能',家业:'家业',作坊:'作坊',副本:'副本',试炼:'试炼',
 };
@@ -14,7 +14,8 @@ export function playerGroups(g:SessionObservation['game']):PlayerGroup[] {
   const groups:PlayerGroup[]=[
     {name:'本季',pages:['聚落'],description:'看这一季的日子与缺口',epigraph:'把日子安顿好，才有余裕向前。'},
     {name:'农场',pages:['农业'],description:'种田、照料与收成',epigraph:'田里有收成，家里才有下一季。'},
-    {name:'师徒与修道',pages:['家人'],description:'两位同门、收徒、修道与师徒交接',epigraph:'道须亲修，学问相承。'},
+    {name:'师徒',pages:['家人'],description:'两位同门、收徒与师徒交接',epigraph:'道须亲修，学问相承。'},
+    ...(g.sect?[{name:'修炼',pages:['修炼'],description:'个人五境、本门心法与修道机缘',epigraph:'静以修身，学以致用。'}]:[]),
     {name:'学习与制造',pages:['学科','制造'],description:'学知识、验证产品、加工物资',epigraph:'亲手做成的东西，才算真正留下。'},
     {name:'集市',pages:['商城'],description:'物资、设备、学习服务与家庭资产的买卖',epigraph:'钱要花在最缺的地方。'},
     {name:'经营与交易',pages:[
@@ -37,6 +38,7 @@ export function chapterEpigraph(g:SessionObservation['game'],page:string):string
 
 export function ruleGuide(g:SessionObservation['game'],page:string):string {
   const e=g.economy!,l=g.life;
+  if(g.sect&&page==='修炼')return `<section class="rules-page"><button class="text-btn" data-page="修炼">← 返回修炼图</button><h2>修炼规则</h2><p>个人五境：定心、观照、知止、守一、通明。名称只表示现有境界，每${g.sect.rules.stageProgress}修为一境；新入门从零修习。</p><p>点击节点只查看详情；静心修道、授徒修道及研证心法通过行动按钮实际结算。切换传人同样是游戏行动，不会刷新预算；节点详情展示当前行动者的数据。</p><p>个人道改善其他行动的时间与精力成本，不能代替知识、物资或电力。心法改进跨代保留，后人仍须逐境修习才能发挥效果。</p><p>研证须个人满境，掌握足够课程并涉猎三类学科，完成两类亲身实践；每级累计${g.sect.rules.doctrineSteps}次付费研证。实际条件和花费以行动报价为准。</p><p>机缘仅为辅助，收在图谱下方；未抽卡不影响修炼与传承。</p></section>`;
   if(g.sect&&['家人','社会'].includes(page))return `<section class="rules-page"><button class="text-btn" data-page="${page}">← 返回</button><h2>${pageNames[page]} · 规则</h2><p>每代两位传人，各收一徒；双方弟子成年后整代交接。切换行动者不刷新时间，结束本季共同结算。</p><p>个人入门从零修道。高修为、跨学科实践和多次研证才能永久改进本门道法；本人道的效果已计入行动报价。术须亲自学习，可由师父付出双方时间与精力传授。</p><p>修道阶段产生少量气运；抽卡仅作辅助，不降低修为、不直接给分。概率以行动前报价为准。</p><p>跨时代保留同一师徒谱系、修为和所学。进入现代自动召集，有${g.sect.rules.modernSeasons}季准备期限；四类危机每类须至少完成兜底。各副本只计已完成最高难度分数，升级不叠加旧档分，未完成任务无分。提前结束会判定使命成败。</p></section>`;
 
   const guides:Record<string,[string,string][]>={
