@@ -5,11 +5,11 @@ import type {GameState} from '../model/state.js';
 import {defineAction,type ActionDefinition} from './definition.js';
 import {branchNeeds} from '../systems/branches.js';
 import {amount,foodStock,changeGoods,missingGoods} from '../systems/economy.js';
-import {ERAS,DUNGEON_TASKS} from '../model/eras.js';
+import {ERAS,DUNGEON_TASKS,CRISES,CRISIS_LEVELS} from '../model/eras.js';
 import {eraEvent} from '../systems/eras.js';
 export function eraActions(s:GameState):ActionDefinition[]{
  const e=s.era;if(!e)return [];const out:ActionDefinition[]=[];
- out.push(defineAction(s,'economy:erasettle:stage','结算当前社会并进入下一段','社会阶段',{ap:0},e.closed?['社会历程已结束']:[],'结束本季，按当前产能推算剩余代际并兑现本阶段回报。进入下一时代时从刚成年的新随机人物开始，不延续上一时代亲属关系或个人知识；资产与公共记录保留。不要求建成水井或泵。现代社会不限代数，结算即结束旅程并按副本任务计分；家业试炼只影响胜负判定。',(d)=>{d.era!.pendingSettle=true;}));
+ out.push(defineAction(s,'economy:erasettle:stage',e.index===3?'结束现代使命并计分':'结算当前社会并进入下一段','社会阶段',{ap:0},e.closed?['社会历程已结束']:[],'结束本季，按当前产能推算剩余代际并兑现本阶段回报。跨时代延续师徒、个人修为和所学；门派资产与规程保留。不要求建成水井或泵。现代有公开准备期限，结算即结束旅程；只有危机副本最高难度计分，四项至少兜底才算使命完成。',(d)=>{d.era!.pendingSettle=true;}));
  for(const on of [true,false])out.push(defineAction(s,'economy:tap:'+(on?'on':'off'),on?'接入家庭田自来水服务':'暂停自来水服务','社会阶段',{ap:0},[...(e.index!==3?['现代社会才提供公共自来水']:[]),...(e.tap===on?['已经是此安排']:[])],'每个确实缺水的季节支付1钱，由公共服务人员为家庭田补2水分。无需求不收费，无钱时保留自家供水退路。',(d,ev)=>{d.era!.tap=on;eraEvent(d,ev,'tap',on?'已接入自来水服务':'已暂停自来水服务');}));
  out.push(defineAction(s,'economy:publicmill:grain','使用公共磨坊','社会阶段',{time:1,energy:0,money:1},[
   ...(!ERAS[e.index].publicMill?['工业城镇以后才有公共磨坊']:[]),
@@ -17,6 +17,7 @@ export function eraActions(s:GameState):ActionDefinition[]{
   ...(s.economy!.equipmentUsed.publicMill===s.clock.absoluteTurn?['本季已经用过公共磨坊']:[]),
  ],'社会提供的磨坊，不要求磨粮知识或设备。2小麦换1面粉，付1钱。每季一次。私人磨粮产量更高。',(d,ev)=>{changeGoods(d,{wheat:2},-1,ev,'公共磨坊');changeGoods(d,{flour:1},1,ev,'公共磨坊');d.economy!.equipmentUsed.publicMill=d.clock.absoluteTurn;eraEvent(d,ev,'public-mill','公共磨坊磨出1面粉',1,1);}));
  if(e.index!==3)return out;
+ if(s.sect)return [...out,...crisisActions(s)];
  out.push(defineAction(s,'economy:dungeonstart:family','进入最终副本：跨代家业试炼','最终副本',{ap:0},e.dungeon.started?['已经进入副本']:[],`仅现代社会开放；现代不限代数，无超时提醒。副本由六个一次性任务组成，按任务分值计分，达标并结算后才算旅程胜利。${s.electric?'v27 还需交付一次真实电力完成通电验收。':''}`,(d,ev)=>{d.era!.dungeon.started=true;eraEvent(d,ev,'dungeon-start','最终副本开始：为跨代家业工程提供真实供给或专业劳动');}));
  const costs:Record<string,{time:number;energy:number;money:number;needs:string[]}>={
   food:{time:2,energy:1,money:0,needs:foodStock(s)<s.socialFood!.foodPerSeason+4?['需4份余粮，并保留本季生活口粮']:[]},
@@ -45,5 +46,37 @@ export function eraActions(s:GameState):ActionDefinition[]{
   const complete=(!d.electric||!!dungeon.powered)&&score>=target;
   eraEvent(d,ev,'dungeon-work',`${o.name}完成：副本总分${score}/${target}${complete?'，通电验收与总分达标，结算即旅程胜利':''}`,o.progress,o.money);
  }));
+ return out;
+}
+
+function crisisActions(s:GameState):ActionDefinition[]{
+ const x=s.era!.crises;if(!x)return [];const r=s.sect!.rules,out:ActionDefinition[]=[];
+ for(const c of CRISES){
+   const p=x.entries[c.id];if(p.level>=3)continue;const level=p.level+1,quantity=r.crisisSupply*level;
+   for(const route of ['technical','coordination'] as const){
+     if(p.step>0&&p.route!==route)continue;
+     const knowledge=[...c[route]] as string[];if(level>=2)knowledge.push(route==='technical'?c.advanced:'O5');
+     const needs=[...branchNeeds(s,knowledge)];
+     const goods=p.step===1&&route==='technical'?{[c.goods]:quantity}:{};
+     const food=p.step===1&&(c.id==='bio'||c.id==='climate')?quantity:0;
+     needs.push(...missingGoods(s,goods));if(food&&foodStock(s)<s.socialFood!.foodPerSeason+food)needs.push(`须交付${food}份可食粮，并留下本季生活口粮`);
+     if(p.step===2&&s.clock.absoluteTurn<=p.lastTurn)needs.push('保障方案须跨季验证，下季再验收');
+     const power=p.step===2&&level>=2&&route==='technical'?r.crisisPower*(level-1):0;
+     if(power&&(s.economy!.modern?.power??0)<power)needs.push(`验收须实际交付${power}电`);
+     if(level===3&&c.id==='climate'&&!s.economy!.industry?.instances.well?.commissioned&&!s.economy!.industry?.instances.pump?.commissioned)needs.push('周全档须有实际调试的井或泵保障供水');
+     if(level===3&&c.id==='ai'&&!s.economy!.industry?.products.E01)needs.push('周全档须验证发电机产品以理解服务韧性');
+     const money=route==='coordination'&&p.step===1?r.crisisFee*level:p.step===0?level:0;
+     const label=['建立方案','投入保障','跨季验收'][p.step];
+     out.push(defineAction(s,`economy:crisis:${c.id}-${route}`,`${c.name} · ${CRISIS_LEVELS[level]} · ${label}（${route==='technical'?'技术':'协调'}）`,'现代使命',{time:p.step===0?4:2,energy:p.step===0?2:1,money},needs,
+       `${c.purpose}。${route==='technical'?'亲自技术保障':'委托与组织保障'}；第${p.step+1}/3步。本步投入${Object.entries(goods).map(([k,v])=>`${v}${k}`).join('、')||'无部件'}${food?`、${food}份粮`:''}${power?`、${power}电`:''}。完成本档后该副本记${r.crisisScore*level*level}分，替换原${r.crisisScore*p.level*p.level}分；投入不返还。`,(d,ev)=>{
+         if(Object.keys(goods).length)changeGoods(d,goods,-1,ev,c.name);
+         let need=food;const direct=Math.min(need,d.household.food);d.household.food-=direct;need-=direct;
+         for(const id of ['flour','wheat','soy']){const n=Math.min(need,amount(d,id));if(n)changeGoods(d,{[id]:n},-1,ev,c.name);need-=n;}
+         if(power)usePower(d,power,ev,c.name);
+         const v=d.era!.crises!.entries[c.id];v.route=route;v.step++;v.lastTurn=d.clock.absoluteTurn;
+         if(v.step===3){v.level=level;v.step=0;v.route='';eraEvent(d,ev,'crisis-complete',`${c.name}完成${CRISIS_LEVELS[level]}，本副本最高成绩${r.crisisScore*level*level}分`);}else eraEvent(d,ev,'crisis-progress',`${c.name}：${label}完成，进度${v.step}/3；已交付资源保留为任务进度`);
+       }));
+   }
+ }
  return out;
 }

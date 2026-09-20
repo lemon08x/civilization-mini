@@ -3,7 +3,7 @@ import { ancestorKnows } from './ancestry.js';
 import { nodeInEra } from '../model/branches.js';
 import { activePerson, blankPerson, heir, project, seedValue, type GameState, type Person } from '../model/state.js';
 import type { GameEvent } from '../model/events.js';
-import type { LifeRules, Talent, Vitality } from '../model/life.js';
+import type { LifeRules, SectRules, SectCard, Talent, Vitality } from '../model/life.js';
 
 export const TALENTS: Record<Talent, {name:string;effect:string}> = {
   strong:{name:'健壮',effect:'亲自体力劳动少消耗1精力'},
@@ -12,7 +12,7 @@ export const TALENTS: Record<Talent, {name:string;effect:string}> = {
   organizer:{name:'善组织',effect:'招聘、采购与建立经营安排少用1时间'},
   resilient:{name:'善恢复',effect:'主动休息与季末基本恢复额外恢复1精力'},
 };
-function draw(s:GameState):number {
+export function draw(s:GameState):number {
   let x=s.randomState;x^=x<<13;x^=x>>>17;x^=x<<5;s.randomState=x>>>0;return s.randomState/4294967296;
 }
 export function makeVitality(s:GameState,r:LifeRules,age:number):Vitality {
@@ -26,7 +26,7 @@ export function makeVitality(s:GameState,r:LifeRules,age:number):Vitality {
   const portrait=pool[Math.floor(draw(s)*pool.length)];
   return {sex,portrait,portraitEra:s.era?.index??0,ageSeasons:age*4,lifespanSeasons,constitution,energy:constitution,health:100,talent,alive:true,childId:null};
 }
-function namePerson(s:GameState,p:Person):void {
+export function namePerson(s:GameState,p:Person):void {
   const names=p.vitality!.sex==='male'?['林禾','林川','林松','林远','林安','林青']:['林穗','林溪','林棠','林宁','林岚','林秋'];
   const unused=names.filter(name=>!Object.values(s.persons).some(other=>other.name===name));
   const pool=unused.length?unused:names;
@@ -41,6 +41,7 @@ export function initializeLife(s:GameState,r:LifeRules):void {
 }
 export function beginEraLife(s:GameState,events:GameEvent[]):void {
   if(!s.life)return;
+  if(s.sect){lifeEvent(events,s.household.activePersonId,'era-start','时代变化，师徒谱系、修为和个人所学延续');return;}
   const id=`person:${Object.keys(s.persons).length+1}`,person=blankPerson(id,'新时代经营者');
   person.vitality=makeVitality(s,s.life.rules,s.life.rules.adultYears);
   if(s.life.renewal)person.vitality.minimumEnergy=s.life.renewal.minimumEnergy;
@@ -65,7 +66,7 @@ export function livingElders(s:GameState):Person[] {
   const out:Person[]=[];const seen=new Set<string>();let current=s.household.activePersonId;
   while(!seen.has(current)){
     seen.add(current);
-    const parent=Object.values(s.persons).find(p=>p.vitality?.childId===current);
+    const parent=s.sect?(s.sect.members[current]?.masterId?s.persons[s.sect.members[current].masterId!]:undefined):Object.values(s.persons).find(p=>p.vitality?.childId===current);
     if(!parent)break;
     if(parent.vitality?.alive&&parent.id!==s.household.heirId)out.push(parent);
     current=parent.id;
@@ -107,7 +108,7 @@ export function lifeCost(s:GameState,id:string,oldAp:number):{time:number;energy
   if(s.life?.renewal&&op==='branchlearn'&&s.life.consultPending===target)time=Math.max(1,time-s.life.renewal.consultDiscount);
   return {time,energy};
 }
-export function canSucceed(s:GameState):boolean {const v=heir(s).vitality;return s.household.heirId!==s.household.activePersonId&&!!v?.alive&&v.ageSeasons>=s.life!.rules.adultYears*4;}
+export function canSucceed(s:GameState):boolean {if(s.sect)return sectSuccessors(s).length===2;const v=heir(s).vitality;return s.household.heirId!==s.household.activePersonId&&!!v?.alive&&v.ageSeasons>=s.life!.rules.adultYears*4;}
 export function recordLifeGeneration(s:GameState,events:GameEvent[]):void {
   const trial=project(s);
   events.push({type:'generation-ended',final:s.status==='ended',facts:{
@@ -151,7 +152,7 @@ export function settleLife(s:GameState,missing:number,events:GameEvent[],foodReq
   delete s.life!.seasonCompany;delete s.life!.seasonTaught;
   // One descendant per person; born during life, never created as an adult on handover.
   // Retired ancestors do not start additional branches.
-  for(const person of new Set([activePerson(s),heir(s)])) {
+  for(const person of s.sect?[]:new Set([activePerson(s),heir(s)])) {
     const v=person.vitality!;
     if(!v.alive||v.childId||v.ageSeasons<r.birthYears*4)continue;
     const id=`person:${Object.keys(s.persons).length+1}`,child=blankPerson(id,'成长中的后辈');
@@ -160,8 +161,91 @@ export function settleLife(s:GameState,missing:number,events:GameEvent[],foodReq
     namePerson(s,child);
     lifeEvent(events,id,'birth',`家族迎来${child.vitality.sex==='male'?'男孩':'女孩'}${child.name}，出生天赋「${TALENTS[child.vitality.talent].name}」，从零岁成长，不自动获得知识`);
   }
+  if(s.sect){
+    if(!activePerson(s).vitality!.alive){
+      const live=s.sect.current.find(id=>s.persons[id].vitality?.alive);
+      if(live)selectSectPerson(s,live);
+      else s.status=canSucceed(s)?'handover':'ended';
+    }
+    return;
+  }
   if(!activePerson(s).vitality!.alive){
     s.status=canSucceed(s)?'handover':'ended';
     lifeEvent(events,s.household.activePersonId,'succession',s.status==='handover'?'成年后辈可接手':'没有可接手的成年后辈，本次家族经营结束');
   }
+}
+
+
+export const SECT_CARDS:Record<SectCard,string>={study:'明理札记',craft:'百工心得',teach:'授业笔录',prepare:'筹备手札'};
+export function initializeSect(s:GameState,r:SectRules):void {
+  const ids=[s.household.activePersonId,s.household.heirId] as [string,string];
+  s.sect={rules:structuredClone(r),current:ids,members:{},doctrine:0,research:0,improvements:[],fortune:0,cards:{study:0,craft:0,teach:0,prepare:0},draws:0,lastDraw:'尚未求取机缘',seasonChance:0,seasonBonus:null,nextBonus:null,lastEvent:'静心修行'};
+  for(const id of ids){
+    const p=s.persons[id];p.vitality=makeVitality(s,s.life!.rules,s.life!.rules.adultYears+2);namePerson(s,p);
+    if(s.life!.renewal)p.vitality.minimumEnergy=s.life!.renewal.minimumEnergy;
+    s.sect.members[id]={generation:1,masterId:null,discipleId:null,candidateId:null,admitted:true,practice:0,rewardedStage:0,time:s.life!.rules.timePerSeason,consulted:[]};
+  }
+  s.household.heirId=s.household.activePersonId;
+}
+export function sectStage(s:GameState,id=s.household.activePersonId):number {
+  const x=s.sect;if(!x)return 0;return Math.min(x.rules.maxStage,Math.floor((x.members[id]?.practice??0)/x.rules.stageProgress));
+}
+export function sectStrength(s:GameState,id=s.household.activePersonId):number {
+  const x=s.sect;if(!x)return 0;return Math.min(0.35,sectStage(s,id)*(x.rules.daoPercent+x.doctrine*x.rules.doctrinePercent)/100);
+}
+export function sectCategory(id:string):SectCard {
+  const op=id.split(':')[1];
+  if(['branchlearn','study','research','tuition','inspect'].includes(op))return 'study';
+  if(['branchteach','teach','sectteach','consult','company'].includes(op))return 'teach';
+  if(['farm','gather','work','build','process','finish','sysbuild','syscommission','sysrun','fertilize'].includes(op))return 'craft';
+  return 'prepare';
+}
+export function sectCosts(s:GameState,id:string,cost:{time:number;energy:number}) {
+  if(!s.sect||id==='handover'||['sectswitch','sectpractice','sectimprove','sectdraw','end','erasettle','retire'].includes(id.split(':')[1]))return cost;
+  const category=sectCategory(id),bonus=s.sect.cards[category]*s.sect.rules.cardPercent/100+(s.sect.seasonBonus===category?0.02:0);
+  const factor=1-Math.min(0.4,sectStrength(s)+bonus);
+  const reduce=(n:number)=>n>0?Math.max(0.25,Math.round(n*factor*100)/100):0;
+  return {time:reduce(cost.time),energy:reduce(cost.energy)};
+}
+export function sectSuccessors(s:GameState):string[] {
+  if(!s.sect)return [];return s.sect.current.map(id=>s.sect!.members[id].discipleId).filter((id):id is string=>!!id&&!!s.persons[id]?.vitality?.alive&&s.persons[id].vitality!.ageSeasons>=s.life!.rules.adultYears*4);
+}
+export function selectSectPerson(s:GameState,id:string):void {
+  const x=s.sect!,old=x.members[s.household.activePersonId];
+  if(old){old.time=s.life!.timeRemaining;old.consulted=[...(s.life!.consulted??[])];old.consultPending=s.life!.consultPending;}
+  s.household.activePersonId=id;s.household.heirId=x.members[id].discipleId??id;
+  s.life!.timeRemaining=x.members[id].time;s.life!.consulted=[...x.members[id].consulted];s.life!.consultPending=x.members[id].consultPending;
+}
+export function gainPractice(s:GameState,id:string,amount:number,events:GameEvent[]):void {
+  const x=s.sect!,m=x.members[id],r=x.rules;
+  m.practice=Math.min(r.stageProgress*r.maxStage,m.practice+amount);
+  const stage=sectStage(s,id),earned=Math.max(0,stage-m.rewardedStage)*r.fortunePerStage;
+  m.rewardedStage=Math.max(stage,m.rewardedStage);const before=x.fortune;x.fortune=Math.min(r.fortuneCap,x.fortune+earned);
+  lifeEvent(events,id,'dao',`${s.persons[id].name}修为 ${m.practice}/${r.stageProgress*r.maxStage}，第${stage}境${earned?`；衍生气运+${x.fortune-before}（溢出${earned-(x.fortune-before)}）`:''}`);
+}
+export function sectDrawOdds(s:GameState):[number,number,number] {
+  const x=s.sect!,q=Math.min(x.fortune/x.rules.fortuneCap,sectStrength(s));
+  return [0.8-q*0.1,0.18+q*0.08,0.02+q*0.02];
+}
+export function renewSect(s:GameState):void {
+  const x=s.sect;if(!x)return;
+  for(const [id,m] of Object.entries(x.members))if(m.admitted){m.time=s.life!.rules.timePerSeason;if(id===s.household.activePersonId)m.time=s.life!.timeRemaining;}
+  x.seasonChance=x.rules.eventPercent/100+x.current.reduce((sum,id)=>sum+sectStrength(s,id),0)/2*0.1;
+  x.seasonBonus=x.nextBonus;x.nextBonus=null;
+}
+export function settleSect(s:GameState,events:GameEvent[]):void {
+  const x=s.sect;if(!x)return;
+  x.members[s.household.activePersonId].time=s.life!.timeRemaining;
+  if(draw(s)<x.seasonChance){
+    const keys=Object.keys(SECT_CARDS) as SectCard[];x.nextBonus=keys[Math.floor(draw(s)*keys.length)];
+    x.lastEvent=`修行偶得${SECT_CARDS[x.nextBonus]}启发，下季对应行动成本额外降低2%`;
+    lifeEvent(events,s.household.activePersonId,'opportunity',x.lastEvent);
+  }else x.lastEvent='本季静修，无额外机缘';
+}
+export function sectView(s:GameState){
+  const x=s.sect;if(!x)return null;
+  return {doctrine:x.doctrine,research:x.research,improvements:structuredClone(x.improvements),rules:{...x.rules},
+    current:[...x.current],activeId:s.household.activePersonId,ready:sectSuccessors(s).length===2,
+    members:Object.entries(x.members).map(([id,m])=>({id,name:s.persons[id].name,practiceEvidence:s.persons[id].practices.filter(v=>v.startsWith('dao:')),...m,consulted:[...m.consulted],time:id===s.household.activePersonId?s.life!.timeRemaining:m.time,stage:sectStage(s,id),effect:Math.round(sectStrength(s,id)*100),life:lifeView(s.persons[id],s.life!.rules)})),
+    fortune:x.fortune,odds:sectDrawOdds(s),cards:Object.entries(x.cards).map(([id,level])=>({id,name:SECT_CARDS[id as SectCard],level,effect:level*x.rules.cardPercent})),lastDraw:x.lastDraw,draws:x.draws,lastEvent:x.lastEvent,seasonBonus:x.seasonBonus};
 }

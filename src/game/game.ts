@@ -1,7 +1,7 @@
 import {initializeEras,recordEraProduction} from './systems/eras.js';
 import {recordProducts} from './systems/industry-products.js';
 import { recordBranchWork } from './systems/branches.js';
-import { initializeLife } from './systems/life.js';
+import { initializeLife, initializeSect } from './systems/life.js';
 import { initialExpeditions,recordExpeditionEvidence } from './systems/expedition.js';
 import { initializeModern } from './systems/modern.js';
 import { initialTower,recordTowerEvidence } from './systems/tower.js';
@@ -55,6 +55,7 @@ export function createInitialState(rules: Ruleset, seed: number, scenarioId: str
   if(rules.renewal){state.life!.renewal=structuredClone(rules.renewal);for(const p of Object.values(state.persons))if(p.vitality)p.vitality.minimumEnergy=rules.renewal.minimumEnergy;}
   if(rules.socialFood){state.socialFood={rules:structuredClone(rules.socialFood),foodPerSeason:p.foodPerTurn,price:p.foodPrice,policy:'off',budget:rules.socialFood.defaultBudget,reserve:rules.socialFood.defaultReserve,delivery:false,serviceRemaining:rules.socialFood.serviceCapacity};state.production!.market.food=Math.min(state.production!.market.food,rules.socialFood.storage);}
   if(rules.electric)state.electric={rules:structuredClone(rules.electric)};
+  if(rules.sect&&state.life)initializeSect(state,rules.sect);
   initializeEras(state,rules);
   newSeason(state, rules, []);
   return deepFreeze(state);
@@ -68,7 +69,7 @@ export function transition(state: GameState, action: GameAction, rules: Ruleset)
   if (!definition?.offer.enabled) throw new Error(definition?.offer.reason || '此状态下不存在该行动');
   const next = structuredClone(state), events: GameEvent[] = [];
   const { ap, time, energy, money, food, materials } = definition.offer;
-  if(next.life){next.life.timeRemaining-=time??0;activePerson(next).vitality!.energy-=energy??0;}
+  if(next.life){next.life.timeRemaining=Math.round((next.life.timeRemaining-(time??0))*100)/100;activePerson(next).vitality!.energy=Math.round((activePerson(next).vitality!.energy-(energy??0))*100)/100;}
   next.ap -= ap; next.household.money -= money; next.household.food -= food;
   if (materials) for (const [material, amount] of Object.entries(materials)) next.production!.inventory[material as Material] -= amount;
   events.push({ type: 'action-paid', action: structuredClone(definition.offer.action), cost: { ap, ...(next.life?{time,energy}:{}), money, food, ...(materials ? { materials: { ...materials } } : {}) } });
@@ -81,7 +82,7 @@ export function transition(state: GameState, action: GameAction, rules: Ruleset)
   masterAvailable(next, activePerson(next), rules, events);
   if (rules.socialInheritance) masterAvailable(next, heir(next), rules, events);
   recordEraProduction(next,events,[...events]);
-  if (action.type !== 'handover' && (action.type === 'end-turn' || action.type==='economy'&&(action.operation==='end'||action.operation==='erasettle') || (next.life?next.life.timeRemaining===0:next.ap === 0))) finishSeason(next, rules, events);
   recordBranchWork(next,events);
+  if (action.type !== 'handover' && (action.type === 'end-turn' || action.type==='economy'&&(action.operation==='end'||action.operation==='erasettle') || (!next.sect&&(next.life?next.life.timeRemaining===0:next.ap === 0)))) finishSeason(next, rules, events);
   return { state: deepFreeze(next), events: deepFreeze(events) };
 }

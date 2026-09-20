@@ -18,6 +18,7 @@ export function branchProcessNeeds(s:GameState,id:string,worker=false):string[]{
 export function branchActionNeeds(s:GameState,id:string):string[]{
   if(!s.economy?.branches||id==='handover')return [];
   const [,op,target]=id.split(':');
+  if(s.sect&&['sectswitch','sectseek','sectadmit','sectpractice','sectteach','sectimprove','sectdraw','crisis'].includes(op))return [];
   if(s.era&&['tap','dungeonstart','dungeonwork','erasettle','publicmill'].includes(op))return [];
   if(s.socialFood&&['foodpolicy','foodbudget','foodreserve','foodplan'].includes(op))return [];
   if(s.economy.industry){
@@ -47,6 +48,7 @@ export function branchActionNeeds(s:GameState,id:string):string[]{
 export function recordBranchWork(s:GameState,events:GameEvent[]):void {
   const b=s.economy?.branches;if(!b)return;
   for(const e of [...events]){
+    if(s.sect){const kind=e.type==='economy-farm'&&e.actor==='本人'&&['harvest','sow','tend'].includes(e.operation)?'farm':e.type==='economy-process'&&e.actor==='本人'&&e.stage==='complete'||e.type==='industry'&&e.actor==='self'&&e.operation==='worked'?'craft':e.type==='branch'&&e.operation==='taught'?'teach':null;const records=s.persons[s.household.activePersonId].practices;if(kind&&!records.includes('dao:'+kind))records.push('dao:'+kind);}
     if(e.type==='economy-process'&&e.stage==='complete'&&e.actor==='本人'&&!b.protocols.includes(e.recipe)){
       b.protocols.push(e.recipe);events.push({type:'branch',operation:'protocol',node:e.recipe,detail:'真实试制完成，工艺规程可供雇员跨代接续'});
     }

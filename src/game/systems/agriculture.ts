@@ -1,3 +1,4 @@
+import {sectCosts} from './life.js';
 import { activePerson, type GameState } from '../model/state.js';
 import type { GameEvent } from '../model/events.js';
 import type { Crop, Worker } from '../model/economy.js';
@@ -73,7 +74,7 @@ export function farmWork(s: GameState, crop: Crop, events: GameEvent[], worker?:
 export function farmCycleLabor(s: GameState) {
   const crop = s.economy?.ongoing?.farm;
   if (!crop || !s.life || s.economy!.workers.farmer?.active) return { time: 0, energy: 0 };
-  const t = s.life.renewal?.farmTime ?? 3, energy = s.life.renewal?.farmEnergy ?? 2, f = s.economy!.field;
+  const {time:t,energy}=sectCosts(s,'economy:farm:cycle',{time:s.life.renewal?.farmTime??3,energy:s.life.renewal?.farmEnergy??2}), f = s.economy!.field;
   if (f.crop && f.growth >= f.duration - 1) return { time: t * 2, energy: energy * 2 };
   if (!f.crop) return { time: t, energy };
   return { time: 0, energy: 0 };
@@ -82,7 +83,7 @@ export function settleOngoingFarm(s: GameState, rules: Ruleset, events: GameEven
   const crop = s.economy?.ongoing?.farm;
   if (!crop) return;
   const f = s.economy!.field, farmer = s.economy!.workers.farmer?.active ? s.economy!.workers.farmer : undefined;
-  const t = s.life?.renewal?.farmTime ?? 3, en = s.life?.renewal?.farmEnergy ?? 2;
+  const {time:t,energy:en}=sectCosts(s,'economy:farm:cycle',{time:s.life?.renewal?.farmTime??3,energy:s.life?.renewal?.farmEnergy??2});
   const pay = (op: string) => {
     if (farmer) {
       const cost = wage(s, rules, farmer);
@@ -98,8 +99,8 @@ export function settleOngoingFarm(s: GameState, rules: Ruleset, events: GameEven
       events.push({ type: 'economy-farm', operation: 'waiting', crop, actor: '本人', amount: 0 });
       return false;
     }
-    s.life.timeRemaining -= t;
-    activePerson(s).vitality!.energy -= en;
+    s.life.timeRemaining = Math.round((s.life.timeRemaining-t)*100)/100;
+    activePerson(s).vitality!.energy = Math.round((activePerson(s).vitality!.energy-en)*100)/100;
     return true;
   };
   if (f.crop && f.growth >= f.duration) { if (!pay('收获')) return; farmWork(s, f.crop, events, farmer); }

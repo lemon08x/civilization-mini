@@ -1,7 +1,8 @@
+import {recordBranchWork} from './branches.js';
 import {renewSocialFood,settleSocialFood} from './social-food.js';
 import {renewEraServices,operateEraServices,recordEraProduction,settleEra} from './eras.js';
 import { renewIndustry } from './industry.js';
-import { canSucceed, recordLifeGeneration, settleLife } from './life.js';
+import { canSucceed, recordLifeGeneration, settleLife, renewSect, settleSect } from './life.js';
 import { arriveExpeditions,recordExpeditionEvidence,settleExpeditions } from './expedition.js';
 import { resetModern,generateModern,serveModern,storeModern } from './modern.js';
 import { arriveTower,dispatchTower,recordTowerEvidence,settleTower } from './tower.js';
@@ -86,6 +87,7 @@ function settleDistantWork(state: GameState, rules: Ruleset, events: GameEvent[]
 function settleLifeAndEra(state: GameState, rules: Ruleset, events: GameEvent[], missing: number, foodPerTurn: number): boolean {
   if(state.life){
     settleLife(state,missing,events,foodPerTurn);
+    settleSect(state,events);
     settleEra(state,rules,events);
     if(state.status!=='active'){recordLifeGeneration(state,events);return true;}
     if(state.life.pendingRetirement&&canSucceed(state)){state.status='handover';recordLifeGeneration(state,events);return true;}
@@ -116,9 +118,11 @@ function settleVictoryAndGeneration(state: GameState, rules: Ruleset, events: Ga
 export function newSeason(state: GameState, rules: Ruleset, events: GameEvent[]): void {
   rollWeather(state, rules, events);
   renewArrivals(state, rules, events);
+  renewSect(state);
 }
 export function finishSeason(state: GameState, rules: Ruleset, events: GameEvent[]): void {
   const productionStart=settleProduction(state, rules, events);
+  recordBranchWork(state,events.slice(productionStart));
   const {missing, foodPerTurn}=settleHousehold(state, rules, events);
   settleDistantWork(state, rules, events, productionStart);
   if(settleLifeAndEra(state, rules, events, missing, foodPerTurn)) return;

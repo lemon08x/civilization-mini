@@ -32,6 +32,7 @@ export interface TrialProject {
 }
 export interface GameState {
   electric?: {rules:import('./electric.js').ElectricRules};
+  sect?: import('./life.js').SectState;
   schemaVersion: 1;
   clock: Clock;
   status: GameStatus;
