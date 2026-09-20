@@ -35,6 +35,13 @@ export interface CompactObservation {
     health?: number;
     hardship: number;
   };
+  family?: {
+    heirAgeYears?: number;
+    seasonsToAdult?: number;
+    upbringing?: { fed: number; company: number; taught: number };
+    seasonCompany: boolean;
+    elderConsults: number;
+  };
   stage?: { era?: string; remaining?: number; farm?: string; tasks: string[] };
   events: unknown[];
   actions: CompactActionQuote[];
@@ -110,6 +117,10 @@ export function compactObservation(
   const clock = record(game.clock) ?? {};
   const actions = ((game.actions as ActionLike[] | undefined) ?? []);
   const enabled = actions.filter(action => action.enabled);
+  const heirView = record(life?.heir);
+  const upbringing = record(heirView?.upbringing);
+  const elders = Array.isArray(life?.elders) ? life.elders : [];
+  const adultYears = num(life?.adultYears);
   const tasks = Array.isArray(budget?.tasks)
     ? (budget.tasks as { name?: string; id?: string }[]).map(task => str(task.name) ?? str(task.id) ?? '').filter(Boolean)
     : [];
@@ -140,6 +151,13 @@ export function compactObservation(
         availableEnergy: num(budget?.freeEnergy, Math.max(0, num(person?.energy) - num(budget?.reservedEnergy))),
         ...(typeof person?.health === 'number' ? { health: person.health } : {}),
         hardship: num(family.hardship),
+      },
+      family: {
+        ...(typeof heirView?.ageYears === 'number' ? { heirAgeYears: heirView.ageYears } : {}),
+        ...(heirView && adultYears ? { seasonsToAdult: Math.max(0, (adultYears - num(heirView.ageYears)) * 4 - num(heirView.ageQuarter)) } : {}),
+        ...(upbringing ? { upbringing: { fed: num(upbringing.fedSeasons), company: num(upbringing.companySeasons), taught: num(upbringing.taughtSeasons) } } : {}),
+        seasonCompany: Boolean(life.seasonCompany),
+        elderConsults: elders.reduce((total, elder) => total + num(record(elder)?.consultable), 0),
       },
     } : {}),
     stage: {
@@ -186,6 +204,16 @@ export function formatCompactObservation(compact: CompactObservation): string {
   if (budget) {
     lines.push(`预算: 时间 ${budget.timeRemaining}（预留 ${budget.reservedTime}，可用 ${budget.availableTime}） / 精力 ${budget.energy}（预留 ${budget.reservedEnergy}，可用 ${budget.availableEnergy}） / 困境 ${budget.hardship}`
       + (budget.health !== undefined ? ` / 健康 ${budget.health}` : ''));
+  }
+  if (compact.family) {
+    const f = compact.family;
+    lines.push(`家人: ${[
+      f.heirAgeYears !== undefined ? `后辈${f.heirAgeYears}岁` : '尚无后辈',
+      f.seasonsToAdult ? `距成年${f.seasonsToAdult}季` : '',
+      f.upbringing ? `养育 饱食${f.upbringing.fed}/陪伴${f.upbringing.company}/受教${f.upbringing.taught}` : '',
+      f.heirAgeYears !== undefined ? `本季陪伴${f.seasonCompany ? '已' : '未'}` : '',
+      f.elderConsults > 0 ? `在世长辈可请教${f.elderConsults}门课程` : '',
+    ].filter(Boolean).join('；')}`);
   }
   if (compact.stage?.era || compact.stage?.farm || (compact.stage?.tasks.length ?? 0) > 0) {
     lines.push(`阶段: ${[compact.stage?.era, compact.stage?.remaining !== undefined ? `剩余${compact.stage.remaining}季` : '', compact.stage?.farm ? `持续耕作 ${compact.stage.farm}` : '', ...(compact.stage?.tasks ?? [])].filter(Boolean).join('；')}`);

@@ -18,7 +18,11 @@ const server = http.createServer(async (req, res) => {
     else if (path === '/ai') absolute = join(projectRoot, 'apps/board/ai.html');
     else if (path === '/ai-guide.md') absolute = join(projectRoot, 'docs/AI_PLAYER.md');
     else if (path === '/style.css') absolute = join(projectRoot, 'apps/board/style.css');
-    else if (path === '/chronicle-art.png') absolute = join(projectRoot, 'apps/board/chronicle-art.png');
+    else if (path.startsWith('/illustrations/') && path.endsWith('.png')) {
+      const root = join(projectRoot, 'apps/board/illustrations');
+      absolute = resolve(root, path.slice('/illustrations/'.length));
+      if (!absolute.startsWith(root + sep)) { res.writeHead(404); res.end(); return; }
+    }
     else if (path === '/rulesets/current.json') {
       const { base } = await loadCurrentContext();
       const body = Buffer.from(JSON.stringify(base), 'utf8');

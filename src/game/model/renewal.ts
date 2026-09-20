@@ -1,1 +1,1 @@
-export interface RenewalRules { fedHealth:number; graceSeasons:number; minimumEnergy:number; farmTime:number; farmEnergy:number; careTime:number; careEnergy:number; careMoney:number; inheritedTime:number; inheritedEnergy:number; }
+export interface RenewalRules { fedHealth:number; graceSeasons:number; minimumEnergy:number; farmTime:number; farmEnergy:number; careTime:number; careEnergy:number; careMoney:number; inheritedTime:number; inheritedEnergy:number; companyTime:number; companyEnergy:number; consultDiscount:number; }

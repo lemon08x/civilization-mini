@@ -434,7 +434,7 @@ summary { cursor: pointer; color: var(--ink); padding: 4px 0; }
 /* Illustrated chronicle: artwork is decorative; values and actions remain live HTML. */
 :root { --page:#f0eadc; --paper:#fffaf0; --line:#d9ceba; --accent:#805037; --ok:#56764c; }
 body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 45%),radial-gradient(ellipse at 100% 30%,#ceb88b20,transparent 50%); }
-.painted-art { background-image:url('/chronicle-art.png'); background-size:300% 200%; aspect-ratio:1; flex-shrink:0; mix-blend-mode:multiply; pointer-events:none; }
+.painted-art { background-image:url('/illustrations/chronicle-art.png'); background-size:300% 200%; aspect-ratio:1; flex-shrink:0; mix-blend-mode:multiply; pointer-events:none; }
 .art-home { background-position:0 0; }
 .art-food { background-position:50% 0; }
 .art-family { background-position:100% 0; }

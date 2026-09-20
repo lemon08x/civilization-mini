@@ -47,6 +47,11 @@ export function seasonCheck(g:Game):string[] {
   const stopped=e.industryView?.systems.filter(s=>s.instance&&s.blockers.length);
   if(stopped?.length)items.push(`已知停机：${stopped.map(s=>`${s.name}（${s.blockers.join('；')}）`).join('、')}`);
   if(l?.pendingRetirement)items.push('已安排本季交接；结束本季后才会进入交接，人物尚未切换。');
+  if(l){
+    if(l.heir?.alive&&l.heir.ageYears<l.adultYears&&!l.seasonCompany)items.push('后辈本季尚未陪伴；饱食、陪伴与受教会在后辈成年时结算体质与天赋。');
+    const consults=(l.elders??[]).reduce((n,x)=>n+x.consultable,0);
+    if(consults>0)items.push(`在世长辈可请教 ${consults} 门课程（见家人页）。`);
+  }
   if(e.modern&&e.modern.power>0)items.push(`当前余电 ${e.modern.power}${e.electricView?'；未入库的电会在季末耗散':''}`);
   return items;
 }
@@ -105,14 +110,18 @@ function family(g:Game,button:Button):string {
     const p=who==='self'?l.person:l.heir;
     if(!p)return `<article class="person-card"><h3>后辈</h3><p>尚未有后辈。</p></article>`;
     const name=who==='self'?g.person.name:g.heir.name;
-    return `<article class="person-card"><h3>${esc(name)} <small>${p.ageYears} 岁 · ${p.alive?'在世':'已故'}</small></h3><p><span class="tag">${esc(p.talent.name)}</span> ${esc(p.talent.effect)}</p>${meter('健康',p.health,p.maxHealth??100,'health')}${meter('精力',p.energy,p.maxEnergy,'energy')}<p class="subtle">已知学习：${esc(knownNames(g,who==='heir'))}</p></article>`;
+    const raising=who==='heir'&&p.upbringing?`<p class="subtle">养育记录：饱食 ${p.upbringing.fedSeasons} 季 · 陪伴 ${p.upbringing.companySeasons} 季 · 受教 ${p.upbringing.taughtSeasons} 季${p.ageYears<l.adultYears?`（成年时按记录结算体质与天赋${l.seasonCompany?'；本季已陪伴':'；本季尚未陪伴'}）`:'（成年评估已完成）'}</p>`:'';
+    return `<article class="person-card"><h3>${esc(name)} <small>${p.ageYears} 岁 · ${p.alive?'在世':'已故'}</small></h3><p><span class="tag">${esc(p.talent.name)}</span> ${esc(p.talent.effect)}</p>${meter('健康',p.health,p.maxHealth??100,'health')}${meter('精力',p.energy,p.maxEnergy,'energy')}${raising}<p class="subtle">已知学习：${esc(knownNames(g,who==='heir'))}</p></article>`;
   };
+  const elders=(l.elders??[]).map(e=>`<article class="person-card"><h3>${esc(e.name)} <small>${e.ageYears} 岁 · 在世长辈</small></h3><p class="subtle">${e.consultable>0?`可请教 ${e.consultable} 门本人未学的课程；请教后下一次学习该课程时间减少，每门每代一次。`:'没有本人未学且可请教的课程。'}</p></article>`).join('');
+  const consults=g.actions.filter(a=>a.id.startsWith('economy:consult:')).slice(0,4).map(a=>button(a.id)).join('');
   return `<div class="person-spread">${person('self')}${person('heir')}</div>
+    ${elders?`<div class="succession-box"><h3>在世长辈</h3><div class="person-spread">${elders}</div>${consults?`<div class="compact-actions">${consults}</div>`:''}</div>`:''}
     <div class="succession-box"><h3>交接</h3><p>${esc(successionState(g))}</p>
     <p>家族实物和记录会保留；后辈仍要亲自学习。安排交接不会立刻切换人物。</p>
     <p class="subtle">${esc(successionWork(g))}</p>
     <div class="action-primary">${button('economy:retire:family')}</div>
-    <div class="compact-actions">${button('economy:rest:self')}${button('economy:care:self')}</div></div>`;
+    <div class="compact-actions">${button('economy:company:heir')}${button('economy:rest:self')}${button('economy:care:self')}</div></div>`;
 }
 
 function village(g:Game,events:string[]):string {

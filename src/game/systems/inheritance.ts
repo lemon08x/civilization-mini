@@ -28,6 +28,7 @@ export function handover(state: GameState, rules: Ruleset, events: GameEvent[]):
     state.persons[fromPersonId].name=state.persons[fromPersonId].vitality!.alive?'退休长辈':'已故长辈';
     state.household.heirId=child.vitality.childId??child.id;
     delete state.life.pendingRetirement;
+    delete state.life.consultPending;delete state.life.seasonCompany;delete state.life.seasonTaught;state.life.consulted=[];
   }else{
   const id = `person:${state.clock.generation + 1}`;
   state.persons[id] = blankPerson(id, '已成年的后辈');
