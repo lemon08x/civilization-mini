@@ -50,7 +50,7 @@ export function seasonCheck(g:Game):string[] {
   if(stopped?.length)items.push(`已知停机：${stopped.map(s=>`${s.name}（${s.blockers.join('；')}）`).join('、')}`);
   if(l?.pendingRetirement)items.push('已安排本季交接；结束本季后才会进入交接，人物尚未切换。');
   if(l){
-    if(l.heir?.alive&&l.heir.ageYears<l.adultYears&&!l.seasonCompany)items.push('后辈本季尚未陪伴；饱食与陪伴在成年时增加体质；教导帮助学习，出生天赋终身保留。');
+    if(!g.sect&&l.heir?.alive&&l.heir.ageYears<l.adultYears&&!l.seasonCompany)items.push('后辈本季尚未陪伴；饱食与陪伴在成年时增加体质；教导帮助学习，出生天赋终身保留。');
     const consults=(l.elders??[]).reduce((n,x)=>n+x.consultable,0);
     if(consults>0)items.push(`在世长辈可请教 ${consults} 门课程（见家人页）。`);
   }
@@ -59,6 +59,10 @@ export function seasonCheck(g:Game):string[] {
 }
 
 export function confirmContent(g:Game, id:string):{title:string;body:string;submitLabel:string} {
+  if(g.sect&&['handover','economy:retire:family','economy:erasettle:stage'].includes(id)){
+    const a=g.actions.find(x=>x.id===id),cr=g.era?.crises;
+    return {title:a?.label??'确认交接',submitLabel:'确认提交',body:`<p>${esc(a?.description??'')}</p><p>当代两人各自的修为和所学不会复制给弟子。门派道法、信物、规程与机缘储备保留。</p>${cr?`<p>剩余${cr.remaining}季，总分${cr.score}。未兜底：${cr.entries.filter(x=>x.level<1).map(x=>esc(x.name)).join('、')||'无'}。现在结束将立即判定使命成败。</p>`:''}`};
+  }
   const a=g.actions.find(x=>x.id===id);
   const kind=confirmKind(id);
   if(kind==='season'){
@@ -85,6 +89,7 @@ const fieldArt=(f:NonNullable<Game['economy']>['field'])=>!f.crop?'field-empty':
 const sceneArt=(name:string)=>`<img class="place-illustration" src="${artUrl(name)}" alt="" aria-hidden="true" width="600" height="400" decoding="async">`;
 
 function successionState(g:Game):string {
+  if(g.sect)return g.status==='handover'?'两位弟子已可接班，确认后开启下一代。':g.sect.ready?'下一代两位弟子已成年，可安排交接。':'每代两位传人各收一徒，待两位弟子成年后交接；婚育无关。';
   const l=g.life; if(!l)return '';
   if(g.status==='ended')return '家族经营已经结束。';
   if(g.status==='complete')return g.victory?.won?'旅程已经胜利结束。':'旅程已经结束。';
@@ -111,6 +116,7 @@ function personPortrait(p:{portrait:string;portraitEra:number;ageYears:number;al
   return `<div class="person-portrait${p.alive?'':' is-deceased'}" role="img" aria-label="${esc(name)} · ${eraNames[p.portraitEra]} · ${ages[stage]}肖像" style="background-image:url('/illustrations/person-${esc(p.portrait)}${eraSuffix}.jpg');background-position:${stage%3*50}% ${stage<3?0:100}%"></div>`;
 }
 function family(g:Game,button:Button):string {
+  if(g.sect)return sectPage(g,button);
   const l=g.life; if(!l)return '';
   const person=(who:'self'|'heir',actions='')=>{
     const p=who==='self'?l.person:l.heir;
@@ -137,11 +143,11 @@ function village(g:Game,events:string[]):string {
   const fieldTitle=!f.crop?'空田待播':f.growth>=f.duration?'成熟待收':CROPS[f.crop].name+'生长中';
   const time=l?.budget;
   const total=Math.max(1,l?.timePerSeason??g.parameters.actionsPerTurn);
-  const history=events.length?events.slice(-3):['一家人从一块田开始。'];
+  const history=events.length?events.slice(-3):['两位同门，从修道习术开始。'];
   return `<div class="season-dashboard"><div class="dashboard-main">
     <section class="estate-board"><div class="estate-copy"><span class="chapter-kicker">家里的田地</span><h3>${fieldTitle}</h3><p>肥力 ${f.fertility}/3 · ${f.crop?`生长 ${f.growth}/${f.duration} 季`:'尚未播种'}</p>${f.crop?`<p>预计收成 ${e.harvest} · 水分 ${f.moisture}</p>`:''}<button type="button" data-page="农业">去田地 →</button></div><div class="painted-art field-dashboard-art" style="background-image:url('${artUrl(fieldArt(f))}')" aria-hidden="true"></div></section>
     <div class="dashboard-pair"><section class="dashboard-card food-board"><div class="painted-art art-food" aria-hidden="true"></div><h3>生活保障</h3><span class="status-pill ${foodWarning(g)?'status-warning':''}">${foodWarning(g)?'需要补给':'本季够吃'}</span><p class="board-number">${e.foodTotal}<small>份可食储备</small></p><p>季耗 ${g.parameters.foodPerTurn} 份</p><dl class="board-ledger"><div><dt>预计购粮</dt><dd>${food?.purchase??0} 份</dd></div><div><dt>预计花费</dt><dd>${food?.cost??0} 钱</dd></div><div><dt>生活缺口</dt><dd>${food?.missing??Math.max(0,g.parameters.foodPerTurn-e.foodTotal)} 份</dd></div></dl><button class="text-btn" type="button" data-page="生活">去补给与谋生 →</button></section>
-    <section class="dashboard-card family-board"><h3>家人与成长</h3><div class="painted-art art-family" aria-hidden="true"></div><div class="family-snapshot"><div><strong>经营者${l?` · ${l.person.ageYears}岁`:''}</strong>${l?meter('健康',l.person.health,l.person.maxHealth??100):''}</div><div><strong>${l?.heir?`后辈 · ${l.heir.ageYears}岁`:'尚无后辈'}</strong>${l?.heir?meter(l.heir.alive?'健康':'已故',l.heir.health,l.heir.maxHealth??100):''}</div></div><button class="text-btn" type="button" data-page="家人">查看家人 →</button></section></div>
+    <section class="dashboard-card family-board"><h3>师徒与修道</h3><div class="painted-art art-family" aria-hidden="true"></div><div class="family-snapshot"><div><strong>当前传人${l?` · ${l.person.ageYears}岁`:''}</strong>${l?meter('健康',l.person.health,l.person.maxHealth??100):''}</div><div><strong>${l?.heir?`弟子 · ${l.heir.ageYears}岁`:'尚未收徒'}</strong>${l?.heir?meter(l.heir.alive?'健康':'已故',l.heir.health,l.heir.maxHealth??100):''}</div></div><button class="text-btn" type="button" data-page="家人">查看师徒与修道 →</button></section></div>
     ${e.industryView?.systems.some(x=>x.instance)?`<section class="dashboard-card"><h3>家业运行</h3><div class="board-ledger">${e.industryView.systems.filter(x=>x.instance).map(x=>`<div><span>${esc(x.name)}</span><span>${!x.instance?.enabled?'已停用':x.blockers.length?'条件不足':x.instance?.operator?'已安排人员':'待安排'}</span></div>`).join('')}</div><button type="button" class="text-btn" data-page="系统">管理生产 →</button></section>`:''}
     </div><aside class="dashboard-side"><section class="dashboard-card"><h3>等你安排 <span class="task-count">${tasks.length}</span></h3>${tasks.length?tasks.map(t=>`<article class="board-task"><strong>${esc(t.title)}</strong><p>${esc(t.detail)}</p><button type="button" data-page="${t.page}">去处理 →</button></article>`).join(''):'<p class="subtle">当前没有待处理事项。</p>'}<h3 class="time-heading">时间安排</h3><div class="time-track" aria-hidden="true"><span style="width:${Math.min(100,(time?.spentTime??0)/total*100)}%"></span><span style="width:${Math.min(100,(time?.reservedTime??0)/total*100)}%"></span></div><p class="time-labels">已用 ${time?.spentTime??0} · 预留 ${time?.reservedTime??0} · 可用 ${time?.freeTime??g.ap}</p></section><section class="dashboard-card"><h3>最近记事</h3><ol class="board-history">${history.map(t=>`<li>${esc(t)}</li>`).join('')}</ol>${events.length>3?`<details><summary>全部变化</summary>${events.map(t=>`<p>${esc(t)}</p>`).join('')}</details>`:''}</section></aside></div>`;
 }
@@ -205,6 +211,7 @@ export function energyPage(g:Game,button:Button,selectedId=''):string {
 }
 
 function endingCopy(g:Game):string {
+  if(g.sect)return `旅程结束，现代副本总分${g.era?.crises?.score??0}。${g.era?.crises?.won?'全部危机完成兜底，使命成功。':'使命尚未完成；已完成副本分数保留。'}`;
   if(g.status==='ended')return '家族经营终止。没有可接手的成年后辈，或经营已经失败。可以从底部导出这次旅程。';
   if(g.status==='complete'&&g.victory?.won)return '最终试炼已完成，家族旅程胜利结束。';
   if(g.status==='complete')return '旅程已经结束。若未完成最终副本，这不是通关胜利。';
@@ -215,8 +222,8 @@ export function humanScreen(g:Game,page:string,body:string,button:Button,events:
   const e=g.economy!,l=g.life,end=g.status==='complete'||g.status==='ended';
   const groups=playerGroups(g),group=groups.find(x=>x.pages.includes(page))??groups[0];
   const low=foodWarning(g);
-  const masthead=`<header class="chronicle-masthead"><div><div class="eyebrow">CIVILIZATION MINI</div><h1>世代 <span>家族编年史</span></h1><p class="rule-line">规则 ${esc(g.rulesVersion)} · ${esc(g.scenario.name)}</p></div><div class="masthead-meta"><div>${l?esc(g.person.name):'当前家族'}${g.era?` · ${esc(g.era.stage.name)}`:''}</div><div class="masthead-links"><details class="options-menu"><summary class="text-btn">${chromeImage('status-save','utility-image')}<span>选项</span></summary><div class="options-panel"><a href="/start">打开其他旅程</a><a href="/start#legacy" target="_blank" rel="noopener">门派缘起与传承之志 ↗</a><a href="/">入口</a><a href="/ai">AI 文本玩法</a><button type="button" id="export">导出存档</button><label class="file-button">导入存档<input id="import" type="file" accept=".json,application/json" hidden></label><p class="subtle">结果由固定规则结算；浏览器存档在开始界面打开或新开，命令行存档在 saves/。</p></div></details><button type="button" class="text-btn" data-guide="${esc(page)}">${chromeImage('status-help','utility-image')}<span>帮助</span></button></div></div></header>`;
-  const navigationArt:Record<string,string>={本季:'season',农场:'farm',家人与传承:'family',学习与制造:'study',集市:'market',经营与交易:'trade',社会历程:'society'};
+  const masthead=`<header class="chronicle-masthead"><div><div class="eyebrow">CIVILIZATION MINI</div><h1>世代 <span>师徒传承</span></h1><p class="rule-line">规则 ${esc(g.rulesVersion)} · ${esc(g.scenario.name)}</p></div><div class="masthead-meta"><div>${l?esc(g.person.name):'当前家族'}${g.era?` · ${esc(g.era.stage.name)}`:''}</div><div class="masthead-links"><details class="options-menu"><summary class="text-btn">${chromeImage('status-save','utility-image')}<span>选项</span></summary><div class="options-panel"><a href="/start">打开其他旅程</a><a href="/start#legacy" target="_blank" rel="noopener">门派缘起与传承之志 ↗</a><a href="/">入口</a><a href="/ai">AI 文本玩法</a><button type="button" id="export">导出存档</button><label class="file-button">导入存档<input id="import" type="file" accept=".json,application/json" hidden></label><p class="subtle">结果由固定规则结算；浏览器存档在开始界面打开或新开，命令行存档在 saves/。</p></div></details><button type="button" class="text-btn" data-guide="${esc(page)}">${chromeImage('status-help','utility-image')}<span>帮助</span></button></div></div></header>`;
+  const navigationArt:Record<string,string>={本季:'season',农场:'farm',师徒与修道:'family',学习与制造:'study',集市:'market',经营与交易:'trade',社会历程:'society'};
   const nav=`<nav class="chapter-nav" aria-label="篇章" style="--chapter-count:${groups.length}">${groups.map(x=>`<button type="button" class="chapter-tab" data-page="${x.pages.includes(page)?page:x.pages[0]}" aria-current="${x===group?'page':'false'}" title="${esc(x.description)}">${chromeImage('nav-'+navigationArt[x.name],navigationArt[x.name]==='society'?'chapter-image chapter-image-society':'chapter-image')}<span>${esc(x.name)}</span></button>`).join('')}</nav>
     ${group.pages.length>1?`<nav class="chapter-subnav" aria-label="${esc(group.name)}分页">${group.pages.map(p=>`<button type="button" data-page="${p}" class="${page===p?'selected':''}" aria-current="${page===p?'page':'false'}">${placeIcon(p)}<span>${pageNames[p]??p}</span></button>`).join('')}</nav>`:''}`;
   const weatherArt=g.world.weather==='wet'?'rain':g.world.weather==='dry'?'sun':null;
@@ -226,6 +233,20 @@ export function humanScreen(g:Game,page:string,body:string,button:Button,events:
   const main=guide?ruleGuide(g,page):page==='聚落'?village(g,events):page==='家人'?family(g,button):page==='仓库'?inventory(g):body;
   const spread=guide||OWN_SPREAD.has(page)?main:`<div class="spread-body"><div class="reading-pane">${main}</div><aside class="attention-pane">${attention(g,page)}</aside></div>`;
   const budget=l?`<details class="budget-details"><summary>查看本季劳动安排 · 预留 ${l.budget.reservedTime} 时间 / ${l.budget.reservedEnergy} 精力</summary><p>已用时间 ${l.budget.spentTime} · 剩余时间 ${l.timeRemaining}</p>${l.budget.tasks.map(t=>`<p>${esc(t.name)} <span class="tag">时间 ${t.time} / 精力 ${t.energy}</span></p>`).join('')||'<p>暂无系统任务</p>'}</details>`:'';
-  const season=end?`<div><h3>${g.status==='ended'?'家族经营终止':g.victory?.won?'旅程胜利':'旅程结束'}</h3><p>${esc(endingCopy(g))}</p><p><a class="text-btn" href="/start">回到开始界面</a></p></div>`:g.status==='handover'?`<div><h3>${g.era?.lastGeneration?'新时代人物':'后辈接手'}</h3><p>${esc(successionState(g))}</p></div><div class="action-primary">${button('handover')}</div>`:`<div><h3>季末检查</h3><ul class="check-list">${seasonCheck(g).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="action-primary">${button('economy:end:season')}</div>${budget}`;
+  const season=end?`<div><h3>${g.status==='ended'?'传承与使命终止':g.victory?.won?'旅程胜利':'旅程结束'}</h3><p>${esc(endingCopy(g))}</p><p><a class="text-btn" href="/start">回到开始界面</a></p></div>`:g.status==='handover'?`<div><h3>${g.sect?'师徒整代交接':g.era?.lastGeneration?'新时代人物':'后辈接手'}</h3><p>${esc(successionState(g))}</p></div><div class="action-primary">${button('handover')}</div>`:`<div><h3>季末检查</h3><ul class="check-list">${seasonCheck(g).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="action-primary">${button('economy:end:season')}</div>${budget}`;
   return `<div class="chronicle-shell page-${pageArt(page)} ${page==='聚落'?'is-dashboard':''}">${masthead}${nav}${hud}${g.era&&page!=='社会'?`<div class="era-link"><span>${esc(g.era.card.name)} · ${g.era.generationLimit===null?'不限代':`第 ${g.era.generationsLived+1}/${g.era.generationLimit} 代`}${g.era.lastGeneration?' · 最后一代':''}</span><button type="button" class="text-btn" data-page="社会">社会历程 · 预计回报 ${g.era.expectedReward} 钱 →</button></div>`:''}${low?'<div class="food-alert" role="status">当前库存与预计购粮不足以覆盖本季消耗。<button type="button" data-page="农业">去田地</button><button type="button" data-page="商城">买补给</button><button type="button" data-page="生活">找生计</button></div>':''}<div class="chronicle-spread">${recapHtml}<header class="chapter-head ${page!=='聚落'?'illustrated-heading':''}">${page!=='聚落'?`<div class="painted-art art-${pageArt(page)}" aria-hidden="true"></div>`:''}<div class="section-heading"><div><h2>${page==='聚落'?'本季看板':pageNames[page]??page}</h2><p class="chapter-epigraph">${esc(chapterEpigraph(g,page))}</p></div>${!guide?`<button type="button" class="text-btn" data-guide="${esc(page)}">${pageNames[page]??page}规则</button>`:''}</div></header>${spread}${page==='聚落'||end||g.status==='handover'?`<div class="season-bar">${season}</div>`:''}</div></div>`;
+}
+
+function sectPage(g:Game,button:Button):string {
+ const x=g.sect!,current=x.members.find(m=>m.id===x.activeId)!,r=x.rules;
+ const members=x.members.filter(m=>m.admitted);
+ return `<div class="page-workbench"><section>
+ ${panel('当代两位传人',`<p>道以传志，术以济世。每人各收一徒，婚育不决定传承。当前由${esc(current.name)}行动；结束本季会结算全体。</p>${x.current.map((id,slot)=>{const m=members.find(p=>p.id===id)!;return `<article class="rule-section"><div><h3>${esc(m.name)} · 第${m.generation}代${id===x.activeId?' · 当前':''}</h3><p>${m.life?.ageYears}岁 · ${m.life?.alive?'在世':'已故'} · ${esc(m.life?.talent.name??'')} · 时间${m.time} · 精力${m.life?.energy}</p><p>修为${m.practice} · 第${m.stage}境 · 道的效率提升${m.effect}%</p><p>弟子：${esc(members.find(p=>p.id===m.discipleId)?.name??'尚未收徒')}</p>${button('economy:sectswitch:'+slot)}</div></article>`;}).join('')}`)}
+ ${panel('师徒谱系',`<ul class="check-list">${members.map(m=>`<li>第${m.generation}代 ${esc(m.name)} · ${m.life?.ageYears}岁 · ${m.life?.alive?'在世':'已故'} · 师父${esc(members.find(p=>p.id===m.masterId)?.name??'开派传人')} · 修为${m.practice}</li>`).join('')}</ul>${x.members.filter(m=>!m.admitted).map(m=>`<p>候选：${esc(m.name)} · ${m.life?.ageYears}岁 · ${esc(m.life?.talent.name??'')} · 体质上限${m.life?.maxEnergy}；资质已固定</p>`).join('')}${button('economy:sectseek:disciple')}${button('economy:sectadmit:disciple')}<p>${esc(successionState(g))}</p>${button('economy:retire:family')}${button('handover')}`)}
+ ${panel('身体与术的传授',`${button('economy:rest:self')}${button('economy:care:self')}<p>术仍需逐门学习。当前弟子的课程可在学堂中教导；本人从在世师父处请教。</p>${g.actions.filter(a=>a.id.startsWith('economy:consult:')).map(a=>button(a.id)).join('')}`)}
+ </section><aside>
+ ${panel('道 · 个人修行',`${meter('修为',current.practice,r.stageProgress*r.maxStage)}<p>每${r.stageProgress}进度一境，最多${r.maxStage}境；新入门从零修行。道影响本人学习、劳动、授徒、休养及任务成本，实际报价已计入。</p>${button('economy:sectpractice:dao')}${button('economy:sectteach:dao')}`)}
+ ${panel('本门道法 · 永久改进',`<p>心法${x.doctrine}/${r.doctrineMax}级，研证${x.research}/${r.doctrineSteps}步。传承的是更好的方法，个人修为不继承。</p>${button('economy:sectimprove:dao')}${x.improvements.map(i=>`<p>第${i.level}次改进：${esc(members.find(m=>m.id===i.personId)?.name??i.personId)}，验证${i.courses.length}门术。</p>`).join('')}`)}
+ <details><summary>修道衍生机缘 · 可选辅助</summary><p>气运${x.fortune}/${r.fortuneCap}，每抽消耗${r.drawCost}。基础/进阶/稀有概率：${x.odds.map(n=>(n*100).toFixed(2)+'%').join(' / ')}（基础80% / 18% / 2%，偏置来自本人修道）。不抽卡也可完成使命。</p>${button('economy:sectdraw:opportunity')}<p>${esc(x.lastDraw)}</p><ul>${x.cards.map(c=>`<li>${esc(c.name)} ${c.level}/${r.cardMax}级，对应行动成本降低${c.effect}%</li>`).join('')}</ul><p>${esc(x.lastEvent)}</p></details>
+ </aside></div>`;
 }
