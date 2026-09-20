@@ -949,3 +949,10 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .character-identity details { border-top:1px solid var(--line); padding-top:10px; }
 .character-identity li { margin:9px 0; }
 .sect-lineage > .person-portrait, .sect-disciple > .person-portrait, .sect-candidate > .person-portrait { margin:12px auto; }
+
+/* Character art follows observed temperament, sex and age; it never rerolls a person. */
+.person-portrait.character-portrait { background-size:600% 300%; width:190px; border:1px solid #ded5c2; border-radius:50% 50% 12px 12px; box-shadow:0 4px 15px #433b2310; }
+.character-trait { display:flex; align-items:center; gap:12px; min-height:48px; }
+.character-trait-art { width:48px; height:48px; }
+.character-mood-label { display:block; font-size:11px; letter-spacing:.12em; color:var(--ok); margin-bottom:6px; }
+.sect-candidate { display:flow-root; }

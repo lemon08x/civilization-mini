@@ -110,7 +110,14 @@ function knownNames(g:Game, heir=false):string {
   return list.length?list.join('、'):'尚未掌握课程';
 }
 
-function personPortrait(p:{portrait:string;portraitEra:number;ageYears:number;alive:boolean},name:string):string {
+function personPortrait(p:{portrait:string;portraitEra:number;ageYears:number;alive:boolean;sex?:string;character?:{temperament:string}|null},name:string):string {
+  const personalities=['内敛细察','坦率热忱','沉静坚韧','谨慎认真','洒脱好奇','温厚耐心'];
+  const temperament=personalities.indexOf(p.character?.temperament??'');
+  // Early-era portraits share identity across three age bands. Other eras keep their era-specific art.
+  if(temperament>=0&&p.ageYears>=12&&p.portraitEra<2&&(p.sex==='male'||p.sex==='female')){
+    const age=p.ageYears<18?0:p.ageYears<55?1:2;
+    return `<div class="person-portrait character-portrait${p.alive?'':' is-deceased'}" role="img" aria-label="${esc(name)} · ${esc(p.character!.temperament)} · ${['少年','成年','老年'][age]}人物插画" style="background-image:url('/illustrations/sect-portraits-${p.sex}.png');background-position:${temperament*20}% ${age*50}%"></div>`;
+  }
   const stage=p.ageYears<6?0:p.ageYears<12?1:p.ageYears<18?2:p.ageYears<35?3:p.ageYears<55?4:5;
   const ages=['幼年','儿童','少年','青年','中年','老年'];
   const eraNames=['农业村落','集镇分工','工业城镇','现代社会'];
@@ -269,7 +276,9 @@ export function cultivationPage(g:Game,button:Button,selected=''):string {
 function characterCard(m:NonNullable<Game['sect']>['members'][number]):string {
  const c=m.life?.character;if(!c)return '';
  const junior=(m.life?.ageYears??0)<18;
- return `<div class="character-identity"><p><span class="tag">${m.life?.sex==='male'?'男':'女'}</span> <span class="tag">${esc(c.temperament)}</span> <span class="tag">${junior?'职业见习 · ':''}${esc(c.occupation)}</span></p><p class="subtle">${esc(c.style)}</p><p><strong>天赋 · ${esc(m.life?.talent.name??'')}</strong><br>${esc(m.life?.talent.effect??'')}</p><p>${esc(c.background)}</p><p class="character-feeling">${esc(c.mood)}</p><details data-fold="character-${esc(m.id)}"><summary>牵挂与成长</summary><p><strong>牵挂</strong> · ${esc(c.attachment)}</p><p><strong>心愿</strong> · ${esc(c.aspiration)}</p><ol>${c.memories.map(n=>`<li>${n.age}岁 · ${esc(n.text)}</li>`).join('')||'<li>故事尚待续写。</li>'}</ol><p class="subtle">职业为社会身份，能力以天赋与实际所学为准。</p></details></div>`;
+ const styleArt=c.style.startsWith('素衣')?7:c.style.startsWith('衣着整洁')?9:c.style.startsWith('偏爱旧物')?11:c.style.startsWith('装束利落')?4:c.style.startsWith('喜用温和')?12:14;
+ const talentArt=({'健壮':13,'善学':8,'善教':0,'善组织':9,'善恢复':12} as Record<string,number>)[m.life?.talent.name??'']??7;
+ return `<div class="character-identity"><p><span class="tag">${m.life?.sex==='male'?'男':'女'}</span> <span class="tag">${esc(c.temperament)}</span> <span class="tag">${junior?'职业见习 · ':''}${esc(c.occupation)}</span></p><p class="character-trait subtle">${sectImage(styleArt,'character-trait-art')}<span>${esc(c.style)}</span></p><p class="character-trait">${sectImage(talentArt,'character-trait-art')}<span><strong>天赋 · ${esc(m.life?.talent.name??'')}</strong><br>${esc(m.life?.talent.effect??'')}</span></p><p>${esc(c.background)}</p><p class="character-feeling"><span class="character-mood-label">此刻心境</span>${esc(c.mood)}</p><details data-fold="character-${esc(m.id)}"><summary>牵挂与成长</summary><p><strong>牵挂</strong> · ${esc(c.attachment)}</p><p><strong>心愿</strong> · ${esc(c.aspiration)}</p><ol>${c.memories.map(n=>`<li>${n.age}岁 · ${esc(n.text)}</li>`).join('')||'<li>故事尚待续写。</li>'}</ol><p class="subtle">职业为社会身份，能力以天赋与实际所学为准。</p></details></div>`;
 }
 
 function sectPage(g:Game,button:Button):string {
