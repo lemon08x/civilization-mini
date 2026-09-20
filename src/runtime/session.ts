@@ -30,7 +30,8 @@ export async function submitCommand(session: Session, input: unknown): Promise<{
   }
   const revision = session.record.entries.length;
   if (command.expectedRevision !== revision) throw new Error(`过期命令：当前 revision=${revision}`);
-  const limit = session.state.era ? session.state.era.rules.seasons * 4 * (session.state.life!.rules.timePerSeason + 5) + 100 : 1500;
+  // 行动上限按代际口径估算：前三个限代时代各 generationLimit 代（每代 birthYears×4 季），外加现代两代人的余量。
+  const limit = session.state.era ? (3 * session.state.era.rules.generationLimit * session.state.life!.rules.birthYears * 4 + 2 * session.state.life!.rules.lifespanMax * 4) * (session.state.life!.rules.timePerSeason + 5) + 100 : 1500;
   if (revision >= limit) throw new Error(`实验已达到 ${limit} 条行动的运行上限`);
   const result = transition(session.state, parseActionId(command.actionId), session.record.manifest.ruleset);
   const entry = { revision: revision + 1, command, events: result.events };
@@ -49,5 +50,13 @@ export function parseSession(value: unknown): Session {
   if (record.format !== 'civilization-mini-run' || record.formatVersion !== 3 || !isRecord(record.manifest) || !Array.isArray(record.entries)) throw new Error('存档格式无效，原文件应保留');
   validateRunId(record.manifest.runId);
   validateRuleset(record.manifest.ruleset);
+  if (value.state.life) {
+    if (!isRecord(value.state.persons) || Object.values(value.state.persons).some(person => {
+      if (!isRecord(person) || !isRecord(person.vitality)) return true;
+      const v=person.vitality;
+      return (v.sex!=='male'&&v.sex!=='female') || typeof v.portrait!=='string' || !new RegExp(`^${v.sex}-0[12]$`).test(v.portrait)
+        || typeof v.portraitEra!=='number' || !Number.isInteger(v.portraitEra) || v.portraitEra<0 || v.portraitEra>3;
+    })) throw new Error('此存档缺少当前人物性别、肖像或时代数据，请新开游戏；原存档不修改。');
+  }
   return deepFreeze({ state: value.state as unknown as Session['state'], record });
 }

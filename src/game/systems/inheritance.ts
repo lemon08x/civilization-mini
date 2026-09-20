@@ -4,10 +4,17 @@ import type { GameState } from '../model/state.js';
 import type { Ruleset } from '../ruleset.js';
 import type { GameEvent } from '../model/events.js';
 import { newSeason } from './time.js';
+import { advanceEra, eraEvent } from './eras.js';
 import { SUBJECTS } from '../model/economy.js';
 import { level } from './knowledge.js';
 
 export function handover(state: GameState, rules: Ruleset, events: GameEvent[]): void {
+  // The last handover of an era starts an unrelated household, not the old heir.
+  if(state.era&&state.era.index<3&&state.clock.generation+1-state.era.startGeneration>=state.era.rules.generationLimit){
+    advanceEra(state,events,'本时代代际预算用尽，结束本时代家族');
+    state.clock.turn=1;state.clock.absoluteTurn++;
+    newSeason(state,rules,events);return;
+  }
   const child = heir(state), fromPersonId = state.household.activePersonId;
   if(state.economy?.lineage){
     for(const subject of SUBJECTS){
@@ -21,13 +28,16 @@ export function handover(state: GameState, rules: Ruleset, events: GameEvent[]):
     if(state.economy.expeditions)state.economy.expeditions.generationProofs=[];
   }
   state.household.activePersonId = child.id;
-  child.name = '本代经营者';
+  if(!state.life)child.name = '本代经营者';
   state.clock.generation++; state.clock.turn = 1; state.clock.absoluteTurn++;
+  if(state.era&&state.era.index<3){
+    if(state.era.index<3&&state.clock.generation-state.era.startGeneration===state.era.rules.generationLimit-1)eraEvent(state,events,'warning','这是本时代能住的最后一代，下一代将强制结算并进入新社会。');
+  }
   if(state.life){
     if(!child.vitality?.alive||child.vitality.ageSeasons<state.life.rules.adultYears*4)throw new Error('没有成年继任者');
-    state.persons[fromPersonId].name=state.persons[fromPersonId].vitality!.alive?'退休长辈':'已故长辈';
     state.household.heirId=child.vitality.childId??child.id;
     delete state.life.pendingRetirement;
+    delete state.life.consultPending;delete state.life.seasonCompany;delete state.life.seasonTaught;state.life.consulted=[];
   }else{
   const id = `person:${state.clock.generation + 1}`;
   state.persons[id] = blankPerson(id, '已成年的后辈');

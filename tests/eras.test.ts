@@ -15,21 +15,23 @@ import {shopCatalog,renewShop} from '../src/game/systems/shop.js';
 import {createSession,observeSession,submitCommand} from '../src/runtime/session.js';
 import type {GameEvent} from '../src/game/model/events.js';
 import {rules as base} from './v27.js';
-const rules=resolveRuleset(base,{'eras.seasons':8,'eras.warning':1});
+const rules=resolveRuleset(base,{'eras.generationLimit':1});
 const fresh=()=>{const s=structuredClone(createInitialState(rules,17,'river'));s.household.food=100;s.household.money=100;s.era!.card='trade';renewEraServices(s,rules);return s;};
 type State=ReturnType<typeof fresh>;
 const act=(s:State,id:string)=>transition(s,parseActionId(id==='handover'?id:'economy:'+id),rules);
 const offer=(s:State,id:string)=>getAvailableActions(s,rules).find(a=>a.id==='economy:'+id);
 const know=(s:State,...ids:string[])=>s.economy!.branches!.learned[s.household.activePersonId].push(...ids);
 
-test('stage windows can be overridden on the current ruleset',()=>{
- assert.throws(()=>validateRuleset({...base,eras:undefined}));assert.throws(()=>resolveRuleset(base,{'eras.seasons':0}));
- assert.equal(base.eras!.seasons,192);assert.equal(rules.eras!.seasons,8);
+test('stage generation limit can be overridden on the current ruleset',()=>{
+ assert.throws(()=>validateRuleset({...base,eras:undefined}));assert.throws(()=>resolveRuleset(base,{'eras.generationLimit':0}));
+ assert.equal(base.eras!.generationLimit,5);assert.equal(rules.eras!.generationLimit,1);
 });
-test('stage changes exactly on deadline if the player has not settled, warns in advance, card draw only then',()=>{
+test('stage changes when the generation limit is reached if the player has not settled, card draw only then',()=>{
  let s=fresh();const original=s.era!.card;const events:GameEvent[]=[];
- for(let i=0;i<7;i++){const n=act(s,'end:season');s=structuredClone(n.state);events.push(...n.events);assert.equal(s.era!.card,original);assert.equal(s.era!.index,0);}
- assert.equal(events.filter(e=>e.type==='era'&&e.operation==='warning').length,1);
+ const first=act(s,'end:season');s=structuredClone(first.state);events.push(...first.events);
+ assert.equal(s.era!.card,original);assert.equal(s.era!.index,0);
+ assert.equal(events.filter(e=>e.type==='era'&&e.operation==='settled').length,0);
+ s.era!.startGeneration=s.clock.generation-rules.eras!.generationLimit;
  const next=act(s,'end:season');assert.equal(next.state.era!.index,1);assert.equal(next.state.era!.elapsed,0);
  assert.equal(next.events.filter(e=>e.type==='era'&&e.operation==='settled').length,1);assert.equal(next.events.filter(e=>e.type==='era'&&e.operation==='revealed').length,1);
  assert.equal(next.events.filter(e=>e.type==='era'&&e.operation==='projected').length,0);
@@ -41,7 +43,7 @@ test('retirement and handover do not advance social time; finishing the season s
  const card=s.era!.card;s=structuredClone(act(s,'handover').state);assert.equal(s.era!.elapsed,1);assert.equal(s.era!.card,card);assert.equal(s.clock.generation,2);
 });
 test('actual harvest ending a season earns once, and reward settles before phase changes',()=>{
- const s=fresh();s.era!.elapsed=7;s.life!.timeRemaining=3;
+ const s=fresh();s.era!.startGeneration=s.clock.generation-rules.eras!.generationLimit;s.life!.timeRemaining=3;
  s.economy!.field={...s.economy!.field,crop:'wheat',growth:2,duration:2,stress:0};
  const n=act(s,'farm:wheat');const harvest=n.events.find(e=>e.type==='economy-farm'&&e.operation==='harvest')!;
  assert.equal(harvest.type,'economy-farm');if(harvest.type!=='economy-farm')return;
@@ -101,8 +103,8 @@ test('society card affects actual prices, income, education and metal supply',()
 });
 
 test('short social sequence observations hide RNG',async()=>{
- const short=resolveRuleset(base,{'eras.seasons':1,'eras.warning':1});let session=await createSession({runId:'eras-observe',ruleset:short,seed:17,scenarioId:'river'});
- for(let i=0;i<4;i++)session=(await submitCommand(session,{commandId:'season-'+i,expectedRevision:i,actionId:'economy:end:season'})).session;
+ const short=resolveRuleset(base,{'eras.generationLimit':1});let session=await createSession({runId:'eras-observe',ruleset:short,seed:17,scenarioId:'river'});
+ for(let i=0;i<4;i++)session=(await submitCommand(session,{commandId:'settle-'+i,expectedRevision:i,actionId:'economy:erasettle:stage'})).session;
  const o=observeSession(session);assert.equal(o.eraSettlements!.length,4);assert.equal(o.game.status,'complete');
  assert.doesNotMatch(JSON.stringify(o),/randomState|lifespanSeasons|futureCards/);
 });
@@ -143,13 +145,13 @@ test('shaft staffing projects craft units; later tap water does not claw back a 
  const first=act(s,'erasettle:stage');const wellSettle=first.events.find(e=>e.type==='era'&&e.operation==='settled');
  assert.equal(wellSettle?.type,'era');if(wellSettle?.type!=='era')return;
  assert.equal(wellSettle.stage,0);assert.ok(wellSettle.money>0);
- s=structuredClone(first.state);s.era!.index=3;s.era!.elapsed=7;s.era!.tap=true;s.era!.rewardEscrow=0;s.era!.dungeon.complete=false;
- const last=act(s,'end:season');const modernSettle=last.events.find(e=>e.type==='era'&&e.operation==='settled');
+ s=structuredClone(first.state);s.era!.index=3;s.era!.tap=true;s.era!.rewardEscrow=0;s.era!.dungeon={started:false,tasks:[]};
+ const last=act(s,'erasettle:stage');const modernSettle=last.events.find(e=>e.type==='era'&&e.operation==='settled');
  assert.equal(modernSettle?.type,'era');if(modernSettle?.type!=='era')return;
  assert.equal(modernSettle.stage,3);assert.ok(modernSettle.money>=0);
 });
 test('deadline without a player settle adds no projected remainder',()=>{
- const s=fresh();s.era!.elapsed=7;s.economy!.goods.seedWheat=4;
+ const s=fresh();s.era!.startGeneration=s.clock.generation-rules.eras!.generationLimit;s.economy!.goods.seedWheat=4;
  s.economy!.field={...s.economy!.field,crop:'wheat',growth:0,duration:2,stress:0};
  const n=act(s,'end:season');
  assert.equal(n.events.filter(e=>e.type==='era'&&e.operation==='projected').length,0);

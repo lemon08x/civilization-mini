@@ -97,12 +97,12 @@ test('modern settlement preview matches paid reward and ownership alone does not
  }
 });
 
-test('dungeon requires real power, delivery removes an unused appliance, and insufficient power cannot be replayed',()=>{
- let s=fixture();s.era!.dungeon={started:true,progress:5,complete:false,powered:false};s.economy!.equipment.LAMP=12;
- s=structuredClone(act(s,'dungeonwork:appliance').state);assert.equal(s.economy!.equipment.LAMP,undefined);assert.equal(s.era!.dungeon.complete,false);
+test('dungeon requires real power, delivery removes an unused appliance, and completed tasks cannot be replayed',()=>{
+ let s=fixture();s.era!.dungeon={started:true,tasks:[],powered:false};s.economy!.equipment.LAMP=12;
+ s=structuredClone(act(s,'dungeonwork:appliance').state);assert.equal(s.economy!.equipment.LAMP,undefined);assert.ok(s.era!.dungeon.tasks.includes('appliance'));assert.ok(!s.era!.dungeon.tasks.includes('power'));
  assert.equal(offer(s,'dungeonwork:appliance')!.enabled,false);
  s.economy!.modern!.power=4;s=structuredClone(act(s,'dungeonwork:power').state);
- assert.equal(s.economy!.modern!.power,0);assert.equal(s.era!.dungeon.complete,true);assert.equal(offer(s,'dungeonwork:power')!.enabled,false);
+ assert.equal(s.economy!.modern!.power,0);assert.ok(s.era!.dungeon.tasks.includes('power'));assert.equal(s.era!.dungeon.powered,true);assert.equal(offer(s,'dungeonwork:power')!.enabled,false);
 });
 
 test('observation hides run internals and keeps electric flavour text',async()=>{

@@ -3,22 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>世代 · 我的聚落</title>
+  <title>世代 · 家族编年史</title>
+  <link rel="stylesheet" href="/farm-animation/scene.css">
   <link rel="stylesheet" href="/style.css">
 </head>
-<body>
-  <header class="masthead">
-    <div><div class="eyebrow">CIVILIZATION MINI / PLAY</div><h1>世代 <span>我的聚落</span></h1><p>照顾家人，经营田地，让技艺代代传承。</p></div>
-    <a class="file-button" href="/start">返回开始界面</a>
-  </header>
-  <div class="notice" id="rule-notice">规则 0.27.0 · 文明阶段、社会服务与自选结算 · 数值待验证</div>
-  <div id="error" role="alert" hidden></div>
-  <main id="app"></main>
-  <footer>
-    <p><a href="/">返回入口</a> · <a href="/ai">AI 文本玩法</a></p>
-    <div class="tools"><button id="export">导出存档</button><label class="file-button">导入存档<input id="import" type="file" accept=".json,application/json" hidden></label></div>
-    <p>结果由固定规则结算。浏览器存档可在开始界面打开或新开；命令行存档在 saves/。</p>
-  </footer>
+<body class="chronicle-body">
+  <div id="error" role="alert" hidden tabindex="-1"></div>
+  <div id="app"></div>
+  <dialog id="confirm-dialog" class="chronicle-dialog" aria-labelledby="confirm-title">
+    <form method="dialog" id="confirm-form">
+      <h2 id="confirm-title">确认行动</h2>
+      <div id="confirm-body"></div>
+      <div class="dialog-actions">
+        <button value="cancel" class="text-btn">取消</button>
+        <button value="confirm" id="confirm-submit" class="primary-btn">确认提交</button>
+      </div>
+    </form>
+  </dialog>
   <script type="module" src="/modules/apps/board/economy-app.js"></script>
 </body>
 </html>

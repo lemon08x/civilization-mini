@@ -38,10 +38,11 @@
     "careRecovery": 8,
     "hungerDamage": 15,
     "adultYears": 18,
-    "birthYears": 30,
+    "birthYears": 26,
     "agingYears": 55,
     "lifespanMin": 72,
-    "lifespanMax": 88
+    "lifespanMax": 88,
+    "growthConstitutionBonus": 3
   },
   "branches": {
     "electricFee": 4,
@@ -68,7 +69,10 @@
     "careEnergy": 1,
     "careMoney": 1,
     "inheritedTime": 1,
-    "inheritedEnergy": 1
+    "inheritedEnergy": 1,
+    "companyTime": 2,
+    "companyEnergy": 1,
+    "consultDiscount": 2
   },
   "socialFood": {
     "storage": 12,
@@ -79,8 +83,7 @@
     "defaultReserve": 4
   },
   "eras": {
-    "seasons": 192,
-    "warning": 12,
+    "generationLimit": 5,
     "rewardDivisor": 12,
     "dungeonTarget": 6
   },

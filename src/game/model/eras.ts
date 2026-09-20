@@ -1,10 +1,20 @@
-export interface EraRules { seasons:number; warning:number; rewardDivisor:number; dungeonTarget:number; }
+export interface EraRules { generationLimit:number; rewardDivisor:number; dungeonTarget:number; }
 export interface EraState {
  rules:EraRules; index:number; elapsed:number; card:string;
  // A payable economic claim, not a production statistic. Settled into household money when the player chooses or the time budget expires.
  rewardEscrow:number; closed:boolean; groundwater:number; tap:boolean; pendingSettle:boolean;
- dungeon:{started:boolean;progress:number;complete:boolean;powered?:boolean};
+ startGeneration:number;
+ dungeon:{started:boolean;tasks:string[];powered?:boolean};
 }
+// 现代家业试炼的一次性任务清单；progress 是该任务的分值权重，电力相关任务的电力量另读 electric 规则。
+export const DUNGEON_TASKS=[
+ {id:'food',name:'交付4份家庭余粮',progress:1},
+ {id:'craft',name:'交付2根传动轴',progress:2},
+ {id:'contract',name:'支付10钱委托施工',progress:1},
+ {id:'math',name:'完成一轮数学方案验算',progress:1},
+ {id:'power',name:'交付4份可用电完成通电验收',progress:2},
+ {id:'appliance',name:'交付一台可用电器',progress:3},
+];
 export const ERAS=[
  {id:'agriculture',name:'农业村落',imports:2,service:3,foodWeight:3,craftWeight:1,gatherBonus:1,workBonus:1,publicWell:false,publicMill:false,description:'农社靠天吃饭。公地采食和帮工不耗科技；收获回报高。成形、流体、泵和工厂知识尚未开放。'},
  {id:'town',name:'集镇分工',imports:3,service:4,foodWeight:2,craftWeight:2,gatherBonus:0,workBonus:0,publicWell:true,publicMill:false,description:'集镇提供公井灌溉，不必先造泵。市集扩大；密封、流体、泵和分工课程在此开放。'},

@@ -1,23 +1,80 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>世代 · 开始生活</title><link rel="stylesheet" href="/style.css"></head>
-<body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>世代 · 开启家族旅程</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="chronicle-body">
   <main class="start-screen">
-    <a href="/">← 返回入口</a>
-    <div class="entry-heading"><div class="eyebrow">CIVILIZATION MINI</div><div class="start-emblem" aria-hidden="true">🌾</div><h1>世代</h1><p>一块田，一家人。<br>打开一份存档，或开始新的生活。</p></div>
-    <section class="panel" id="save-panel" hidden>
-      <div class="panel-head"><h2>打开存档</h2></div>
-      <div class="panel-body" id="save-list"></div>
+    <a class="text-btn" href="/">← 返回入口</a>
+    <div class="entry-heading"><div class="painted-art art-home entry-art" aria-hidden="true"></div>
+      <div class="eyebrow">CIVILIZATION MINI</div>
+      <p class="brand-mark" aria-hidden="true">记</p>
+      <h1>世代</h1>
+      <p>以家为根，潜龙养志。<br>将一代人的修行，续成人类危难时的底气。</p>
+      <a class="text-btn" href="#legacy">读门派缘起与传承之志 ↓</a>
+    </div>
+    <section class="panel" id="save-panel">
+      <div class="panel-head"><h2>打开已有旅程</h2></div>
+      <div class="panel-body">
+        <div id="save-list"></div>
+        <p class="subtle">导入会建立一份新的本机存档，不会覆盖原文件。仅接受当前规则。</p>
+        <label class="file-button import-label">导入存档
+          <input id="import" type="file" accept=".json,application/json" hidden>
+        </label>
+      </div>
     </section>
-    <section class="panel"><div class="panel-head"><h2>开始新生活</h2></div><div class="panel-body">
-      <form id="start-form" class="start-form">
-        <label>选择起始环境<select id="scenario"><option value="river">河渠农地</option><option value="clay-valley">黏土河谷</option><option value="woodland">林地聚落</option><option value="dry">缺水聚落</option></select></label>
-        <details><summary>世界设置</summary><label>世界编号<input id="seed" type="number" value="17" min="1" max="4294967295" step="1" required></label><p class="subtle">相同编号与环境生成相同的初始世界。</p></details>
-        <div id="error" role="alert" hidden></div>
-        <button id="new-game" type="submit" disabled>准备中…</button>
-      </form>
-    </div></section>
+    <section class="panel">
+      <div class="panel-head"><h2>开启家族旅程</h2></div>
+      <div class="panel-body">
+        <form id="start-form" class="start-form">
+          <label>选择起始环境
+            <select id="scenario">
+              <option value="river">河渠农地</option>
+              <option value="clay-valley">黏土河谷</option>
+              <option value="woodland">林地聚落</option>
+              <option value="dry">缺水聚落</option>
+            </select>
+          </label>
+          <details>
+            <summary>世界设置</summary>
+            <label>世界编号<input id="seed" type="number" value="17" min="1" max="4294967295" step="1" required></label>
+            <p class="subtle">相同编号与环境生成相同的初始世界。种子不会出现在游戏界面或记事里。</p>
+          </details>
+          <div id="error" role="alert" hidden tabindex="-1"></div>
+          <button id="new-game" type="submit" disabled>准备中…</button>
+        </form>
+      </div>
+    </section>
     <p class="entry-note">存档只保存在本机浏览器。每次从这里选择打开或新开，不会自动进入上一局。</p>
+    <section class="panel legacy-story" id="legacy" aria-labelledby="legacy-title">
+      <div class="panel-head"><h2 id="legacy-title">门派缘起 · 以家为根，以世为任</h2></div>
+      <div class="panel-body">
+        <blockquote>人类掌握力量的速度，超过了学会驾驭力量的速度。</blockquote>
+        <p>墨家济世的失败，促使一支传人重新思考如何守住兼爱、非攻之志。他们吸收鬼谷一脉隐世与韬光养晦的处世之道。掌门令门人化整为零，散居各地，以家为单位独立发展，保存学问，修身养性，紧跟每个时代的前沿。</p>
+        <p>你便是其中一支的传人。从一家人的生计开始，耕作、求学、制造、养育，将自己的能力一点点壮大。门派不以平定每次纷争、救济每场灾荒为使命；即使目睹苦难，也以观察、思考和积累为常。只有当人类走到灭绝的边缘，门派才承担最后的兜底之责。</p>
+        <details>
+          <summary>传承之志 · 兼爱非攻，潜龙养志</summary>
+          <p>兼爱，是将人类整体的存续放在最终使命之中；非攻，是不以侵略和掠夺为志。允许一时的自私，允许为家人谋求更好的生活，但须恪守无私的信念，在最终的责任面前不只顾一家。</p>
+          <p>提升自身能力是贯穿世代的主线，偏离这条主线的事不获得奖励；能够兼顾成长与善行，则值得额外的机缘。</p>
+          <p><strong>潜龙勿用：</strong>平日隐世积累。<strong>见龙在田：</strong>有限施展，验证所学。<strong>飞龙在天：</strong>唯有进入现代、面对必须解决的副本任务，才全面施展历代积累的力量。</p>
+        </details>
+        <details>
+          <summary>家族信物 · 命定之人与气运</summary>
+          <p>家族信物赋予每代唯一一位命定之人特殊的联系：他的决定影响家庭气运，气运又影响随机机遇与下一代的天赋。拥有这份力量的人，永远无法摆脱门派的联系，门主总能找到他。</p>
+          <p>古人称其为气运，现代门人则尝试用概率分布来理解它：信物能够偏置某些可能结果出现的概率。这是本作借量子概率构想的虚构规律。抽卡将消耗气运，气运同时影响抽取概率；如何使用这份机缘，也是传承中的取舍。</p>
+        </details>
+        <details>
+          <summary>现代之约 · 为拥有“上帝之力”的人类兜底</summary>
+          <p>漫长的积累延续到现代。人类的认知与自我约束尚未跟上，手中却已有足以毁灭自身的“上帝之力”：失去约束的 AI 与生物技术、相互猜疑中被滥用的核武器、一触即发的世界大战，以及环境恶化与极端气候叠加的生存危机。</p>
+          <p>当危机越过人类存续的底线，信物传来召集，隐世的各支终于需要出手。现代副本是必须承担的任务，也是最终分数的唯一来源；同一副本设置不同难度，对应不同等级的奖励分。世代经营的成果，将在这些任务中得到检验。</p>
+          <p>散居各地的同门是否会与你同行，留待未来的旅程揭晓。</p>
+        </details>
+        <p class="subtle legacy-status">设定与后续方向：信物、命定之人、气运抽卡、危机副本难度与同门同行尚未实装。当前 0.27.0 可经营、学习与传承，现代按现有副本任务计分；跨时代仍按现行规则开启新人物与家族。</p>
+      </div>
+    </section>
   </main>
   <script type="module" src="/modules/apps/board/start.js"></script>
 </body>
