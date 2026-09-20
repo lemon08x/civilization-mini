@@ -1,4 +1,4 @@
-# Civilization Mini · 世代规则预研
+# Civilization Mini · 隐士修所
 
 当前规则 **0.27.0**（师徒传承、道术修行与现代使命）。玩法见 [CURRENT_GAMEPLAY_V27.md](docs/CURRENT_GAMEPLAY_V27.md)。目录与分层见 [ARCHITECTURE.md](docs/ARCHITECTURE.md)。改机制或改数值见 [AGENTS.md](AGENTS.md)。文档目录见 [docs/README.md](docs/README.md)。
 
