@@ -410,3 +410,26 @@ A precisely aligned 3 by 3 contact sheet of nine separate Chinese pastoral water
 ```
 
 接入位置：`farm-view.ts` 的农舍 panel；`farm-animation/scene.css` 的 `.farm-painted-art`。图片为装饰性，名称、材料、状态与行动仍由原有可访问文本表达。未修改田地场景、游戏机制或数值。
+
+
+## 仓库、同门、买卖与田地选项（2026-09-21）
+
+继续使用 Grok Build CLI 的 `image_gen`。新增两张原始图集和 21 张 300×300 WebP，文件均在本目录。`farm-goods-*.webp` 在仓库、选中详情、买卖和播种选项共用；`farm-affairs-*.webp` 用于同门互动、采购篮、探索、开垦、灌溉、异种和事件选项。仓库横幅复用上一批储粮图。未知地块只使用通用地图与手杖，不依据隐藏结果选图。图标为装饰，原有行动名称、消耗、禁用状态与原因保留。
+
+后处理：按图集格子裁切，去除边缘连通的浅色底；事务图边沿额外渐隐，减轻生成纸片的方框。保留原始 JPG。未改变游戏规则。
+
+`farm-affairs-atlas.jpg` 最终提示词：
+
+```text
+A precisely aligned 3 by 3 sheet of nine separate Chinese pastoral watercolor spot illustrations, equal square cells on flat pure white background. No panel borders, no shadows around cells, no text, no letters, no humans. Objects fully inside cells with generous white margins. Muted sage green, warm ochre, grey ink, delicate handpainted watercolor matching Chinese farming game inventory illustrations. Row 1: two cups of tea on a small wooden tray for conversation between fellow disciples; two open cloth seed pouches exchanging different seeds; open blank farming notebook with wheat stalk and a simple wooden watering bucket for learning and mutual help. Row 2: wicker shopping basket with a few ancient copper coins; a folded blank trail map beside a walking staff for exploring unknown terrain; a hoe resting in a small patch of freshly tilled earth for reclaiming land. Row 3: small wooden watering bucket with water and green shoot for tending crops; unusual golden wheat ear with three violet kernels for rare seed; old rolled blank scroll and a small mossy stone for countryside stories. Square image at highest supported resolution.
+```
+
+按行导出：`talk / exchange / learn / basket / explore / reclaim / water / rare / story`。
+
+`farm-goods-atlas.jpg` 最终提示词：
+
+```text
+A precisely aligned 3 column by 4 row sheet of twelve separate Chinese pastoral watercolor inventory spot illustrations, equal cells, pure white flat background. No borders, no framed panels, no text, no letters, no people. Each object centered fully within its cell with generous margins. Muted sage green warm ochre grey ink delicate handpainted watercolor style. Row 1: harvested golden wheat sheaf; small bowl of dry soybeans with green soybean pod; bundle of flax stalks with tiny blue flowers. Row 2: open cloth pouch of wheat seeds with one wheat ear beside it; open cloth pouch of soybean seeds with soybean pod beside it; open cloth pouch of flax seeds with blue flax flower beside it. Row 3: tied split firewood logs; lump of moist clay; basket of dark compost with a leaf. Row 4: tied bundle of straw; open sack of white flour with a wooden scoop; cooked grains in ceramic bowl for food rations. Portrait image, 3 columns 4 rows at highest supported resolution.
+```
+
+按行导出：`wheat / soy / flax / seedWheat / seedSoy / seedFlax / wood / clay / compost / straw / flour / food`。

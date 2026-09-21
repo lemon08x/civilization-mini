@@ -79,3 +79,8 @@
 .farm-painted-art img{display:block;width:112px;height:112px;object-fit:contain;mix-blend-mode:multiply}
 .farm-room-hero>.farm-painted-art{width:144px;height:128px}
 .farm-room-hero>.farm-painted-art img{width:136px;height:128px}
+.farm-choice-art{display:inline-block;width:56px;height:56px;object-fit:contain;flex-shrink:0;mix-blend-mode:multiply;vertical-align:middle;margin-right:8px}
+.pixi-farm-inspector .action-name{display:flex;align-items:center;line-height:1.5}
+.farm-room-split .farm-room-hero{flex-wrap:wrap;gap:14px}
+.farm-room-split .farm-room-hero>.farm-painted-art{width:112px;height:112px}
+.farm-room-split .farm-room-hero>.farm-painted-art img{width:112px;height:112px}
