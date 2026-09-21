@@ -395,3 +395,18 @@ Use the reference ONLY for face identity, painterly style, six-cell grid alignme
 - `story-token.jpg`（1024×1024）→ `story-token-ui.webp`（384×384，q84）：开始页题图。无字素玉佩、编绳与银杏叶静物，呼应家族信物。信物机制尚未实装，图片只是主题示意。
 
 两图均为不透明暖纸底，页面以 `mix-blend-mode:multiply` 融入纸色容器；已目视检查主题、风格与无文字。
+
+
+## 农舍事务卡片插画（2026-09-21）
+
+通过本机 Grok Build CLI 的 `image_gen` 生成 `farm-home-atlas.jpg`（1024×1024），按用户红框位置替换农舍横幅及六张功能卡片的线框图标。只改呈现。
+
+页面使用七张 300×300 WebP：`farm-home-home`（农舍）、`farm-home-porridge`（麦粥）、`farm-home-beans`（炖豆）、`farm-home-mixed`（麦豆饭）、`farm-home-rest`（休息）、`farm-home-reserves`（储粮）、`farm-home-gather`（采集）。图集第三行余下两格未用于页面。裁掉生成的纸片边框，对边缘连通的浅灰底做透明度处理，保留器物和水彩阴影；页面以 multiply 融入原有纸色。原始图集保留，便于重新裁切。
+
+最终绘图提示词：
+
+```text
+A precisely aligned 3 by 3 contact sheet of nine separate Chinese pastoral watercolor spot illustrations on pure white background, equal square cells, no borders, no text, no letters, no people. Each object centered in its cell with generous white margins, completely contained in its cell. Muted sage green, warm ochre, ink grey, delicate handpainted rice-paper watercolor aesthetic. Row 1: small rustic tiled farmhouse with warm kitchen window; ceramic bowl of wheat porridge and wheat stalk; earthenware bowl of stewed brown soybeans. Row 2: ceramic bowl of mixed wheat grains and beans; resting bamboo mat with cushion and herbal tea; woven basket of grain and storage jar. Row 3: gathering basket with firewood and small hand hoe; a sprouting seed; small cooking stove. Square image at highest supported resolution.
+```
+
+接入位置：`farm-view.ts` 的农舍 panel；`farm-animation/scene.css` 的 `.farm-painted-art`。图片为装饰性，名称、材料、状态与行动仍由原有可访问文本表达。未修改田地场景、游戏机制或数值。
