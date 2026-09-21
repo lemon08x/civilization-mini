@@ -1,3 +1,4 @@
+import {ELECTRIC_KNOWLEDGE} from '../model/electric.js';
 import {industryProductsFor} from '../model/industry.js';
 import {branchNodesFor} from '../model/branches.js';
 import {changeGoods,consumeEquipment} from './inventory.js';
@@ -10,6 +11,7 @@ export function knowledgeNeeds(s:GameState,ids:string[]):string[]{return ids.fil
 export function productNeeds(s:GameState,id:string,inspection=false):string[]{
  const state=s.economy?.industry;if(!state)return [];
  const p=industryProductsFor(s).find(p=>p.id===id);if(!p)return ['产品尚未纳入三类树'];
+ if(inspection&&p.kind==='device'&&s.electric&&(s.era?.index??0)>=2&&(id==='E01'||ELECTRIC_KNOWLEDGE[id]))return knowledgeNeeds(s,['M4','L7']);
  if(!inspection&&state.products[id]?.protocol)return [];
  return [...knowledgeNeeds(s,p.knowledge),...p.parents.filter(id=>!state.products[id]).map(id=>'需验证前置产品：'+productName(id))];
 }

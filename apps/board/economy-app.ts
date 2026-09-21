@@ -25,6 +25,7 @@ const saveId=requested;
 const loaded=loadSave(saveId);
 if(!loaded){location.replace('/start');throw new Error('missing save');}
 let failed=false,busy=false,page='家人',guide=false,selectedCultivation='',selectedCourse='',selectedProduct='',selectedSystem='',selectedDevice='',filter='',shopCategory='物资';
+let selectedTechStage=-1;
 let recap:Recap|null=null,pendingAction='';
 let feedbackTimer:ReturnType<typeof setTimeout>|undefined;
 function sectFeedback(id:string,lines:string[]):void {
@@ -81,7 +82,7 @@ function recapFor(id:string,lines:string[]):Recap|null {
 function focusKey():string {
   const el=document.activeElement as HTMLElement|null;
   if(!el)return '';
-  for(const attr of ['data-action','data-page','data-cultivation','data-course','data-product','data-recipe','data-system','data-device','data-shop-category','data-guide','id'] as const){
+  for(const attr of ['data-action','data-page','data-cultivation','data-course','data-course-stage','data-product','data-recipe','data-system','data-device','data-shop-category','data-guide','id'] as const){
     const value=el.getAttribute(attr); if(value)return attr+'='+value;
   }
   return '';
@@ -125,7 +126,7 @@ function bindApp():void {
 $('export').onclick=()=>download('economy-run.json',{record:session.record,state:session.state});
 $('import').onchange=async ev=>{const file=(ev.target as HTMLInputElement).files?.[0];if(!file||busy)return;busy=true;try{const value=JSON.parse(await file.text());const next=parseSession(value);if(next.record.manifest.ruleset.rulesVersion!==rules.rulesVersion)throw new Error('仅导入当前规则存档');const id=crypto.randomUUID();writeSave(id,next,`导入 · ${new Date().toLocaleString()}`);location.assign('/play?save='+encodeURIComponent(id));}catch(e){error((e as Error).message);busy=false;}};
   bindFarmScene(document,observeSession(session).game,render);
-  document.querySelectorAll<HTMLButtonElement>('[data-page]').forEach(b=>b.onclick=()=>{page=b.dataset.page!;if(b.dataset.destination)selectFarmPanel(b.dataset.destination as FarmPanel);guide=false;filter='';render();});
+  document.querySelectorAll<HTMLButtonElement>('[data-page]').forEach(b=>b.onclick=()=>{page=b.dataset.page!;if(page==='学科'){selectedTechStage=-1;selectedCourse='';}if(b.dataset.destination)selectFarmPanel(b.dataset.destination as FarmPanel);guide=false;filter='';render();});
   const showSelection=()=>{
     render();
     if(matchMedia('(max-width: 900px)').matches){
@@ -135,7 +136,8 @@ $('import').onchange=async ev=>{const file=(ev.target as HTMLInputElement).files
     }
   };
   document.querySelectorAll<HTMLButtonElement>('[data-cultivation]').forEach(b=>b.onclick=()=>{selectedCultivation=b.dataset.cultivation!;render();});
-  document.querySelectorAll<HTMLButtonElement>('[data-course]').forEach(b=>{const go=()=>{selectedCourse=b.dataset.course!;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
+  document.querySelectorAll<HTMLButtonElement>('[data-course-stage]').forEach(b=>b.onclick=()=>{selectedTechStage=Number(b.dataset.courseStage);selectedCourse='';render();});
+  document.querySelectorAll<HTMLButtonElement>('[data-course]').forEach(b=>{const go=()=>{selectedCourse=b.dataset.course!;selectedTechStage=observeSession(session).game.economy!.branchView?.nodes.find(n=>n.id===selectedCourse)?.unlockStage??-1;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
   document.querySelectorAll<HTMLButtonElement>('[data-product]').forEach(b=>{const go=()=>{selectedProduct=b.dataset.product!;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
   document.querySelectorAll<HTMLButtonElement>('[data-system]').forEach(b=>{const go=()=>{selectedSystem=b.dataset.system!;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
   document.querySelectorAll<HTMLButtonElement>('[data-device]').forEach(b=>{const go=()=>{selectedDevice=b.dataset.device!;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
@@ -192,7 +194,7 @@ function render():void {
   if(page==='系统')body=e.industryView?industrySystems(o,button,selectedSystem):operationsPage(o,button)+(e.workshopView?'<section class="panel"><div class="panel-body"><h2>作坊协作</h2><p>建立纤维与绳索工序，配置跨季供货，观察库存与运输瓶颈。</p><button type="button" data-page="作坊">查看生产网络 →</button></div></section>':'');
   if(page==='家业')body=operationsPage(o,button)+(e.workshopView?'<section class="panel"><div class="panel-body"><h2>作坊协作</h2><p>建立纤维与绳索工序，配置跨季供货，观察库存与运输瓶颈。</p><button type="button" data-page="作坊">查看生产网络 →</button></div></section>':'');
   if(page==='作坊')body=workshopPage(o,button,observeSession(session).recentEvents);
-  if(page==='学科')body=e.branchView?branchPage(o,button,selectedCourse):e.disciplines.map(d=>panel(d.name+` · 本人${d.level}阶 / 后辈${d.heirLevel}阶`, `<p>家族记录${d.notes}阶；下一阶可通过固定研究、生产证据或购买教材学习；家学书室可合并记录与教导。各学科内部暂按单主干顺序学习。</p><div class="flow">${d.topics.map(t=>`<span class="tag">${t.known?'✓ ':''}${t.level} ${t.name}</span>`).join(' → ')}</div>${d.topics.filter(t=>t.level===d.level+1).map(t=>button('economy:study:'+t.id)+(t.level>1?button('economy:research:'+t.id):'')).join('')}${button('economy:archive:'+d.subject)}${button('economy:teach:'+d.subject)}${button('economy:publish:'+d.subject)}`)).join('');
+  if(page==='学科')body=e.branchView?branchPage(o,button,selectedCourse,selectedTechStage):e.disciplines.map(d=>panel(d.name+` · 本人${d.level}阶 / 后辈${d.heirLevel}阶`, `<p>家族记录${d.notes}阶；下一阶可通过固定研究、生产证据或购买教材学习；家学书室可合并记录与教导。各学科内部暂按单主干顺序学习。</p><div class="flow">${d.topics.map(t=>`<span class="tag">${t.known?'✓ ':''}${t.level} ${t.name}</span>`).join(' → ')}</div>${d.topics.filter(t=>t.level===d.level+1).map(t=>button('economy:study:'+t.id)+(t.level>1?button('economy:research:'+t.id):'')).join('')}${button('economy:archive:'+d.subject)}${button('economy:teach:'+d.subject)}${button('economy:publish:'+d.subject)}`)).join('');
   if(page==='制造')body=e.industryView?manufacturePage(o,button,selectedProduct):manufactureFallback(o,button);
   if(page==='农业')body=farm(o,button);
   if(page==='雇佣')body=staffPage(o,button);

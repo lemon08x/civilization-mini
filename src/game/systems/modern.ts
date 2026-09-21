@@ -33,7 +33,7 @@ export const GENERATORS=['E01','E02','E03'];
 export const SERVICES=['N08','N10','S08','U08M','U09M'];
 export function generateModern(s:GameState,events:GameEvent[]):void {
  const m=s.economy?.modern;if(!m||s.economy!.operations?.paused)return;
- if(s.economy?.branches&&!branchHas(s,'L6'))return;
+ if(s.economy?.branches&&!branchHas(s,s.electric?'L7':'L6'))return;
  for(const id of GENERATORS){
   if(!m.enabled.includes(id)||m.operated[id]===s.clock.absoluteTurn||!equipped(s,id))continue;
   if(id==='E01'&&s.location.water<1||id==='E02'&&amount(s,'fuel')<1){modernEvent(events,id,'发电待命：缺水或精炼燃料');continue;}
@@ -52,7 +52,7 @@ export function generateModern(s:GameState,events:GameEvent[]):void {
 }
 export function serveModern(s:GameState,events:GameEvent[]):void {
  const m=s.economy?.modern;if(!m||s.economy!.operations?.paused)return;
- if(s.economy?.branches&&!branchHas(s,'L6'))return;
+ if(s.economy?.branches&&!branchHas(s,s.electric?'L7':'L6'))return;
  if(s.electric){
   if(!branchHas(s,'L7'))return;
   for(const id of ['LAMP','TELEGRAPH']){

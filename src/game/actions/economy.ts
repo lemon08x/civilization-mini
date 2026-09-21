@@ -108,7 +108,7 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
   const org=organizationLevel(s),capacity=org>=5?4:org>=3?3:org>=2?2:1;
   for(const kind of Object.keys(WORKER_NAMES) as WorkerKind[]){
     const worker=e.workers[kind],required=kind==='laborer'?1:kind==='manager'?5:2;
-    add('hire',kind,'雇佣'+WORKER_NAMES[kind],'雇佣',{money:p.hireCost},[...(e.branches?(kind==='laborer'?branchNeeds(s,['O0']):kind==='manager'?['管理进阶分支尚未接入']:branchNeeds(s,['O1'])):org<required?[ `需生产组织第${required}阶或家族记录`]:[]),...(worker?['已雇有此岗位']:[]),...(Object.keys(e.workers).length>=capacity?['达到当前组织人数上限']:[]),...(e.recruitment<1?['本季招募机会用完']:[])],
+    add('hire',kind,'雇佣'+WORKER_NAMES[kind],'雇佣',{money:p.hireCost},[...(e.branches?(kind==='manager'?['管理进阶分支尚未接入']:[]):org<required?[ `需生产组织第${required}阶或家族记录`]:[]),...(worker?['已雇有此岗位']:[]),...(Object.keys(e.workers).length>=capacity?['达到当前组织人数上限']:[]),...(e.recruitment<1?['本季招募机会用完']:[])],
       `招募费${p.hireCost}钱，之后按实际工作季支付工资；无任务、缺料、设备占用时待命不收费。熟练人员可使用其专业工艺，不赠送本人技能。`,(draft,events)=>{
         if(draft.economy!.industry){const r=draft.economy!.industry!.rules;draft.economy!.industry!.workers[kind]={timeRemaining:r.workerTime,energy:r.workerEnergy};}
         draft.economy!.recruitment--;draft.economy!.workers[kind]={kind,experience:kind==='laborer'?0:4,job:'rest',active:false,project:null};

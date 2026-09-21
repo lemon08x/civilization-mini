@@ -25,10 +25,10 @@ export interface FrameworkStage extends FrameworkStageOutline {
 }
 export interface FrameworkOutline {id:string;name:string;summary:string;implemented:boolean;stages:FrameworkStageOutline[];}
 const RIVERINE_STAGES:FrameworkStage[]=[
- {id:'farming',name:'农耕村落',focus:'农场',imports:2,service:3,foodWeight:3,craftWeight:1,gatherBonus:1,workBonus:1,publicWell:false,publicMill:false,courses:['A0','A1','A2','A3','A4','M0','M3','L0','O0','Q0'],description:'农社靠天吃饭。公地采食和帮工不耗科技；收获回报高。成形、流体、泵和工厂知识尚未开放。'},
- {id:'township',name:'市镇百工',focus:'水力机械与市镇手工业',imports:3,service:4,foodWeight:2,craftWeight:2,gatherBonus:0,workBonus:0,publicWell:true,publicMill:true,courses:['M1','M2','L1','L2','L3','L4','O1','O2','O3','Q1','Q2'],description:'市镇提供公井灌溉，不必先造泵；公共磨坊以水力把小麦磨成面粉。市集扩大；密封、流体、泵、水力与分工课程在此开放。'},
- {id:'electric',name:'电力工业',focus:'发电、储能与电解',imports:4,service:6,foodWeight:1,craftWeight:3,gatherBonus:0,workBonus:0,publicWell:true,publicMill:true,courses:['M4','M5','L5','L6','O4'],description:'公共采购提供稳定铁料和电工材料；发电、储能与电解在此开放，水力机械转为驱动发电机。'},
- {id:'modern',name:'现代社会',focus:'配电入户与存续使命',imports:6,service:8,foodWeight:1,craftWeight:3,gatherBonus:0,workBonus:0,publicWell:false,publicMill:true,courses:['L7','O5'],description:'市政配送口粮、可付费自来水。配电课程与四类存续危机在此开放。自来水不追溯取消前期水井的价值。'},
+ {id:'farming',name:'农耕村落',focus:'农场',imports:2,service:3,foodWeight:3,craftWeight:1,gatherBonus:1,workBonus:1,publicWell:false,publicMill:false,courses:['A0','A1','A2','A3','A4','M0','M3','L0'],description:'农社靠天吃饭。公地采食和帮工不耗科技；收获回报高。成形、流体、泵和工厂知识尚未开放。'},
+ {id:'township',name:'市镇百工',focus:'水力机械与市镇手工业',imports:3,service:4,foodWeight:2,craftWeight:2,gatherBonus:0,workBonus:0,publicWell:true,publicMill:true,courses:['M1','M2','L1','L2','L3','L4','O1','O3','Q0','Q1','Q2'],description:'市镇提供公井灌溉，不必先造泵；公共磨坊以水力把小麦磨成面粉。市集扩大；密封、流体、泵、水力与加工工序在此开放。'},
+ {id:'electric',name:'电力工业',focus:'购置设备、组织生产与市场经营',imports:4,service:6,foodWeight:1,craftWeight:3,gatherBonus:0,workBonus:0,publicWell:true,publicMill:true,courses:['M4','M5','L5','L6','L7','O0','O2','O4','O5'],description:'公共采购提供稳定铁料和电工材料；用电、劳动分工与经营安排在此开放；发电设备制造为可选专业支线。'},
+ {id:'modern',name:'现代社会',focus:'资本经营（筹备中）与存续使命',imports:6,service:8,foodWeight:1,craftWeight:3,gatherBonus:0,workBonus:0,publicWell:false,publicMill:true,courses:[],description:'市政配送口粮、可付费自来水。资本科技尚在筹备，四类存续危机在此开放。自来水不追溯取消前期水井的价值。'},
 ];
 export const FRAMEWORKS:FrameworkOutline[]=[
  {id:'riverine',name:'大河农耕',summary:'以中华文明为背景，沿大河安顿农耕，从村落走到市镇百工，再经电力工业进入现代社会。',implemented:true,stages:RIVERINE_STAGES},
