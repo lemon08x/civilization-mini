@@ -46,7 +46,7 @@ export function farmWork(s: GameState, crop: Crop, events: GameEvent[], worker?:
       e.shop.seededTurn = s.clock.absoluteTurn;
       consumeEquipment(s, 'U02', events);
     }
-    if (level(s, 'agronomy') >= 6 && f.lastCrop && f.lastCrop !== crop) bonus++;
+    if ((e.branches?branchHas(s,'A5'):level(s, 'agronomy') >= 6) && f.lastCrop && f.lastCrop !== crop) bonus++;
     let duration = c.duration;
     if (equipped(s, 'U10')) { duration = Math.max(1, duration - 1); consumeEquipment(s, 'U10', events); }
     if(heritage){bonus+=e.farm!.rules.rareBonus;f.variety='heritage';}else delete f.variety;
@@ -54,7 +54,7 @@ export function farmWork(s: GameState, crop: Crop, events: GameEvent[], worker?:
     events.push({ type: 'economy-farm', operation: 'sow', crop, actor, amount: 0 });
   } else if (f.growth >= f.duration) {
     const c = CROPS[f.crop], n = fieldYield(s,f), out: Record<string, number> = { [f.crop]: n, straw: c.straw, [c.seed]: 1 };
-    if(f.variety==='heritage'){delete out[c.seed];e.farm!.rareSeeds++;}else if (level(s, 'agronomy') >= 5) out[c.seed]++;
+    if(f.variety==='heritage'){delete out[c.seed];e.farm!.rareSeeds++;}else if (e.branches?branchHas(s,'A6'):level(s, 'agronomy') >= 5) out[c.seed]++;
     changeGoods(s, out, 1, events, actor + '收获');
     made(s, f.crop);
     if (equipped(s, 'U04')) consumeEquipment(s, 'U04', events);
@@ -138,7 +138,7 @@ export function initializeFarm(s:GameState,rules:FarmRules):void{
 export function farmView(s:GameState){
  const f=s.economy?.farm;if(!f)return undefined;
  const id=s.sect!.current[1],v=s.persons[id].vitality!,trust=activePerson(s).vitality?.experiences?.relationships[id]??0;
- return {homeId:HOME_PLOT,rareSeeds:f.rareSeeds,discovered:[...f.discovered],plots:Object.values(f.plots).map(p=>{const field=plotField(s,p.id);return {id:p.id,x:p.x,y:p.y,kind:p.kind,...(p.kind==='field'&&field?{field:{...field},harvest:fieldYield(s,field)}:{}),...(p.kind==='unknown'?{reachable:farmNeighbors(p).some(n=>f.plots[n.id]&&f.plots[n.id].kind!=='unknown')}:{}),...(p.discovery?{discovery:{...p.discovery,...FARM_EVENTS[p.discovery.id]}}:{}),...(p.fertility!==undefined?{fertility:p.fertility}:{})};}),neighbor:{id,title:v.sex==='female'?'师姐':'师兄',name:s.persons[id].name,alive:v.alive,trust,busy:f.neighbor.busy,offers:{seedSoy:f.neighbor.goods.seedSoy??0,seedFlax:f.neighbor.goods.seedFlax??0},description:'独立同门，不可切换控制；自己的田地与物资独立结算'},rules:{...f.rules}};
+ return {techniques:{rotation:branchHas(s,'A5'),seedSelection:branchHas(s,'A6'),scouting:branchHas(s,'A11'),nursery:equipped(s,'U10'),drainage:equipped(s,'U08'),harvestTools:equipped(s,'U04')},homeId:HOME_PLOT,rareSeeds:f.rareSeeds,discovered:[...f.discovered],plots:Object.values(f.plots).map(p=>{const field=plotField(s,p.id);return {id:p.id,x:p.x,y:p.y,kind:p.kind,...(p.kind==='field'&&field?{field:{...field},harvest:fieldYield(s,field)}:{}),...(p.kind==='unknown'?{reachable:farmNeighbors(p).some(n=>f.plots[n.id]&&f.plots[n.id].kind!=='unknown')}:{}),...(p.discovery?{discovery:{...p.discovery,...FARM_EVENTS[p.discovery.id]}}:{}),...(p.fertility!==undefined?{fertility:p.fertility}:{})};}),neighbor:{id,title:v.sex==='female'?'师姐':'师兄',name:s.persons[id].name,alive:v.alive,trust,busy:f.neighbor.busy,offers:{seedSoy:f.neighbor.goods.seedSoy??0,seedFlax:f.neighbor.goods.seedFlax??0},description:'独立同门，不可切换控制；自己的田地与物资独立结算'},rules:{...f.rules}};
 }
 export function growField(s:GameState,f:Field,events:GameEvent[],id:string):void{
  if(!f.crop)return;

@@ -1,3 +1,4 @@
+import {manufacturingStage} from '../model/industry.js';
 import {sectCosts} from './life.js';
 import {seasonTime} from '../model/electric.js';
 import {publicWaterFee} from './eras.js';
@@ -118,6 +119,6 @@ export function personalBudget(s:GameState){
 }
 export function industryView(s:GameState){
  const x=s.economy!.industry!;
- return {catalog:structuredClone(industryProductsFor(s)),reserved:reservedLabor(s),products:structuredClone(x.products),workers:structuredClone(x.workers),rules:structuredClone(x.rules),
+ return {catalog:industryProductsFor(s).map(p=>({...structuredClone(p),unlockStage:manufacturingStage(s,p.id)})),reserved:reservedLabor(s),products:structuredClone(x.products),workers:structuredClone(x.workers),rules:structuredClone(x.rules),
   systems:systemDefinitions(s).map(def=>{const instance=x.instances[def.id];return {...def,instance:instance?structuredClone(instance):null,unlockNeeds:systemUnlockNeeds(s,def),blockers:instance?systemBlockers(s,def,instance):['尚未建设'],wage:instance?wageFor(s,def,instance.operator):0};})};
 }

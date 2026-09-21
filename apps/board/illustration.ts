@@ -5,7 +5,9 @@ export const subjectArt=(subject:string):string=>({agronomy:'chronicle-farming',
 export function productArt(id:string):string {
   if(['W01','W03','U08','valve'].includes(id))return 'product-water';
   if(['S01','S02','mill','U06'].includes(id))return 'chronicle-pantry';
-  if(['T01','T03','U01'].includes(id))return 'product-tools';
+  if(['T01','T03','U01','U04'].includes(id))return 'product-tools';
+  if(['U09','compost','U10'].includes(id))return 'chronicle-farming';
+  if(['fiber','rope','oil'].includes(id))return 'tech-materials';
   if(['seal','fuel','aluminium','battery'].includes(id))return 'tech-materials';
   if(['P01','P03','shaft'].includes(id))return 'tech-mechanics';
   return 'chronicle-power';

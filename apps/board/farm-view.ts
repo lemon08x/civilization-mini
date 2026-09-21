@@ -58,6 +58,17 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string):string {
  const usage=(id:string)=>{const u=uses[id];return u?`<div class="farm-good-use"><span>${u[0]}</span><p>${u[1]}</p></div>`:'<div class="farm-good-use"><span>制作物资</span><p>在「学习与制造」查看配方中的用途与解锁要求。</p></div>';};
  const seedBag=()=>`<div class="pixi-seed-bag"><strong>种子袋</strong>${map.discovered.map(c=>`<p>${CROPS[c].name} ${e.goods[CROPS[c].seed]??0} 份</p>`).join('')}${map.rareSeeds?`<p>异穗麦种 ${map.rareSeeds} 份 · 独立留种</p>`:''}${jump('market','购买种子')}</div>`;
  const fieldTags:string[]=[];
+ const techniques=map.techniques;
+ if(panel==='field'&&techniques){
+  if(p.kind==='unknown'&&techniques.scouting)fieldTags.push('探路辨种 · 已节省探索时间');
+  if(p.kind==='field'&&f){
+   if(!f.crop&&techniques.rotation&&f.lastCrop)fieldTags.push(`上茬${CROPS[f.lastCrop].name} · 换种收成+1`);
+   if(f.crop&&techniques.seedSelection)fieldTags.push(f.variety==='heritage'?'异穗留种 1份':'收获留种 2份');
+   if(!f.crop&&techniques.nursery)fieldTags.push('育苗设施 · 下茬成熟缩短1季');
+   if(techniques.drainage)fieldTags.push('排涝设施 · 每田防涝耗1耐用');
+   if(techniques.harvestTools)fieldTags.push('收割工具 · 迟收宽限1季');
+  }
+ }
  if(panel==='field'){
   title=p.discovery?.title??names[p.kind];
   let actions='',extra='',hint='';

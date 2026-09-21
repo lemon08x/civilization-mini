@@ -269,7 +269,7 @@ function sectionPayload(observation: SessionObservation, section: CompactSection
   const actions = (game.actions as ActionLike[] | undefined) ?? [];
   switch (section) {
     case 'branches': return economy.branchView ? {...record(economy.branchView), learningActions:actions.filter(a=>a.id.startsWith('economy:branchlearn:'))} : null;
-    case 'industry': return economy.industryView ?? null;
+    case 'industry': return economy.industryView ? {...record(economy.industryView), manufactureActions:actions.filter(a=>/^economy:(build|process|inspect|finish):/.test(a.id))} : null;
     case 'systems': return {
       operations: economy.operationsView ?? null,
       workshop: economy.workshopView ?? null,

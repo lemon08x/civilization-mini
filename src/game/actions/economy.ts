@@ -131,7 +131,7 @@ function farmMapActions(s:GameState):ActionDefinition[]{
  const farm=s.economy?.farm;if(!farm)return [];const r=farm.rules,out:ActionDefinition[]=[];
  const event=(d:GameState,ev:import('../model/events.js').GameEvent[],detail:string)=>ev.push({type:'life',personId:d.household.activePersonId,operation:'farm-map',detail});
  for(const p of Object.values(farm.plots)){
-  if(p.kind==='unknown'&&farmNeighbors(p).some(n=>farm.plots[n.id]&&farm.plots[n.id].kind!=='unknown'))out.push(defineAction(s,'economy:farmexplore:'+p.id,'探索 '+p.id,'农业',{time:r.exploreTime,energy:r.exploreEnergy},[],'揭开相邻地块；探索结果永久保留，不提前显示资源。',(d,ev)=>{
+  if(p.kind==='unknown'&&farmNeighbors(p).some(n=>farm.plots[n.id]&&farm.plots[n.id].kind!=='unknown'))out.push(defineAction(s,'economy:farmexplore:'+p.id,'探索 '+p.id,'农业',{time:branchHas(s,'A11')?Math.min(r.exploreTime,r.interactionTime):r.exploreTime,energy:r.exploreEnergy},[],'揭开相邻地块；探索结果永久保留，不提前显示资源。',(d,ev)=>{
    exploreFarm(d,p.id,ev);
   }));
   if(p.kind==='wild')out.push(defineAction(s,'economy:farmreclaim:'+p.id,'开垦 '+p.id,'农业',{time:r.reclaimTime,energy:r.reclaimEnergy,money:r.reclaimMoney},[],'开垦为独立田块。新田手动管理；起始田的公共供水、井泵与持续耕作不自动覆盖新田。',(d,ev)=>{const plot=d.economy!.farm!.plots[p.id];plot.kind='field';plot.field={...blankField(),fertility:plot.fertility??2};event(d,ev,p.id+' 已开垦');}));
@@ -139,7 +139,7 @@ function farmMapActions(s:GameState):ActionDefinition[]{
    const key=p.discovery.id;
    const choice=(id:string,label:string,time:number,energy:number,blockers:string[],description:string,food=0)=>out.push(defineAction(s,`economy:farmstory:${p.id}-${id}`,label,'探索',{time,energy,food},blockers,description,(d,ev)=>resolveFarmDiscovery(d,p.id,id,ev)));
    if(key==='brambles')choice('clear','清理荆棘',r.clearTime,r.clearEnergy,[],'投入劳力清理，此后可以开垦；也可保留并探索旁边。');
-   if(key==='seedbag'||key==='heritage')choice('identify','辨种与留种',r.identifyTime,1,branchNeeds(s,['A0']),'辨认一次，领取种子；地块随后可开垦。异穗麦独立留种，不能在集市购买。');
+   if(key==='seedbag'||key==='heritage')choice('identify','辨种与留种',branchHas(s,'A11')?Math.min(r.identifyTime,r.interactionTime):r.identifyTime,1,branchNeeds(s,['A0']),'辨认一次，领取种子；地块随后可开垦。异穗麦独立留种，不能在集市购买。');
    if(key==='canal')choice('repair','疏渠归淤',r.clearTime,r.clearEnergy,missingGoods(s,{wood:1}),'耗1木料，恢复土层；此格开垦时肥力为3，不增加水源。');
    if(key==='traveler')choice('share','分一份口粮，听旅人讲述',r.interactionTime,0,[],`付${r.storyFood}份即食口粮，回赠${r.discoverySeeds}麦种；不会扣种子当口粮。`,r.storyFood);
    if(key==='shrine')choice('preserve','描下旧界，保留地标',r.interactionTime,0,[],'永久保留此格，不能开垦；周边仍可探索。');

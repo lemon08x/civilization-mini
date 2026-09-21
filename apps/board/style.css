@@ -1243,3 +1243,27 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .study-purpose p { margin:8px 0 16px; line-height:1.8; }
 .study-blocker { padding:12px; background:#eee4d3; border-radius:7px; color:#80694a; font-size:13px; }
 .school-workbench .inspector-head small { display:block; margin-top:6px; font-size:12px; color:#7a856e; }
+
+/* Stage-based manufacturing: browse useful objects, then inspect the actual recipe. */
+.manufacture-intro { color:var(--muted); line-height:1.8; margin:14px 0 24px; }
+.manufacture-project { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:18px 24px; margin-top:18px; border:1px solid #b9c9a6; border-radius:8px; background:#edf1e4; }
+.manufacture-project p { margin:6px 0; color:var(--muted); font-size:13px; }
+.manufacture-library { min-width:0; }
+.manufacture-group { margin:0 0 26px; }
+.manufacture-group h4 { margin:0 0 12px; padding-bottom:10px; border-bottom:1px solid var(--line); font-family:var(--title); font-size:16px; }
+.manufacture-items { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.manufacture-item { display:flex; align-items:center; gap:10px; min-height:120px; text-align:left; padding:12px; background:var(--paper); border:1px solid var(--line); border-radius:8px; transition:background .18s,border-color .18s; }
+.manufacture-item:hover { background:#f0efdf; border-color:#9baf90; }
+.manufacture-item.selected { border-color:#72846a; background:#edf0e2; box-shadow:inset 3px 0 #72846a; }
+.manufacture-item:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.manufacture-item > span { display:grid; gap:6px; }
+.manufacture-item strong { font-family:var(--title); font-size:16px; }
+.manufacture-item small { color:var(--muted); font-size:12px; }
+.manufacture-item em { font-style:normal; font-size:11px; color:var(--muted); }
+.manufacture-item em.ready { color:#496d40; }
+.manufacture-item-art { flex:0 0 68px; width:68px; height:80px; object-fit:contain; mix-blend-mode:multiply; }
+.manufacture-inspector { align-self:start; }
+.manufacture-recipe { display:grid; gap:7px; text-align:center; padding:16px 12px; margin:18px 0; border-block:1px solid var(--line); background:#f3efe4; }
+.manufacture-recipe strong { font-size:14px; line-height:1.7; }
+.manufacture-dependencies { margin-top:24px; }
+.manufacture-dependencies > p { color:var(--muted); font-size:13px; }

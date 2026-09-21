@@ -1,3 +1,4 @@
+import {frameworkUnlockStage} from './eras.js';
 import {ELECTRIC_KNOWLEDGE,ELECTRIC_PARENTS} from './electric.js';
 import type {GameState} from './state.js';
 import {BRANCH_PRODUCTS,BRANCH_PROCESSES} from './branches.js';
@@ -7,7 +8,7 @@ export interface IndustryRules {
   workerRestTime:number;workerRestRecovery:number;wageTimeUnit:number;archiveDiscount:number;
 }
 export interface ProductDefinition {id:string;knowledge:string[];parents:string[];kind:'device'|'goods';good?:string;}
-const parents:Record<string,string[]>={W03:['valve','seal'],P01:['shaft'],P03:['shaft'],S02:['S01','seal'],E01:['coil','shaft'],shaft:['T03'],valve:['seal'],coil:['wire'],cable:['wire','seal'],mill:['U06']};
+const parents:Record<string,string[]>={W03:['valve','seal'],P01:['shaft'],P03:['shaft'],S02:['S01','seal'],E01:['coil','shaft'],shaft:['T03'],valve:['seal'],coil:['wire'],cable:['wire','seal'],mill:['U06'],compost:['U09'],U10:['S01'],rope:['fiber']};
 export const INDUSTRY_PRODUCTS:ProductDefinition[]=[
   ...Object.entries(BRANCH_PRODUCTS).map(([id,knowledge])=>({id,knowledge,parents:parents[id]??[],kind:'device' as const})),
   ...Object.entries(BRANCH_PROCESSES).map(([id,knowledge])=>({id,knowledge,parents:parents[id]??[],kind:'goods' as const,good:id==='mill'?'flour':id})),
@@ -35,4 +36,17 @@ export interface IndustryState {
 
 export function industryProductsFor(s:GameState):ProductDefinition[]{
  return s.electric?[...INDUSTRY_PRODUCTS,...Object.entries(ELECTRIC_KNOWLEDGE).map(([id,knowledge])=>({id,knowledge,parents:ELECTRIC_PARENTS[id]??[],kind:(['fuel','battery','aluminium','aluminiumwire'].includes(id)?'goods':'device') as 'goods'|'device',...(['fuel','battery','aluminium','aluminiumwire'].includes(id)?{good:id==='aluminiumwire'?'wire':id}:{})}))]:INDUSTRY_PRODUCTS;
+}
+
+// Presentation metadata follows the same course batches and full product dependency chain.
+export function manufacturingStage(s:GameState,id:string):number {
+ const catalog=industryProductsFor(s),visiting=new Set<string>();
+ const stage=(key:string):number=>{
+  if(visiting.has(key))return 0;
+  visiting.add(key);
+  const p=catalog.find(p=>p.id===key);
+  const result=p?Math.max(0,...p.knowledge.map(n=>frameworkUnlockStage(s.era?.frameworkId,n)),...p.parents.map(stage)):0;
+  visiting.delete(key);return result;
+ };
+ return stage(id);
 }

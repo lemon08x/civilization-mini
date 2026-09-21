@@ -1,56 +1,47 @@
 import {productArt,artUrl,illustration} from './illustration.js';
 import type {SessionObservation} from '../../src/runtime/session.js';
 import {SYSTEMS} from '../../src/game/model/industry.js';
-import {nodeUnlockEra} from '../../src/game/model/branches.js';
 import {productName} from '../../src/game/systems/industry-products.js';
 import {branchRequirements} from './branch-view.js';
 import {esc,inputsText,needsText} from './economy-view.js';
 import {treeGraph,type TreeNodeSpec} from './tree-view.js';
 const panel=(title:string,body:string)=>`<section class="panel"><div class="panel-head"><h2>${title}</h2></div><div class="panel-body">${body}</div></section>`;
-const MANUFACTURE_LANES=[{id:'field',name:'田间与储存',ids:['W01','U01','U08','S01','S02','U06','mill']},{id:'parts',name:'部件与机械',ids:['T01','T03','seal','shaft','valve','W03','P01','P03']},{id:'power',name:'电力与化工',ids:['wire','coil','cable','F07','fuel','battery','E01','E02','E04','LAMP','TELEGRAPH','ELECTROLYZER','aluminium','aluminiumwire']}];
-
-export function manufacturePage(g:SessionObservation['game'],button:(id:string)=>string,selectedId=''):string{
- const e=g.economy!,x=e.industryView!;
- const selected=x.catalog.find(p=>p.id===selectedId)??x.catalog[0];
- const laneOf=(id:string)=>MANUFACTURE_LANES.find(l=>l.ids.includes(id))?.id??'其他';
- const eraTag=(ids:string[])=>{const i=Math.max(0,...ids.map(nodeUnlockEra)),name=g.era?.stages[i]?.name;return i>0&&name?' · '+name.slice(0,2):'';};
- const nodes:TreeNodeSpec[]=x.catalog.map(p=>{
-  const record=x.products[p.id];
-  const stock=p.kind==='device'?`耐用${e.equipment[p.id]??0}`:`库存${e.goods[p.good!]??0}`;
-  return {id:p.id,name:productName(p.id),image:artUrl(productArt(p.id)),lane:laneOf(p.id),parents:p.parents.filter(id=>x.catalog.some(c=>c.id===id)),selected:selected?.id===p.id,stateClass:record?.protocol?'known':p.parents.every(id=>x.products[id])?'ready':'locked',sub:`${record?'✓验证':'○验证'} ${record?.protocol?'✓规程':'○规程'} · ${stock}${eraTag(p.knowledge)}`,dataAttr:'data-product'};
- });
- const detail=(()=>{
-  if(!selected)return '<p>暂无制造条目。</p>';
-  const record=x.products[selected.id],spec=e.products.find(d=>d.id===selected.id),recipe=e.processes.find(d=>d.id===selected.id);
-  const lane=MANUFACTURE_LANES.find(l=>l.id===laneOf(selected.id))?.name??'其他';
-  const chip=(id:string)=>`<button type="button" data-product="${id}" class="prerequisite ${x.products[id]?'met':''}">${x.products[id]?'✓':'○'} ${esc(productName(id))}</button>`;
-  const downstream=x.catalog.filter(c=>c.id!==selected.id&&c.parents.includes(selected.id));
-  const asIngredient=e.processes.filter(p=>p.id!==selected.id&&(selected.id in p.inputs||!!selected.good&&selected.good in p.inputs));
-  const asEquipment=e.processes.filter(p=>p.equipment===selected.id);
-  const inSystems=SYSTEMS.filter(s=>s.equipment===selected.id||s.products.includes(selected.id));
-  const meaning=[spec?`<p>${esc(spec.effect)}</p>`:'',recipe?`<p>由配方「${esc(recipe.name)}」制造。</p>`:'',
-   downstream.length?`<p><span class="detail-label">是这些产品的前置验证</span><br>${downstream.map(c=>chip(c.id)).join('')}</p>`:'',
-   asIngredient.length?`<p><span class="detail-label">是这些配方的原料</span><br>${asIngredient.map(p=>chip(p.id)).join('')}</p>`:'',
-   asEquipment.length?`<p><span class="detail-label">是这些配方的设备</span><br>${asEquipment.map(p=>chip(p.id)).join('')}</p>`:'',
-   inSystems.length?`<p>生产系统：${inSystems.map(s=>`${esc(s.name)}（${s.equipment===selected.id?'设备':'验证对象'}）`).join('、')}</p>`:''].join('');
-  const stock=selected.kind==='device'?`实物耐用 ${e.equipment[selected.id]??0}`:`实物库存 ${e.goods[selected.good!]??0}`;
-  return `${illustration(productArt(selected.id))}<h3>${esc(productName(selected.id))}</h3>
-    <p><span class="detail-label">${lane} · ${selected.kind==='device'?'设备':'部件'}</span></p>
-    <div class="production-stages"><span class="${record?'done':''}">${record?'✓':'○'} 产品验证</span><span aria-hidden="true">→</span><span class="${record?.protocol?'done':''}">${record?.protocol?'✓':'○'} 制造规程</span></div>
-    <p class="detail-label">在游戏中的意义</p>${meaning||'<p>暂无下游用途。</p>'}
-    <p class="detail-label">如何获得</p>
-    <p>知识：${branchRequirements(selected.knowledge)}<br>前置验证：${selected.parents.length?selected.parents.map(chip).join(''):'无'}<br>材料投入：${esc(inputsText(spec?.inputs??recipe?.inputs??{}))||'无'}</p>
-    <p>自行试制取得验证和制造规程；购买只获得实物，检验也不赠送规程。${record?(record.protocol?'已验证，并有制造规程。':'已检验外购实物，没有制造规程。'):'尚未验证。'}</p>
-    ${recipe?`<div class="recipe-flow"><span>投入 ${esc(inputsText(recipe.inputs)||'无')}</span><span aria-hidden="true">→</span><span>工序 ${recipe.wait?'跨季等待':'当次完成'}${recipe.power?` · 单批用电 ${recipe.power}`:''}${recipe.equipment?` · ${esc(e.products.find(d=>d.id===recipe.equipment)?.name??recipe.equipment)}`:''}</span><span aria-hidden="true">→</span><span>产出 ${esc(inputsText(recipe.outputs)||'无')}</span></div>`:''}
-    <p class="detail-label">状态与操作</p>
-    <p>${stock}</p>
-    ${selected.kind==='goods'&&recipe?.wait?`<p>本人项目：${e.project?esc(e.processes.find(p=>p.id===e.project?.good)?.name??e.project.good):'暂无'}。跨季项目需等待并完成才能拿到产品。</p>`:''}
-    <p><button type="button" class="text-btn" data-page="商城">去集市补缺</button><button type="button" class="text-btn" data-page="学科">去学堂</button></p>
-    <div class="inspector-action">${!record?button('economy:inspect:'+selected.id):''}${button('economy:'+(selected.kind==='device'?'build:':'process:')+selected.id)}${recipe?.wait?button('economy:finish:project'):''}</div>`;
- })();
- return `<details><summary>如何获得实物、验证与规程</summary><p>解锁条件是前置知识与已验证产品。自行试制取得验证和制造规程；购买只获得实物，检验不赠送制造规程。验证记录不因实物消耗而失去。已有规程可跨代执行，新研发仍需个人知识。泵和发电机首次试制还需实际试运行。产品关系图不是必须依次造过全部产品。</p><p>部件由对应配方加工：当次完成的立即得到实物，跨季项目需等待并完成才能拿到产品。本人和雇工共用材料与设备，同一设备不能重复占用。</p></details>
-  ${e.operations?.production?'<p>已有持续生产计划；日常进度见「家业」。本页的手动制造与雇员共用材料和设备。</p>':''}
-  <div class="illustrated-categories product-categories">${MANUFACTURE_LANES.map(l=>{const group=x.catalog.filter(p=>laneOf(p.id)===l.id);return group.length?`<button type="button" class="category-card ${laneOf(selected?.id??'')===l.id?'selected':''}" data-product="${group[0].id}">${illustration(l.id==='field'?'product-tools':l.id==='parts'?'tech-mechanics':'chronicle-power','category-illustration')}<span><strong>${l.name}</strong><small>${group.filter(p=>x.products[p.id]?.protocol).length} / ${group.length} 项已有规程</small></span></button>`:'';}).join('')}</div><div class="page-workbench"><section><div class="library-heading"><h3>制造目录</h3><span>${x.catalog.length} 项 · 实线 部件前置 / 虚线 设备前置</span></div><p class="tree-legend subtle">✓ 已验证规程 / 实线 部件前置 / 虚线 设备前置 / 虚框 缺前置验证</p>${x.catalog.length?`<div class="tree-network" tabindex="0" role="region" aria-label="制造树，可横向滚动">${treeGraph(nodes,MANUFACTURE_LANES.map(l=>({id:l.id,name:l.name})),{edgeClass:(fromId)=>x.catalog.find(c=>c.id===fromId)?.kind==='device'?'device':'',ariaLabel:'制造树'})}</div>`:'<p>暂无条目。</p>'}</section><aside class="course-inspector">${detail}</aside></div>`;
+const MANUFACTURE_LANES=[
+ {id:'field',name:'水土照料',ids:['W01','U08','U09','compost']},
+ {id:'harvest',name:'收获、育苗与储粮',ids:['S01','U04','U10']},
+ {id:'food',name:'粮食与油料加工',ids:['U06','mill','oil']},
+ {id:'fiber',name:'纤维与绳索加工',ids:['fiber','rope']},
+ {id:'parts',name:'工具、部件与动力',ids:['T01','T03','U01','S02','seal','shaft','valve','W03','P01','P03']},
+ {id:'power',name:'电气设备与材料',ids:['wire','coil','cable','F07','fuel','battery','E01','E02','E04','LAMP','TELEGRAPH','ELECTROLYZER','aluminium','aluminiumwire']},
+];
+const manufactureStages=[
+ {name:'农场',era:'农耕村落',title:'为田地做工具，把收成留住',flow:'木材与黏土 → 农用设施 → 水土养护、育苗与储粮',description:'先满足自己的田地需要。设施制造、跨季堆肥和材料条件都通过实际行动结算。'},
+ {name:'工坊',era:'市镇百工',title:'把农产品加工成更有用的东西',flow:'谷物、油料与亚麻 → 工具与工序 → 面粉、油、纤维与绳索',description:'农产加工是主线，部件和动力是工具支线；不用先把整棵制造树做完。'},
+ {name:'贸易',era:'电力工业',title:'制造是行业选择，购入设备也能经营',flow:'购入设备 → 检验与使用，或学习专业工艺 → 自行制造',description:'这里展示电气设备制造专业支线。外购设备不赠送制造规程，检验条件以实际报价为准。'},
+ {name:'资本',era:'现代社会',title:'既有产业继续生产',flow:'农场、工坊与工业制造持续可用',description:'金融玩法尚在筹备，不额外编造金融制造物品。可切换之前的阶段继续制作。'},
+];
+export function manufacturePage(g:SessionObservation['game'],button:(id:string)=>string,selectedId='',selectedStage=-1):string{
+ const e=g.economy!,x=e.industryView!,current=g.era?.index??0;
+ const stage=selectedStage>=0&&selectedStage<4?selectedStage:current,theme=manufactureStages[stage];
+ const catalog=x.catalog.filter(p=>p.unlockStage===stage);
+ const actionId=(p:typeof x.catalog[number])=>'economy:'+(p.kind==='device'?'build:':'process:')+p.id;
+ const offer=(p:typeof x.catalog[number])=>g.actions.find(a=>a.id===actionId(p));
+ const selected=catalog.find(p=>p.id===selectedId)??catalog.find(p=>offer(p)?.enabled)??catalog[0];
+ const laneOf=(id:string)=>MANUFACTURE_LANES.find(l=>l.ids.includes(id))?.id??'parts';
+ const stock=(p:typeof x.catalog[number])=>p.kind==='device'?`耐用 ${e.equipment[p.id]??0}`:`库存 ${e.goods[p.good!]??0}`;
+ const state=(p:typeof x.catalog[number])=>e.project?.good===p.id?'制作中':offer(p)?.enabled?(p.kind==='device'?'可制作':'可加工'):'条件不足';
+ const chip=(id:string)=>`<button type="button" data-product="${id}" class="prerequisite ${x.products[id]?'met':''}">${x.products[id]?'✓':'○'} ${esc(productName(id))}${x.catalog.find(p=>p.id===id)?.unlockStage!==stage?' · '+manufactureStages[x.catalog.find(p=>p.id===id)?.unlockStage??0].name:''} →</button>`;
+ const project=e.project?`<section class="manufacture-project"><div><strong>正在制作 · ${esc(productName(e.project.good))}</strong><p>材料已投入，跨季后完成；切换目录不影响项目。</p><button class="text-btn" type="button" data-product="${e.project.good}">查看项目 →</button></div>${button('economy:finish:project')}</section>`:'';
+ const top=`<nav class="study-stage-nav" aria-label="按文明阶段选择制造">${manufactureStages.map((s,i)=>`<button type="button" data-manufacture-stage="${i}" aria-pressed="${i===stage}"><small>第 ${i+1} 阶段${i>current?' · 预览':i===current?' · 当前':''}</small><strong>${s.name}</strong><span>${s.era}</span></button>`).join('')}</nav><header class="study-stage-overview"><span class="eyebrow">${theme.era} · ${stage>current?'尚未开放':stage<current?'可继续生产':'当前阶段'}</span><h3>${theme.title}</h3><p>${theme.flow}</p></header>${project}`;
+ if(stage>current||!selected)return `${top}<section class="study-preview"><h3>${stage>current?'到达对应阶段后开放':'本阶段没有新增制造条目'}</h3><p>${theme.description}</p></section>`;
+ const record=x.products[selected.id],spec=e.products.find(d=>d.id===selected.id),recipe=e.processes.find(d=>d.id===selected.id);
+ const input=inputsText(spec?.inputs??recipe?.inputs??{})||'无';
+ const result=recipe?inputsText(recipe.outputs):'1套'+productName(selected.id);
+ const uses=x.catalog.filter(c=>c.parents.includes(selected.id));
+ const stateClass=(p:typeof selected)=>offer(p)?.enabled?'ready':x.products[p.id]?.protocol?'known':'locked';
+ const graphNodes:TreeNodeSpec[]=catalog.map(p=>({id:p.id,name:productName(p.id),image:artUrl(productArt(p.id)),lane:laneOf(p.id),parents:p.parents,selected:p.id===selected.id,stateClass:stateClass(p),stateText:state(p),sub:stock(p),dataAttr:'data-product'}));
+ const detail=`<aside class="course-inspector manufacture-inspector" tabindex="-1">${illustration(productArt(selected.id))}<span class="eyebrow">${MANUFACTURE_LANES.find(l=>l.id===laneOf(selected.id))?.name}</span><h3>${esc(productName(selected.id))}</h3><p>${spec?esc(spec.effect):recipe?`加工得到${esc(inputsText(recipe.outputs))}。${recipe.wait?'开工扣料，跨季后完成领取。':'当次完成，产物进入库存。'}`:''}</p><div class="manufacture-recipe"><span class="detail-label">需要投入</span><strong>${esc(input)}</strong><span aria-hidden="true">↓</span><span class="detail-label">制作结果</span><strong>${esc(result)}</strong></div>${recipe?.equipment?`<p class="subtle">设备：${esc(productName(recipe.equipment))}，每批消耗耐用。</p>`:''}${recipe?.power?`<p>每批耗电 ${recipe.power}</p>`:''}<p class="detail-label">自行制作的条件</p>${record?.protocol?'<p>已有跨代制造规程，可沿用；材料、设备、劳动仍需满足。</p>':`<p>知识：${branchRequirements(selected.knowledge)}</p><div class="prerequisite-chain">${selected.parents.length?selected.parents.map(chip).join(''):'<span class="met">不需要前置产品验证</span>'}</div>`}<p>${stock(selected)} · ${record?.protocol?'已有制造规程':record?'外购实物已检验':'尚未验证'}</p><div class="inspector-action">${button(actionId(selected))}</div>${uses.length?`<details><summary>可用于哪些后续工艺</summary>${uses.map(p=>chip(p.id)).join('')}</details>`:''}<details><summary>购入实物与检验</summary><p>购买得到实物；检验只留下验证记录，自行制作才留下规程。已有验证不必重复检验。</p>${!record?button('economy:inspect:'+selected.id):'<p>✓ 已有验证记录</p>'}<button type="button" class="text-btn" data-page="商城">查看物资与设备买卖 →</button></details></aside>`;
+ return `${top}<p class="manufacture-intro">${theme.description}</p><div class="page-workbench"><section class="manufacture-library"><div class="library-heading"><h3>本阶段可制作</h3><span>${catalog.length} 项 · ${catalog.filter(p=>offer(p)?.enabled).length} 项当前条件满足</span></div>${MANUFACTURE_LANES.map(l=>{const group=catalog.filter(p=>laneOf(p.id)===l.id);return group.length?`<section class="manufacture-group"><h4>${l.name}</h4><div class="manufacture-items">${group.map(p=>`<button type="button" class="manufacture-item ${selected.id===p.id?'selected':''}" data-product="${p.id}" aria-pressed="${selected.id===p.id}">${illustration(productArt(p.id),'manufacture-item-art')}<span><strong>${esc(productName(p.id))}</strong><small>${stock(p)}</small><em class="${offer(p)?.enabled?'ready':''}">${state(p)}</em></span></button>`).join('')}</div></section>`:'';}).join('')}<details class="manufacture-dependencies" ${catalog.some(p=>p.parents.length)?'':'hidden'}><summary>查看本阶段工艺依赖图</summary><p>这里只展示本阶段关系；所需的前期验证可在产品详情中跳转。</p><div class="tree-network" tabindex="0" role="region" aria-label="本阶段制造关系">${treeGraph(graphNodes,MANUFACTURE_LANES,{ariaLabel:'本阶段制造关系'})}</div></details></section>${detail}</div>`;
 }
 
 export function manufactureFallback(g:SessionObservation['game'],button:(id:string)=>string):string{
