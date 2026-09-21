@@ -129,7 +129,7 @@ export function extendFarm(s:GameState,p:FarmPlot):void{const plots=s.economy!.f
 export function initializeFarm(s:GameState,rules:FarmRules):void{
  const plots:Record<string,FarmPlot>={};
  for(let y=1;y<=4;y++)for(let x=1;x<=5;x++){const id=plotId(x,y);plots[id]={id,x,y,kind:x<=3?'wild':'unknown'};}
- plots[HOME_PLOT].kind='field';plots.p2q4.kind='home';
+ plots[HOME_PLOT].kind='field';
  s.economy!.farm={explorationVersion:2,rareSeeds:0,rules:structuredClone(rules),plots,discovered:['wheat'],explored:0,neighbor:{personId:s.sect!.current[1],goods:{seedSoy:rules.neighborStock,seedFlax:rules.neighborStock,wheat:0},field:{...blankField(),crop:'soy',duration:CROPS.soy.duration},talked:-1,traded:-1,helped:-1,busy:false}};
  for(const p of Object.values(plots))if(p.kind!=='unknown')extendFarm(s,p);
  s.economy!.goods.seedSoy=0;s.economy!.goods.seedFlax=0;

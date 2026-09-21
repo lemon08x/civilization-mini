@@ -17,7 +17,7 @@ export interface FarmRules {exploreTime:number;exploreEnergy:number;reclaimTime:
 export const FARM_BOUNDS:Record<keyof FarmRules,[number,number]>={exploreTime:[1,8],exploreEnergy:[1,6],reclaimTime:[1,8],reclaimEnergy:[1,6],reclaimMoney:[1,20],discoverySeeds:[1,6],tradeQuantity:[1,6],neighborStock:[2,20],interactionTime:[1,4],helpWater:[1,3],clearTime:[1,8],clearEnergy:[1,6],identifyTime:[1,6],storyFood:[1,4],rareBonus:[1,2]};
 export const FARM_DISCOVERIES=['meadow','oldtree','boulder','brambles','seedbag','heritage','canal','traveler','shrine'] as const;
 export type FarmDiscovery=typeof FARM_DISCOVERIES[number];
-export interface FarmPlot {id:string;x:number;y:number;kind:'unknown'|'wild'|'field'|'home'|'tree'|'rock'|'brush'|'story';field?:Field;discovery?:{id:FarmDiscovery;resolved:boolean;outcome:string};fertility?:number;}
+export interface FarmPlot {id:string;x:number;y:number;kind:'unknown'|'wild'|'field'|'tree'|'rock'|'brush'|'story';field?:Field;discovery?:{id:FarmDiscovery;resolved:boolean;outcome:string};fertility?:number;}
 
 export interface FarmState {explorationVersion:2;rareSeeds:number;rules:FarmRules;plots:Record<string,FarmPlot>;discovered:Crop[];explored:number;neighbor:{personId:string;goods:Record<string,number>;field:Field;talked:number;traded:number;helped:number;busy:boolean};}
 export interface OngoingWork {farm:Crop|null;}

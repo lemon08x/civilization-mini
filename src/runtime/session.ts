@@ -67,12 +67,11 @@ export function parseSession(value: unknown): Session {
   const validField=(f:unknown)=>isRecord(f)&&[null,'wheat','soy','flax'].includes(f.crop as null|string)&&[null,'wheat','soy','flax'].includes(f.lastCrop as null|string)&&['planted','moisture','growth','stress','fertility','tended','bonus','duration'].every(k=>finite(f[k]))&&Number(f.fertility)<=3&&Number(f.duration)>=1&&typeof f.composted==='boolean'&&(f.variety===undefined||f.variety==='heritage'&&f.crop==='wheat');
   if(farm.explorationVersion!==2||!Number.isSafeInteger(farm.rareSeeds)||farm.rareSeeds<0)farmInvalid();
   if(!isRecord(farm.rules)||canonical(farm.rules)!==canonical(record.manifest.ruleset.farm)||!isRecord(farm.plots)||!Array.isArray(farm.discovered)||!farm.discovered.includes('wheat')||new Set(farm.discovered).size!==farm.discovered.length||farm.discovered.some((c:unknown)=>!['wheat','soy','flax'].includes(String(c)))||!Number.isSafeInteger(farm.explored)||farm.explored<0)farmInvalid();
-  if(!validField((economy as Record<string,any>).field)||farm.plots.p2q2?.kind!=='field'||farm.plots.p2q4?.kind!=='home')farmInvalid();
+  if(!validField((economy as Record<string,any>).field)||farm.plots.p2q2?.kind!=='field')farmInvalid();
   for(const [id,raw] of Object.entries(farm.plots)){
-    if(!isRecord(raw)||raw.id!==id||!Number.isSafeInteger(raw.x)||!Number.isSafeInteger(raw.y)||Number(raw.x)<0||Number(raw.y)<0||id!==`p${raw.x}q${raw.y}`||!['unknown','wild','field','home','tree','rock','brush','story'].includes(String(raw.kind)))farmInvalid();
+    if(!isRecord(raw)||raw.id!==id||!Number.isSafeInteger(raw.x)||!Number.isSafeInteger(raw.y)||Number(raw.x)<0||Number(raw.y)<0||id!==`p${raw.x}q${raw.y}`||!['unknown','wild','field','tree','rock','brush','story'].includes(String(raw.kind)))farmInvalid();
     const p=raw as Record<string,any>;
     if(p.kind==='field'&&id!=='p2q2'?!validField(p.field):p.field!==undefined)farmInvalid();
-    if(p.kind==='home'&&id!=='p2q4')farmInvalid();
     if(p.fertility!==undefined&&(!Number.isInteger(p.fertility)||p.fertility<0||p.fertility>3))farmInvalid();
     if(p.discovery!==undefined&&(!isRecord(p.discovery)||!(FARM_DISCOVERIES as readonly unknown[]).includes(p.discovery.id)||typeof p.discovery.resolved!=='boolean'||typeof p.discovery.outcome!=='string'))farmInvalid();
     if(['tree','rock','brush','story'].includes(p.kind)&&!p.discovery)farmInvalid();

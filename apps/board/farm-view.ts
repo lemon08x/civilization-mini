@@ -12,7 +12,7 @@ export function selectFarmStock(id:string){stockSelection=id;}
 export const selectedFarmPlot=()=>selected;
 export function selectFarmPlot(id:string){selected=id;panel='field';}
 export function selectFarmPanel(id:FarmPanel){panel=id;}
-const names={unknown:'未知地块',wild:'可耕荒地',field:'自家田地',home:'你的农舍',tree:'古树',rock:'岩石与地标',brush:'荆棘地',story:'乡野发现'};
+const names={unknown:'未知地块',wild:'可耕荒地',field:'自家田地',tree:'古树',rock:'岩石与地标',brush:'荆棘地',story:'乡野发现'};
 const panels:Record<FarmPanel,string>={field:'田地与探索',home:'农舍',store:'仓库',market:'买卖与补给',neighbor:'同门',discoveries:'探索见闻'};
 export function farm(g:FarmGame,button:(id:string)=>string):string {
  const e=g.economy!,map=e.farm;if(!map)return '<p>此存档缺少地块数据，请新开游戏。</p>';
@@ -37,7 +37,6 @@ export function farm(g:FarmGame,button:(id:string)=>string):string {
    if(p.id===map.homeId)body+=`<details><summary>起始田持续耕作</summary>${map.discovered.map(c=>button('economy:farmcycle:'+c)).join('')}${button('economy:farmcycle:off')}<p>仅起始田自动耕作；异穗麦收获后仍按所选普通作物复种。</p></details>`;
    body+=seedBag();
   }
-  if(p.kind==='home')body='<p>一处遮风避雨的家。休息、储粮和日常往来在面板中安排。</p>'+jump('home','回农舍')+jump('store','查看库存');
  }
  if(panel==='home'){
   const cooking=g.actions.filter(a=>a.id.startsWith('economy:cook:'));
