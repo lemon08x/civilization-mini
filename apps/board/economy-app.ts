@@ -1,6 +1,5 @@
-import {farm} from './farm-view.js';
-import {bindFarmScene,playFarmFeedback} from './farm-animation/controller.js';
-import {erasPage} from './eras-view.js';
+import {farm,selectFarmPanel,type FarmPanel} from './farm-view.js';
+import {bindFarmScene,playFarmFeedback,type FarmFeedback} from './farm-animation/controller.js';
 import {socialFoodPage} from './social-food-view.js';
 import { cultivationPage, actionButton, humanScreen, energyPage, confirmKind, confirmContent } from './human-view.js';
 import type { Recap } from './human-view.js';
@@ -25,7 +24,7 @@ if(!requested){location.replace('/start');throw new Error('missing save');}
 const saveId=requested;
 const loaded=loadSave(saveId);
 if(!loaded){location.replace('/start');throw new Error('missing save');}
-let failed=false,busy=false,page='聚落',guide=false,selectedCultivation='',selectedCourse='',selectedProduct='',selectedSystem='',selectedDevice='',filter='',shopCategory='物资';
+let failed=false,busy=false,page='农业',guide=false,selectedCultivation='',selectedCourse='',selectedProduct='',selectedSystem='',selectedDevice='',filter='',shopCategory='物资';
 let recap:Recap|null=null,pendingAction='';
 let feedbackTimer:ReturnType<typeof setTimeout>|undefined;
 function sectFeedback(id:string,lines:string[]):void {
@@ -60,7 +59,7 @@ function feedback(e:GameEvent):string {
   if(e.type==='economy-built')return `${PRODUCTS.find(p=>p.id===e.product)?.name}已制造安装，耐用${e.durability}。`;
   if(e.type==='economy-equipment-used')return `${PRODUCTS.find(p=>p.id===e.product)?.name}生效，剩余${e.remaining}次。`;
   if(e.type==='economy-trade')return `${e.operation==='buy'?'购入':'交付'}${e.amount}${GOODS[e.good]?.name}，${e.money}钱。`;
-  if(e.type==='economy-farm')return `${e.actor}：${{sow:'播种',harvest:'收获',tend:'田间管理',pump:'自动灌溉',waiting:'持续耕作未能执行'}[e.operation]}${CROPS[e.crop as keyof typeof CROPS]?.name??e.crop}${e.operation==='harvest'?' '+e.amount:''}`;
+  if(e.type==='economy-farm')return `${e.plotId?e.plotId+' · ':''}${e.actor}：${{sow:'播种',harvest:'收获',tend:'田间管理',pump:'自动灌溉',waiting:'持续耕作未能执行'}[e.operation]}${CROPS[e.crop as keyof typeof CROPS]?.name??e.crop}${e.operation==='harvest'?' '+e.amount:''}`;
   if(e.type==='economy-crop-growth')return `${CROPS[e.crop as keyof typeof CROPS].name}生长${e.growth}季，累计天气胁迫${e.stress}。`;
   if(e.type==='economy-process')return `${e.actor}${e.stage==='start'?'开工':'完成'}${PROCESSES.find(p=>p.id===e.recipe)?.name}。`;
   if(e.type==='economy-knowledge')return `${e.operation==='archive'?'留存家族记录':'传播地区知识'}：${SUBJECT_NAMES[e.subject as keyof typeof SUBJECT_NAMES]} ${e.level}阶。`;
@@ -117,7 +116,7 @@ async function act(id:string){
     if(next.record.entries.length>before)sectFeedback(id,lines);
     if(page==='农业'&&next.record.entries.length>before){
       const events=next.record.entries.slice(before).flatMap(entry=>entry.events);
-      playFarmFeedback(document,events.flatMap(event=>event.type==='economy-farm'&&['sow','harvest','tend'].includes(event.operation)?[{kind:event.operation as 'sow'|'harvest'|'tend',label:feedback(event)}]:[]));
+      playFarmFeedback(document,events.flatMap<FarmFeedback>(event=>event.type==='economy-farm'&&['sow','harvest','tend'].includes(event.operation)?[{kind:event.operation as 'sow'|'harvest'|'tend',label:feedback(event)}]:event.type==='life'&&event.operation==='farm-map'||event.type==='branch'&&id.startsWith('economy:neighbor:')?[{kind:'notice' as const,label:feedback(event)}]:[]));
     }
   }catch(e){error((e as Error).message);}
   finally{busy=false;$('app').removeAttribute('aria-busy');}
@@ -125,7 +124,7 @@ async function act(id:string){
 function bindApp():void {
 $('export').onclick=()=>download('economy-run.json',{record:session.record,state:session.state});
 $('import').onchange=async ev=>{const file=(ev.target as HTMLInputElement).files?.[0];if(!file||busy)return;busy=true;try{const value=JSON.parse(await file.text());const next=parseSession(value);if(next.record.manifest.ruleset.rulesVersion!==rules.rulesVersion)throw new Error('仅导入当前规则存档');const id=crypto.randomUUID();writeSave(id,next,`导入 · ${new Date().toLocaleString()}`);location.assign('/play?save='+encodeURIComponent(id));}catch(e){error((e as Error).message);busy=false;}};
-  bindFarmScene(document);
+  bindFarmScene(document,observeSession(session).game,render);
   document.querySelectorAll<HTMLButtonElement>('[data-page]').forEach(b=>b.onclick=()=>{page=b.dataset.page!;guide=false;filter='';render();});
   const showSelection=()=>{
     render();
@@ -181,12 +180,13 @@ function openConfirm(id:string):void {
 function render():void {
   const key=focusKey(),folds=openFolds();
   const o=observeSession(session).game,e=o.economy!;
+  if(page==='社会'){page='农业';guide=false;}
+  if((o.era?.index??0)===0){const legacy:Record<string,FarmPanel>={仓库:'store',商城:'market',生活:'home',安排:'home'};if(legacy[page]){selectFarmPanel(legacy[page]);page='农业';}if(['系统','家业','能源','雇佣','作坊','副本','试炼'].includes(page))page='农业';}
   const button=(id:string)=>actionButton(o,id,failed);
   const panel=(title:string,body:string)=>`<section class="panel"><div class="panel-head"><h2>${title}</h2></div><div class="panel-body">${body}</div></section>`;
   const acts=(group:string)=>o.actions.filter(a=>a.group===group&&!a.id.startsWith('economy:buyfood:')&&(!filter||a.label.includes(filter))).map(a=>`<div class="family-item">${button(a.id)}</div>`).join('');
   let body='';
   if(page==='修炼')body=cultivationPage(o,button,selectedCultivation);
-  if(page==='社会')body=erasPage(observeSession(session),button);
   if(page==='副本')body=expeditionPage(observeSession(session),button);
   if(page==='试炼')body=towerPage(observeSession(session),button);
   if(page==='系统')body=e.industryView?industrySystems(o,button,selectedSystem):operationsPage(o,button)+(e.workshopView?'<section class="panel"><div class="panel-body"><h2>作坊协作</h2><p>建立纤维与绳索工序，配置跨季供货，观察库存与运输瓶颈。</p><button type="button" data-page="作坊">查看生产网络 →</button></div></section>':'');

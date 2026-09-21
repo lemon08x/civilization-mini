@@ -11,8 +11,8 @@ import { level } from './knowledge.js';
 
 export function handover(state: GameState, rules: Ruleset, events: GameEvent[]): void {
   if(state.sect){
-    const ids=sectSuccessors(state);if(ids.length!==2)throw new Error('下一代两位弟子须均成年且在世');
-    const from=state.household.activePersonId;state.sect.current=[ids[0],ids[1]];selectSectPerson(state,ids[0]);
+    const ids=sectSuccessors(state);if(!ids.length)throw new Error('自己的弟子须成年且在世');
+    const from=state.household.activePersonId;state.sect.current=[ids[0],state.sect.current[1]];selectSectPerson(state,ids[0]);
     state.clock.generation++;state.clock.turn=1;state.clock.absoluteTurn++;state.status='active';
     delete state.life!.pendingRetirement;handoverOperations(state,events);
     if(state.economy?.industry)for(const i of Object.values(state.economy.industry.instances))if(i?.operator==='self')i.enabled=false;

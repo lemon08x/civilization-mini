@@ -2,7 +2,7 @@ import {eraCard} from '../systems/eras.js';
 import { activePerson, blankPerson, heir, type GameState } from '../model/state.js';
 import { branchNodesFor } from '../model/branches.js';
 import { branchName, branchNeeds } from '../systems/branches.js';
-import { hasTalent, canSucceed, consultableNodes, energyCeiling, healthCeiling, lifeEvent, livingElders, makeVitality, namePerson, initializeCharacter, characterMemory, selectSectPerson, gainPractice, sectStage, sectStrength, sectDrawOdds, SECT_CARDS, draw } from '../systems/life.js';
+import { hasTalent, canSucceed, consultableNodes, energyCeiling, healthCeiling, lifeEvent, livingElders, makeVitality, namePerson, initializeCharacter, characterMemory, gainPractice, sectStage, sectStrength, sectDrawOdds, SECT_CARDS, draw } from '../systems/life.js';
 import { defineAction, type ActionDefinition } from './definition.js';
 
 export function lifeActions(s:GameState):ActionDefinition[] {
@@ -17,7 +17,7 @@ export function lifeActions(s:GameState):ActionDefinition[] {
     }),
   ];
   for(const [index,person] of Object.values(s.persons).entries()){
-    if(person.id===s.household.activePersonId||!person.vitality?.alive||!person.vitality.experiences||(s.sect&&!s.sect.members[person.id]?.admitted))continue;
+    if(person.id===s.economy?.farm?.neighbor.personId||person.id===s.household.activePersonId||!person.vitality?.alive||!person.vitality.experiences||(s.sect&&!s.sect.members[person.id]?.admitted))continue;
     actions.push(defineAction(s,'economy:bond:'+index,'与'+person.name+'谈心','身体',{time:2,energy:1},v.experiences?.contacts.includes(person.id)?['本季已与此人谈心']:[],
       '倾听与表达：改善双方关系1点（上限5），本季双方遇到关系事件时优先涉及彼此；关系影响季末和解或争执的机会。',(d,ev)=>{
         const mine=activePerson(d).vitality!.experiences!,theirs=d.persons[person.id].vitality!.experiences!;
@@ -50,19 +50,15 @@ export function lifeActions(s:GameState):ActionDefinition[] {
     }
   }
   actions.push(defineAction(s,'economy:retire:family','安排季末交接','身体',{ap:0},[
-    ...(!canSucceed(s)?[s.sect?'下一代两位弟子须均存活并成年':s.household.heirId===s.household.activePersonId?'尚无后辈':`后辈须存活并满${r.adultYears}岁，当前${Math.floor(heir(s).vitality!.ageSeasons/4)}岁`]:[]),
+    ...(!canSucceed(s)?[s.sect?'自己的弟子须存活并成年':s.household.heirId===s.household.activePersonId?'尚无后辈':`后辈须存活并满${r.adultYears}岁，当前${Math.floor(heir(s).vitality!.ageSeasons/4)}岁`]:[]),
     ...(s.life.pendingRetirement?['已安排本季交接']:[]),
-  ],'本季正常结算后进入交接。下一代两位成年弟子接手，个人修为与所学各自独立；门派道法、规程、气运与资产延续。',(d,ev)=>{d.life!.pendingRetirement=true;lifeEvent(ev,d.household.activePersonId,'retire','已安排季末交接');}));
+  ],'本季正常结算后进入交接。自己的成年弟子接手，邻居不参与交接，个人修为与所学各自独立；门派道法、规程、气运与资产延续。',(d,ev)=>{d.life!.pendingRetirement=true;lifeEvent(ev,d.household.activePersonId,'retire','已安排季末交接');}));
   return s.sect?[...actions.filter(a=>a.offer.id!=='economy:company:heir'),...sectActions(s)]:actions;
 }
 
 function sectActions(s:GameState):ActionDefinition[]{
   const x=s.sect!,r=x.rules,id=s.household.activePersonId,m=x.members[id],out:ActionDefinition[]=[];
   const say=(d:GameState,ev:import('../model/events.js').GameEvent[],detail:string)=>lifeEvent(ev,d.household.activePersonId,'sect',detail);
-  for(const [slot,pid] of x.current.entries())out.push(defineAction(s,`economy:sectswitch:${slot}`,`转由${s.persons[pid].name}行动`,'师徒',{ap:0,time:0,energy:0},[
-    ...(pid===id?['已经是当前行动者']:[]),...(!s.persons[pid].vitality?.alive?['该传人已故']:[]),
-    ...(Object.values(s.economy!.industry?.instances??{}).some(v=>v?.enabled&&v.operator==='self')?['切换前请暂停本人负责的生产系统，或改派雇员']:[]),
-  ],'切换当代传人，各自时间与精力独立，不刷新本季预算。共享物资与设备不会复制。',(d,ev)=>{selectSectPerson(d,pid);say(d,ev,`由${d.persons[pid].name}继续本季行动`);}));
   out.push(defineAction(s,'economy:sectseek:disciple','寻访弟子','师徒',{time:2,energy:1},[
     ...(m.discipleId?['每位师父只收一名正式弟子']:[]),...(m.candidateId?['已经找到候选人，资质固定']:[]),
   ],`寻访一位${r.candidateAge}岁候选人；独立于婚育。修道只小幅改善候选体质机会，资质生成后不重抽。`,(d,ev)=>{
@@ -76,7 +72,7 @@ function sectActions(s:GameState):ActionDefinition[]{
   out.push(defineAction(s,'economy:sectadmit:disciple','正式收徒','师徒',{time:2,energy:1,money:r.recruitMoney},[
     ...(m.discipleId?['已经收徒，不可替换']:[]),...(!m.candidateId?['先寻访弟子']:[]),
     ...(m.candidateId&&!s.persons[m.candidateId].vitality?.alive?['候选人已故']:[]),
-  ],'每师一徒、每代两席；徒弟从零修道，课程按前置学习，不受私人婚育影响。',(d,ev)=>{
+  ],'自己收徒与传承；徒弟从零修道，课程按前置学习，不受私人婚育影响。',(d,ev)=>{
     const master=d.sect!.members[id],pid=master.candidateId!;master.discipleId=pid;master.candidateId=null;
     d.sect!.members[pid].admitted=true;d.household.memberIds.push(pid);d.household.heirId=pid;
     characterMemory(d,pid,'admitted',`拜${d.persons[id].name}为师，从今日开始修道习术。`,'对新的师承心怀期待，也还惦念原来的生活。',ev);

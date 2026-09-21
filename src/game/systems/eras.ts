@@ -103,6 +103,7 @@ export function projectEraRemainder(s:GameState,rules:Ruleset,remaining:number){
  const tap=s.era.index===3&&s.era.tap&&s.household.money>=1;
  const publicWell=stageOf(s).publicWell;
  const waterSecured=run.has('well')||run.has('pump')||tap||publicWell;
+ if(s.economy?.farm)notes.push('田间推算只覆盖起始田；扩展田以实际收获计入凭证，不预兑未来收成');
  notes.push(waterSecured?(run.has('well')?'井水保障剩余旱季灌溉':run.has('pump')?'机械供水保障剩余旱季灌溉':tap?'公共自来水保障剩余旱季灌溉':'公井保障剩余旱季灌溉'):'无公共供水也无已安排的井泵，旱季收成按当地气候折减');
  const f=s.economy!.field,goods=s.economy!.goods;
  const cropId=f.crop??((f.lastCrop&&(goods[CROPS[f.lastCrop].seed]??0)>0)?f.lastCrop:null)??((goods.seedWheat??0)>0||f.crop?'wheat':null);
@@ -131,7 +132,7 @@ function xHasShaft(s:GameState){return !!s.economy?.industry?.instances.shaft?.c
 export function estimateEraRemaining(s:GameState):number{
  const e=s.era;if(!e||e.index>=eraStages(s).length-1)return 0;
  if(s.sect){
-   const next=s.sect.current.map(id=>s.sect!.members[id].discipleId);
+   const next=[s.sect.current[0]].map(id=>s.sect!.members[id].discipleId);
    const current=Math.max(...next.map(id=>id?Math.max(0,s.life!.rules.adultYears*4-s.persons[id].vitality!.ageSeasons):(s.life!.rules.adultYears-s.sect!.rules.candidateAge)*4+1));
    return Math.max(0,e.rules.generationLimit-(s.clock.generation-e.startGeneration)-1)*((s.life!.rules.adultYears-s.sect.rules.candidateAge)*4+1)+current;
  }

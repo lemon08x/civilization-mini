@@ -1,3 +1,4 @@
+import {initializeFarm} from './systems/agriculture.js';
 import {initializeEras,recordEraProduction} from './systems/eras.js';
 import {recordProducts} from './systems/industry-products.js';
 import { recordBranchWork } from './systems/branches.js';
@@ -57,6 +58,7 @@ export function createInitialState(rules: Ruleset, seed: number, frameworkId: st
   if(rules.socialFood){state.socialFood={rules:structuredClone(rules.socialFood),foodPerSeason:p.foodPerTurn,price:p.foodPrice,policy:'off',budget:rules.socialFood.defaultBudget,reserve:rules.socialFood.defaultReserve,delivery:false,serviceRemaining:rules.socialFood.serviceCapacity};state.production!.market.food=Math.min(state.production!.market.food,rules.socialFood.storage);}
   if(rules.electric)state.electric={rules:structuredClone(rules.electric)};
   if(rules.sect&&state.life)initializeSect(state,rules.sect);
+  if(rules.farm&&state.sect)initializeFarm(state,rules.farm);
   initializeEras(state,rules,frameworkId);
   newSeason(state, rules, []);
   recordCharacterGrowth(state,[]);

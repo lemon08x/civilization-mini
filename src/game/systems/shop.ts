@@ -39,7 +39,7 @@ export function shopCatalog(s:GameState,r:Ruleset):ShopItem[]{
  const assets=[item({id:'asset-granary',target:'granary',kind:'asset',name:'家庭粮仓',category:'家庭资产',price:cfg.granaryPrice,weight:4,local:false,effect:`食品保护容量提高至${cfg.granaryCapacity}，与容器取较大值，永久跨代保留`,condition:'交付时建成，无学科要求，限一座',owned:sh.assets.includes('granary')||servicePending(s,'asset','granary')}),item({id:'asset-library',target:'library',kind:'asset',name:'家学书室',category:'家庭资产',price:cfg.libraryPrice,weight:4,local:false,effect:'留存新的学科记录时，同时教导后辈该学科下一课题；上限为本人水平，永久保留',condition:'交付时建成，不自动继承等级，限一间',owned:sh.assets.includes('library')||servicePending(s,'asset','library')})];
  const available=[...goods,...devices,...books,...assets];
  if(e.branches){
-   const channels=e.branches.channels,baseGoods=['food','wheat','flour','wood','clay','iron','fiber','oil','ceramics','seal','shaft','valve','seedWheat'];
+   const channels=e.branches.channels,baseGoods=[...(e.farm?.discovered??[]).map(c=>c==='soy'?'seedSoy':c==='flax'?'seedFlax':'seedWheat'),'food','wheat','flour','wood','clay','iron','fiber','oil','ceramics','seal','shaft','valve','seedWheat'];
    const electrical=['copper','polymer','wire','coil','cable',...(s.electric?['brick','feedstock','solution','fuel','battery','alumina']:[])];
    return available.filter(x=>x.kind==='goods'?(baseGoods.includes(x.target)||(channels.includes('electric')||(s.era?.index??0)>=2)&&electrical.includes(x.target)):x.kind==='device'?(!!BRANCH_PRODUCTS[x.target]||!!s.electric&&!!ELECTRIC_KNOWLEDGE[x.target]&&(s.era?.index??0)>=2)&&(x.target!=='E01'||(channels.includes('electric')||(s.era?.index??0)>=2)&&branchHas(s,'L6')):x.kind==='asset'&&x.target==='granary').map(x=>{
      if(x.kind!=='goods')return {...x,condition:'整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源'};

@@ -20,6 +20,7 @@ export interface CompactActionQuote {
 }
 
 export interface CompactObservation {
+  farm?:NonNullable<SessionObservation['game']['economy']>['farm'];
   seasonalEvents: SessionObservation['game']['seasonalEvents'];
   sect?: SessionObservation['game']['sect'];
   crises?: NonNullable<SessionObservation['game']['era']>['crises'];
@@ -133,7 +134,7 @@ export function compactObservation(
   const eraStage = record(era?.stage);
   return {
     seasonalEvents:observation.game.seasonalEvents,
-    sect:observation.game.sect,crises:observation.game.era?.crises,
+    farm:observation.game.economy?.farm,sect:observation.game.sect,crises:observation.game.era?.crises,
     runId: observation.runId,
     revision: observation.revision,
     status: str(game.status) ?? 'unknown',
@@ -216,6 +217,7 @@ export function formatCompactObservation(compact: CompactObservation): string {
     lines.push(`预算: 时间 ${budget.timeRemaining}（预留 ${budget.reservedTime}，可用 ${budget.availableTime}） / 精力 ${budget.energy}（预留 ${budget.reservedEnergy}，可用 ${budget.availableEnergy}） / 困境 ${budget.hardship}`
       + (budget.health !== undefined ? ` / 健康 ${budget.health}` : ''));
   }
+  if(compact.farm)lines.push(`地块与邻居：${JSON.stringify(compact.farm)}`);
   lines.push(`季末经历：${JSON.stringify(compact.seasonalEvents)}`);
   if(compact.sect)lines.push(`师徒与道：${JSON.stringify(compact.sect)}`);
   if(compact.crises)lines.push(`现代使命：${JSON.stringify(compact.crises)}`);

@@ -1,4 +1,5 @@
 {
+  "farm": {"exploreTime":2,"exploreEnergy":2,"reclaimTime":3,"reclaimEnergy":2,"reclaimMoney":4,"discoverySeeds":2,"tradeQuantity":2,"neighborStock":6,"interactionTime":1,"helpWater":2,"clearTime":3,"clearEnergy":2,"identifyTime":2,"storyFood":1,"rareBonus":1},
   "economy": {
     "wage": 1,
     "hireCost": 2,

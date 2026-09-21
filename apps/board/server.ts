@@ -13,6 +13,7 @@ const server = http.createServer(async (req, res) => {
     const path = decodeURIComponent(url.pathname);
     let absolute: string;
     if (path === '/') absolute = join(projectRoot, 'apps/board/entry.html');
+    else if (path === '/vendor/pixi.js') absolute = join(projectRoot, 'node_modules/pixi.js-legacy/dist/pixi-legacy.min.js');
     else if (path === '/start') absolute = join(projectRoot, 'apps/board/start.html');
     else if (path === '/play') absolute = join(projectRoot, 'apps/board/index.html');
     else if (path === '/ai') absolute = join(projectRoot, 'apps/board/ai.html');

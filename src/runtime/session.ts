@@ -1,3 +1,4 @@
+import {FARM_DISCOVERIES} from '../game/model/economy.js';
 import { createInitialState, transition } from '../game/game.js';
 import { getObservation } from '../game/observation.js';
 import { parseActionId } from '../game/model/action.js';
@@ -59,6 +60,28 @@ export function parseSession(value: unknown): Session {
   const finite=(n:unknown)=>typeof n==='number'&&Number.isFinite(n)&&n>=0;
   if(!isRecord(sect)||!isRecord(persons)||!isRecord(sect.members)||!Array.isArray(sect.current)||sect.current.length!==2||new Set(sect.current).size!==2||!isRecord(sect.rules)||canonical(sect.rules)!==canonical(record.manifest.ruleset.sect))invalid();
   const q=sect as Record<string,any>,people=persons as Record<string,any>;
+  const economy=value.state.economy;
+  const farmInvalid=()=>{throw new Error('存档缺少有效地块或独立邻居数据，请新开游戏；原存档不修改。');};
+  if(!isRecord(economy)||!isRecord(economy.farm))farmInvalid();
+  const farm=(economy as Record<string,any>).farm;
+  const validField=(f:unknown)=>isRecord(f)&&[null,'wheat','soy','flax'].includes(f.crop as null|string)&&[null,'wheat','soy','flax'].includes(f.lastCrop as null|string)&&['planted','moisture','growth','stress','fertility','tended','bonus','duration'].every(k=>finite(f[k]))&&Number(f.fertility)<=3&&Number(f.duration)>=1&&typeof f.composted==='boolean'&&(f.variety===undefined||f.variety==='heritage'&&f.crop==='wheat');
+  if(farm.explorationVersion!==2||!Number.isSafeInteger(farm.rareSeeds)||farm.rareSeeds<0)farmInvalid();
+  if(!isRecord(farm.rules)||canonical(farm.rules)!==canonical(record.manifest.ruleset.farm)||!isRecord(farm.plots)||!Array.isArray(farm.discovered)||!farm.discovered.includes('wheat')||new Set(farm.discovered).size!==farm.discovered.length||farm.discovered.some((c:unknown)=>!['wheat','soy','flax'].includes(String(c)))||!Number.isSafeInteger(farm.explored)||farm.explored<0)farmInvalid();
+  if(!validField((economy as Record<string,any>).field)||farm.plots.p2q2?.kind!=='field'||farm.plots.p2q4?.kind!=='home')farmInvalid();
+  for(const [id,raw] of Object.entries(farm.plots)){
+    if(!isRecord(raw)||raw.id!==id||!Number.isSafeInteger(raw.x)||!Number.isSafeInteger(raw.y)||Number(raw.x)<0||Number(raw.y)<0||id!==`p${raw.x}q${raw.y}`||!['unknown','wild','field','home','tree','rock','brush','story'].includes(String(raw.kind)))farmInvalid();
+    const p=raw as Record<string,any>;
+    if(p.kind==='field'&&id!=='p2q2'?!validField(p.field):p.field!==undefined)farmInvalid();
+    if(p.kind==='home'&&id!=='p2q4')farmInvalid();
+    if(p.fertility!==undefined&&(!Number.isInteger(p.fertility)||p.fertility<0||p.fertility>3))farmInvalid();
+    if(p.discovery!==undefined&&(!isRecord(p.discovery)||!(FARM_DISCOVERIES as readonly unknown[]).includes(p.discovery.id)||typeof p.discovery.resolved!=='boolean'||typeof p.discovery.outcome!=='string'))farmInvalid();
+    if(['tree','rock','brush','story'].includes(p.kind)&&!p.discovery)farmInvalid();
+    if(p.kind==='story'&&(p.discovery.resolved||!['seedbag','heritage','canal','traveler','shrine'].includes(p.discovery.id)))farmInvalid();
+    if(p.kind==='brush'&&(p.discovery.id!=='brambles'||p.discovery.resolved))farmInvalid();
+    if(p.kind==='unknown'&&Object.keys(p).some(k=>!['id','x','y','kind'].includes(k)))farmInvalid();
+  }
+  const neighbor=farm.neighbor;
+  if(!isRecord(neighbor)||neighbor.personId!==q.current[1]||!validField(neighbor.field)||!isRecord(neighbor.goods)||!Object.values(neighbor.goods).every(finite)||typeof neighbor.busy!=='boolean'||!['talked','traded','helped'].every(k=>Number.isSafeInteger(neighbor[k])&&Number(neighbor[k])>=-1))farmInvalid();
   if(!['doctrine','research','fortune','draws','seasonChance'].every(k=>finite(q[k]))||!Array.isArray(q.improvements)||!isRecord(q.cards)||!['study','craft','teach','prepare'].every(k=>Number.isInteger(q.cards[k])&&q.cards[k]>=0&&q.cards[k]<=q.rules.cardMax)||q.doctrine>q.rules.doctrineMax||q.research>=q.rules.doctrineSteps||q.fortune>q.rules.fortuneCap)invalid();
   const generations=new Map<number,number>();
   for(const [id,raw] of Object.entries(q.members)){
@@ -81,7 +104,7 @@ export function parseSession(value: unknown): Session {
   }
   if([...generations.values()].some(n=>n>2)||q.current.some((id:unknown)=>typeof id!=='string'||!q.members[id]?.admitted))invalid();
   const household=value.state.household,clock=value.state.clock;
-  if(!isRecord(household)||!isRecord(clock)||!q.current.includes(household.activePersonId)||q.current.some((id:string)=>q.members[id].generation!==clock.generation))invalid();
+  if(!isRecord(household)||!isRecord(clock)||household.activePersonId!==q.current[0]||q.members[q.current[0]].generation!==clock.generation)invalid();
   if(isRecord(value.state.era)&&value.state.era.index===3){
     const c=value.state.era.crises;if(!isRecord(c)||!finite(c.remaining)||!isRecord(c.entries)||![null,true,false].includes(c.won as null|boolean))invalid();
     const entries=(c as Record<string,any>).entries;

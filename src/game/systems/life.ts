@@ -143,7 +143,7 @@ export function consultableNodes(s:GameState,elder:Person):string[] {
   return (b.learned[elder.id]??[]).filter(id=>nodeInEra(s,id)&&!mine.includes(id)&&!(s.life?.consulted??[]).includes(id));
 }
 export function lifeEvent(events:GameEvent[],personId:string,operation:string,detail:string):void {events.push({type:'life',personId,operation,detail});}
-const physical=new Set(['farm','gather','work','build','process','finish','fertilize','nutrient','reclaim','expeditionship']);
+const physical=new Set(['farmrare','farmstory','farmplot','farmexplore','farmreclaim','farmfertilize','farm','gather','work','build','process','finish','fertilize','nutrient','reclaim','expeditionship']);
 const learning=new Set(['study','research','tuition','branchlearn']);
 const management=new Set(['channel','hire','checkout','assign','resumeplans','charter','foodplan','farmplan','farmcycle','productionplan','supplyplan','salesplan','careplan','mineplan','steamplan']);
 // Cost categories describe personal involvement, not the number of UI clicks.
@@ -153,12 +153,12 @@ export function lifeCost(s:GameState,id:string,oldAp:number,useLearningPoint=tru
   if(op==='rest')return {time:4,energy:0};
   if(op==='care')return {time:s.life?.renewal?.careTime??4,energy:s.life?.renewal?.careEnergy??1};
   if(op==='company')return {time:s.life?.renewal?.companyTime??2,energy:s.life?.renewal?.companyEnergy??1};
-  if(op==='pause'||op==='assign'||target==='off'||oldAp===0&&op!=='farm'&&op!=='process')return {time:0,energy:0};
+  if(op==='pause'||op==='assign'||target==='off'||oldAp===0&&op!=='farm'&&op!=='farmplot'&&op!=='process')return {time:0,energy:0};
   // Powered tools still require a brief personal instruction, but remove bodily labour.
   if(oldAp===0)return {time:1,energy:0};
   let time=physical.has(op)||learning.has(op)||op==='teach'||op==='branchteach'?4:2;
   let energy=physical.has(op)?4:learning.has(op)||op==='teach'||op==='branchteach'?2:1;
-  if(s.life?.renewal&&op==='farm'){time=s.life.renewal.farmTime;energy=s.life.renewal.farmEnergy;}
+  if(s.life?.renewal&&['farm','farmplot'].includes(op)){time=s.life.renewal.farmTime;energy=s.life.renewal.farmEnergy;}
   const v=activePerson(s).vitality!;
   if(s.era&&learning.has(op))time=Math.max(1,time-(eraCard(s)?.learning??0));
   if(s.era&&op==='process'&&s.economy!.branches!.learned[s.household.activePersonId]?.includes('Q1'))energy=Math.max(0,energy-1);
@@ -172,7 +172,7 @@ export function lifeCost(s:GameState,id:string,oldAp:number,useLearningPoint=tru
   if(useLearningPoint&&learning.has(op)&&v.experiences?.learning)time=Math.max(1,time-1);
   return {time,energy};
 }
-export function canSucceed(s:GameState):boolean {if(s.sect)return sectSuccessors(s).length===2;const v=heir(s).vitality;return s.household.heirId!==s.household.activePersonId&&!!v?.alive&&v.ageSeasons>=s.life!.rules.adultYears*4;}
+export function canSucceed(s:GameState):boolean {if(s.sect)return sectSuccessors(s).length>=1;const v=heir(s).vitality;return s.household.heirId!==s.household.activePersonId&&!!v?.alive&&v.ageSeasons>=s.life!.rules.adultYears*4;}
 export function recordLifeGeneration(s:GameState,events:GameEvent[]):void {
   const trial=project(s);
   events.push({type:'generation-ended',final:s.status==='ended',facts:{
@@ -188,9 +188,11 @@ export function settleLife(s:GameState,missing:number,events:GameEvent[],foodReq
     const v=person.vitality;if(!v?.alive)continue;
     v.ageSeasons++;
     const renewal=s.life!.renewal;
-    const deficit=Math.min(1,missing/Math.max(1,foodRequired));
+    const independent=person.id===s.economy?.farm?.neighbor.personId;
+    const personMissing=independent?0:missing;
+    const deficit=Math.min(1,personMissing/Math.max(1,foodRequired));
     const damage=renewal?Math.ceil(r.hungerDamage*deficit*Math.min(1,Math.max(0,s.household.hardship-renewal.graceSeasons)/2)):r.hungerDamage;
-    v.health=Math.max(0,Math.min(healthCeiling(v,r),v.health+(missing?-damage:(renewal?.fedHealth??1))));
+    v.health=Math.max(0,Math.min(healthCeiling(v,r),v.health+(personMissing?-damage:(renewal?.fedHealth??1))));
     const recovery=renewal?Math.max(1,Math.ceil(r.recovery*(1-deficit*0.75)))+(hasTalent(v,'resilient')?1:0):missing?0:Math.max(1,Math.floor(r.recovery*v.health/100))+(hasTalent(v,'resilient')?1:0);
     v.energy=Math.min(energyCeiling(v),v.energy+recovery);
     if(v.health===0||v.ageSeasons>=v.lifespanSeasons){v.alive=false;v.energy=0;lifeEvent(events,person.id,'death',`${person.name}因${v.health===0?'健康耗尽':'自然衰老'}离世`);}
@@ -227,9 +229,7 @@ export function settleLife(s:GameState,missing:number,events:GameEvent[],foodReq
   }
   if(s.sect){
     if(!activePerson(s).vitality!.alive){
-      const live=s.sect.current.find(id=>s.persons[id].vitality?.alive);
-      if(live)selectSectPerson(s,live);
-      else s.status=canSucceed(s)?'handover':'ended';
+      s.status=canSucceed(s)?'handover':'ended';
     }
     return;
   }
@@ -262,7 +262,7 @@ export function sectCategory(id:string):SectCard {
   const op=id.split(':')[1];
   if(['branchlearn','study','research','tuition','inspect'].includes(op))return 'study';
   if(['branchteach','teach','sectteach','consult','company'].includes(op))return 'teach';
-  if(['farm','gather','work','build','process','finish','sysbuild','syscommission','sysrun','fertilize'].includes(op))return 'craft';
+  if(['farmrare','farmstory','farmplot','farmreclaim','farmfertilize','farm','gather','work','build','process','finish','sysbuild','syscommission','sysrun','fertilize'].includes(op))return 'craft';
   return 'prepare';
 }
 export function sectCosts(s:GameState,id:string,cost:{time:number;energy:number}) {
@@ -273,7 +273,7 @@ export function sectCosts(s:GameState,id:string,cost:{time:number;energy:number}
   return {time:reduce(cost.time),energy:reduce(cost.energy)};
 }
 export function sectSuccessors(s:GameState):string[] {
-  if(!s.sect)return [];return s.sect.current.map(id=>s.sect!.members[id].discipleId).filter((id):id is string=>!!id&&!!s.persons[id]?.vitality?.alive&&s.persons[id].vitality!.ageSeasons>=s.life!.rules.adultYears*4);
+  if(!s.sect)return [];return [s.sect.current[0]].map(id=>s.sect!.members[id].discipleId).filter((id):id is string=>!!id&&!!s.persons[id]?.vitality?.alive&&s.persons[id].vitality!.ageSeasons>=s.life!.rules.adultYears*4);
 }
 export function selectSectPerson(s:GameState,id:string):void {
   const x=s.sect!,old=x.members[s.household.activePersonId];
@@ -295,7 +295,7 @@ export function sectDrawOdds(s:GameState):[number,number,number] {
 export function renewSect(s:GameState):void {
   const x=s.sect;if(!x)return;
   for(const [id,m] of Object.entries(x.members))if(m.admitted){m.time=s.life!.rules.timePerSeason;if(id===s.household.activePersonId)m.time=s.life!.timeRemaining;}
-  x.seasonChance=x.rules.eventPercent/100+x.current.reduce((sum,id)=>sum+sectStrength(s,id),0)/2*0.1;
+  x.seasonChance=x.rules.eventPercent/100+sectStrength(s)*0.1;
   x.seasonBonus=x.nextBonus;x.nextBonus=null;
 }
 export function settleSect(s:GameState,events:GameEvent[]):void {
@@ -310,7 +310,7 @@ export function settleSect(s:GameState,events:GameEvent[]):void {
 export function sectView(s:GameState){
   const x=s.sect;if(!x)return null;
   return {doctrine:x.doctrine,research:x.research,improvements:structuredClone(x.improvements),rules:{...x.rules},
-    current:[...x.current],activeId:s.household.activePersonId,ready:sectSuccessors(s).length===2,
+    current:[...x.current],activeId:s.household.activePersonId,ready:canSucceed(s),
     members:Object.entries(x.members).map(([id,m])=>({id,name:s.persons[id].name,practiceEvidence:s.persons[id].practices.filter(v=>v.startsWith('dao:')),...m,consulted:[...m.consulted],time:id===s.household.activePersonId?s.life!.timeRemaining:m.time,stage:sectStage(s,id),effect:Math.round(sectStrength(s,id)*100),relationships:Object.entries(s.persons[id].vitality?.experiences?.relationships??{}).map(([otherId,value])=>({name:s.persons[otherId]?.name??otherId,value})),life:lifeView(s.persons[id],s.life!.rules)})),
     fortune:x.fortune,odds:sectDrawOdds(s),cards:Object.entries(x.cards).map(([id,level])=>({id,name:SECT_CARDS[id as SectCard],level,effect:level*x.rules.cardPercent})),lastDraw:x.lastDraw,draws:x.draws,lastEvent:x.lastEvent,seasonBonus:x.seasonBonus};
 }
@@ -332,12 +332,12 @@ export function recordSeasonChoice(s:GameState,id:string,events:GameEvent[]):voi
 
 export function settleSeasonEncounter(s:GameState,missing:number,events:GameEvent[]):void {
   if(!s.life)return;
-  const people=(s.sect?s.sect.current:s.household.memberIds).map(id=>s.persons[id]).filter(p=>p.vitality?.alive&&p.vitality.experiences);
+  const people=(s.sect?[s.sect.current[0]]:s.household.memberIds).map(id=>s.persons[id]).filter(p=>p.vitality?.alive&&p.vitality.experiences);
   if(!people.length)return;
   const p=people[Math.floor(draw(s)*people.length)],v=p.vitality!,e=v.experiences!,r=s.life.rules;
   const has=(ops:string[])=>e.actions.some(a=>ops.includes(a));
   const studying=has(['study','research','tuition','branchlearn','sectpractice']);
-  const working=has(['farm','gather','work','process','build','sysrun','finish']);
+  const working=has(['farmrare','farmstory','farmplot','farmreclaim','farmexplore','farmfertilize','farm','gather','work','process','build','sysrun','finish']);
   const caring=has(['company','consult','teach','branchteach','sectteach','bond']);
   const rested=has(['rest','care']);
   const others=Object.values(s.persons).filter(q=>q.id!==p.id&&q.vitality?.alive&&q.vitality.experiences&&(!s.sect||s.sect.members[q.id]?.admitted));
@@ -359,7 +359,7 @@ export function settleSeasonEncounter(s:GameState,missing:number,events:GameEven
     {kind:'study',eligible:(s.economy?.branches?.learned[p.id]?.length??0)>1,prepared:studying,positive:['旧学互相印证','不同课程中的知识在一件小事上互相印证，终于能举一反三。'],negative:['旧说彼此冲突','把两门学问放在一起思考，却发现适用条件并不相同，先前的理解需要修正。']},
     {kind:'study',eligible:(s.era?.index??0)>=2,prepared:studying,positive:['新刊打开眼界','读到关于新技术的公开资料，认出了其中与自己所学相通的线索。'],negative:['新术名词迷阵','新资料中的名词与旧日用法相差太远，一番比对后仍难理清脉络。']},
     {kind:'work',eligible:true,prepared:working,positive:['辛劳得到酬谢','一份零散活计顺利交付，对方按约送来了酬劳。'],negative:['临工结算折损','零散活计在结算时出了差错，为了补齐交付只能承担一笔开支。']},
-    {kind:'work',eligible:has(['farm','fertilize']),prepared:true,positive:['田间经验获谢','邻人借鉴了本季的田间经验，特意送来一份谢钱。'],negative:['田间补修支出','田间劳作暴露出一些需要补修的小问题，只好另付费用处理。']},
+    {kind:'work',eligible:has(['farmplot','farmfertilize','farm','fertilize']),prepared:true,positive:['田间经验获谢','邻人借鉴了本季的田间经验，特意送来一份谢钱。'],negative:['田间补修支出','田间劳作暴露出一些需要补修的小问题，只好另付费用处理。']},
     {kind:'work',eligible:has(['build','process','finish','sysbuild']),prepared:true,positive:['手艺赢得口碑','本季做活的细致之处被人看见，额外的酬谢随之而来。'],negative:['返工赔付','交付时发现一处疏漏，需要花钱补救，手艺上的教训也记在了心里。']},
     {kind:'work',eligible:has(['gather']),prepared:true,positive:['识材受到赏识','采集时辨识材料的经验帮上了旁人的忙，换来一笔报酬。'],negative:['采集行装损耗','采集途中随身行装受损，回程后不得不支付修补费用。']},
     {kind:'work',eligible:has(['sysrun','syscommission']),prepared:true,positive:['设备经验获酬','亲自操作设备积累的经验解决了旁人的疑问，对方付钱致谢。'],negative:['操作疏漏赔补','设备操作中的疏漏带来了额外赔补，必须从公用钱财中支付。']},
