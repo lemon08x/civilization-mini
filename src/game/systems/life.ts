@@ -143,7 +143,7 @@ export function consultableNodes(s:GameState,elder:Person):string[] {
   return (b.learned[elder.id]??[]).filter(id=>nodeInEra(s,id)&&!mine.includes(id)&&!(s.life?.consulted??[]).includes(id));
 }
 export function lifeEvent(events:GameEvent[],personId:string,operation:string,detail:string):void {events.push({type:'life',personId,operation,detail});}
-const physical=new Set(['farmrare','farmstory','farmplot','farmexplore','farmreclaim','farmfertilize','farm','gather','work','build','process','finish','fertilize','nutrient','reclaim','expeditionship']);
+const physical=new Set(['cook','farmrare','farmstory','farmplot','farmexplore','farmreclaim','farmfertilize','farm','gather','work','build','process','finish','fertilize','nutrient','reclaim','expeditionship']);
 const learning=new Set(['study','research','tuition','branchlearn']);
 const management=new Set(['channel','hire','checkout','assign','resumeplans','charter','foodplan','farmplan','farmcycle','productionplan','supplyplan','salesplan','careplan','mineplan','steamplan']);
 // Cost categories describe personal involvement, not the number of UI clicks.
@@ -262,7 +262,7 @@ export function sectCategory(id:string):SectCard {
   const op=id.split(':')[1];
   if(['branchlearn','study','research','tuition','inspect'].includes(op))return 'study';
   if(['branchteach','teach','sectteach','consult','company'].includes(op))return 'teach';
-  if(['farmrare','farmstory','farmplot','farmreclaim','farmfertilize','farm','gather','work','build','process','finish','sysbuild','syscommission','sysrun','fertilize'].includes(op))return 'craft';
+  if(['cook','farmrare','farmstory','farmplot','farmreclaim','farmfertilize','farm','gather','work','build','process','finish','sysbuild','syscommission','sysrun','fertilize'].includes(op))return 'craft';
   return 'prepare';
 }
 export function sectCosts(s:GameState,id:string,cost:{time:number;energy:number}) {
@@ -337,7 +337,7 @@ export function settleSeasonEncounter(s:GameState,missing:number,events:GameEven
   const p=people[Math.floor(draw(s)*people.length)],v=p.vitality!,e=v.experiences!,r=s.life.rules;
   const has=(ops:string[])=>e.actions.some(a=>ops.includes(a));
   const studying=has(['study','research','tuition','branchlearn','sectpractice']);
-  const working=has(['farmrare','farmstory','farmplot','farmreclaim','farmexplore','farmfertilize','farm','gather','work','process','build','sysrun','finish']);
+  const working=has(['cook','farmrare','farmstory','farmplot','farmreclaim','farmexplore','farmfertilize','farm','gather','work','process','build','sysrun','finish']);
   const caring=has(['company','consult','teach','branchteach','sectteach','bond']);
   const rested=has(['rest','care']);
   const others=Object.values(s.persons).filter(q=>q.id!==p.id&&q.vitality?.alive&&q.vitality.experiences&&(!s.sect||s.sect.members[q.id]?.admitted));

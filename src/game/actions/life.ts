@@ -52,7 +52,7 @@ export function lifeActions(s:GameState):ActionDefinition[] {
   actions.push(defineAction(s,'economy:retire:family','安排季末交接','身体',{ap:0},[
     ...(!canSucceed(s)?[s.sect?'自己的弟子须存活并成年':s.household.heirId===s.household.activePersonId?'尚无后辈':`后辈须存活并满${r.adultYears}岁，当前${Math.floor(heir(s).vitality!.ageSeasons/4)}岁`]:[]),
     ...(s.life.pendingRetirement?['已安排本季交接']:[]),
-  ],'本季正常结算后进入交接。自己的成年弟子接手，邻居不参与交接，个人修为与所学各自独立；门派道法、规程、气运与资产延续。',(d,ev)=>{d.life!.pendingRetirement=true;lifeEvent(ev,d.household.activePersonId,'retire','已安排季末交接');}));
+  ],'本季正常结算后进入交接。自己的成年弟子接手，同门不参与交接，个人修为与所学各自独立；门派道法、规程、气运与资产延续。',(d,ev)=>{d.life!.pendingRetirement=true;lifeEvent(ev,d.household.activePersonId,'retire','已安排季末交接');}));
   return s.sect?[...actions.filter(a=>a.offer.id!=='economy:company:heir'),...sectActions(s)]:actions;
 }
 

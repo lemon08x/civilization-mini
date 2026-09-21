@@ -71,7 +71,7 @@ type ActionLike = {
 };
 
 const URGENT_REASON = /时间不足|精力不足|口粮不足|钱财不足|健康|食物|预留|饥饿|困境|hardship|食品/;
-const LIFE_ACTIONS = /^(economy:(rest|care|end|farm|farmcycle|buyfood|foodpolicy|foodbudget|foodreserve)|end-turn|buy-food|cultivate)/;
+const LIFE_ACTIONS = /^(economy:(cook|rest|care|end|farm|farmcycle|buyfood|foodpolicy|foodbudget|foodreserve)|end-turn|buy-food|cultivate)/;
 
 function record(value: unknown): Record<string, unknown> | undefined {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
@@ -217,7 +217,7 @@ export function formatCompactObservation(compact: CompactObservation): string {
     lines.push(`预算: 时间 ${budget.timeRemaining}（预留 ${budget.reservedTime}，可用 ${budget.availableTime}） / 精力 ${budget.energy}（预留 ${budget.reservedEnergy}，可用 ${budget.availableEnergy}） / 困境 ${budget.hardship}`
       + (budget.health !== undefined ? ` / 健康 ${budget.health}` : ''));
   }
-  if(compact.farm)lines.push(`地块与邻居：${JSON.stringify(compact.farm)}`);
+  if(compact.farm)lines.push(`地块与同门：${JSON.stringify(compact.farm)}`);
   lines.push(`季末经历：${JSON.stringify(compact.seasonalEvents)}`);
   if(compact.sect)lines.push(`师徒与道：${JSON.stringify(compact.sect)}`);
   if(compact.crises)lines.push(`现代使命：${JSON.stringify(compact.crises)}`);

@@ -1,15 +1,17 @@
 import {farmArt} from './scene.js';
 import {farmEventArt,type FarmArt} from '../illustration.js';
-import {type FarmGame,selectedFarmPlot,selectFarmPlot,selectFarmPanel,type FarmPanel} from '../farm-view.js';
+import {type FarmGame,selectedFarmPlot,selectFarmPlot,selectFarmPanel,selectFarmStock,type FarmPanel} from '../farm-view.js';
 let cleanup=()=>{};
 let zoom=1.55,pan={x:0,y:0};
 export function bindFarmScene(root:Document,g:FarmGame,rerender:()=>void):void {
  cleanup();cleanup=()=>{};
- const host=root.getElementById('farm-map'),map=g.economy?.farm;if(!host||!map)return;
+ const host=root.getElementById('farm-map'),map=g.economy?.farm;if(!map)return;
  const select=(id:string)=>{selectFarmPlot(id);if(map.plots.find(p=>p.id===id)?.kind==='home')selectFarmPanel('home');rerender();};
  root.querySelectorAll<HTMLButtonElement>('[data-farm-panel]').forEach(b=>b.onclick=()=>{selectFarmPanel(b.dataset.farmPanel as FarmPanel);rerender();});
+ root.querySelectorAll<HTMLButtonElement>('[data-farm-stock]').forEach(b=>b.onclick=()=>{selectFarmStock(b.dataset.farmStock!);rerender();});
  root.querySelectorAll<HTMLButtonElement>('[data-farm-jump]').forEach(b=>b.onclick=()=>select(b.dataset.farmJump!));
  const picker=root.getElementById('farm-plot-select') as HTMLSelectElement;if(picker)picker.onchange=()=>select(picker.value);
+ if(!host)return;
  const P=(window as unknown as {PIXI:typeof import('pixi.js-legacy')}).PIXI;
  if(!P){host.textContent='地图加载失败，请刷新。仍可使用右侧地块选择器进行操作。';return;}
  const app=new P.Application({width:Math.max(1,host.clientWidth),height:560,backgroundAlpha:0,antialias:true,resolution:Math.min(devicePixelRatio,2),autoDensity:true,autoStart:false});
@@ -57,9 +59,9 @@ export function bindFarmScene(root:Document,g:FarmGame,rerender:()=>void):void {
 }
 export type FarmFeedback=Readonly<{kind:FarmArt|'notice';label:string}>;
 export function playFarmFeedback(root:Document,events:readonly FarmFeedback[]):void {
- const layer=root.querySelector<HTMLElement>('.farm-effect-layer');if(!layer||!events.length)return;
+ const layer=root.querySelector<HTMLElement>('.farm-effect-layer,.farm-room-feedback');if(!layer||!events.length)return;
  const topic=events.find(e=>e.kind!=='notice')?.kind;
- layer.innerHTML=topic&&topic!=='notice'?farmEventArt(topic):'';
+ layer.innerHTML=layer.classList.contains('farm-effect-layer')&&topic&&topic!=='notice'?farmEventArt(topic):'';
  const text=root.createElement('span');text.textContent=events.map(e=>e.label).join('；');layer.append(text);
  if(!matchMedia('(prefers-reduced-motion: reduce)').matches)layer.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:350,fill:'both'});
 }

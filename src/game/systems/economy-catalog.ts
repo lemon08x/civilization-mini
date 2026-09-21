@@ -82,6 +82,7 @@ export const processesFor=(s:GameState)=>s.economy?.branches?ALL_PROCESSES.filte
 export const goodsFor=(s:GameState)=>s.electric?ALL_GOODS:s.economy?.modern?{...GOODS,...MODERN_GOODS}:GOODS;
 
 export interface CatalogOverlay {
+  cooking: Record<string,{inputs:Record<string,number>;food:number;time:number;energy:number}>;
   goods: Record<string, { price: number; food: number }>;
   crops: Record<string, { duration: number; yield: number; straw: number; level: number }>;
   products: Record<string, { inputs: Record<string, number> }>;
@@ -96,6 +97,12 @@ function integerMap(value: Record<string, number>, allowZero = true): void {
 
 /** JSON 是数字来源；TypeScript 目录只保留名称、效果和结构。 */
 export function applyCatalogOverlay(overlay: CatalogOverlay): void {
+  if(!overlay.cooking||Object.keys(overlay.cooking).length!==COOKING.length)throw new Error('存档缺少当前烹饪目录，请新开游戏；原档不修改');
+  for(const recipe of COOKING){
+    const n=overlay.cooking[recipe.id];
+    if(!n||!n.inputs||Object.keys(n.inputs).sort().join()!==Object.keys(recipe.inputs).sort().join()||![n.food,n.time,n.energy].every(v=>Number.isInteger(v)&&v>=1&&v<=12))throw new Error('烹饪数值无效：'+recipe.id);
+    integerMap(n.inputs,false);recipe.inputs={...n.inputs};recipe.food=n.food;recipe.time=n.time;recipe.energy=n.energy;
+  }
   if (Object.keys(overlay.goods).length !== Object.keys(ALL_GOODS).length) throw new Error('物资目录条目不匹配');
   for (const [id, n] of Object.entries(overlay.goods)) {
     const item = ALL_GOODS[id];
@@ -134,3 +141,9 @@ export function applyCatalogOverlay(overlay: CatalogOverlay): void {
     } else delete process.power;
   }
 }
+
+export const COOKING:import('../model/economy.js').CookingRecipe[]=[
+ {id:'porridge',name:'麦粥',inputs:{wheat:0,wood:0},food:0,time:0,energy:0},
+ {id:'beans',name:'炖豆',inputs:{soy:0,wood:0},food:0,time:0,energy:0},
+ {id:'mixed',name:'麦豆饭',inputs:{wheat:0,soy:0,wood:0},food:0,time:0,energy:0},
+];

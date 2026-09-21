@@ -61,7 +61,7 @@ export function parseSession(value: unknown): Session {
   if(!isRecord(sect)||!isRecord(persons)||!isRecord(sect.members)||!Array.isArray(sect.current)||sect.current.length!==2||new Set(sect.current).size!==2||!isRecord(sect.rules)||canonical(sect.rules)!==canonical(record.manifest.ruleset.sect))invalid();
   const q=sect as Record<string,any>,people=persons as Record<string,any>;
   const economy=value.state.economy;
-  const farmInvalid=()=>{throw new Error('存档缺少有效地块或独立邻居数据，请新开游戏；原存档不修改。');};
+  const farmInvalid=()=>{throw new Error('存档缺少有效地块或独立同门数据，请新开游戏；原存档不修改。');};
   if(!isRecord(economy)||!isRecord(economy.farm))farmInvalid();
   const farm=(economy as Record<string,any>).farm;
   const validField=(f:unknown)=>isRecord(f)&&[null,'wheat','soy','flax'].includes(f.crop as null|string)&&[null,'wheat','soy','flax'].includes(f.lastCrop as null|string)&&['planted','moisture','growth','stress','fertility','tended','bonus','duration'].every(k=>finite(f[k]))&&Number(f.fertility)<=3&&Number(f.duration)>=1&&typeof f.composted==='boolean'&&(f.variety===undefined||f.variety==='heritage'&&f.crop==='wheat');

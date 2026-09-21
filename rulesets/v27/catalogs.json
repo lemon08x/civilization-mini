@@ -1,4 +1,9 @@
 {
+  "cooking": {
+    "porridge": {"inputs":{"wheat":2,"wood":1},"food":3,"time":2,"energy":1},
+    "beans": {"inputs":{"soy":2,"wood":1},"food":3,"time":2,"energy":1},
+    "mixed": {"inputs":{"wheat":1,"soy":1,"wood":1},"food":4,"time":3,"energy":1}
+  },
   "goods": {
     "wood": {
       "price": 1,

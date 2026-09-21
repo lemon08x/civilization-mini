@@ -115,6 +115,11 @@ export function settleOngoingFarm(s: GameState, rules: Ruleset, events: GameEven
 }
 
 
+export function cookMeal(s:GameState,recipe:import('../model/economy.js').CookingRecipe,events:GameEvent[]):void{
+ changeGoods(s,recipe.inputs,-1,events,'烹饪'+recipe.name);
+ s.household.food+=recipe.food;
+ events.push({type:'life',personId:s.household.activePersonId,operation:'farm-map',detail:`做成${recipe.name}，备下${recipe.food}份即食口粮。`});
+}
 export const HOME_PLOT='p2q2';
 export const plotId=(x:number,y:number)=>`p${x}q${y}`;
 export function blankField():Field{return {crop:null,planted:0,moisture:0,growth:0,stress:0,fertility:2,lastCrop:null,tended:0,composted:false,bonus:0,duration:2};}
@@ -133,7 +138,7 @@ export function initializeFarm(s:GameState,rules:FarmRules):void{
 export function farmView(s:GameState){
  const f=s.economy?.farm;if(!f)return undefined;
  const id=s.sect!.current[1],v=s.persons[id].vitality!,trust=activePerson(s).vitality?.experiences?.relationships[id]??0;
- return {homeId:HOME_PLOT,rareSeeds:f.rareSeeds,discovered:[...f.discovered],plots:Object.values(f.plots).map(p=>{const field=plotField(s,p.id);return {id:p.id,x:p.x,y:p.y,kind:p.kind,...(p.kind==='field'&&field?{field:{...field},harvest:fieldYield(s,field)}:{}),...(p.kind==='unknown'?{reachable:farmNeighbors(p).some(n=>f.plots[n.id]&&f.plots[n.id].kind!=='unknown')}:{}),...(p.discovery?{discovery:{...p.discovery,...FARM_EVENTS[p.discovery.id]}}:{}),...(p.fertility!==undefined?{fertility:p.fertility}:{})};}),neighbor:{id,name:s.persons[id].name,alive:v.alive,trust,busy:f.neighbor.busy,offers:{seedSoy:f.neighbor.goods.seedSoy??0,seedFlax:f.neighbor.goods.seedFlax??0},description:'独立邻居，不可切换控制；自己的田地与物资独立结算'},rules:{...f.rules}};
+ return {homeId:HOME_PLOT,rareSeeds:f.rareSeeds,discovered:[...f.discovered],plots:Object.values(f.plots).map(p=>{const field=plotField(s,p.id);return {id:p.id,x:p.x,y:p.y,kind:p.kind,...(p.kind==='field'&&field?{field:{...field},harvest:fieldYield(s,field)}:{}),...(p.kind==='unknown'?{reachable:farmNeighbors(p).some(n=>f.plots[n.id]&&f.plots[n.id].kind!=='unknown')}:{}),...(p.discovery?{discovery:{...p.discovery,...FARM_EVENTS[p.discovery.id]}}:{}),...(p.fertility!==undefined?{fertility:p.fertility}:{})};}),neighbor:{id,title:v.sex==='female'?'师姐':'师兄',name:s.persons[id].name,alive:v.alive,trust,busy:f.neighbor.busy,offers:{seedSoy:f.neighbor.goods.seedSoy??0,seedFlax:f.neighbor.goods.seedFlax??0},description:'独立同门，不可切换控制；自己的田地与物资独立结算'},rules:{...f.rules}};
 }
 export function growField(s:GameState,f:Field,events:GameEvent[],id:string):void{
  if(!f.crop)return;

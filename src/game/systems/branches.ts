@@ -19,7 +19,7 @@ export function branchProcessNeeds(s:GameState,id:string,worker=false):string[]{
 export function branchActionNeeds(s:GameState,id:string):string[]{
   if(!s.economy?.branches||id==='handover')return [];
   const [,op,target]=id.split(':');
-  if(s.economy.farm&&['farmrare','farmstory','farmplot','farmexplore','farmreclaim','farmfertilize','neighbor'].includes(op))return [];
+  if(s.economy.farm&&['cook','farmrare','farmstory','farmplot','farmexplore','farmreclaim','farmfertilize','neighbor'].includes(op))return [];
   if(s.sect&&['sectswitch','sectseek','sectadmit','sectpractice','sectteach','sectimprove','sectdraw','crisis'].includes(op))return [];
   if(s.era&&['tap','dungeonstart','dungeonwork','erasettle','publicmill'].includes(op))return [];
   if(s.socialFood&&['foodpolicy','foodbudget','foodreserve','foodplan'].includes(op))return [];
