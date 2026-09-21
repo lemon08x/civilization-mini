@@ -116,7 +116,7 @@ async function act(id:string){
     if(next.record.entries.length>before)sectFeedback(id,lines);
     if(page==='农业'&&next.record.entries.length>before){
       const events=next.record.entries.slice(before).flatMap(entry=>entry.events);
-      playFarmFeedback(document,events.flatMap<FarmFeedback>(event=>event.type==='economy-farm'&&['sow','harvest','tend'].includes(event.operation)?[{kind:event.operation as 'sow'|'harvest'|'tend',label:feedback(event)}]:event.type==='life'&&event.operation==='farm-map'||event.type==='branch'&&id.startsWith('economy:neighbor:')?[{kind:'notice' as const,label:feedback(event)}]:[]));
+      playFarmFeedback(document,events.flatMap<FarmFeedback>(event=>event.type==='economy-farm'&&['sow','harvest','tend'].includes(event.operation)?[{kind:event.operation as 'sow'|'harvest'|'tend',label:feedback(event)}]:event.type==='life'&&event.operation==='farm-map'||event.type==='branch'&&id.startsWith('economy:neighbor:')?[{kind:id.startsWith('economy:farmreclaim:')?'reclaim' as const:id.startsWith('economy:farmexplore:')?'explore' as const:id.startsWith('economy:farmstory:')?'discovery' as const:'notice' as const,label:feedback(event)}]:[]));
     }
   }catch(e){error((e as Error).message);}
   finally{busy=false;$('app').removeAttribute('aria-busy');}

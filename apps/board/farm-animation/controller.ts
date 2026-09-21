@@ -1,4 +1,5 @@
 import {farmArt} from './scene.js';
+import {farmEventArt,type FarmArt} from '../illustration.js';
 import {type FarmGame,selectedFarmPlot,selectFarmPlot,selectFarmPanel,type FarmPanel} from '../farm-view.js';
 let cleanup=()=>{};
 let zoom=1.55,pan={x:0,y:0};
@@ -54,9 +55,11 @@ export function bindFarmScene(root:Document,g:FarmGame,rerender:()=>void):void {
  const observer=new ResizeObserver(()=>{if(host.clientWidth){app.renderer.resize(host.clientWidth,560);app.stage.hitArea=new P.Rectangle(0,0,host.clientWidth,560);fit();}});observer.observe(host);fit();
  cleanup=()=>{observer.disconnect();app.destroy(true,{children:true,texture:false,baseTexture:false});art.destroy();};
 }
-export type FarmFeedback=Readonly<{kind:'sow'|'harvest'|'tend'|'notice';label:string}>;
+export type FarmFeedback=Readonly<{kind:FarmArt|'notice';label:string}>;
 export function playFarmFeedback(root:Document,events:readonly FarmFeedback[]):void {
  const layer=root.querySelector<HTMLElement>('.farm-effect-layer');if(!layer||!events.length)return;
- layer.textContent=events.map(e=>e.label).join('；');
+ const topic=events.find(e=>e.kind!=='notice')?.kind;
+ layer.innerHTML=topic&&topic!=='notice'?farmEventArt(topic):'';
+ const text=root.createElement('span');text.textContent=events.map(e=>e.label).join('；');layer.append(text);
  if(!matchMedia('(prefers-reduced-motion: reduce)').matches)layer.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:350,fill:'both'});
 }

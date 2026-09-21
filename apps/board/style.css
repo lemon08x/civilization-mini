@@ -776,15 +776,18 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .chrome-image{display:block;width:48px;height:48px;flex:none;object-fit:contain;mix-blend-mode:multiply;pointer-events:none}
 .utility-image{width:25px;height:25px;object-fit:contain;mix-blend-mode:multiply;pointer-events:none}
 .masthead-links .text-btn{display:inline-flex;align-items:center;gap:5px}
-.chronicle-shell .player-hud{margin-top:6px}
-.chronicle-shell .player-hud .season-card{display:flex;flex-wrap:nowrap;align-items:center;gap:10px;padding:10px 12px 10px 0}
-.season-copy{display:grid;gap:2px;min-width:0}
+.chronicle-shell .player-hud{display:flex;flex-wrap:wrap;align-items:center;gap:0;margin:6px 0 10px;padding:4px 0}
+.chronicle-shell .player-hud .season-card{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;padding:6px 18px 6px 0;margin-right:auto}
+.season-copy{display:flex;align-items:baseline;gap:10px;min-width:0}
+.chronicle-shell .player-hud .chrome-image{width:26px;height:26px}
+.chronicle-shell .player-hud .season-card strong{font-size:15px}
 .chronicle-shell .season-copy strong{white-space:nowrap}
 .season-card .weather-status{display:flex;align-items:center;gap:4px;min-height:22px}
 .weather-image{width:23px;height:23px;object-fit:contain;mix-blend-mode:multiply}
-.chronicle-shell .player-hud .hud-item{display:flex;align-items:center;gap:8px;padding:10px 12px;min-width:0}
+.chronicle-shell .player-hud .hud-item{display:flex;align-items:center;gap:6px;padding:6px 16px;min-width:0}
+.chronicle-shell .player-hud .hud-item strong{font-size:18px;line-height:1.3}
 .chronicle-shell.is-dashboard .hud-item:nth-child(4){display:none}
-.hud-copy{display:grid;gap:3px;min-width:0}
+.hud-copy{display:flex;align-items:baseline;flex-wrap:wrap;gap:3px 7px;min-width:0}
 .hud-copy>span{font-size:12px;color:var(--muted);line-height:1.5}
 .hud-copy .num{white-space:nowrap}
 .hud-copy .hud-detail{font-size:11px;line-height:1.4}

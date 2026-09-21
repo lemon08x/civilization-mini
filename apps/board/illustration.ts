@@ -11,6 +11,11 @@ export function productArt(id:string):string {
   return 'chronicle-power';
 }
 export const artUrl=(name:string)=>`/illustrations/${name}-ui.webp`;
+export type FarmArt='explore'|'reclaim'|'sow'|'tend'|'harvest'|'discovery';
+export function farmEventArt(topic:FarmArt):string {
+  const cell={explore:0,reclaim:1,sow:2,tend:3,harvest:4,discovery:5}[topic];
+  return `<span class="farm-event-art" aria-hidden="true" style="background-position:${cell%3*50}% ${Math.floor(cell/3)*100}%"></span>`;
+}
 export const illustration=(name:string,className='detail-illustration')=>`<img class="${esc(className)}" src="${artUrl(name)}" alt="" aria-hidden="true" width="384" height="384" loading="lazy" decoding="async">`;
 
 export const itemImage=(id:string)=>`<img class="item-illustration" src="/illustrations/item-${esc(id)}-ui.webp" alt="" aria-hidden="true" width="128" height="128" loading="lazy" decoding="async">`;

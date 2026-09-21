@@ -2,6 +2,7 @@ import type {SessionObservation} from '../../src/runtime/session.js';
 import {CROPS} from '../../src/game/systems/economy-catalog.js';
 import {esc} from './economy-view.js';
 import {foodPolicyControls} from './social-food-view.js';
+import {farmEventArt,type FarmArt} from './illustration.js';
 export type FarmGame=SessionObservation['game'];
 export type FarmPanel='field'|'home'|'store'|'market'|'neighbor'|'discoveries';
 let selected='p2q2',panel:FarmPanel='field';
@@ -14,6 +15,7 @@ export function farm(g:FarmGame,button:(id:string)=>string):string {
  const e=g.economy!,map=e.farm;if(!map)return '<p>此存档缺少地块数据，请新开游戏。</p>';
  const p=map.plots.find(p=>p.id===selected)??map.plots.find(p=>p.id===map.homeId)!;selected=p.id;
  const f=p.field,n=map.neighbor;let title=panels[panel],body='';
+ const art:FarmArt|null=panel==='discoveries'?'discovery':panel!=='field'?null:p.kind==='unknown'?'explore':p.kind==='wild'?'reclaim':p.kind==='field'?(!f?.crop?'sow':f.growth>=f.duration?'harvest':'tend'):p.discovery?'discovery':null;
  const jump=(id:FarmPanel,label:string)=>`<button type="button" class="text-btn" data-farm-panel="${id}">${label} →</button>`;
  const seedBag=()=>`<div class="pixi-seed-bag"><strong>种子袋</strong>${map.discovered.map(c=>`<p>${CROPS[c].name} ${e.goods[CROPS[c].seed]??0} 份</p>`).join('')}${map.rareSeeds?`<p>异穗麦种 ${map.rareSeeds} 份 · 独立留种</p>`:''}${jump('market','购买种子')}</div>`;
  if(panel==='field'){
@@ -48,5 +50,5 @@ export function farm(g:FarmGame,button:(id:string)=>string):string {
  }
  if(panel==='neighbor')body=`<p>${esc(n.name)} · ${n.alive?(n.busy?'忙于农活':'在世'):'已故'}</p><p>关系 ${n.trust}/5 · 独立生活，不可控制</p><p>可交换豆种 ${n.offers.seedSoy} · 亚麻种 ${n.offers.seedFlax}</p><div class="pixi-farm-actions">${['talk','trade-soy','trade-flax','learn'].map(a=>button('economy:neighbor:'+a)).join('')}</div><p class="subtle">灌溉求助在具体田块中选择。</p>`;
  if(panel==='discoveries')body=map.plots.filter(p=>p.discovery).map(p=>`<article class="farm-discovery"><button class="text-btn" data-farm-jump="${p.id}">${p.id} · ${esc(p.discovery!.title)} →</button><p>${esc(p.discovery!.resolved?p.discovery!.outcome||'已记录，保留地貌。':'尚待处理，可以稍后再来。')}</p></article>`).join('')||'<p>沿地图边缘探索，见闻与处理结果会保存在对应地块。</p>';
- return `<section class="pixi-farm"><header class="pixi-farm-heading"><div><span class="eyebrow">田野 · ${esc(g.world.weatherName)}</span><h2>耕一方田，探一方天地</h2></div><span>田 ${map.plots.filter(p=>p.kind==='field').length} 块 · 已知 ${map.plots.filter(p=>p.kind!=='unknown').length} 格</span></header><nav class="farm-local-nav" aria-label="农场事务">${Object.entries(panels).map(([id,n])=>`<button type="button" data-farm-panel="${id}" aria-pressed="${panel===id}">${n}</button>`).join('')}</nav><div class="pixi-farm-layout"><div class="pixi-farm-viewport"><div id="farm-map"></div><div class="pixi-map-tools"><span>点击地块 · 拖动地图</span><div><button data-farm-zoom="-1" aria-label="缩小地图">−</button><button data-farm-zoom="1" aria-label="放大地图">＋</button><button data-farm-center>回到选中地块</button></div></div><div class="farm-effect-layer" role="status" aria-live="polite"></div></div><aside class="pixi-farm-inspector"><h3>${title}</h3>${body}</aside></div><footer><p>起始田 ${map.homeId} 接入自动供水与持续耕作；扩展田手动管理。探索结果永久保留，未知格不预告内容。</p><div class="pixi-season-end">${button('economy:end:season')}</div></footer></section>`;
+ return `<section class="pixi-farm"><header class="pixi-farm-heading"><div><span class="eyebrow">田野 · ${esc(g.world.weatherName)}</span><h2>耕一方田，探一方天地</h2></div><span>田 ${map.plots.filter(p=>p.kind==='field').length} 块 · 已知 ${map.plots.filter(p=>p.kind!=='unknown').length} 格</span></header><nav class="farm-local-nav" aria-label="农场事务">${Object.entries(panels).map(([id,n])=>`<button type="button" data-farm-panel="${id}" aria-pressed="${panel===id}">${n}</button>`).join('')}</nav><div class="pixi-farm-layout"><div class="pixi-farm-viewport"><div id="farm-map"></div><div class="pixi-map-tools"><span>点击地块 · 拖动地图</span><div><button data-farm-zoom="-1" aria-label="缩小地图">−</button><button data-farm-zoom="1" aria-label="放大地图">＋</button><button data-farm-center>回到选中地块</button></div></div><div class="farm-effect-layer" role="status" aria-live="polite"></div></div><aside class="pixi-farm-inspector">${art?farmEventArt(art):''}<h3>${title}</h3>${body}</aside></div><footer><p>起始田 ${map.homeId} 接入自动供水与持续耕作；扩展田手动管理。探索结果永久保留，未知格不预告内容。</p><div class="pixi-season-end">${button('economy:end:season')}</div></footer></section>`;
 }
