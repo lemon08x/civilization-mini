@@ -81,6 +81,10 @@
 .farm-room-hero>.farm-painted-art img{width:136px;height:128px}
 .farm-choice-art{display:inline-block;width:56px;height:56px;object-fit:contain;flex-shrink:0;mix-blend-mode:multiply;vertical-align:middle;margin-right:8px}
 .pixi-farm-inspector .action-name{display:flex;align-items:center;line-height:1.5}
+.farm-good-use{margin:16px 0;padding:13px 15px;background:#eef0e3;border-left:3px solid #a6b496;border-radius:0 8px 8px 0}
+.farm-good-use>span{font-size:12px;font-weight:600;letter-spacing:1px;color:#52684b}
+.farm-item-card .farm-good-use p,.farm-ledger .farm-good-use p{font-size:13px;line-height:1.75;margin:7px 0 0;color:#59664f}
+.farm-purchase-note{font-size:13px;color:#52684b;background:#e4eadb;padding:10px 12px;border-radius:6px}
 .farm-room-split .farm-room-hero{flex-wrap:wrap;gap:14px}
 .farm-room-split .farm-room-hero>.farm-painted-art{width:112px;height:112px}
 .farm-room-split .farm-room-hero>.farm-painted-art img{width:112px;height:112px}

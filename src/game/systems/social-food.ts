@@ -1,4 +1,3 @@
-import {sectCosts} from './life.js';
 import type {GameState} from '../model/state.js';
 import type {GameEvent} from '../model/events.js';
 import {publicWaterFee} from './eras.js';
@@ -13,7 +12,7 @@ export function renewSocialFood(s:GameState,events:GameEvent[]):void{
  s.production!.market.food+=incoming;
  socialFoodEvent(events,'arrived',`外部食品供应商到货${incoming}份，地区库存${s.production!.market.food}/${f.rules.storage}；本季服务人员可处理${f.serviceRemaining}份`,incoming);
 }
-export function socialFoodQuote(s:GameState,afterProduction=false,productionTime=0){
+export function socialFoodQuote(s:GameState,afterProduction=false,_productionTime=0){
  const f=s.socialFood!,delivery=f.delivery||s.era?.index===3,stock=foodStock(s),available=s.production!.market.food;
  const target=f.foodPerSeason+(f.policy==='reserve'?f.reserve:0);
  // Market living buys ready meals first, preserving grain for production when possible.
@@ -21,8 +20,8 @@ export function socialFoodQuote(s:GameState,afterProduction=false,productionTime
  const funds=Math.max(0,Math.floor((s.household.money-(afterProduction?0:publicWaterFee(s)))/f.price)),cap=Math.floor(f.budget/f.price);
  const transport=s.economy!.shop!.transport;
  const quantity=Math.min(need,available,funds,cap,f.serviceRemaining,transport);
- const timeAvailable=Math.max(0,s.life!.timeRemaining-(afterProduction?0:productionTime));
- const time=quantity>0&&!delivery?sectCosts(s,'economy:food:pickup',{time:f.rules.pickupTime,energy:0}).time:0;
+ // Buying food never reserves or consumes personal labor.
+ const time=0;
  const reasons:string[]=[];
  if(need>0){
   if(funds<need)reasons.push(`资金不足：需${need*f.price}钱，现有${s.household.money}`);
@@ -30,9 +29,8 @@ export function socialFoodQuote(s:GameState,afterProduction=false,productionTime
   if(available<need)reasons.push(`市场缺货：需${need}份，现有${available}`);
   if(f.serviceRemaining<need)reasons.push(`社会服务人员额度不足：剩余${f.serviceRemaining}份`);
   if(transport<need)reasons.push(`运输不足：共享采购运输剩余${transport}份`);
-  if(time>timeAvailable)reasons.push(`赶集时间不足：需${time}，扣除生产任务后可用${timeAvailable}`);
  }
- const purchase=time<=timeAvailable?quantity:0;
+ const purchase=quantity;
  return {policy:f.policy,policyName:FOOD_POLICIES[f.policy],delivery,budget:f.budget,reserve:f.reserve,price:f.price,foodPerSeason:f.foodPerSeason,householdStock:stock,marketStock:available,storage:f.rules.storage,scheduledImports:f.rules.imports,serviceRemaining:f.serviceRemaining,transport,need,purchase,cost:purchase*f.price,time:purchase?time:0,missing:Math.max(0,f.foodPerSeason-stock-purchase),expectedReserve:Math.max(0,stock+purchase-f.foodPerSeason),reasons,source:'外部地区食品供应商定额到货；集镇人员办理采购配送，与商城即食口粮共用库存和运输。'};
 }
 // This is a forecast, not a debit. It is included in the shared personal labor budget.

@@ -68,7 +68,7 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
   for(const [id,good]of Object.entries(goodsFor(s))){
     const regional=id==='iron'&&e.regional.iron||id==='fiber'&&e.regional.fiber;
     const price=good.price+(regional?0:1);
-    if(!e.shop)add('buy',id,'购买'+good.name,'交换',{money:price},e.industrySupply<1?['本季采购额度用完']:[],`购入1${good.name}，价格${price}钱；地区供应成熟后铁料／纤维采购价下降1钱，仍不低于交付价。`,(draft,events)=>{
+    if(!e.shop)add('buy',id,'购买'+good.name,'交换',{ap:0,time:0,energy:0,money:price},e.industrySupply<1?['本季采购额度用完']:[],`购入1${good.name}，价格${price}钱；地区供应成熟后铁料／纤维采购价下降1钱，仍不低于交付价。`,(draft,events)=>{
       const n=1;
       draft.economy!.industrySupply--;changeGoods(draft,{[id]:n},1,events,'市场采购');events.push({type:'economy-trade',good:id,operation:'buy',amount:n,money:price});
     });
@@ -80,7 +80,7 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
       if(food){const money=2*(s.socialFood?.price??rules.parameters.foodPrice);draft.household.money-=money;draft.household.food+=2;draft.production!.market.food-=2;if(draft.socialFood){draft.socialFood.serviceRemaining-=2;draft.economy!.shop!.transport-=2;}events.push({type:'food-purchased',amount:2,money});}
     });
   }
-  if(!e.shop)add('buyfood','bulk','买入4口粮','生活',{money:4*(s.socialFood?.price??rules.parameters.foodPrice)},s.production!.market.food<4?['市场不足4粮']:[],'购买普通即食口粮；仓库里的小麦、大豆和面粉也会在季末按需用于生活。',(draft,events)=>{draft.production!.market.food-=4;draft.household.food+=4;events.push({type:'food-purchased',amount:4});});
+  if(!e.shop)add('buyfood','bulk','买入4口粮','生活',{ap:0,time:0,energy:0,money:4*(s.socialFood?.price??rules.parameters.foodPrice)},s.production!.market.food<4?['市场不足4粮']:[],'购买普通即食口粮；仓库里的小麦、大豆和面粉也会在季末按需用于生活。',(draft,events)=>{draft.production!.market.food-=4;draft.household.food+=4;events.push({type:'food-purchased',amount:4});});
   for(const crop of Object.keys(CROPS) as Crop[])add('farm',crop,(e.field.crop?'管理／收获':'播种')+CROPS[crop].name,'农业',{ap:e.shop&&!e.field.crop&&equipped(s,'U02')&&e.shop.seededTurn!==s.clock.absoluteTurn?0:1},[
     ...(e.farm&&!e.farm.discovered.includes(crop)?['尚未发现此种子']:[]),...(e.field.crop&&e.field.crop!==crop?['田里种植的是其他作物']:[]),...farmBlocker(s,crop),
   ],'空田播种；生长期缺水时灌溉；成熟后收获。此入口操作起始田，个人与雇工共用。',(draft,events)=>farmWork(draft,crop,events));

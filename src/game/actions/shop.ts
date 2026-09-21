@@ -18,7 +18,7 @@ export function shopActions(s:GameState,r:Ruleset):ActionDefinition[]{
   add('cartremove',item.id,'移除一份'+item.name,{ap:0},quantity<1?['清单中没有此商品']:[],'移除一份，未付款。',(draft,events)=>{const c=draft.economy!.shop!.cart;if(quantity===1)delete c[item.id];else c[item.id]=quantity-1;shopEvent(events,'cart',item.id,'已移除'+item.name);});
  }
  add('clearcart','all','清空采购清单',{ap:0},Object.keys(sh.cart).length?[]:['清单为空'],'清单不保留价格或占用库存。',(draft,events)=>{draft.economy!.shop!.cart={};shopEvent(events,'cart','all','采购清单已清空');});
- add('checkout','cart','确认整单采购',{money:quote.total},quote.blockers,`合计${quote.total}钱、${quote.weight}运输容量，付款后剩${quote.remainingMoney}钱。${instant?'电报在线，新订货当季交付':'现货立即交付，订货下一季开始交付'}；所有材料和食品都占运输额度。`,(draft,events)=>{
+ add('checkout','cart','确认整单采购',{ap:0,time:0,energy:0,money:quote.total},quote.blockers,`合计${quote.total}钱、${quote.weight}运输容量，付款后剩${quote.remainingMoney}钱。${instant?'电报在线，新订货当季交付':'现货立即交付，订货下一季开始交付'}；购买不耗时间和精力，所有材料和食品都占运输额度。`,(draft,events)=>{
   const shop=draft.economy!.shop!;shop.transport-=quote.weight;
   for(const {item,quantity}of quote.lines){
    if(item.id==='good-food'){draft.production!.market.food-=quantity;if(draft.socialFood)draft.socialFood.serviceRemaining-=quantity;}else shop.stock[item.id]-=quantity;
