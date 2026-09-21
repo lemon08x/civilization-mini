@@ -433,3 +433,12 @@ A precisely aligned 3 column by 4 row sheet of twelve separate Chinese pastoral 
 ```
 
 按行导出：`wheat / soy / flax / seedWheat / seedSoy / seedFlax / wood / clay / compost / straw / flour / food`。
+
+
+## 文明模块导航（2026-09-22）
+
+由 Grok Build CLI `image_gen` 生成 `era-navigation-atlas.jpg`（1280×576），裁切并清理浅灰背景后导出 `era-nav-workshop.webp`、`era-nav-trade.webp`、`era-nav-capital.webp`。用于农场右侧的工坊、贸易、资本导航及页面题图。只提供 UI 骨架，具体生产、市场、金融行动尚未接入。
+
+提示词：A horizontal triptych of exactly three equal square cells, all on pure white flat background, no panels, no borders, no text, no lettering, no people. Three Chinese pastoral watercolor spot illustrations for game navigation, muted sage green, ochre and ink grey, delicate handmade appearance, centered objects with generous margins within each cell. Left: a modest traditional wooden workshop with a small workbench, wooden gear and sack of grain, representing farm produce processing and toolmaking. Middle: a twentieth century industrial warehouse with a small conveyor belt and shipping crates, representing production and market trade. Right: an elegant contemporary financial office silhouette with an abacus and a restrained stack of coins in foreground, representing capital and investment, no charts or letters. Cohesive style and similar visual weight.
+
+原定 3:1 比例不受生成器支持，实际采用 20:9。原图浅色面板经本地后处理去除，页面使用 multiply 融入纸色。

@@ -83,6 +83,10 @@ try {
     </label>`).join('');
   renderSaves();
   button.disabled = false;
+  frameworkOptions.addEventListener('change', () => {
+    const selected = form.querySelector<HTMLInputElement>('input[name="framework"]:checked');
+    document.getElementById('framework-current')!.textContent = FRAMEWORKS.find(f => f.id === selected?.value)?.name ?? '大河农耕';
+  });
   button.textContent = '写下新的一章 →';
   importInput.onchange = async ev => {
     const file = (ev.target as HTMLInputElement).files?.[0];

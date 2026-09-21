@@ -2,10 +2,21 @@ import type { SessionObservation } from '../../src/runtime/session.js';
 import {esc} from './economy-view.js';
 
 export const pageNames:Record<string,string>={
-  社会:'社会历程',聚落:'本季看板',农业:'农场',生活:'补给与谋生',家人:'师徒',修炼:'修炼图',仓库:'仓库',安排:'安排与计划',
+  工坊:'工坊',贸易:'贸易',资本:'资本',社会:'社会历程',聚落:'本季看板',农业:'农场',生活:'补给与谋生',家人:'师徒',修炼:'修炼图',仓库:'仓库',安排:'安排与计划',
   学科:'学堂',制造:'制造',系统:'生产系统',雇佣:'人员安排',商城:'集市',
   能源:'供能',家业:'家业',作坊:'作坊',副本:'副本',试炼:'试炼',
 };
+
+export const stageModules:Record<string,{stage:number;era:string;art:string;theme:string;intro:string;steps:readonly [string,string][]}>={
+ 工坊:{stage:1,era:'市镇百工',art:'workshop',theme:'把收成做成更好的东西',intro:'以农产品加工为中心，学习制作工具，再用工具组织生产。',steps:[['原料台','接入农场收成，选择要加工的原料。'],['工具台','学习工具制作，准备加工所需的器具。'],['加工台','选择配方，将农产品制成更高价值的产物。']]},
+ 贸易:{stage:2,era:'电力工业',art:'trade',theme:'生产之后，让产品找到买家',intro:'购买生产工具进入行业，雇佣劳动力搭建流水线，通过宣传和销售管理库存。',steps:[['采购与用工','购买设备，配置岗位与劳动力。'],['生产线','安排投入与产出，控制生产节奏。'],['宣传与销售','寻找市场，销售产品，避免库存积压。']]},
+ 资本:{stage:3,era:'现代社会',art:'capital',theme:'从经营收入走向资本配置',intro:'第四阶段的金融玩法入口。具体机制待后续确定。',steps:[['资产总览','预留资产与资金概况的位置。'],['投资配置','预留投资选择的位置。'],['收益与风险','预留收益、风险及资金流动的展示位置。']]},
+};
+export function stageModulePage(g:SessionObservation['game'],page:string):string {
+ const m=stageModules[page];if(!m)return '';
+ const open=(g.era?.index??0)>=m.stage;
+ return `<section class="era-module"><header class="era-module-hero"><img src="/illustrations/era-nav-${m.art}.webp" alt="" width="160" height="160"><div><span class="era-module-status">第 ${m.stage+1} 阶段 · ${m.era} · ${open?'页面已开放':'尚未开放'}</span><h3>${m.theme}</h3><p>${m.intro}</p></div></header><div class="era-module-flow">${m.steps.map(([name,detail],i)=>`<article><span class="era-module-step">0${i+1}</span><h4>${name}</h4><p>${detail}</p><span class="era-module-placeholder">${open?'筹备中':'进入'+m.era+'后开放'}</span></article>`).join('')}</div><div class="era-module-note">${open?'已到达开放阶段，玩法仍在筹备中。':'当前可预览模块规划，进入对应阶段后开放。'}目前仅搭建页面骨架，尚无生产、交易或投资操作。</div></section>`;
+}
 
 export type PlayerGroup = {name:string;pages:string[];description:string;epigraph:string};
 
@@ -14,6 +25,7 @@ export function playerGroups(g:SessionObservation['game']):PlayerGroup[] {
   const groups:PlayerGroup[]=[
     {name:'本季',pages:['聚落'],description:'看这一季的日子与缺口',epigraph:'把日子安顿好，才有余裕向前。'},
     {name:'农场',pages:['农业'],description:'种田、照料与收成',epigraph:'田里有收成，家里才有下一季。'},
+    ...Object.entries(stageModules).map(([name,m])=>({name,pages:[name],description:m.intro,epigraph:m.theme})),
     {name:'师徒',pages:['家人'],description:'自己与同门、收徒与传承',epigraph:'道须亲修，学问相承。'},
     ...(g.sect?[{name:'修炼',pages:['修炼'],description:'个人五境、本门心法与修道机缘',epigraph:'静以修身，学以致用。'}]:[]),
     {name:'学习与制造',pages:['学科','制造'],description:'学知识、验证产品、加工物资',epigraph:'亲手做成的东西，才算真正留下。'},
@@ -38,6 +50,7 @@ export function chapterEpigraph(g:SessionObservation['game'],page:string):string
 
 export function ruleGuide(g:SessionObservation['game'],page:string):string {
   const e=g.economy!,l=g.life;
+  if(stageModules[page])return stageModulePage(g,page);
   if(g.sect&&page==='修炼')return `<section class="rules-page"><button class="text-btn" data-page="修炼">← 返回修炼图</button><h2>修炼规则</h2><p>个人五境：定心、观照、知止、守一、通明。名称只表示现有境界，每${g.sect.rules.stageProgress}修为一境；新入门从零修习。</p><p>点击节点只查看详情；静心修道、授徒修道及研证心法通过行动按钮实际结算。切换传人同样是游戏行动，不会刷新预算；节点详情展示当前行动者的数据。</p><p>个人道改善其他行动的时间与精力成本，不能代替知识、物资或电力。心法改进跨代保留，后人仍须逐境修习才能发挥效果。</p><p>研证须个人满境，掌握足够课程并涉猎三类学科，完成两类亲身实践；每级累计${g.sect.rules.doctrineSteps}次付费研证。实际条件和花费以行动报价为准。</p><p>机缘仅为辅助，收在图谱下方；未抽卡不影响修炼与传承。</p></section>`;
   if(g.sect&&['家人','社会'].includes(page))return `<section class="rules-page"><button class="text-btn" data-page="${page}">← 返回</button><h2>${pageNames[page]} · 规则</h2><p>你只控制自己，另一位是独立同门，可在农场拜访。自己的弟子成年后即可交接，同门不参与传承。</p><p>个人入门从零修道。高修为、跨学科实践和多次研证才能永久改进本门道法；本人道的效果已计入行动报价。术须亲自学习，可由师父付出双方时间与精力传授。</p><p>修道阶段产生少量气运；抽卡仅作辅助，不降低修为、不直接给分。概率以行动前报价为准。</p><p>跨时代保留同一师徒谱系、修为和所学。进入现代自动召集，有${g.sect.rules.modernSeasons}季准备期限；四类危机每类须至少完成兜底。各副本只计已完成最高难度分数，升级不叠加旧档分，未完成任务无分。提前结束会判定使命成败。</p></section>`;
 

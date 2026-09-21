@@ -31,24 +31,24 @@ const RIVERINE_STAGES:FrameworkStage[]=[
  {id:'modern',name:'现代社会',focus:'配电入户与存续使命',imports:6,service:8,foodWeight:1,craftWeight:3,gatherBonus:0,workBonus:0,publicWell:false,publicMill:true,courses:['L7','O5'],description:'市政配送口粮、可付费自来水。配电课程与四类存续危机在此开放。自来水不追溯取消前期水井的价值。'},
 ];
 export const FRAMEWORKS:FrameworkOutline[]=[
- {id:'riverine',name:'大河农耕',summary:'沿大河安顿农耕，从村落走到市镇百工，再经电力工业进入现代社会。',implemented:true,stages:RIVERINE_STAGES},
- {id:'maritime',name:'商贸城邦',summary:'渔商埠口起家，工匠行会积累，同样收束于电力工业与现代社会。',implemented:false,stages:[
-  {id:'port',name:'渔商埠口',focus:'渔业与近海贸易',description:'以渔获与埠口贸易谋生。'},
-  {id:'guild',name:'工匠行会',focus:'行会手工业',description:'行会组织工匠与订货。'},
-  {id:'electric',name:'电力工业',focus:'发电、储能与电解',description:'进入电力生产。'},
-  {id:'modern',name:'现代社会',focus:'配电入户与存续使命',description:'电力生活与存续使命。'},
+ {id:'riverine',name:'大河农耕',summary:'以中华文明为背景，沿大河安顿农耕，从村落走到市镇百工，再经电力工业进入现代社会。',implemented:true,stages:RIVERINE_STAGES},
+ {id:'maritime',name:'爱琴海城邦',summary:'以古希腊文明为灵感，从橄榄园与葡萄园出发，发展陶器作坊与海上贸易。',implemented:false,stages:[
+  {id:'port',name:'海岸聚落',focus:'橄榄、葡萄与渔业',description:'经营海岸农园，利用近海资源。'},
+  {id:'guild',name:'城邦作坊',focus:'陶器、榨油与航海贸易',description:'把农产加工为货物，通过港口交换。'},
+  {id:'electric',name:'港口工业',focus:'工业与远洋市场',description:'游戏设想：发展港口工业与远洋市场。'},
+  {id:'modern',name:'现代社会',focus:'资本与金融',description:'游戏设想：进入现代资本经营。'},
  ]},
- {id:'highland',name:'矿冶山城',summary:'矿冶山村起家，机械工场积累，同样收束于电力工业与现代社会。',implemented:false,stages:[
-  {id:'mine',name:'矿冶山村',focus:'采矿与冶炼',description:'以矿冶换取粮食与工具。'},
-  {id:'workshop',name:'机械工场',focus:'工场机械',description:'工场组织批量加工。'},
-  {id:'electric',name:'电力工业',focus:'发电、储能与电解',description:'进入电力生产。'},
-  {id:'modern',name:'现代社会',focus:'配电入户与存续使命',description:'电力生活与存续使命。'},
+ {id:'highland',name:'安第斯文明',summary:'以印加及其前身文明为灵感，从高山梯田、薯类与藜麦出发，发展驼羊毛织造与山地交换。',implemented:false,stages:[
+  {id:'mine',name:'高山梯田',focus:'薯类、藜麦与驼羊',description:'适应山地环境，经营梯田与畜群。'},
+  {id:'workshop',name:'织造聚落',focus:'毛织、食物保存与山地运输',description:'加工纤维与农产，沿山路交换物资。'},
+  {id:'electric',name:'山地工业',focus:'工业与区域市场',description:'游戏设想：发展山地工业与区域市场。'},
+  {id:'modern',name:'现代社会',focus:'资本与金融',description:'游戏设想：进入现代资本经营。'},
  ]},
- {id:'polder',name:'水乡农商',summary:'水乡园田起家，商贸市镇积累，同样收束于电力工业与现代社会。',implemented:false,stages:[
-  {id:'garden',name:'水乡园田',focus:'园田与水网',description:'圩田园圃，水网密布。'},
-  {id:'market',name:'商贸市镇',focus:'水路商贸',description:'市镇沿水路集散货物。'},
-  {id:'electric',name:'电力工业',focus:'发电、储能与电解',description:'进入电力生产。'},
-  {id:'modern',name:'现代社会',focus:'配电入户与存续使命',description:'电力生活与存续使命。'},
+ {id:'polder',name:'尼罗河文明',summary:'以古埃及文明为灵感，依河水泛滥耕种小麦与亚麻，发展灌渠、织布与河运。',implemented:false,stages:[
+  {id:'garden',name:'河谷农庄',focus:'泛滥农业与亚麻',description:'顺应河水涨落，经营河谷农田。'},
+  {id:'market',name:'河运工坊',focus:'织布、纸草与水利',description:'加工亚麻与纸草，依托河运交换产品。'},
+  {id:'electric',name:'河谷工业',focus:'工业与河运市场',description:'游戏设想：发展河谷工业与区域市场。'},
+  {id:'modern',name:'现代社会',focus:'资本与金融',description:'游戏设想：进入现代资本经营。'},
  ]},
 ];
 export function frameworkById(id?:string):FrameworkOutline{return FRAMEWORKS.find(f=>f.id===id)??FRAMEWORKS[0];}
