@@ -131,6 +131,13 @@ input, select {
 .start-form #new-game { font-size: 16px; }
 .start-form #error { margin: 0; }
 .start-form details { padding: 8px 0; border-top: 1px solid var(--line); }
+.start-form .framework-fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 14px; }
+.start-form .framework-fieldset legend { padding: 0; }
+.start-form .framework-card { display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.start-form .framework-card:has(input:checked) { border-color: currentColor; }
+.start-form .framework-card input { width: auto; justify-self: start; }
+.start-form .framework-card p { margin: 0; }
+.start-form .framework-card.framework-disabled { opacity: 0.55; cursor: not-allowed; }
 .save-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 14px 0; border-top: 1px solid var(--line); }
 .save-row:first-child { border-top: 0; padding-top: 0; }
 .save-row .save-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }

@@ -1,4 +1,4 @@
-import {ERAS} from '../model/eras.js';
+import {stageOf} from '../model/eras.js';
 import {eraCard} from '../systems/eras.js';
 import {branchHas,branchNeeds} from '../systems/branches.js';
 import { expeditionActions } from './expedition.js';
@@ -51,14 +51,14 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
   }
   for(const resource of ['wood','clay','food'] as const){
     const key=resource==='wood'?'timber':resource==='food'?'wildFood':'clay',available=s.production!.stocks[key];
-    const take=Math.min(available,2+(resource==='wood'&&equipped(s,'T01')?1:0)+(resource==='food'?(s.era?ERAS[s.era.index].gatherBonus:0):0));
-    add('gather',resource,'采集'+(resource==='food'?'食物':GOODS[resource].name),'生活',{},take<1?['当地资源已耗尽']:[],`取得${take}，真实扣当地库存。${resource==='food'&&s.era&&ERAS[s.era.index].gatherBonus?'农社公地额外提供采集。':''}`,(draft,events)=>{
+    const take=Math.min(available,2+(resource==='wood'&&equipped(s,'T01')?1:0)+(resource==='food'?(s.era?stageOf(s).gatherBonus:0):0));
+    add('gather',resource,'采集'+(resource==='food'?'食物':GOODS[resource].name),'生活',{},take<1?['当地资源已耗尽']:[],`取得${take}，真实扣当地库存。${resource==='food'&&s.era&&stageOf(s).gatherBonus?'农社公地额外提供采集。':''}`,(draft,events)=>{
       draft.production!.stocks[key]-=take;if(resource==='food')draft.household.food+=take;else changeGoods(draft,{[resource]:take},1,events,'当地采集');
       if(resource==='wood'&&equipped(draft,'T01'))consumeEquipment(draft,'T01',events);
       events.push({type:'resource-gathered',resource,amount:take,remaining:draft.production!.stocks[key],toolUsed:false});
     });
   }
-  add('work','local','临时做工','生活',{},s.production!.market.jobs<1?['本季岗位已满']:[],`1行动赚${(rules.parameters.workIncome+(eraCard(s)?.income??0)+(s.era?ERAS[s.era.index].workBonus:0))}钱，扣1当地岗位。${s.era&&ERAS[s.era.index].workBonus?'农社帮工提高收入。':''}`,(draft,events)=>{const pay=rules.parameters.workIncome+(eraCard(s)?.income??0)+(s.era?ERAS[s.era.index].workBonus:0);draft.production!.market.jobs--;draft.household.money+=pay;events.push({type:'income',source:'work',amount:pay});});
+  add('work','local','临时做工','生活',{},s.production!.market.jobs<1?['本季岗位已满']:[],`1行动赚${(rules.parameters.workIncome+(eraCard(s)?.income??0)+(s.era?stageOf(s).workBonus:0))}钱，扣1当地岗位。${s.era&&stageOf(s).workBonus?'农社帮工提高收入。':''}`,(draft,events)=>{const pay=rules.parameters.workIncome+(eraCard(s)?.income??0)+(s.era?stageOf(s).workBonus:0);draft.production!.market.jobs--;draft.household.money+=pay;events.push({type:'income',source:'work',amount:pay});});
   for(const [id,good]of Object.entries(goodsFor(s))){
     const regional=id==='iron'&&e.regional.iron||id==='fiber'&&e.regional.fiber;
     const price=good.price+(regional?0:1);

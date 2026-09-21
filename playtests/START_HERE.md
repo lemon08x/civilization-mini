@@ -19,10 +19,10 @@ run ID 使用 `<批次编号>-g01`、`-g02` 等，只含字母、数字、短横
 先确认已有可用的 `dist/`。仅在开局准备阶段允许：
 
 ```powershell
-npm run lab -- new --run pt-20260913-150000-a7c2-g01 --scenario river
+npm run lab -- new --run pt-20260913-150000-a7c2-g01 --framework riverine
 ```
 
-默认场景按 `river / clay-valley / woodland / dry` 逐局轮换。默认不传种子。同名存档已存在时不要覆盖，改 run ID 或先 `lab -- delete`。
+默认不传种子。同名存档已存在时不要覆盖，改 run ID 或先 `lab -- delete`。
 
 没有构建或开局失败时在对话中报告错误，不擅自重建或覆盖。
 

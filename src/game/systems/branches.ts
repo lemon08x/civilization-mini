@@ -3,6 +3,7 @@ import {APPLIANCES,ELECTRIC_EPIGRAPHS} from '../model/electric.js';
 import {ancestorKnows} from './ancestry.js';
 import { productNeeds,productTrialNeeds } from './industry-products.js';
 import {branchNodesFor,nodeInEra,ERA_NODES,BRANCH_NODES,BRANCH_PRODUCTS,BRANCH_PROCESSES,BRANCH_PATHS} from '../model/branches.js';
+import {frameworkUnlockStage} from '../model/eras.js';
 import type {GameState} from '../model/state.js';
 import type {GameEvent} from '../model/events.js';
 export {BRANCH_NODES,BRANCH_PRODUCTS,BRANCH_PROCESSES,BRANCH_PATHS};
@@ -57,7 +58,7 @@ export function recordBranchWork(s:GameState,events:GameEvent[]):void {
 }
 export function branchView(s:GameState){
   const b=s.economy!.branches!;
-  return {nodes:branchNodesFor(s).map(n=>({...n,...(s.electric&&ELECTRIC_EPIGRAPHS[n.id]?{epigraph:ELECTRIC_EPIGRAPHS[n.id]}:{}),...(s.economy!.industry?{sample:{}}:{}),known:branchHas(s,n.id),inherited:ancestorKnows(s,n.id),heirInherited:ancestorKnows(s,n.id,s.household.heirId),heirKnown:s.household.heirId!==s.household.activePersonId&&branchHas(s,n.id,s.household.heirId),archived:b.archives.includes(n.id),scope:(n.unlockEra??0)>0?'社会开放后可学':'通用知识',active:nodeInEra(s,n.id),recorded:!!b.learned[s.household.activePersonId]?.includes(n.id),missing:[...branchNeeds(s,n.parents),...(!nodeInEra(s,n.id)?['当前社会尚未开放此课程']:[])]})),
+  return {nodes:branchNodesFor(s).map(n=>({...n,...(s.electric&&ELECTRIC_EPIGRAPHS[n.id]?{epigraph:ELECTRIC_EPIGRAPHS[n.id]}:{}),...(s.economy!.industry?{sample:{}}:{}),known:branchHas(s,n.id),inherited:ancestorKnows(s,n.id),heirInherited:ancestorKnows(s,n.id,s.household.heirId),heirKnown:s.household.heirId!==s.household.activePersonId&&branchHas(s,n.id,s.household.heirId),archived:b.archives.includes(n.id),scope:frameworkUnlockStage(s.era?.frameworkId,n.id)>0?'社会开放后可学':'通用知识',active:nodeInEra(s,n.id),recorded:!!b.learned[s.household.activePersonId]?.includes(n.id),missing:[...branchNeeds(s,n.parents),...(!nodeInEra(s,n.id)?['当前社会尚未开放此课程']:[])]})),
     paths:BRANCH_PATHS.map(p=>({...p,learned:p.nodes.filter(id=>branchHas(s,id)).length})),
     channels:[...b.channels],protocols:[...b.protocols],delivered:[...b.delivered],products:s.electric?Object.fromEntries(industryProductsFor(s).filter(p=>p.kind==='device').map(p=>[p.id,p.knowledge])):BRANCH_PRODUCTS,processes:s.electric?Object.fromEntries(industryProductsFor(s).filter(p=>p.kind==='goods').map(p=>[p.id,p.knowledge])):BRANCH_PROCESSES};
 }

@@ -16,6 +16,7 @@ import { activePerson, blankPerson, heir } from './model/state.js';
 import type { GameState } from './model/state.js';
 import type { GameEvent } from './model/events.js';
 import type { Ruleset } from './ruleset.js';
+import { FRAMEWORKS } from './model/eras.js';
 import { deepFreeze } from './ruleset.js';
 import { newSeason, finishSeason } from './systems/time.js';
 import { masterAvailable } from './systems/learning.js';
@@ -24,24 +25,24 @@ import { initialProduction } from './systems/crafts.js';
 import type { Material } from './model/production.js';
 import { initialDevelopment,developFromEvents } from './systems/development.js';
 
-export function createInitialState(rules: Ruleset, seed: number, scenarioId: string): GameState {
+export function createInitialState(rules: Ruleset, seed: number, frameworkId: string): GameState {
   if (!Number.isInteger(seed) || seed < 1 || seed > 0xffffffff) throw new Error('种子需要是 1—4294967295 的整数');
-  if (!Object.hasOwn(rules.scenarios, scenarioId)) throw new Error('未知场景');
+  if (!FRAMEWORKS.some(f => f.id === frameworkId && f.implemented)) throw new Error('未知或尚未开放的发展框架');
   const p = rules.parameters;
   const state: GameState = {
     schemaVersion: 1, clock: { generation: 1, turn: 1, absoluteTurn: 1 }, status: 'active', ap: p.actionsPerTurn,
     world: { era: '传统农业技术条件（非具体史年）', technologies: [...rules.worldTechnologies] },
-    location: { id: scenarioId, weather: 'normal', rain: 2, water: 2, teachers: rules.technologies.map(t => t.id), season: { cultivated: false, usedChannel: false, trialSample: false } },
+    location: { id: 'river', weather: 'normal', rain: 2, water: 2, teachers: rules.technologies.map(t => t.id), season: { cultivated: false, usedChannel: false, trialSample: false } },
     household: { id: 'household:1', activePersonId: 'person:1', heirId: 'person:2', memberIds: ['person:1', 'person:2'], food: p.initialFood, money: p.initialMoney, hardship: 0, assetIds: ['seed:initial'], stockId: 'seed:initial', candidateId: null, activeProjectId: null },
     persons: { 'person:1': blankPerson('person:1', '本代经营者'), 'person:2': blankPerson('person:2', '已成年的后辈') },
     assets: { 'seed:initial': { id: 'seed:initial', kind: 'seed', name: '普通地方种源', potential: p.cropPotential, tolerance: 0 } },
     projects: {}, knowledge: { archives: [], reportIds: [] }, randomState: seed,
   };
   if (rules.production) {
-    state.production = initialProduction(rules.scenarios[scenarioId].production!);
+    state.production = initialProduction(rules.scenarios.river.production!);
     if (rules.technologyFeedback) state.production.workshops = { woodenware: false, pottery: false };
     state.world.era = '跨地域生产与传承（非单一文明历史顺序）';
-    state.location.teachers = [...rules.scenarios[scenarioId].production!.teachers];
+    state.location.teachers = [...rules.scenarios.river.production!.teachers];
   }
   if (rules.socialInheritance) state.society = { teaching: {}, methods: [], goods: { woodenware: 0, pottery: 0 }, contracts: { woodenware: { active: false, project: null }, pottery: { active: false, project: null } } };
   if(rules.development)state.development=initialDevelopment();
@@ -56,7 +57,7 @@ export function createInitialState(rules: Ruleset, seed: number, scenarioId: str
   if(rules.socialFood){state.socialFood={rules:structuredClone(rules.socialFood),foodPerSeason:p.foodPerTurn,price:p.foodPrice,policy:'off',budget:rules.socialFood.defaultBudget,reserve:rules.socialFood.defaultReserve,delivery:false,serviceRemaining:rules.socialFood.serviceCapacity};state.production!.market.food=Math.min(state.production!.market.food,rules.socialFood.storage);}
   if(rules.electric)state.electric={rules:structuredClone(rules.electric)};
   if(rules.sect&&state.life)initializeSect(state,rules.sect);
-  initializeEras(state,rules);
+  initializeEras(state,rules,frameworkId);
   newSeason(state, rules, []);
   recordCharacterGrowth(state,[]);
   return deepFreeze(state);

@@ -7,7 +7,7 @@
 需要 Node.js 24+，在项目根目录执行 `npm ci`、`npm run build`。创建独立 run ID；已有同名目录不会覆盖。
 
 ```powershell
-npm run lab -- new --run ai-demo --scenario river
+npm run lab -- new --run ai-demo --framework riverine
 ```
 
 模型试玩先读 `playtests/AGENTS.md` 与 `playtests/START_HERE.md`。

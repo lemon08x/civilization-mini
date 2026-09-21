@@ -2,7 +2,6 @@ import {productArt,artUrl,illustration} from './illustration.js';
 import type {SessionObservation} from '../../src/runtime/session.js';
 import {SYSTEMS} from '../../src/game/model/industry.js';
 import {nodeUnlockEra} from '../../src/game/model/branches.js';
-import {ERAS} from '../../src/game/model/eras.js';
 import {productName} from '../../src/game/systems/industry-products.js';
 import {branchRequirements} from './branch-view.js';
 import {esc,inputsText,needsText} from './economy-view.js';
@@ -14,7 +13,7 @@ export function manufacturePage(g:SessionObservation['game'],button:(id:string)=
  const e=g.economy!,x=e.industryView!;
  const selected=x.catalog.find(p=>p.id===selectedId)??x.catalog[0];
  const laneOf=(id:string)=>MANUFACTURE_LANES.find(l=>l.ids.includes(id))?.id??'其他';
- const eraTag=(ids:string[])=>{const i=Math.max(0,...ids.map(nodeUnlockEra));return i>0?' · '+ERAS[i].name.slice(0,2):'';};
+ const eraTag=(ids:string[])=>{const i=Math.max(0,...ids.map(nodeUnlockEra)),name=g.era?.stages[i]?.name;return i>0&&name?' · '+name.slice(0,2):'';};
  const nodes:TreeNodeSpec[]=x.catalog.map(p=>{
   const record=x.products[p.id];
   const stock=p.kind==='device'?`耐用${e.equipment[p.id]??0}`:`库存${e.goods[p.good!]??0}`;

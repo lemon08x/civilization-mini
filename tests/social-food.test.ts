@@ -11,7 +11,7 @@ import {personalBudget,systemLabor} from '../src/game/systems/industry.js';
 import {createSession,observeSession,submitCommand} from '../src/runtime/session.js';
 import type {GameEvent} from '../src/game/model/events.js';
 import {rules} from './v27.js';
-const fresh=()=>structuredClone(createInitialState(rules,17,'river'));
+const fresh=()=>structuredClone(createInitialState(rules,17,'riverine'));
 type State=ReturnType<typeof fresh>;
 const offer=(s:State,id:string)=>getAvailableActions(s,rules).find(a=>a.id==='economy:'+id)!;
 const act=(s:State,id:string)=>transition(s,parseActionId(id==='handover'?id:'economy:'+id),rules);
@@ -77,7 +77,7 @@ test('policy survives handover; suspension releases pickup and never grants food
  s=act(s,'foodpolicy:off').state;assert.equal(personalBudget(s).reservedTime,0);assert.equal(foodStock(s),0);
 });
 test('session observations exclude hidden state',async()=>{
- let session=await createSession({runId:'social-food-test',ruleset:rules,seed:17,scenarioId:'river'});
+ let session=await createSession({runId:'social-food-test',ruleset:rules,seed:17,frameworkId:'riverine'});
  for(const id of ['foodpolicy:market','foodbudget:8','end:season'])session=(await submitCommand(session,{commandId:'test-'+session.record.entries.length,expectedRevision:session.record.entries.length,actionId:'economy:'+id})).session;
  assert.doesNotMatch(JSON.stringify(observeSession(session)),/randomState|lifespanSeasons|constitution/);
 });

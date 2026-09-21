@@ -15,11 +15,11 @@ export function validateCommand(value: unknown): Command {
   parseActionId(value.actionId);
   return { commandId: value.commandId, expectedRevision: value.expectedRevision as number, actionId: value.actionId, ...(value.reason !== undefined ? { reason: value.reason as string } : {}) };
 }
-export async function createSession(options: { runId: string; ruleset: Ruleset; seed: number; scenarioId: string }): Promise<Session> {
+export async function createSession(options: { runId: string; ruleset: Ruleset; seed: number; frameworkId: string }): Promise<Session> {
   validateRunId(options.runId);
   const ruleset = validateRuleset(options.ruleset);
-  const state = createInitialState(ruleset, options.seed, options.scenarioId);
-  const record: RunRecord = { format: 'civilization-mini-run', formatVersion: 3, manifest: { runId: options.runId, ruleset, seed: options.seed, scenarioId: options.scenarioId }, entries: [] };
+  const state = createInitialState(ruleset, options.seed, options.frameworkId);
+  const record: RunRecord = { format: 'civilization-mini-run', formatVersion: 3, manifest: { runId: options.runId, ruleset, seed: options.seed, frameworkId: options.frameworkId }, entries: [] };
   return deepFreeze({ state, record });
 }
 export async function submitCommand(session: Session, input: unknown): Promise<{ session: Session; duplicate: boolean; revision: number }> {
@@ -54,6 +54,8 @@ export function parseSession(value: unknown): Session {
   // Current save shape is deliberately not migrated: preserve incompatible files.
   const sect=value.state.sect,persons=value.state.persons;
   const invalid=()=>{throw new Error('存档缺少有效人物经历、生平、师徒、道术或现代使命数据，请新开游戏；原存档不修改。');};
+  if(typeof (record.manifest as Record<string,unknown>).frameworkId!=='string')invalid();
+  if(isRecord(value.state.era)&&typeof (value.state.era as Record<string,unknown>).frameworkId!=='string')invalid();
   const finite=(n:unknown)=>typeof n==='number'&&Number.isFinite(n)&&n>=0;
   if(!isRecord(sect)||!isRecord(persons)||!isRecord(sect.members)||!Array.isArray(sect.current)||sect.current.length!==2||new Set(sect.current).size!==2||!isRecord(sect.rules)||canonical(sect.rules)!==canonical(record.manifest.ruleset.sect))invalid();
   const q=sect as Record<string,any>,people=persons as Record<string,any>;

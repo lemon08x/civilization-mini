@@ -39,7 +39,7 @@ function sectFeedback(id:string,lines:string[]):void {
   target?.classList.add('sect-action-flash');
   feedbackTimer=setTimeout(()=>{box.hidden=true;},5000);
 }
-let session=await createSession({runId:saveId,ruleset:rules,seed:17,scenarioId:'river'});
+let session=await createSession({runId:saveId,ruleset:rules,seed:17,frameworkId:'riverine'});
 const error=(message:string)=>{$('error').hidden=!message;$('error').textContent=message;if(message)$('error').focus();};
 try{session=parseSession(loaded);if(session.record.manifest.ruleset.rulesVersion!==rules.rulesVersion)throw new Error('只接受当前规则；请另开新局');}catch(e){failed=true;error('当前存档无法读取，请新开局：'+(e as Error).message);}
 function feedback(e:GameEvent):string {

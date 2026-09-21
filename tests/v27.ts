@@ -15,4 +15,4 @@ export const rules = validateRuleset({
   ...(await part('systems.json') as object),
   catalogs: await part('catalogs.json'),
 });
-export const fresh = () => structuredClone(createInitialState(rules, 17, 'river'));
+export const fresh = () => structuredClone(createInitialState(rules, 17, 'riverine'));
