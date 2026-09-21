@@ -24,7 +24,7 @@ if(!requested){location.replace('/start');throw new Error('missing save');}
 const saveId=requested;
 const loaded=loadSave(saveId);
 if(!loaded){location.replace('/start');throw new Error('missing save');}
-let failed=false,busy=false,page='农业',guide=false,selectedCultivation='',selectedCourse='',selectedProduct='',selectedSystem='',selectedDevice='',filter='',shopCategory='物资';
+let failed=false,busy=false,page='家人',guide=false,selectedCultivation='',selectedCourse='',selectedProduct='',selectedSystem='',selectedDevice='',filter='',shopCategory='物资';
 let recap:Recap|null=null,pendingAction='';
 let feedbackTimer:ReturnType<typeof setTimeout>|undefined;
 function sectFeedback(id:string,lines:string[]):void {
@@ -125,7 +125,7 @@ function bindApp():void {
 $('export').onclick=()=>download('economy-run.json',{record:session.record,state:session.state});
 $('import').onchange=async ev=>{const file=(ev.target as HTMLInputElement).files?.[0];if(!file||busy)return;busy=true;try{const value=JSON.parse(await file.text());const next=parseSession(value);if(next.record.manifest.ruleset.rulesVersion!==rules.rulesVersion)throw new Error('仅导入当前规则存档');const id=crypto.randomUUID();writeSave(id,next,`导入 · ${new Date().toLocaleString()}`);location.assign('/play?save='+encodeURIComponent(id));}catch(e){error((e as Error).message);busy=false;}};
   bindFarmScene(document,observeSession(session).game,render);
-  document.querySelectorAll<HTMLButtonElement>('[data-page]').forEach(b=>b.onclick=()=>{page=b.dataset.page!;guide=false;filter='';render();});
+  document.querySelectorAll<HTMLButtonElement>('[data-page]').forEach(b=>b.onclick=()=>{page=b.dataset.page!;if(b.dataset.destination)selectFarmPanel(b.dataset.destination as FarmPanel);guide=false;filter='';render();});
   const showSelection=()=>{
     render();
     if(matchMedia('(max-width: 900px)').matches){

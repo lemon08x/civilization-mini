@@ -2,7 +2,7 @@ import type { SessionObservation } from '../../src/runtime/session.js';
 import {esc} from './economy-view.js';
 
 export const pageNames:Record<string,string>={
-  工坊:'工坊',贸易:'贸易',资本:'资本',社会:'社会历程',聚落:'本季看板',农业:'农场',生活:'补给与谋生',家人:'师徒',修炼:'修炼图',仓库:'仓库',安排:'安排与计划',
+  工坊:'工坊',贸易:'贸易',资本:'资本',社会:'社会历程',聚落:'本季看板',农业:'农场',生活:'补给与谋生',家人:'我',修炼:'修炼图',仓库:'仓库',安排:'安排与计划',
   学科:'学堂',制造:'制造',系统:'生产系统',雇佣:'人员安排',商城:'集市',
   能源:'供能',家业:'家业',作坊:'作坊',副本:'副本',试炼:'试炼',
 };
@@ -23,10 +23,10 @@ export type PlayerGroup = {name:string;pages:string[];description:string;epigrap
 export function playerGroups(g:SessionObservation['game']):PlayerGroup[] {
   const e=g.economy!;
   const groups:PlayerGroup[]=[
+    {name:'我',pages:['家人'],description:'我的状态、成长与当下事务',epigraph:'从此刻的自己，安排下一步。'},
     {name:'本季',pages:['聚落'],description:'看这一季的日子与缺口',epigraph:'把日子安顿好，才有余裕向前。'},
     {name:'农场',pages:['农业'],description:'种田、照料与收成',epigraph:'田里有收成，家里才有下一季。'},
     ...Object.entries(stageModules).map(([name,m])=>({name,pages:[name],description:m.intro,epigraph:m.theme})),
-    {name:'师徒',pages:['家人'],description:'自己与同门、收徒与传承',epigraph:'道须亲修，学问相承。'},
     ...(g.sect?[{name:'修炼',pages:['修炼'],description:'个人五境、本门心法与修道机缘',epigraph:'静以修身，学以致用。'}]:[]),
     {name:'学习与制造',pages:['学科','制造'],description:'学知识、验证产品、加工物资',epigraph:'亲手做成的东西，才算真正留下。'},
     {name:'集市',pages:['商城'],description:'物资、设备、学习服务与家庭资产的买卖',epigraph:'钱要花在最缺的地方。'},
