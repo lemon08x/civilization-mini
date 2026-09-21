@@ -442,3 +442,13 @@ A precisely aligned 3 column by 4 row sheet of twelve separate Chinese pastoral 
 提示词：A horizontal triptych of exactly three equal square cells, all on pure white flat background, no panels, no borders, no text, no lettering, no people. Three Chinese pastoral watercolor spot illustrations for game navigation, muted sage green, ochre and ink grey, delicate handmade appearance, centered objects with generous margins within each cell. Left: a modest traditional wooden workshop with a small workbench, wooden gear and sack of grain, representing farm produce processing and toolmaking. Middle: a twentieth century industrial warehouse with a small conveyor belt and shipping crates, representing production and market trade. Right: an elegant contemporary financial office silhouette with an abacus and a restrained stack of coins in foreground, representing capital and investment, no charts or letters. Cohesive style and similar visual weight.
 
 原定 3:1 比例不受生成器支持，实际采用 20:9。原图浅色面板经本地后处理去除，页面使用 multiply 融入纸色。
+
+## 个人事务行插图（2026-09-22）
+
+使用用户指定的 Grok Build CLI `image_gen` 生成 `self-records-atlas.jpg`，按格裁切并移除边缘连通的浅色底，柔化边缘，导出五张 336×264 透明 WebP：`self-record-story.webp`、`self-record-rest.webp`、`self-record-peers.webp`、`self-record-disciple.webp`、`self-record-lineage.webp`。对应我的经历、身体休养、我的同门、我的弟子、我的传承。作为行内装饰，保留原有可访问标题与展开交互，不重复主导航。CSS multiply 与页面纸色融合。
+
+生成提示词：
+
+```text
+Use case: historical-scene. A precisely aligned 3 column by 2 row contact sheet on pure white background, six equal square cells, generous white margins, no dividers, no labels, no lettering, no watermark. Cohesive Chinese pastoral watercolor and fine ink spot illustrations, muted sage green warm ochre and ink grey. Delicate organic edges dissolve into white; subjects readable at small sizes. Top left: a gently opened blank stitched journal, writing brush, fallen leaf, for personal memories. Top middle: earthen herbal tea bowl, small medicine pot, fresh medicinal leaves, for rest and recovery. Top right: two adult fellow students sitting at a low tea table beneath a tiny bamboo branch, equal status, modest historical robes, for companionship. Bottom left: an adult teacher showing a blank open book to a young adult apprentice at a low desk, for teaching a disciple. Bottom middle: two hands passing a small jade pendant above a rolled blank manuscript, for spiritual inheritance across generations. Bottom right: a small inkstone and bamboo leaf as a spare motif. Objects and figures fully contained in their individual cells, no room backgrounds, no hard rectangular patches or frames. Square canvas at high resolution.
+```
