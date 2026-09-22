@@ -283,6 +283,7 @@ function sectionPayload(observation: SessionObservation, section: CompactSection
       disciplines: economy.disciplines ?? null,
       products: economy.products ?? null,
       processes: economy.processes ?? null,
+      crops: economy.crops ?? null,
       goods: economy.goodsCatalog ?? null,
     };
     case 'actions-disabled': return actions.filter(action => !action.enabled).map(action => ({

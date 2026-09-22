@@ -7,7 +7,7 @@ import type { OperationsState } from './operations.js';
 import type { ShopState } from "./shop.js";
 export const SUBJECTS = ['mechanics','heat','chemistry','materials','agronomy','organization'] as const;
 export type Subject = typeof SUBJECTS[number];
-export type Crop = 'wheat'|'soy'|'flax';
+export type Crop = 'wheat'|'soy'|'flax'|'rice'|'millet'|'adzuki'|'mallow'|'mustard';
 export interface CookingRecipe {id:string;name:string;inputs:Record<string,number>;food:number;time:number;energy:number;}
 export type WorkerKind = 'laborer'|'farmer'|'artisan'|'manager';
 export type Work = 'polymer'|'wire'|'coil'|'cable'|'fuel'|'nutrient'|'battery'|'silicon'|'circuit'|'controller'|'composite'|'recycle'|'rest'|Crop|'ceramics'|'iron'|'fiber'|'brick'|'rope'|'oil'|'seal'|'shaft'|'valve'|'spring'|'solution'|'thresh'|'mill'|'compost';

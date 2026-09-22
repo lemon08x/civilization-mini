@@ -4,7 +4,9 @@ import {esc} from './economy-view.js';
 import {foodPolicyControls} from './social-food-view.js';
 import {uiIcon} from './ui-icons.js';
 import {farmEventArt} from './illustration.js';
-import {COOKING} from '../../src/game/systems/economy-catalog.js';
+import {COOKING,EDIBLE} from '../../src/game/systems/economy-catalog.js';
+import {sowingSeasons} from '../../src/game/systems/agriculture.js';
+import type {Crop} from '../../src/game/model/economy.js';
 export type FarmGame=SessionObservation['game'];
 export type FarmPanel='field'|'home'|'store'|'market'|'neighbor'|'discoveries'|'manufacture';
 let selected='p2q2',panel:FarmPanel='field';
@@ -24,6 +26,10 @@ const panels:Record<FarmPanel,string>={field:'田地与探索',home:'农舍',sto
 const goodsArt=new Set(['wheat','soy','flax','seedWheat','seedSoy','seedFlax','wood','clay','compost','straw','flour','food']);
 const affairsArt=new Set(['talk','exchange','learn','basket','explore','reclaim','water','rare','story']);
 const homeArt=new Set(['home','porridge','beans','mixed','rest','reserves','gather']);
+// 新种子暂无独立绘件，播种与买卖按钮复用相近的种子袋绘件：谷物种用麦种袋，豆与菜种用豆种袋。
+const seedArtAlias:Record<string,string>={seedRice:'seedWheat',seedFoxtail:'seedWheat',seedAdzuki:'seedSoy',seedMallow:'seedSoy',seedMustard:'seedSoy'};
+// 新食谱暂无独立绘件，农舍卡片复用相近餐食绘件。
+const recipeArtAlias:Record<string,string>={milletPorridge:'porridge',adzukiSoup:'beans',mallowSoup:'porridge',riceMeal:'mixed'};
 export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing=''):string {
  const button=(id:string)=>renderButton(id)
   .replace(/<details class="action-help"[\s\S]*?<\/details>/g,'')
@@ -47,7 +53,7 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing='
   if(group==='goods'&&goodsArt.has(key))return `farm-goods-${key}.webp`;
   return undefined;
  };
- const goodArt=(id:string)=>id==='rare'?'affairs:rare':goodsArt.has(id)?'goods:'+id:'home:reserves';
+ const goodArt=(id:string)=>id==='rare'?'affairs:rare':goodsArt.has(id)?'goods:'+id:seedArtAlias[id]?'goods:'+seedArtAlias[id]:'home:reserves';
  const emblem=(id:string)=>artSource(id)
   ?`<div class="farm-item-art farm-painted-art" aria-hidden="true"><img src="/illustrations/${artSource(id)}" alt="" width="300" height="300"></div>`
   :`<div class="farm-item-art">${uiIcon(id)}</div>`;
@@ -67,9 +73,33 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing='
   seedWheat:['播种专用','在空田播种小麦。种子与收成分别存放，不计入口粮。'],
   seedSoy:['播种专用','在空田播种大豆，还需掌握对应种植知识；种子不能当口粮。'],
   seedFlax:['播种专用','在空田播种亚麻，还需掌握对应种植知识；收获的是制作原料。'],
+  seedRice:['播种专用','在空田播种水稻，需掌握水田稻作且田边有渠格供水；种子不能当口粮。'],
+  seedFoxtail:['播种专用','在空田播种粟，需掌握旱地谷物；种子不能当口粮。'],
+  seedAdzuki:['播种专用','在空田播种小豆，需掌握杂粮接茬；种子不能当口粮。'],
+  seedMallow:['播种专用','在空田播种葵菜，需掌握园圃菜蔬；种子不能当口粮。'],
+  seedMustard:['播种专用','在空田播种芥菜，需掌握园圃菜蔬；种子不能当口粮。'],
+  rice:['做饭 · 口粮','可煮食，也可碾成稻米；日常做饭按天取用。'],
+  milledRice:['做饭 · 口粮','稻谷碾制所得，可做米饭；日常做饭按天取用，需要柴火。'],
+  millet:['做饭 · 口粮','可煮小米粥；日常做饭按天取用。'],
+  adzuki:['做饭 · 口粮','可煮小豆羹；日常做饭按天取用。'],
+  mallow:['做饭 · 口粮','可煮葵菜羹；日常做饭按天取用。'],
+  mustard:['做饭 · 腌渍','可煮食，也可加食盐腌渍为腌菜；日常做饭按天取用。'],
+  salt:['腌渍原料','集市常驻供应；与芥菜一起腌渍为腌菜，不能当作口粮。'],
+  pickles:['直接食用','腌渍所得的腌菜，可直接食用；日常饮食按批取用。'],
   rare:['探索所得 · 独立留种','在空田播种异穗麦，收获后返还专属种子；集市不出售。'],
  };
  const usage=(id:string)=>{const u=uses[id];return u&&panel==='market'?`<details class="farm-good-use farm-use-details"><summary>${u[0]} · 用途</summary><p>${u[1]}</p></details>`:u?`<div class="farm-good-use"><span>${u[0]}</span><p>${u[1]}</p></div>`:'<div class="farm-good-use"><span>制作物资</span><p>在农场「农具与加工」或对应阶段的主场景查看配方用途与条件。</p></div>';};
+ const cropTraits=(c:Crop):string[]=>{
+  const spec=CROPS[c],tags:string[]=[];
+  if((spec.waterNeed??2)>2)tags.push('需水高');
+  if(spec.waterNeed===1)tags.push('耐旱');
+  if(spec.floodTolerant)tags.push('免涝');
+  if(c==='rice')tags.push('需渠边田');
+  if((spec.lateRate??1)>1)tags.push('迟收落粒加倍');
+  if(spec.legume)tags.push('豆科养地');
+  return tags;
+ };
+ const cropMeta=(c:Crop)=>{const spec=CROPS[c],traits=cropTraits(c);return `<small class="farm-crop-meta">生长期 ${spec.duration} 天 · ${sowingSeasons(c).map(n=>['春','夏','秋','冬'][n]).join('、')}播${traits.length?' · '+traits.join(' · '):''}</small>`;};
 
  const fieldTags:string[]=[g.life?.calendar.date??'',g.life?.calendar.currentTerm??'',...(g.life?.calendar.festivals.map(f=>f.name)??[])];
  const techniques=map.techniques;
@@ -104,13 +134,14 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing='
    if(p.maturity)fieldTags.push('预计 '+p.maturity.date+' 收获');
    if(f.crop)fieldTags.push(`预计收成 ${p.harvest}`,`累计受灾 ${Number(f.stress.toFixed(2))}`);
    if(f.crop&&f.growth<f.duration){
-    const water=Number((g.world.rain+f.moisture+p.waterSupport).toFixed(2)),need=Number(Math.max(0,2-water).toFixed(2));
+    const req=CROPS[f.crop].waterNeed??2;
+    const water=Number((g.world.rain+f.moisture+p.waterSupport).toFixed(2)),need=Number(Math.max(0,req-water).toFixed(2));
     const lift=(e.equipment.W01??0)>0&&!e.shop?.orders.some(o=>o.kind==='repair'&&o.target==='W01'),gain=lift?2:1;
     const offer=g.actions.find(a=>a.id===`economy:farmplot:${p.id}-${f.crop}`);
-    careInfo=`<div class="farm-water-guide"><div class="farm-water-heading"><strong>${need?'当前还缺 '+need+' 点水分':'当前水分已足'}</strong><span>灌溉用于防止缺水减产</span></div><div class="farm-water-flow"><span>降雨 <b>${g.world.rain}</b> ＋ 已补水 <b>${Number(f.moisture.toFixed(2))}</b> ＋ 地景 <b>${p.waterSupport}</b> ＝ <b>${water}</b></span><span>生长所需 <b>2</b></span><span>${need?`灌溉补 <b>${gain}</b> → 达到 <b>${Number((water+gain).toFixed(2))}</b>${Number((water+gain).toFixed(2))<2?'，仍缺 '+(2-water-gain):'，水分足够'}`:'无需继续灌溉'}</span></div><p>每次耗 1 公共水${lift?'，并消耗提水器耐用':''}；缺水时可以再次补水，不受换季次数限制。水分不足 2 的天数会累计受灾，影响最终收成（最低 1）。</p><small>补水在干燥天气消退较快，晴和时较慢，连雨时不消退；换季不清零。灌溉不加快成熟，也不会消除已有受灾。${p.id===map.homeId?'此处只计当前水分，起始田安排的供水在推进日历时按设备与任务执行。':''}${need&&Number((water+gain).toFixed(2))<2?'一次灌溉仍不足，可查看同门浇水是否可用。':''}</small>${offer&&!offer.enabled?`<p class="farm-water-blocked">当前无法灌溉：${esc(offer.reason??'暂不可用')}</p>`:''}</div>`;
+    careInfo=`<div class="farm-water-guide"><div class="farm-water-heading"><strong>${need?'当前还缺 '+need+' 点水分':'当前水分已足'}</strong><span>灌溉用于防止缺水减产</span></div><div class="farm-water-flow"><span>降雨 <b>${g.world.rain}</b> ＋ 已补水 <b>${Number(f.moisture.toFixed(2))}</b> ＋ 地景 <b>${p.waterSupport}</b> ＝ <b>${water}</b></span><span>生长所需 <b>${req}</b></span><span>${need?`灌溉补 <b>${gain}</b> → 达到 <b>${Number((water+gain).toFixed(2))}</b>${Number((water+gain).toFixed(2))<req?'，仍缺 '+(req-water-gain):'，水分足够'}`:'无需继续灌溉'}</span></div><p>每次耗 1 公共水${lift?'，并消耗提水器耐用':''}；缺水时可以再次补水，不受换季次数限制。水分不足 ${req} 的天数会累计受灾，影响最终收成（最低 1）。</p><small>补水在干燥天气消退较快，晴和时较慢，连雨时不消退；换季不清零。灌溉不加快成熟，也不会消除已有受灾。${p.id===map.homeId?'此处只计当前水分，起始田安排的供水在推进日历时按设备与任务执行。':''}${need&&Number((water+gain).toFixed(2))<req?'一次灌溉仍不足，可查看同门浇水是否可用。':''}</small>${offer&&!offer.enabled?`<p class="farm-water-blocked">当前无法灌溉：${esc(offer.reason??'暂不可用')}</p>`:''}</div>`;
    }
 
-   actions=(f.crop?[f.crop]:map.discovered).map(c=>illustratedAction(`economy:farmplot:${p.id}-${c}`,f.crop?(f.growth>=f.duration?goodArt(c):'affairs:water'):goodArt(CROPS[c].seed))).join('')+(!f.crop?illustratedAction('economy:farmrare:'+p.id,'affairs:rare'):'');
+   actions=(f.crop?[f.crop]:map.discovered).map(c=>{const btn=illustratedAction(`economy:farmplot:${p.id}-${c}`,f.crop?(f.growth>=f.duration?goodArt(c):'affairs:water'):goodArt(CROPS[c].seed));return f.crop?btn:btn.replace('</button>','</button>'+cropMeta(c));}).join('')+(!f.crop?illustratedAction('economy:farmrare:'+p.id,'affairs:rare'):'');
    actions+=illustratedAction('economy:farmfertilize:'+p.id,'goods:compost')+illustratedAction('economy:neighbor:help-'+p.id,'affairs:talk');
    if(f.crop&&f.growth<f.duration)actions+=illustratedAction('economy:wait:'+p.id,'home:rest');
    seedInfo=`<div class="farm-plot-seeds" aria-label="当前种子储备">${map.discovered.map(c=>`<span>${CROPS[c].name}种 <b>${e.goods[CROPS[c].seed]??0}</b></span>`).join('')}${map.rareSeeds?`<span>异穗麦种 <b>${map.rareSeeds}</b></span>`:''}</div>`;
@@ -152,25 +183,26 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing='
  if(panel==='manufacture')body=manufacturing;
  if(panel==='home'){
   const cooking=g.actions.filter(a=>a.id.startsWith('economy:cook:'));
-  body=`<div class="farm-room-hero">${emblem('home:home')}<div><span class="eyebrow">${esc(g.person.name)}的农舍</span><h3>生火做饭，归来歇息</h3><p>可用精力 ${g.life?.budget.freeEnergy??0} · 饮食可支持 ${diet?.days??0} 天 · ${diet?.name??'简单饮食'}</p></div></div><section class="farm-diet-plan"><h4>日常饮食 · 现做现吃</h4><p>${diet?.description??''}</p><div class="farm-status-tags"><span>每天食材 ${diet?.dailyGrain??0} 批</span><span>做饭每天柴火 ${diet?.dailyWood??0} 批</span><span>饱食每天恢复 ${diet?.recovery??0} 精力</span></div><div class="farm-dock-options">${button('economy:diet:simple')}${button('economy:diet:hearty')}</div><p class="subtle">粮食与木柴都是批量库存；不足以做饭时用干粮，不会食用种子。</p></section><h4>用心做一餐 · 短期调养</h4><div class="farm-card-grid">${cooking.map(a=>{const recipe=COOKING.find(r=>a.id==='economy:cook:'+r.id)!;return card(recipe.name,`<p>${Object.entries(recipe.inputs).map(([id,q])=>`${esc(e.goodsCatalog[id]?.name??id)} ${e.goods[id]??0}/${q}`).join(' · ')}</p><p class="farm-result">餐食调养 ${recipe.food} 天 · 每天额外恢复精力</p>`,button(a.id),'home:'+recipe.id);}).join('')}</div><p class="subtle">当次做、当次吃，不把熟饭存数月。恢复效果剩余 ${diet?.mealDays??0} 天；效果未结束不能叠加。</p><h4>身体与日常</h4><div class="farm-card-grid">${card('休息与疗养','<p>恢复精力，照料身体。</p>',button('economy:rest:self')+button('economy:care:self'),'home:rest')}${card('生活储备',`<p>饮食可支持 ${diet?.days??0} 天 · 木柴可做饭 ${diet?.woodDays??0} 天</p>`,jump('store','查看仓库')+jump('market','买粮补给'),'home:reserves')}${card('采集与临时帮工','<p>采集木柴与食物，或帮工换取钱财。</p>',g.actions.filter(a=>a.group==='生活'&&['gather','work'].includes(a.id.split(':')[1])).map(a=>button(a.id)).join(''),'home:gather')}</div>${g.socialFood?`<details class="farm-policy"><summary>吃饭与储粮安排 · 预计补粮 ${g.socialFood.purchase} 份</summary>${foodPolicyControls(g,button)}</details>`:''}`;
+  body=`<div class="farm-room-hero">${emblem('home:home')}<div><span class="eyebrow">${esc(g.person.name)}的农舍</span><h3>生火做饭，归来歇息</h3><p>可用精力 ${g.life?.budget.freeEnergy??0} · 饮食可支持 ${diet?.days??0} 天 · ${diet?.name??'简单饮食'}</p></div></div><section class="farm-diet-plan"><h4>日常饮食 · 现做现吃</h4><p>${diet?.description??''}</p><div class="farm-status-tags"><span>每天食材 ${diet?.dailyGrain??0} 批</span><span>做饭每天柴火 ${diet?.dailyWood??0} 批</span><span>饱食每天恢复 ${diet?.recovery??0} 精力</span></div><div class="farm-dock-options">${button('economy:diet:simple')}${button('economy:diet:hearty')}</div><p class="subtle">粮食与木柴都是批量库存；不足以做饭时用干粮，不会食用种子。</p></section><h4>用心做一餐 · 短期调养</h4><div class="farm-card-grid">${cooking.map(a=>{const recipe=COOKING.find(r=>a.id==='economy:cook:'+r.id)!;return card(recipe.name,`<p>${Object.entries(recipe.inputs).map(([id,q])=>`${esc(e.goodsCatalog[id]?.name??id)} ${e.goods[id]??0}/${q}`).join(' · ')}</p><p class="farm-result">餐食调养 ${recipe.food} 天 · 每天额外恢复精力</p>`,button(a.id),'home:'+(recipeArtAlias[recipe.id]??recipe.id));}).join('')}</div><p class="subtle">当次做、当次吃，不把熟饭存数月。恢复效果剩余 ${diet?.mealDays??0} 天；效果未结束不能叠加。</p><h4>身体与日常</h4><div class="farm-card-grid">${card('休息与疗养','<p>恢复精力，照料身体。</p>',button('economy:rest:self')+button('economy:care:self'),'home:rest')}${card('生活储备',`<p>饮食可支持 ${diet?.days??0} 天 · 木柴可做饭 ${diet?.woodDays??0} 天</p>`,jump('store','查看仓库')+jump('market','买粮补给'),'home:reserves')}${card('采集与临时帮工','<p>采集木柴与食物，或帮工换取钱财。</p>',g.actions.filter(a=>a.group==='生活'&&['gather','work'].includes(a.id.split(':')[1])).map(a=>button(a.id)).join(''),'home:gather')}</div>${g.socialFood?`<details class="farm-policy"><summary>吃饭与储粮安排 · 预计补粮 ${g.socialFood.purchase} 份</summary>${foodPolicyControls(g,button)}</details>`:''}`;
  }
  if(panel==='store'){
-  const stock=(id:string,name:string,q:number)=>card(name,`<strong class="farm-stock-quantity">${Number(q.toFixed(3))}<small> 份</small></strong>${usage(id)}`,id.startsWith('seed')||id==='rare'?jump('field','去播种'):['wheat','soy'].includes(id)?jump('home','去做饭'):'',goodArt(id));
+  const cookable=[...new Set(COOKING.flatMap(r=>Object.keys(r.inputs).filter(i=>i!=='wood')))],harvestGoods=[...EDIBLE,'flax','straw'];
+  const stock=(id:string,name:string,q:number)=>card(name,`<strong class="farm-stock-quantity">${Number(q.toFixed(3))}<small> 份</small></strong>${usage(id)}`,id.startsWith('seed')||id==='rare'?jump('field','去播种'):cookable.includes(id)?jump('home','去做饭'):'',goodArt(id));
   const goods=Object.entries(e.goods).filter(([,q])=>q>0);
-  body=`<div class="farm-room-hero">${emblem('home:reserves')}<div><h3>收好这一季的收成</h3><p>可食储备 ${Number(e.foodTotal.toFixed(3))} · 食品保护容量 ${e.storage} · 超出保护的食物随存放时间逐渐损耗，换季不集中扣除</p></div><div>${jump('market','出售或补给')}</div></div><h4>口粮与收成</h4><div class="farm-card-grid">${stock('food','即食口粮',g.family.food)}${goods.filter(([id])=>['wheat','soy','flour','flax','straw'].includes(id)).map(([id,q])=>stock(id,e.goodsCatalog[id]?.name??id,q)).join('')}</div><h4>留种与材料</h4><div class="farm-card-grid">${goods.filter(([id])=>!['wheat','soy','flour','flax','straw'].includes(id)).map(([id,q])=>stock(id,e.goodsCatalog[id]?.name??id,q)).join('')}${map.rareSeeds?stock('rare','异穗麦种',map.rareSeeds):''}</div>`;
+  body=`<div class="farm-room-hero">${emblem('home:reserves')}<div><h3>收好这一季的收成</h3><p>可食储备 ${Number(e.foodTotal.toFixed(3))} · 食品保护容量 ${e.storage} · 超出保护的食物随存放时间逐渐损耗，换季不集中扣除</p></div><div>${jump('market','出售或补给')}</div></div><h4>口粮与收成</h4><div class="farm-card-grid">${stock('food','即食口粮',g.family.food)}${goods.filter(([id])=>harvestGoods.includes(id)).map(([id,q])=>stock(id,e.goodsCatalog[id]?.name??id,q)).join('')}</div><h4>留种与材料</h4><div class="farm-card-grid">${goods.filter(([id])=>!harvestGoods.includes(id)).map(([id,q])=>stock(id,e.goodsCatalog[id]?.name??id,q)).join('')}${map.rareSeeds?stock('rare','异穗麦种',map.rareSeeds):''}</div>`;
   const stockItems=[['food','即食口粮',g.family.food],...goods.map(([id,q])=>[id,e.goodsCatalog[id]?.name??id,q]),...(map.rareSeeds?[['rare','异穗麦种',map.rareSeeds]]:[])] as [string,string,number][];
   const chosen=stockItems.find(([id])=>id===stockSelection)??stockItems[0];
-  const seed=chosen[0].startsWith('seed')||chosen[0]==='rare',edible=['food','wheat','soy','flour'].includes(chosen[0]);
+  const seed=chosen[0].startsWith('seed')||chosen[0]==='rare',edible=['food',...EDIBLE].includes(chosen[0]);
   for(const [id,name] of stockItems)body=body.replace(`<h4>${esc(name)}</h4>`,`<h4><button class="text-btn" data-farm-stock="${esc(id)}" aria-pressed="${chosen[0]===id}">${esc(name)}</button></h4>`);
-  body=`<div class="farm-room-split"><section>${body}</section><aside class="farm-ledger">${emblem(goodArt(chosen[0]))}<h3>${esc(chosen[1])}</h3><p class="farm-result">持有 ${Number(chosen[2].toFixed(3))} 份</p>${usage(chosen[0])}<p>${seed?'种子单独留存，播种时消耗，不会当作口粮。':edible?'可用于家庭口粮。小麦和大豆也能带到灶台烹饪，主动烹饪当次享用，提供短期调养效果。':'保留用于制作、农事或交付；不计入可食储备。'}</p>${chosen[0]==='rare'?'<p>探索所得，市场不出售；收获后返还专属种子。</p>':''}${jump(seed?'field':edible?'home':'market',seed?'去播种':edible?'去农舍':'去买卖')}</aside></div>`;
+  body=`<div class="farm-room-split"><section>${body}</section><aside class="farm-ledger">${emblem(goodArt(chosen[0]))}<h3>${esc(chosen[1])}</h3><p class="farm-result">持有 ${Number(chosen[2].toFixed(3))} 份</p>${usage(chosen[0])}<p>${seed?'种子单独留存，播种时消耗，不会当作口粮。':edible?'可用于家庭口粮；也能带到农舍灶台主动烹饪，当次享用并提供短期调养效果。':'保留用于制作、农事或交付；不计入可食储备。'}</p>${chosen[0]==='rare'?'<p>探索所得，市场不出售；收获后返还专属种子。</p>':''}${jump(seed?'field':edible?'home':'market',seed?'去播种':edible?'去农舍':'去买卖')}</aside></div>`;
  }
  if(panel==='market'){
   const direct=g.era?.index===0;
-  const v=e.marketView,allowed=['seedWheat','seedSoy','seedFlax','wood','clay','compost','straw'];
+  const v=e.marketView,allowed=['wood','clay','compost','straw','salt',...map.discovered.map(c=>CROPS[c].seed)];
   const items=(v?.catalog??[]).filter(i=>i.id==='good-food'||i.kind==='goods'&&allowed.includes(i.target));
-  body=`<div class="farm-room-split${direct?' farm-market-direct':''}"><section><h4>农家所需</h4>${direct?'<p class="farm-purchase-note">点击商品即可买入1份并付款；出售也直接成交，无需采购清单。购买不耗时间与精力。</p>':''}<p class="subtle">${g.life?.calendar?`下次补货：${esc(g.life.calendar.businessCycle.nextDate)} · ${g.life.calendar.businessCycle.remaining} 天后。市场暂按独立90天经营周期补货，换季不刷新。`:""}</p><div class="farm-card-grid">${items.map(i=>card(i.name,`<p class="farm-result">${i.price} 钱 / 份</p><p>${i.local?'现货':'下次补货日交付'} · 库存 ${i.stock}</p>${usage(i.id==='good-food'?'food':i.target)}`,button('economy:'+(direct?'checkout:':'cartadd:')+i.id),goodArt(i.id==='good-food'?'food':i.target))).join('')||button('economy:buyfood:bulk')}</div><h4>出售收成</h4><div class="farm-card-grid">${['wheat','soy','flax','straw'].filter(id=>(e.goods[id]??0)>0).map(id=>card(e.goodsCatalog[id]?.name??id,`<p>持有 ${e.goods[id]} 份</p>`,button('economy:sell:'+id),goodArt(id))).join('')||'<p class="subtle">暂无可出售的收成。</p>'}</div></section>${direct?'':`<aside class="farm-ledger">${emblem('affairs:basket')}<h3>这趟采购</h3><p class="farm-purchase-note">购买不耗时间与精力</p>${v?`${v.quote.lines.map(l=>`<div class="farm-ledger-line"><strong>${esc(l.item.name)} × ${l.quantity}</strong>${button('economy:cartremove:'+l.item.id)}</div>`).join('')||'<p class="subtle">选好物资，再一起结账。</p>'}<p class="farm-result">合计 ${v.quote.total} 钱</p>${button('economy:checkout:cart')}${button('economy:clearcart:all')}`:''}</aside>`}</div>`;
+  body=`<div class="farm-room-split${direct?' farm-market-direct':''}"><section><h4>农家所需</h4>${direct?'<p class="farm-purchase-note">点击商品即可买入1份并付款；出售也直接成交，无需采购清单。购买不耗时间与精力。</p>':''}<p class="subtle">${g.life?.calendar?`下次补货：${esc(g.life.calendar.businessCycle.nextDate)} · ${g.life.calendar.businessCycle.remaining} 天后。市场暂按独立90天经营周期补货，换季不刷新。`:""}</p><div class="farm-card-grid">${items.map(i=>card(i.name,`<p class="farm-result">${i.price} 钱 / 份</p><p>${i.local?'现货':'下次补货日交付'} · 库存 ${i.stock}</p>${usage(i.id==='good-food'?'food':i.target)}`,button('economy:'+(direct?'checkout:':'cartadd:')+i.id),goodArt(i.id==='good-food'?'food':i.target))).join('')||button('economy:buyfood:bulk')}</div><h4>出售收成</h4><div class="farm-card-grid">${[...EDIBLE,'flax','straw'].filter(id=>(e.goods[id]??0)>0).map(id=>card(e.goodsCatalog[id]?.name??id,`<p>持有 ${e.goods[id]} 份</p>`,button('economy:sell:'+id),goodArt(id))).join('')||'<p class="subtle">暂无可出售的收成。</p>'}</div></section>${direct?'':`<aside class="farm-ledger">${emblem('affairs:basket')}<h3>这趟采购</h3><p class="farm-purchase-note">购买不耗时间与精力</p>${v?`${v.quote.lines.map(l=>`<div class="farm-ledger-line"><strong>${esc(l.item.name)} × ${l.quantity}</strong>${button('economy:cartremove:'+l.item.id)}</div>`).join('')||'<p class="subtle">选好物资，再一起结账。</p>'}<p class="farm-result">合计 ${v.quote.total} 钱</p>${button('economy:checkout:cart')}${button('economy:clearcart:all')}`:''}</aside>`}</div>`;
  }
- if(panel==='neighbor')body=`<div class="farm-room-hero">${emblem('affairs:talk')}<div><span class="eyebrow">同门相助</span><h3>${esc(n.name)} · ${n.title}</h3><p>${n.alive?(n.busy?'正在忙农活':'可前往拜访'):'已故'} · 交情 ${n.trust}/5</p></div></div><div class="farm-card-grid">${card('田边叙话','<p>同门各自修行经营，闲时聊聊近况。</p>',button('economy:neighbor:talk'),'affairs:talk')}${card('互换种子',`<p>可交换豆种 ${n.offers.seedSoy} 份 · 麻种 ${n.offers.seedFlax} 份</p>`,button('economy:neighbor:trade-soy')+button('economy:neighbor:trade-flax'),'affairs:exchange')}${card('请教与互助','<p>请教种植知识；灌溉求助需先选择具体田块。</p>',button('economy:neighbor:learn')+jump('field','去田地求助'),'affairs:learn')}</div><p class="subtle">${n.title}的田地、物资与劳动独立结算，不能切换控制；自己的弟子接续自己的传承。</p>`;
+ if(panel==='neighbor')body=`<div class="farm-room-hero">${emblem('affairs:talk')}<div><span class="eyebrow">同门相助</span><h3>${esc(n.name)} · ${n.title}</h3><p>${n.alive?(n.busy?'正在忙农活':'可前往拜访'):'已故'} · 交情 ${n.trust}/5</p></div></div><div class="farm-card-grid">${card('田边叙话','<p>同门各自修行经营，闲时聊聊近况。</p>',button('economy:neighbor:talk'),'affairs:talk')}${card('互换种子',`<p>可交换豆种 ${n.offers.seedSoy} 份 · 麻种 ${n.offers.seedFlax} 份 · 葵菜种 ${n.offers.seedMallow} 份${n.offers.seedRice!==undefined?` · 稻种 ${n.offers.seedRice} 份`:' · 建成渠后可换稻种'}</p>`,button('economy:neighbor:trade-soy')+button('economy:neighbor:trade-flax')+button('economy:neighbor:trade-mallow')+button('economy:neighbor:trade-rice'),'affairs:exchange')}${card('请教与互助','<p>请教种植知识；灌溉求助需先选择具体田块。</p>',button('economy:neighbor:learn')+jump('field','去田地求助'),'affairs:learn')}</div><p class="subtle">${n.title}的田地、物资与劳动独立结算，不能切换控制；自己的弟子接续自己的传承。</p>`;
  if(panel==='discoveries')body=map.plots.filter(p=>p.discovery).map(p=>`<article class="farm-discovery">${emblem('affairs:story')}<button class="text-btn" data-farm-jump="${p.id}">${p.id} · ${esc(p.discovery!.title)} →</button><p>${esc(p.discovery!.resolved?p.discovery!.outcome||'已记录，保留地貌。':'尚待处理，可以稍后再来。')}</p></article>`).join('')||'<p>沿地图边缘探索，见闻与处理结果会保存在对应地块。</p>';
  return `<section class="pixi-farm"><header class="pixi-farm-heading"><div><span class="eyebrow">${esc(g.life?.calendar.date??'田野')} · ${esc(g.world.weatherName)}</span><h2>${panel==='field'?'耕一方田，探一方天地':panels[panel]}</h2></div><span>田 ${map.plots.filter(p=>p.kind==='field').length} 块 · 已知 ${map.plots.filter(p=>p.kind!=='unknown').length} 格</span></header><nav class="farm-local-nav" aria-label="农场事务">${Object.entries(panels).map(([id,n])=>`<button type="button" data-farm-panel="${id}" aria-pressed="${panel===id}">${n}</button>`).join('')}</nav>${panel==='field'?`<div class="pixi-farm-layout farm-layout-floating"><div class="pixi-farm-viewport"><div id="farm-map"></div><div class="farm-ink-title" aria-hidden="true"><span>一方田野 · ${esc(g.world.weatherName)}</span><strong>田畴</strong></div><div class="farm-map-picker"><label for="farm-plot-select">定位地块</label><select id="farm-plot-select">${map.plots.map(t=>`<option value="${t.id}" ${t.id===p.id?'selected':''}>${t.id} · ${names[t.kind]}</option>`).join('')}</select></div><div class="pixi-map-tools"><span>有边框即可选 · ? 可探索 · 拖动查看远处</span><div><button data-farm-zoom="-1" aria-label="缩小地图">−</button><button data-farm-zoom="1" aria-label="放大地图">＋</button><button data-farm-center>回到选中地块</button></div></div></div>${body}</div>`:`<div class="farm-room farm-room-${panel}"><div class="farm-room-feedback" role="status" aria-live="polite"></div>${body}</div>`}<footer class="farm-live-footer"><div class="farm-status-tags" role="status" aria-live="polite">${(panel==='field'?fieldTags:[`口粮 ${Number(g.family.food.toFixed(3))} 份`,`可用精力 ${g.life?.budget.freeEnergy??0}`]).map(t=>`<span>${esc(t)}</span>`).join('')}</div>${panel==='field'?'<details class="farm-recent-feedback"><summary>最新动态</summary><div class="farm-effect-layer" role="status" aria-live="polite"></div></details>':''}<div class="pixi-season-end">${button('economy:wait:half')}${button('economy:wait:week')}${g.life?.calendar?'':button('economy:end:season')}</div></footer></section>`;
 }

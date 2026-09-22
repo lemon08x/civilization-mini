@@ -1,5 +1,6 @@
 import {seasonAt} from '../game/systems/calendar.js';
 import {FARM_DISCOVERIES} from '../game/model/economy.js';
+import {CROPS} from '../game/systems/economy-catalog.js';
 import { createInitialState, transition } from '../game/game.js';
 import { getObservation } from '../game/observation.js';
 import { parseActionId } from '../game/model/action.js';
@@ -65,9 +66,9 @@ export function parseSession(value: unknown): Session {
   const farmInvalid=()=>{throw new Error('存档缺少有效地块或独立同门数据，请新开游戏；原存档不修改。');};
   if(!isRecord(economy)||!isRecord(economy.farm))farmInvalid();
   const farm=(economy as Record<string,any>).farm;
-  const validField=(f:unknown)=>isRecord(f)&&[null,'wheat','soy','flax'].includes(f.crop as null|string)&&[null,'wheat','soy','flax'].includes(f.lastCrop as null|string)&&['planted','moisture','growth','stress','fertility','tended','bonus','duration'].every(k=>finite(f[k]))&&Number(f.fertility)<=3&&Number(f.duration)>=1&&typeof f.composted==='boolean'&&(f.variety===undefined||f.variety==='heritage'&&f.crop==='wheat');
+  const validField=(f:unknown)=>isRecord(f)&&[null,...Object.keys(CROPS)].includes(f.crop as null|string)&&[null,...Object.keys(CROPS)].includes(f.lastCrop as null|string)&&['planted','moisture','growth','stress','fertility','tended','bonus','duration'].every(k=>finite(f[k]))&&Number(f.fertility)<=3&&Number(f.duration)>=1&&typeof f.composted==='boolean'&&(f.variety===undefined||f.variety==='heritage'&&f.crop==='wheat');
   if(farm.explorationVersion!==3||!Number.isSafeInteger(farm.rareSeeds)||farm.rareSeeds<0)farmInvalid();
-  if(!isRecord(farm.rules)||canonical(farm.rules)!==canonical(record.manifest.ruleset.farm)||!isRecord(farm.plots)||!Array.isArray(farm.discovered)||!farm.discovered.includes('wheat')||new Set(farm.discovered).size!==farm.discovered.length||farm.discovered.some((c:unknown)=>!['wheat','soy','flax'].includes(String(c)))||!Number.isSafeInteger(farm.explored)||farm.explored<0)farmInvalid();
+  if(!isRecord(farm.rules)||canonical(farm.rules)!==canonical(record.manifest.ruleset.farm)||!isRecord(farm.plots)||!Array.isArray(farm.discovered)||!farm.discovered.includes('wheat')||new Set(farm.discovered).size!==farm.discovered.length||farm.discovered.some((c:unknown)=>!Object.keys(CROPS).includes(String(c)))||!Number.isSafeInteger(farm.explored)||farm.explored<0)farmInvalid();
   if(!validField((economy as Record<string,any>).field)||farm.plots.p2q2?.kind!=='field')farmInvalid();
   for(const [id,raw] of Object.entries(farm.plots)){
     if(!isRecord(raw)||raw.id!==id||!Number.isSafeInteger(raw.x)||!Number.isSafeInteger(raw.y)||Number(raw.x)<0||Number(raw.y)<0||id!==`p${raw.x}q${raw.y}`||!['unknown','wild','field','tree','rock','brush','story'].includes(String(raw.kind)))farmInvalid();

@@ -13,13 +13,20 @@ import { made } from './shop.js';
 export function fieldYield(s: GameState,f:Field=s.economy!.field): number {
   if (!f.crop) return 0;
   const grace=s.life?.calendar?.rules.harvestGraceDays??1;
-  const late = Math.floor(Math.max(0, f.growth - f.duration - (equipped(s, 'U04') ? grace : 0))/grace);
+  const late = Math.floor(Math.max(0, f.growth - f.duration - (equipped(s, 'U04') ? grace : 0))/grace)*(CROPS[f.crop].lateRate??1);
   return Math.max(1, Math.floor(CROPS[f.crop].yield + f.bonus + (f===s.economy!.field?(s.economy!.modern?.cropBonus ?? 0):0) + Math.min(1, f.fertility) - f.stress - late));
 }
 export function farmBlocker(s: GameState, crop: Crop, worker?: Worker,f:Field=s.economy!.field): string[] {
   if (s.economy!.branches) {
     if (crop === 'wheat' && !branchHas(s, 'A0') && !worker) return ['需掌握基础栽培'];
     if ((crop === 'soy' || crop === 'flax') && !branchHas(s, 'A4')) return ['需掌握油料与纤维作物'];
+    if (crop === 'rice') {
+      if (!branchHas(s, 'A12')) return ['需掌握水田稻作'];
+      if (fieldWaterSupport(s, f) < 2) return ['需在相邻渠格的田块播种水稻'];
+    }
+    if (crop === 'millet' && !branchHas(s, 'A13')) return ['需掌握旱地谷物'];
+    if (crop === 'adzuki' && !branchHas(s, 'A14')) return ['需掌握杂粮接茬'];
+    if ((crop === 'mallow' || crop === 'mustard') && !branchHas(s, 'A15')) return ['需掌握园圃菜蔬'];
   }
   if (!f.crop) {
     if(s.life?.calendar&&!sowingSeasons(crop).includes(seasonIndex(s)))return ['不在播种季：'+sowingSeasons(crop).map(n=>['春','夏','秋','冬'][n]).join('、')];
@@ -61,7 +68,7 @@ export function farmWork(s: GameState, crop: Crop, events: GameEvent[], worker?:
     made(s, f.crop);
     if (equipped(s, 'U04')) consumeEquipment(s, 'U04', events);
     events.push({ type: 'economy-farm', operation: 'harvest', crop: f.crop, actor, amount: n });
-    f.fertility = Math.max(0, Math.min(3, f.fertility + (f.crop === 'soy' ? 1 : -1)));
+    f.fertility = Math.max(0, Math.min(3, f.fertility + (CROPS[f.crop].legume ? 1 : -1)));
     f.lastCrop = f.crop;
     f.crop = null;delete f.variety;
   } else {
@@ -91,7 +98,7 @@ export function initializeFarm(s:GameState,rules:FarmRules):void{
  plots[HOME_PLOT].kind='field';
  for(const [id,key] of [['p1q2','canal'],['p3q2','fallow'],['p2q3','woodland']] as const){plots[id].kind='story';plots[id].discovery={id:key,resolved:false,outcome:''};}
 
- s.economy!.farm={explorationVersion:3,rareSeeds:0,rules:structuredClone(rules),plots,discovered:['wheat'],explored:0,neighbor:{personId:s.sect!.current[1],goods:{seedSoy:rules.neighborStock,seedFlax:rules.neighborStock,wheat:0},field:{...blankField(),crop:'soy',duration:CROPS.soy.duration},talked:-1,traded:-1,helped:-1,busy:false}};
+ s.economy!.farm={explorationVersion:3,rareSeeds:0,rules:structuredClone(rules),plots,discovered:['wheat'],explored:0,neighbor:{personId:s.sect!.current[1],goods:{seedSoy:rules.neighborStock,seedFlax:rules.neighborStock,seedMallow:rules.neighborStock,seedRice:rules.neighborStock,wheat:0},field:{...blankField(),crop:'soy',duration:CROPS.soy.duration},talked:-1,traded:-1,helped:-1,busy:false}};
  for(const p of Object.values(plots))if(p.kind!=='unknown')extendFarm(s,p);
  s.economy!.goods.seedSoy=0;s.economy!.goods.seedFlax=0;
  const id=s.sect!.current[1];s.economy!.branches!.learned[id]=['A0','A4'];
@@ -99,13 +106,14 @@ export function initializeFarm(s:GameState,rules:FarmRules):void{
 export function farmView(s:GameState){
  const f=s.economy?.farm;if(!f)return undefined;
  const id=s.sect!.current[1],v=s.persons[id].vitality!,trust=activePerson(s).vitality?.experiences?.relationships[id]??0;
- return {techniques:{rotation:branchHas(s,'A5'),seedSelection:branchHas(s,'A6'),scouting:branchHas(s,'A11'),nursery:equipped(s,'U10'),drainage:equipped(s,'U08'),harvestTools:equipped(s,'U04')},homeId:HOME_PLOT,rareSeeds:f.rareSeeds,discovered:[...f.discovered],plots:Object.values(f.plots).map(p=>{const field=plotField(s,p.id);return {id:p.id,x:p.x,y:p.y,kind:p.kind,...(p.kind==='field'&&field?{field:{...field},harvest:fieldYield(s,field),maturity:field.crop?maturityView(s,field):null}:{}),...(p.kind==='unknown'?{reachable:farmNeighbors(p).some(n=>f.plots[n.id]&&f.plots[n.id].kind!=='unknown')}:{}),...(p.project?{project:{...p.project,name:FARM_PROJECT_NAMES[p.project.kind],stage:p.project.done<p.project.total/2?'整备':'施工',remaining:p.project.total-p.project.done}}:{}),...(p.improvement?{improvement:p.improvement}:{}),waterSupport:farmWaterSupport(s,p),affected:farmNeighbors(p).filter(n=>f.plots[n.id]?.kind!=='unknown'&&f.plots[n.id]).map(n=>n.id),...(p.discovery?{discovery:{...p.discovery,...FARM_EVENTS[p.discovery.id]}}:{}),...(p.fertility!==undefined?{fertility:p.fertility}:{})};}),neighbor:{id,title:v.sex==='female'?'师姐':'师兄',name:s.persons[id].name,alive:v.alive,trust,busy:f.neighbor.busy,offers:{seedSoy:f.neighbor.goods.seedSoy??0,seedFlax:f.neighbor.goods.seedFlax??0},description:'独立同门，不可切换控制；自己的田地与物资独立结算'},rules:{...f.rules}};
+ return {techniques:{rotation:branchHas(s,'A5'),seedSelection:branchHas(s,'A6'),scouting:branchHas(s,'A11'),paddy:branchHas(s,'A12'),dryland:branchHas(s,'A13'),relay:branchHas(s,'A14'),garden:branchHas(s,'A15'),nursery:equipped(s,'U10'),drainage:equipped(s,'U08'),harvestTools:equipped(s,'U04')},homeId:HOME_PLOT,rareSeeds:f.rareSeeds,discovered:[...f.discovered],plots:Object.values(f.plots).map(p=>{const field=plotField(s,p.id);return {id:p.id,x:p.x,y:p.y,kind:p.kind,...(p.kind==='field'&&field?{field:{...field},harvest:fieldYield(s,field),maturity:field.crop?maturityView(s,field):null}:{}),...(p.kind==='unknown'?{reachable:farmNeighbors(p).some(n=>f.plots[n.id]&&f.plots[n.id].kind!=='unknown')}:{}),...(p.project?{project:{...p.project,name:FARM_PROJECT_NAMES[p.project.kind],stage:p.project.done<p.project.total/2?'整备':'施工',remaining:p.project.total-p.project.done}}:{}),...(p.improvement?{improvement:p.improvement}:{}),waterSupport:farmWaterSupport(s,p),affected:farmNeighbors(p).filter(n=>f.plots[n.id]?.kind!=='unknown'&&f.plots[n.id]).map(n=>n.id),...(p.discovery?{discovery:{...p.discovery,...FARM_EVENTS[p.discovery.id]}}:{}),...(p.fertility!==undefined?{fertility:p.fertility}:{})};}),neighbor:{id,title:v.sex==='female'?'师姐':'师兄',name:s.persons[id].name,alive:v.alive,trust,busy:f.neighbor.busy,offers:{seedSoy:f.neighbor.goods.seedSoy??0,seedFlax:f.neighbor.goods.seedFlax??0,seedMallow:f.neighbor.goods.seedMallow??0,...(isCanalBuilt(s)?{seedRice:f.neighbor.goods.seedRice??0}:{})},description:'独立同门，不可切换控制；自己的田地与物资独立结算'},rules:{...f.rules}};
 }
 export function growField(s:GameState,f:Field,events:GameEvent[],id:string):void{
  if(!f.crop)return;
+ const c=CROPS[f.crop],need=c.waterNeed??2;
  if(f.growth<f.duration){
-  if(s.location.rain+f.moisture<2)f.stress++;
-  if(s.location.rain>=3){if(equipped(s,'U08'))consumeEquipment(s,'U08',events);else f.stress++;}
+  if(s.location.rain+f.moisture<need)f.stress++;
+  if(s.location.rain>=3&&!c.floodTolerant){if(equipped(s,'U08'))consumeEquipment(s,'U08',events);else f.stress++;}
   f.moisture=0;
  }
  f.growth++;
@@ -149,8 +157,9 @@ export function exploreFarm(s:GameState,id:string,events:GameEvent[]):void{
  events.push({type:'life',personId:s.household.activePersonId,operation:'farm-map',detail:`${id} · ${FARM_EVENTS[key].title}：${FARM_EVENTS[key].text}`});
 }
 export function discoverFarmSeed(s:GameState,events:GameEvent[]):string{
- const f=s.economy!.farm!,crop=(['soy','flax'] as const).find(c=>!f.discovered.includes(c));
- if(crop){f.discovered.push(crop);changeGoods(s,{[CROPS[crop].seed]:f.rules.discoverySeeds},1,events,'辨认乡野种子');return `辨认出${CROPS[crop].name}，获得${f.rules.discoverySeeds}份种子；需学会A4才能种植，集市开放补购。`;}
+ const f=s.economy!.farm!,crop=(['soy','flax','millet','adzuki','mustard'] as const).find(c=>!f.discovered.includes(c));
+ const gate:Record<string,string>={soy:'A4',flax:'A4',millet:'A13',adzuki:'A14',mustard:'A15'};
+ if(crop){f.discovered.push(crop);changeGoods(s,{[CROPS[crop].seed]:f.rules.discoverySeeds},1,events,'辨认乡野种子');return `辨认出${CROPS[crop].name}，获得${f.rules.discoverySeeds}份种子；需学会${gate[crop]}才能种植，集市开放补购。`;}
  f.rareSeeds++;return '选得1份异穗麦种，独立留种，收成比普通麦增加'+f.rules.rareBonus+'份；市场不出售。';
 }
 export function resolveFarmDiscovery(s:GameState,id:string,choice:string,events:GameEvent[]):void{
@@ -165,10 +174,11 @@ export function resolveFarmDiscovery(s:GameState,id:string,choice:string,events:
  events.push({type:'life',personId:s.household.activePersonId,operation:'farm-map',detail:`${id} · ${FARM_EVENTS[d.id].title}：${outcome}`});
 }
 
-export function sowingSeasons(crop:Crop):number[]{return crop==='wheat'?[0,2]:crop==='soy'?[0,1]:[0];}
+export function sowingSeasons(crop:Crop):number[]{return crop==='wheat'?[0,2]:['soy','rice','millet','adzuki'].includes(crop)?[0,1]:['mallow','mustard'].includes(crop)?[2,3]:[0];}
 export function maturityView(s:GameState,f:Field){
  const c=s.life!.calendar!,days=Math.max(0,f.duration-f.growth);
- return {days,date:lunarDateAt(c.rules.referenceYear,c.absoluteDay+days).date};
+ const crop=f.crop?CROPS[f.crop]:null;
+ return {days,date:lunarDateAt(c.rules.referenceYear,c.absoluteDay+days).date,...(crop?{waterNeed:crop.waterNeed??2,...(crop.floodTolerant?{floodTolerant:true}:{}),...(crop.lateRate&&crop.lateRate>1?{lateRisk:`迟收每${c.rules.harvestGraceDays}天减产${crop.lateRate}份`}:{})}:{})};
 }
 export function advanceFields(s:GameState,days:number):string[]{
  const ripe:string[]=[];
@@ -177,9 +187,10 @@ export function advanceFields(s:GameState,days:number):string[]{
   const before=f.growth;f.growth=Math.round((f.growth+days)*100)/100;
   if(before<f.duration){
    const exposure=Math.min(days,f.duration-before)/s.life!.calendar!.rules.businessCycleDays;
+   const c=CROPS[f.crop],need=c.waterNeed??2;
    const supply=s.location.rain+f.moisture+farmWaterSupport(s,p);
-   if(supply<2)f.stress+=exposure*(2-supply)/2;
-   if(s.location.rain>=3&&!equipped(s,'U08'))f.stress+=exposure;
+   if(supply<need)f.stress+=exposure*(need-supply)/need;
+   if(s.location.rain>=3&&!c.floodTolerant&&!equipped(s,'U08'))f.stress+=exposure;
    const drying=s.location.weather==='dry'?2:s.location.weather==='wet'?0:1;
    f.moisture=Math.max(0,Math.round((f.moisture-days*drying/s.life!.calendar!.rules.waterRetentionDays)*1000000)/1000000);
    if(f.growth>=f.duration)ripe.push(p.id+' '+CROPS[f.crop].name);
@@ -211,6 +222,8 @@ export function workFarmProject(s:GameState,id:string,kind:import('../model/econ
 }
 
 export function fieldWaterSupport(s:GameState,f:Field):number {const p=Object.values(s.economy?.farm?.plots??{}).find(p=>plotField(s,p.id)===f);return p?farmWaterSupport(s,p):0;}
+
+export function isCanalBuilt(s:GameState):boolean{return Object.values(s.economy?.farm?.plots??{}).some(p=>p.improvement==='canal');}
 
 export function startFarmProject(s:GameState,id:string,kind:import('../model/economy.js').FarmProjectKind,total:number,events:GameEvent[]):void {
  const farm=s.economy!.farm!,p=farm.plots[id];

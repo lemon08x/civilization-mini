@@ -36,10 +36,13 @@ export function farmEventArt(topic:FarmArt):string {
 }
 export const illustration=(name:string,className='detail-illustration')=>`<img class="${esc(className)}" src="${artUrl(name)}" alt="" aria-hidden="true" width="384" height="384" loading="lazy" decoding="async">`;
 
-export const itemImage=(id:string)=>`<img class="item-illustration" src="/illustrations/item-${esc(id)}-ui.webp" alt="" aria-hidden="true" width="128" height="128" loading="lazy" decoding="async">`;
+// 新物资暂无独立绘件，复用相近物品绘件：谷物种用麦种袋、豆与菜种用豆种袋，谷物收成用麦，
+// 小豆用大豆，稻米用面粉（碾制加工粮），食盐用矿石，葵菜/芥菜与腌菜用口粮。
+const itemArtAlias:Record<string,string>={seedRice:'seedWheat',seedFoxtail:'seedWheat',seedAdzuki:'seedSoy',seedMallow:'seedSoy',seedMustard:'seedSoy',rice:'wheat',millet:'wheat',adzuki:'soy',milledRice:'flour',salt:'ore',mallow:'food',mustard:'food',pickles:'food'};
+export const itemImage=(id:string)=>`<img class="item-illustration" src="/illustrations/item-${esc(itemArtAlias[id]??id)}-ui.webp" alt="" aria-hidden="true" width="128" height="128" loading="lazy" decoding="async">`;
 
 export function shopImage(item:{kind:string;target:string}):string {
-  const src=item.kind==='goods'?`/illustrations/item-${esc(item.target)}-ui.webp`
+  const src=item.kind==='goods'?`/illustrations/item-${esc(itemArtAlias[item.target]??item.target)}-ui.webp`
     :item.kind==='device'?`/illustrations/device-${esc(item.target)}-ui.webp`
     :item.kind==='book'?artUrl('item-book')
     :artUrl('item-'+item.target);

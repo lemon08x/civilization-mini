@@ -3,7 +3,7 @@ import {artUrl,itemImage,chromeImage,sectImage,encounterCard} from './illustrati
 import {uiIcon,placeIcon} from './ui-icons.js';
 import {pageNames,playerGroups,ruleGuide,chapterEpigraph,stageModules,stageModulePage} from './player-guide.js';
 import type { SessionObservation } from '../../src/runtime/session.js';
-import { ALL_GOODS, CROPS } from '../../src/game/systems/economy-catalog.js';
+import { ALL_GOODS, CROPS, EDIBLE } from '../../src/game/systems/economy-catalog.js';
 import { esc } from './economy-view.js';
 
 type Game = SessionObservation['game'];
@@ -184,9 +184,9 @@ function pageArt(page:string):string {
 function inventory(g:Game):string {
   const e=g.economy!;
   const stock:[string,number][]=[...Object.entries(e.goods).filter(([,n])=>n>0),...(g.family.food>0?[['food',g.family.food] as [string,number]]:[])];
-  const category=(id:string)=>id.startsWith('seed')?'种子':['food','wheat','soy','flour'].includes(id)?'口粮':['wood','clay','stone','straw','fiber','iron','copper','oil','polymer'].includes(id)?'原料':'加工品与其他';
+  const category=(id:string)=>id.startsWith('seed')?'种子':['food',...EDIBLE].includes(id)?'口粮':['wood','clay','stone','straw','fiber','iron','copper','oil','polymer'].includes(id)?'原料':'加工品与其他';
   const groups=['口粮','种子','原料','加工品与其他'].map(name=>{const entries=stock.filter(([id])=>category(id)===name);return entries.length?`<section class="stock-group"><h3>${name}<small>${entries.length} 种</small></h3><dl class="inventory-grid">${entries.map(([id,n])=>`<div class="inventory-item"><dt>${itemImage(id)}<span>${esc(id==='food'?'即食粮':ALL_GOODS[id]?.name??id)}</span></dt><dd class="num">${n}</dd></div>`).join('')}</dl></section>`:'';}).join('');
-  return panel('仓库',`<div class="place-overview warehouse-overview">${sceneArt('warehouse')}<div><span class="chapter-kicker">家里的物资账</span><h3>储备与保存</h3><dl class="stock-summary"><div><dt>可食储备</dt><dd>${Number(e.foodTotal.toFixed(3))}<small>份</small></dd></div><div><dt>食品保护容量</dt><dd>${e.storage}</dd></div><div><dt>即食粮</dt><dd>${g.family.food}</dd></div></dl><p class="subtle">插画为仓储场景示意，实际库存见下方清单。</p></div></div>${groups||'<p class="stock-empty">暂无物资，可以去集市采购或田地收获。</p>'}<p class="subtle">面粉、小麦、大豆依序补生活缺口；种子不当饭吃。食品保护容量不代表整个仓库的存放上限。</p><div class="stock-links"><button type="button" class="text-btn" data-page="商城">去集市补给 →</button><button type="button" class="text-btn" data-page="农业">查看田地 →</button></div>`);
+  return panel('仓库',`<div class="place-overview warehouse-overview">${sceneArt('warehouse')}<div><span class="chapter-kicker">家里的物资账</span><h3>储备与保存</h3><dl class="stock-summary"><div><dt>可食储备</dt><dd>${Number(e.foodTotal.toFixed(3))}<small>份</small></dd></div><div><dt>食品保护容量</dt><dd>${e.storage}</dd></div><div><dt>即食粮</dt><dd>${g.family.food}</dd></div></dl><p class="subtle">插画为仓储场景示意，实际库存见下方清单。</p></div></div>${groups||'<p class="stock-empty">暂无物资，可以去集市采购或田地收获。</p>'}<p class="subtle">面粉、小麦、大豆、小米、稻谷、稻米、小豆、葵菜、芥菜与腌菜依序补生活缺口；种子不当饭吃。食品保护容量不代表整个仓库的存放上限。</p><div class="stock-links"><button type="button" class="text-btn" data-page="商城">去集市补给 →</button><button type="button" class="text-btn" data-page="农业">查看田地 →</button></div>`);
 }
 
 function attention(g:Game,page:string):string {

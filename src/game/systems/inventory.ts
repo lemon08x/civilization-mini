@@ -1,6 +1,6 @@
 import type { GameState } from '../model/state.js';
 import type { GameEvent } from '../model/events.js';
-import { ALL_GOODS as GOODS } from './economy-catalog.js';
+import { ALL_GOODS as GOODS, EDIBLE } from './economy-catalog.js';
 
 export function amount(s: GameState, id: string): number {
   return s.economy!.goods[id] ?? 0;
@@ -17,7 +17,7 @@ export function missingGoods(s: GameState, needs: Record<string, number>): strin
   return Object.entries(needs).filter(([id, n]) => amount(s, id) < n).map(([id, n]) => `需${n}${GOODS[id]?.name ?? id}`);
 }
 export function foodStock(s: GameState): number {
-  return Math.round((s.household.food + ['flour', 'wheat', 'soy'].reduce((n, id) => n + amount(s, id), 0))*1000000)/1000000;
+  return Math.round((s.household.food + EDIBLE.reduce((n, id) => n + amount(s, id), 0))*1000000)/1000000;
 }
 export function equipped(s: GameState, id: string): boolean {
   return (s.economy!.equipment[id] ?? 0) > 0 && !s.economy?.shop?.orders.some(order => order.kind === 'repair' && order.target === id);

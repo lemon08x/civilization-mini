@@ -5,6 +5,7 @@ import type {GameState} from '../model/state.js';
 import type {GameEvent} from '../model/events.js';
 import {publicWaterFee} from './eras.js';
 import {foodStock,amount,changeGoods} from './inventory.js';
+import {EDIBLE} from './economy-catalog.js';
 export const FOOD_POLICIES={off:'暂停自动购买',self:'自给优先',market:'市场生活',reserve:'保留储备'};
 export function socialFoodEvent(events:GameEvent[],operation:string,detail:string,amount=0,money=0,time=0){events.push({type:'social-food',operation,detail,amount,money,time});}
 export function renewSocialFood(s:GameState,events:GameEvent[]):void{
@@ -55,7 +56,7 @@ export function settleSocialFood(s:GameState,events:GameEvent[]):void{
  if(s.life?.calendar)return;
  // Existing grain remains a fallback even in market mode. One food conversion authority in v21.
  let need=Math.max(0,f.foodPerSeason-s.household.food);
- for(const id of ['flour','wheat','soy']){const n=Math.min(need,amount(s,id));if(n){changeGoods(s,{[id]:n},-1,events,'家庭生活取粮');s.household.food+=n;need-=n;}}
+ for(const id of EDIBLE){const n=Math.min(need,amount(s,id));if(n){changeGoods(s,{[id]:n},-1,events,'家庭生活取粮');s.household.food+=n;need-=n;}}
  if(q.reasons.length)socialFoodEvent(events,'shortfall',q.reasons.join('；')+`；预计生活缺口${Math.max(0,f.foodPerSeason-s.household.food)}份`);
 }
 
@@ -64,7 +65,7 @@ export function dailyFoodNeed(s:GameState):number {
 }
 export function dietView(s:GameState){
  const c=s.life?.calendar;if(!c)return undefined;
- const dry=s.household.food,grain=['wheat','soy','flour'].reduce((n,k)=>n+amount(s,k),0);
+ const dry=s.household.food,grain=EDIBLE.reduce((n,k)=>n+amount(s,k),0);
  const daily=dailyFoodNeed(s),grainDays=grain/daily,woodDays=amount(s,'wood')/c.rules.woodPerDay;
  return {mode:c.diet,name:c.diet==='hearty'?'丰足饮食':'简单饮食',dailyGrain:daily,dailyWood:c.rules.woodPerDay,
   days:Math.floor((dry/daily+Math.min(grainDays,woodDays))*2+1e-8)/2,grainDays:Math.floor(grainDays),woodDays:Math.floor(woodDays),
@@ -80,7 +81,7 @@ export function feedCalendar(s:GameState,days:number,events:GameEvent[]):boolean
  // Prepare today's meal from grain when fuel permits; dry rations are the fallback.
  let cooked=0;const fuelDays=amount(s,'wood')/r.woodPerDay;
  const grainLimit=Math.min(need,fuelDays*dailyFoodNeed(s));
- for(const id of ['flour','wheat','soy']){
+ for(const id of EDIBLE){
   const n=Math.min(remaining,Math.max(0,grainLimit-cooked),amount(s,id));
   if(n>0){s.economy!.goods[id]=round(amount(s,id)-n);remaining=round(remaining-n);cooked+=n;}
  }

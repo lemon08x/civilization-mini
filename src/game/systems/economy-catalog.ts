@@ -22,9 +22,22 @@ export const GOODS:Record<string,{name:string;price:number;food:number}>={
   compost:{name:'腐熟堆肥',price:2,food:0},ceramics:{name:'陶质构件',price:5,food:0},brick:{name:'耐火砖',price:4,food:0},seal:{name:'密封件',price:5,food:0},
   valve:{name:'阀门',price:8,food:0},shaft:{name:'传动轴',price:7,food:0},spring:{name:'弹簧',price:8,food:0},solution:{name:'提纯溶液',price:6,food:0},
   seedWheat:{name:'小麦种子',price:1,food:0},seedSoy:{name:'大豆种子',price:2,food:0},seedFlax:{name:'亚麻种子',price:2,food:0},
+  seedRice:{name:'稻种',price:2,food:0},rice:{name:'稻谷',price:1,food:1},milledRice:{name:'稻米',price:2,food:1},
+  seedFoxtail:{name:'粟种',price:2,food:0},millet:{name:'小米',price:1,food:1},
+  seedAdzuki:{name:'小豆种子',price:2,food:0},adzuki:{name:'小豆',price:2,food:1},
+  seedMallow:{name:'葵菜种子',price:2,food:0},mallow:{name:'葵菜',price:1,food:1},
+  seedMustard:{name:'芥菜种子',price:2,food:0},mustard:{name:'芥菜',price:1,food:1},
+  salt:{name:'食盐',price:2,food:0},pickles:{name:'腌菜',price:3,food:1},
 };
-export const CROPS:Record<Crop,{name:string;seed:string;duration:number;yield:number;straw:number;level:number}>={
-  wheat:{name:'小麦',seed:'seedWheat',duration:2,yield:6,straw:2,level:1},soy:{name:'大豆',seed:'seedSoy',duration:2,yield:4,straw:1,level:2},flax:{name:'亚麻',seed:'seedFlax',duration:3,yield:5,straw:1,level:2},
+export const EDIBLE=['flour','wheat','soy','millet','rice','milledRice','adzuki','mallow','mustard','pickles'];
+export interface CropSpec {name:string;seed:string;duration:number;yield:number;straw:number;level:number;waterNeed?:number;floodTolerant?:boolean;lateRate?:number;legume?:boolean;}
+export const CROPS:Record<Crop,CropSpec>={
+  wheat:{name:'小麦',seed:'seedWheat',duration:2,yield:6,straw:2,level:1},soy:{name:'大豆',seed:'seedSoy',duration:2,yield:4,straw:1,level:2,legume:true},flax:{name:'亚麻',seed:'seedFlax',duration:3,yield:5,straw:1,level:2},
+  rice:{name:'水稻',seed:'seedRice',duration:140,yield:7,straw:2,level:2,waterNeed:3,floodTolerant:true},
+  millet:{name:'粟',seed:'seedFoxtail',duration:98,yield:5,straw:2,level:2,waterNeed:1},
+  adzuki:{name:'小豆',seed:'seedAdzuki',duration:84,yield:3,straw:1,level:2,lateRate:2,legume:true},
+  mallow:{name:'葵菜',seed:'seedMallow',duration:63,yield:3,straw:0,level:1},
+  mustard:{name:'芥菜',seed:'seedMustard',duration:70,yield:4,straw:0,level:2},
 };
 export interface ProductSpec {id:string;name:string;category:string;effect:string;requires:Partial<Record<Subject,number>>;inputs:Record<string,number>;from:string[];}
 export const PRODUCTS:ProductSpec[]=[
@@ -66,10 +79,12 @@ export const PROCESSES:ProcessSpec[]=[
   {id:'solution',name:'制备提纯溶液',inputs:{soy:1,wood:1},outputs:{solution:1},requires:{chemistry:3},equipment:'F05',wait:0},
   {id:'thresh',name:'脱粒加工',inputs:{wheat:2},outputs:{flour:2,straw:1},requires:{agronomy:4},equipment:'U05',wait:0},
   {id:'mill',name:'磨粮',inputs:{wheat:2},outputs:{flour:3},requires:{mechanics:2},equipment:'U06',wait:0},
+  {id:'hull',name:'碾米',inputs:{rice:2},outputs:{milledRice:3},requires:{mechanics:2},equipment:'U06',wait:0},
+  {id:'pickles',name:'腌渍',inputs:{mustard:3,salt:1},outputs:{pickles:2},requires:{},wait:1},
   {id:'compost',name:'腐熟堆肥',inputs:{straw:3},outputs:{compost:2},requires:{agronomy:3},equipment:'U09',wait:1},
 ];
 export const WORKER_NAMES:Record<WorkerKind,string>={laborer:'普通雇工',farmer:'熟练农工',artisan:'熟练工匠',manager:'生产负责人'};
-export const JOB_NAMES={brick:'耐火砖生产',rope:'绳索生产',oil:'榨油',seal:'密封件生产',shaft:'传动轴生产',valve:'阀门生产',spring:'弹簧生产',solution:'溶液生产',thresh:'脱粒',mill:'磨粮',compost:'堆肥',rest:'暂停',wheat:'小麦种植',soy:'大豆种植',flax:'亚麻种植',ceramics:'陶质构件生产',iron:'冶铁',fiber:'纤维加工'};
+export const JOB_NAMES={brick:'耐火砖生产',rope:'绳索生产',oil:'榨油',seal:'密封件生产',shaft:'传动轴生产',valve:'阀门生产',spring:'弹簧生产',solution:'溶液生产',thresh:'脱粒',mill:'磨粮',compost:'堆肥',rest:'暂停',wheat:'小麦种植',soy:'大豆种植',flax:'亚麻种植',rice:'水稻种植',millet:'粟种植',adzuki:'小豆种植',mallow:'葵菜种植',mustard:'芥菜种植',ceramics:'陶质构件生产',iron:'冶铁',fiber:'纤维加工'};
 
 export const ALL_TOPICS=[...TOPICS,...MODERN_TOPICS];
 export const ALL_GOODS:Record<string,{name:string;price:number;food:number}>={...GOODS,...MODERN_GOODS,...ELECTRIC_GOODS};
@@ -84,7 +99,7 @@ export const goodsFor=(s:GameState)=>s.electric?ALL_GOODS:s.economy?.modern?{...
 export interface CatalogOverlay {
   cooking: Record<string,{inputs:Record<string,number>;food:number;time:number;energy:number}>;
   goods: Record<string, { price: number; food: number }>;
-  crops: Record<string, { duration: number; yield: number; straw: number; level: number }>;
+  crops: Record<string, { duration: number; yield: number; straw: number; level: number; waterNeed?: number; floodTolerant?: boolean; lateRate?: number; legume?: boolean }>;
   products: Record<string, { inputs: Record<string, number> }>;
   processes: Record<string, { inputs: Record<string, number>; outputs: Record<string, number>; wait: number; power?: number }>;
 }
@@ -113,11 +128,19 @@ export function applyCatalogOverlay(overlay: CatalogOverlay): void {
   if (Object.keys(overlay.crops).length !== Object.keys(CROPS).length) throw new Error('作物目录条目不匹配');
   for (const [id, n] of Object.entries(overlay.crops)) {
     const crop = CROPS[id as Crop];
-    if (!crop || ![n.duration, n.yield, n.straw, n.level].every(Number.isInteger) || n.duration < 1 || n.yield < 1) throw new Error('作物数值无效：' + id);
+    if (!crop || ![n.duration, n.yield, n.straw, n.level].every(Number.isInteger) || n.duration < 1 || n.yield < 1 || n.straw < 0) throw new Error('作物数值无效：' + id);
+    if (n.waterNeed !== undefined && (!Number.isInteger(n.waterNeed) || n.waterNeed < 1 || n.waterNeed > 6)) throw new Error('作物需水无效：' + id);
+    if (n.floodTolerant !== undefined && typeof n.floodTolerant !== 'boolean') throw new Error('作物耐涝标记无效：' + id);
+    if (n.lateRate !== undefined && (!Number.isFinite(n.lateRate) || n.lateRate < 1 || n.lateRate > 9)) throw new Error('作物迟收倍率无效：' + id);
+    if (n.legume !== undefined && typeof n.legume !== 'boolean') throw new Error('作物豆科标记无效：' + id);
     crop.duration = n.duration;
     crop.yield = n.yield;
     crop.straw = n.straw;
     crop.level = n.level;
+    if (n.waterNeed !== undefined) crop.waterNeed = n.waterNeed; else delete crop.waterNeed;
+    if (n.floodTolerant !== undefined) crop.floodTolerant = n.floodTolerant; else delete crop.floodTolerant;
+    if (n.lateRate !== undefined) crop.lateRate = n.lateRate; else delete crop.lateRate;
+    if (n.legume !== undefined) crop.legume = n.legume; else delete crop.legume;
   }
   if (Object.keys(overlay.products).length !== ALL_PRODUCTS.length) throw new Error('产品目录条目不匹配');
   for (const product of ALL_PRODUCTS) {
@@ -146,4 +169,8 @@ export const COOKING:import('../model/economy.js').CookingRecipe[]=[
  {id:'porridge',name:'麦粥',inputs:{wheat:0,wood:0},food:0,time:0,energy:0},
  {id:'beans',name:'炖豆',inputs:{soy:0,wood:0},food:0,time:0,energy:0},
  {id:'mixed',name:'麦豆饭',inputs:{wheat:0,soy:0,wood:0},food:0,time:0,energy:0},
+ {id:'milletPorridge',name:'小米粥',inputs:{millet:0,wood:0},food:0,time:0,energy:0},
+ {id:'adzukiSoup',name:'小豆羹',inputs:{adzuki:0,wood:0},food:0,time:0,energy:0},
+ {id:'mallowSoup',name:'葵菜羹',inputs:{mallow:0,wood:0},food:0,time:0,energy:0},
+ {id:'riceMeal',name:'米饭',inputs:{milledRice:0,wood:0},food:0,time:0,energy:0},
 ];

@@ -7,11 +7,12 @@ import type { GameState } from '../model/state.js';
 import type { Ruleset } from '../ruleset.js';
 import type { GameEvent } from '../model/events.js';
 import type { ShopOrder,ShopState } from '../model/shop.js';
-import type { Subject } from '../model/economy.js';
-import { ALL_GOODS as GOODS,ALL_PRODUCTS as PRODUCTS,ALL_PROCESSES as PROCESSES,SUBJECT_NAMES } from './economy-catalog.js';
+import type { Subject,Crop } from '../model/economy.js';
+import { ALL_GOODS as GOODS,ALL_PRODUCTS as PRODUCTS,ALL_PROCESSES as PROCESSES,SUBJECT_NAMES,CROPS } from './economy-catalog.js';
 
-export const SHOP_GOODS=['food','wheat','flour','soy','seedWheat','seedSoy','seedFlax','compost','wood','clay','ore','iron','flax','straw','fiber','oil','ceramics','brick','seal','shaft','valve'];
-const BASIC=['food','wheat','flour','soy','seedWheat','seedSoy','seedFlax','wood','clay','ore','flax','straw'];
+export const SHOP_GOODS=['food','wheat','flour','soy','seedWheat','seedSoy','seedFlax','compost','wood','clay','salt','ore','iron','flax','straw','fiber','oil','ceramics','brick','seal','shaft','valve'];
+const BASIC=['food','wheat','flour','soy','seedWheat','seedSoy','seedFlax','wood','clay','salt','ore','flax','straw'];
+const DISCOVERY_SEEDS:Record<string,Crop>={seedFoxtail:'millet',seedAdzuki:'adzuki',seedMustard:'mustard',seedMallow:'mallow',seedRice:'rice'};
 export function salePrice(s:GameState,id:string):number{return s.economy?.shop&&id==='flour'?1:GOODS[id].price;}
 export function shopEvent(events:GameEvent[],operation:string,target:string,detail:string,money=0,amount=1){events.push({type:'shop',operation,target,detail,money,amount});}
 export function made(s:GameState,id:string):void{const sh=s.economy?.shop;if(sh)sh.produced[id]=Math.min(3,(sh.produced[id]??0)+1);}
@@ -21,16 +22,16 @@ export function servicePending(s:GameState,kind:ShopOrder['kind'],id:string):boo
 export function deviceReserved(s:GameState,id:string):boolean{return deviceBusy(s,id)||servicePending(s,'device',id)||servicePending(s,'repair',id);}
 export function deviceBasePrice(r:Ruleset,id:string):number{const p=PRODUCTS.find(p=>p.id===id)!;return Object.entries(p.inputs).reduce((n,[g,q])=>n+(GOODS[g].price+1)*q,0)+r.shop!.deviceFee;}
 export function repairPrice(s:GameState,r:Ruleset,id:string):number{return Math.max(1,Math.ceil(deviceBasePrice(r,id)*r.shop!.repairPercent/100*(r.economy!.durability-(s.economy!.equipment[id]??0))/r.economy!.durability));}
-const uses:Record<string,string>={food:'批量干粮，按天取食；与市场购粮共用库存',wheat:'批量食材，日常做饭或磨成面粉',flour:'批量食材，做饭需柴火；按与小麦相同的食用份额定价',soy:'做饭食材或榨油原料',seedWheat:'播种小麦；需农学1阶',seedSoy:'播种大豆；需农学2阶',seedFlax:'播种亚麻；需农学2阶',compost:'恢复田地肥力；施用需农学3阶',wood:'设备、部件与燃料',clay:'建窑、烧陶和烧砖',ore:'冶炼铁料；需冶炼炉与工艺',iron:'直接进入工具和机械部件配方',flax:'加工纤维的农业原料，不能食用',straw:'腐熟堆肥原料',fiber:'密封件与绳索原料',oil:'密封件原料，当前不作为食品',ceramics:'容器、磨粮及其他设备的构件',brick:'高温炉和耐热容器的材料',seal:'泵、阀门和密闭容器的部件',shaft:'动力、播种与脱粒设备的部件',valve:'活塞泵部件'};
+const uses:Record<string,string>={food:'批量干粮，按天取食；与市场购粮共用库存',wheat:'批量食材，日常做饭或磨成面粉',flour:'批量食材，做饭需柴火；按与小麦相同的食用份额定价',soy:'做饭食材或榨油原料',seedWheat:'播种小麦；需农学1阶',seedSoy:'播种大豆；需农学2阶',seedFlax:'播种亚麻；需农学2阶',seedRice:'播种水稻；建成一条渠后可与同门换种，发现后集市补购',rice:'批量食材，可碾成稻米，也可直接做饭',milledRice:'批量食材，做饭需柴火；由稻谷碾制',seedFoxtail:'播种粟；探索种囊辨种获得，发现后集市补购',millet:'批量食材，日常做饭的主食谷物',seedAdzuki:'播种小豆；探索种囊辨种获得，发现后集市补购',adzuki:'做饭食材；豆科作物，收获后田地肥力回升',seedMallow:'播种葵菜；可与同门换种，发现后集市补购',mallow:'做饭食材，秋冬播种的园圃菜',seedMustard:'播种芥菜；探索种囊辨种获得，发现后集市补购',mustard:'做饭食材，也是腌渍原料',salt:'腌渍原料；集市常驻供应',pickles:'可直接食用的腌菜，按批取用',compost:'恢复田地肥力；施用需农学3阶',wood:'设备、部件与燃料',clay:'建窑、烧陶和烧砖',ore:'冶炼铁料；需冶炼炉与工艺',iron:'直接进入工具和机械部件配方',flax:'加工纤维的农业原料，不能食用',straw:'腐熟堆肥原料',fiber:'密封件与绳索原料',oil:'密封件原料，当前不作为食品',ceramics:'容器、磨粮及其他设备的构件',brick:'高温炉和耐热容器的材料',seal:'泵、阀门和密闭容器的部件',shaft:'动力、播种与脱粒设备的部件',valve:'活塞泵部件'};
 export interface ShopItem {id:string;target:string;kind:ShopOrder['kind'];name:string;category:string;price:number;weight:number;local:boolean;effect:string;condition:string;owned:boolean;stock:number;}
 export function shopCatalog(s:GameState,r:Ruleset):ShopItem[]{
  const e=s.economy!,sh=e.shop!,cfg=r.shop!;
  const item=(x:Omit<ShopItem,'stock'>):ShopItem=>({...x,stock:x.id==='good-food'?Math.min(s.production!.market.food,s.socialFood?.serviceRemaining??Infinity):sh.stock[x.id]??0});
- const goods=[...SHOP_GOODS,...(s.electric?['alumina']:[]),...(e.modern?['copper','feedstock','mineral','silica','polymer','wire','coil','cable','fuel','nutrient','battery','silicon','circuit','solution']:[])].map(id=>{
+ const goods=[...SHOP_GOODS,...Object.keys(DISCOVERY_SEEDS).filter(id=>e.farm?.discovered.includes(DISCOVERY_SEEDS[id])),...(s.electric?['alumina']:[]),...(e.modern?['copper','feedstock','mineral','silica','polymer','wire','coil','cable','fuel','nutrient','battery','silicon','circuit','solution']:[])].map(id=>{
    const recipe=PROCESSES.find(p=>Object.hasOwn(p.outputs,id));
-   const local=(BASIC.includes(id)||e.modern&&['copper','feedstock','mineral','silica'].includes(id))||!!recipe&&(sh.produced[id]??0)>=3&&localNeeds(s,recipe.requires);
+   const local=(BASIC.includes(id)||!!DISCOVERY_SEEDS[id]||e.modern&&['copper','feedstock','mineral','silica'].includes(id))||!!recipe&&(sh.produced[id]??0)>=3&&localNeeds(s,recipe.requires);
    const base=id==='food'?(s.socialFood?.price??r.parameters.foodPrice):salePrice(s,id)+1;
-   return item({id:'good-'+id,target:id,kind:'goods',name:id==='food'?'即食口粮':GOODS[id].name,category:'物资',price:base+(local?0:1),weight:1,local,effect:uses[id]??'现代制造与工程物资，库存、采购运输和到货时间照常结算',condition:BASIC.includes(id)?'开局本地供应':`本地化：实际完成3批${GOODS[id].name}，并传播${Object.entries(recipe?.requires??{}).map(([d,n])=>SUBJECT_NAMES[d as Subject]+n+'阶').join('、')}；目前${sh.produced[id]??0}/3批`,owned:false});
+   return item({id:'good-'+id,target:id,kind:'goods',name:id==='food'?'即食口粮':GOODS[id].name,category:'物资',price:base+(local?0:1),weight:1,local,effect:uses[id]??'现代制造与工程物资，库存、采购运输和到货时间照常结算',condition:BASIC.includes(id)?'开局本地供应':DISCOVERY_SEEDS[id]?'发现'+CROPS[DISCOVERY_SEEDS[id]].name+'后本地补购':`本地化：实际完成3批${GOODS[id].name}，并传播${Object.entries(recipe?.requires??{}).map(([d,n])=>SUBJECT_NAMES[d as Subject]+n+'阶').join('、')}；目前${sh.produced[id]??0}/3批`,owned:false});
  });
  const devices=productsFor(s).filter(p=>!['F04','F05'].includes(p.id)&&(!e.modern||!['N10','F10','E03'].includes(p.id))).map(p=>{
    const local=['W01','S01','T01','U01','F02'].includes(p.id)||(sh.produced[p.id]??0)>0&&localNeeds(s,p.requires);
@@ -40,7 +41,7 @@ export function shopCatalog(s:GameState,r:Ruleset):ShopItem[]{
  const assets=[item({id:'asset-granary',target:'granary',kind:'asset',name:'家庭粮仓',category:'家庭资产',price:cfg.granaryPrice,weight:4,local:false,effect:`食品保护容量提高至${cfg.granaryCapacity}，与容器取较大值，永久跨代保留`,condition:'交付时建成，无学科要求，限一座',owned:sh.assets.includes('granary')||servicePending(s,'asset','granary')}),item({id:'asset-library',target:'library',kind:'asset',name:'家学书室',category:'家庭资产',price:cfg.libraryPrice,weight:4,local:false,effect:'留存新的学科记录时，同时教导后辈该学科下一课题；上限为本人水平，永久保留',condition:'交付时建成，不自动继承等级，限一间',owned:sh.assets.includes('library')||servicePending(s,'asset','library')})];
  const available=[...goods,...devices,...books,...assets];
  if(e.branches){
-   const channels=e.branches.channels,baseGoods=[...(e.farm?.discovered??[]).map(c=>c==='soy'?'seedSoy':c==='flax'?'seedFlax':'seedWheat'),'food','wheat','flour','wood','clay','iron','fiber','oil','ceramics','seal','shaft','valve','seedWheat'];
+   const channels=e.branches.channels,baseGoods=[...(e.farm?.discovered??[]).map(c=>CROPS[c].seed),'food','wheat','flour','wood','clay','salt','iron','fiber','oil','ceramics','seal','shaft','valve','seedWheat'];
    const electrical=['copper','polymer','wire','coil','cable',...(s.electric?['brick','feedstock','solution','fuel','battery','alumina']:[])];
    return available.filter(x=>x.kind==='goods'?(baseGoods.includes(x.target)||(channels.includes('electric')||(s.era?.index??0)>=2)&&electrical.includes(x.target)):x.kind==='device'?(!!BRANCH_PRODUCTS[x.target]||!!s.electric&&!!ELECTRIC_KNOWLEDGE[x.target]&&(s.era?.index??0)>=2)&&(x.target!=='E01'||(s.era?.index??0)>=2):x.kind==='asset'&&x.target==='granary').map(x=>{
      if(x.kind!=='goods')return {...x,condition:'整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源'};

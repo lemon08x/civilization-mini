@@ -5,6 +5,11 @@ import { FOOD_LORE, type FoodLore, type CulturalLore } from './food-lore.js';
 import { esc } from './economy-view.js';
 
 type Entry={id:string;name:string;category:string;planned:boolean;source:string;use:string;art?:string;amount?:number;lore?:SeedLore;foodLore?:FoodLore};
+// 实装条目与编辑文案（seed-lore / food-lore）的 id 对应：左侧为游戏物资与条目 id，右侧为文案条目 id。
+const SEED_LORE_ALIAS:Record<string,string>={seedRice:'seed-rice',seedFoxtail:'seed-foxtail',seedAdzuki:'seed-adzuki',seedMallow:'seed-mallow',seedMustard:'seed-mustard'};
+const GOODS_LORE_ALIAS:Record<string,string>={rice:'crop-rice',millet:'crop-foxtail',adzuki:'crop-adzuki',mallow:'crop-mallow',mustard:'crop-mustard',milledRice:'food-rice',salt:'food-salt',pickles:'food-pickles'};
+const MEAL_LORE_ALIAS:Record<string,string>={'meal-milletPorridge':'recipe-millet-porridge','meal-adzukiSoup':'recipe-adzuki','meal-mallowSoup':'recipe-mallow','meal-riceMeal':'recipe-rice'};
+const loreIdOf=(id:string)=>SEED_LORE_ALIAS[id]??GOODS_LORE_ALIAS[id]??MEAL_LORE_ALIAS[id]??id;
 const categories=['种子','农作物与食材','烹饪食谱','原料与材料','工具与加工品'];
 // Fixed cell order follows the generated sheets, independently of catalog sorting.
 const botanicalCells=['seedWheat','seedSoy','seedFlax','rare-wheat','seed-rice','seed-foxtail','seed-broomcorn','seed-barley','seed-adzuki','seed-mallow','seed-turnip','seed-mustard','seed-gourd','seed-melon','seed-waxgourd','seed-hemp','seed-buckwheat','seed-sesame','seed-radish','seed-cabbage','seed-spinach','seed-carrot','seed-watermelon','seed-cotton','seed-maize','seed-sweetpotato','seed-potato','seed-peanut','seed-chili','seed-tomato','seed-commercial-cotton','seed-hybrid-rice','seed-greenhouse-tomato','plan-0','plan-1','plan-2'];
@@ -12,10 +17,11 @@ const ingredientCells=['food-rice','food-millet','food-broomcorn','flour','oil',
 const mealCells=['meal-porridge','meal-beans','meal-mixed','recipe-millet-porridge','recipe-rice','recipe-broomcorn-cake','recipe-mallow','recipe-turnip','recipe-adzuki','recipe-waxgourd','recipe-gourd','recipe-fish','recipe-cabbage-beans','recipe-steamed-bread','recipe-scallion-noodles','recipe-radish-beans','recipe-festival-cake','recipe-buckwheat-noodles','recipe-sweetpotato','recipe-tomato-potato','recipe-egg-greens','recipe-tofu-greens','recipe-pork-turnip','recipe-honey-adzuki','recipe-dry-noodles'];
 const equipmentCells=['device-F04','device-F05','device-E03','device-F10','device-N10','recipe-modern-grain'];
 function atlasArt(x:Entry,detail=false):string {
- const botanicalId=x.foodLore?.kind==='crop'?x.foodLore.seedIds[0]:x.id;
+ const botanicalId=x.foodLore?.kind==='crop'?x.foodLore.seedIds[0]:SEED_LORE_ALIAS[x.id]??x.id;
+ const mealId=MEAL_LORE_ALIAS[x.id]??x.id,ingredientId=GOODS_LORE_ALIAS[x.id]??x.id;
  const sheet=botanicalCells.includes(botanicalId)?{name:'botanical',index:botanicalCells.indexOf(botanicalId),cols:6,rows:6}
-  :ingredientCells.includes(x.id)?{name:'ingredients',index:ingredientCells.indexOf(x.id),cols:5,rows:4}
-  :mealCells.includes(x.id)?{name:'meals',index:mealCells.indexOf(x.id),cols:5,rows:5}
+  :ingredientCells.includes(ingredientId)?{name:'ingredients',index:ingredientCells.indexOf(ingredientId),cols:5,rows:4}
+  :mealCells.includes(mealId)?{name:'meals',index:mealCells.indexOf(mealId),cols:5,rows:5}
   :equipmentCells.includes(x.id)?{name:'equipment',index:equipmentCells.indexOf(x.id),cols:3,rows:2}:undefined;
  if(sheet){
   const {name,index,cols,rows}=sheet;
@@ -40,20 +46,20 @@ const plans: [string,string,string,string][]=[
  ['酿造缸','工具与加工品','陶土成形烧制','发酵与腌渍容器；工坊方向'],
  ['自动包装线','工具与加工品','工业阶段购置设备、安排员工','产品包装与批量销售；市场玩法方向'],
 ];
-const uses:Record<string,string>={wood:'农舍燃料，也用于修渠、木作和设备制造。',clay:'陶器与陶质构件的原料，不能直接当作田间肥料。',wheat:'可烹饪麦粥、麦豆饭，也可磨粉或补生活口粮。',soy:'可做炖豆、麦豆饭，也用于榨油和生活口粮。',flax:'加工为亚麻纤维，再制成绳索；不能食用。',straw:'收获副产物，可用于堆肥。',compost:'田地施肥投入，用于改善肥力。',flour:'磨粮所得，可补生活口粮。',oil:'榨油加工品，可供后续生产与交易。',fiber:'纤维加工品，用于制绳。',rope:'绳索加工品，可作为制造投入。'};
+const uses:Record<string,string>={wood:'农舍燃料，也用于修渠、木作和设备制造。',clay:'陶器与陶质构件的原料，不能直接当作田间肥料。',wheat:'可烹饪麦粥、麦豆饭，也可磨粉或补生活口粮。',soy:'可做炖豆、麦豆饭，也用于榨油和生活口粮。',flax:'加工为亚麻纤维，再制成绳索；不能食用。',straw:'收获副产物，可用于堆肥。',compost:'田地施肥投入，用于改善肥力。',flour:'磨粮所得，可补生活口粮。',rice:'稻谷脱壳碾制为稻米，也可直接补生活口粮。',milledRice:'碾米所得，可做米饭或补生活口粮。',millet:'粟的收获物，可煮小米粥或补生活口粮。',adzuki:'可煮小豆羹，也可补生活口粮。',mallow:'秋冬园圃菜，可煮葵菜羹或补生活口粮。',mustard:'秋冬园圃菜，可煮食，也可加食盐腌渍。',salt:'腌渍必需原料，在集市常年可购。',pickles:'腌渍所得的腌菜，可直接食用。',oil:'榨油加工品，可供后续生产与交易。',fiber:'纤维加工品，用于制绳。',rope:'绳索加工品，可作为制造投入。'};
 function entries(g:SessionObservation['game']):Entry[]{
  const e=g.economy!;
  const seeds=Object.entries(CROPS).map(([id,c]):Entry=>({id:c.seed,name:c.name+'种子',category:'种子',planned:false,source:id==='wheat'?'起始物资与农场买卖':'探索辨种或同门换种，发现后可补购；播种需相应栽培知识',use:`播种 → ${c.name}，基础生长 ${c.duration} 天。种子不作为食物。`,art:`item-${c.seed}-ui.webp`,amount:e.goods[c.seed]??0}));
  seeds.push({id:'rare-wheat',name:'异穗麦种',category:'种子',planned:false,source:'探索「一束异穗」并选留；市场不出售',use:'培育异穗麦，收获时留种；仍受旱涝影响。',art:'item-seedWheat-ui.webp'});
- const meals=COOKING.map((r):Entry=>({id:'meal-'+r.id,name:r.name,category:'烹饪食谱',planned:false,source:Object.entries(r.inputs).map(([id,n])=>`${e.goodsCatalog[id]?.name??id} ${n}`).join(' + '),use:`农舍现做现吃；餐食调养 ${r.food} 天，不存为仓库物品，效果期间不能叠加。实际时间、精力以行动报价为准。`,art:`farm-home-${r.id}.webp`,foodLore:{...FOOD_LORE.find(f=>f.id==='meal-'+r.id)!,ingredients:Object.keys(r.inputs)}}));
+ const meals=COOKING.map((r):Entry=>({id:'meal-'+r.id,name:r.name,category:'烹饪食谱',planned:false,source:Object.entries(r.inputs).map(([id,n])=>`${e.goodsCatalog[id]?.name??id} ${n}`).join(' + '),use:`农舍现做现吃；餐食调养 ${r.food} 天，不存为仓库物品，效果期间不能叠加。实际时间、精力以行动报价为准。`,art:`farm-home-${r.id}.webp`,foodLore:{...FOOD_LORE.find(f=>f.id===loreIdOf('meal-'+r.id))!,ingredients:Object.keys(r.inputs)}}));
  const sources=(id:string)=>ALL_PROCESSES.filter(p=>p.outputs[id]).map(p=>p.name).join('、');
  const destinations=(id:string)=>[...ALL_PROCESSES.filter(p=>p.inputs[id]).map(p=>p.name),...ALL_PRODUCTS.filter(p=>p.inputs[id]).map(p=>p.name)].join('、');
- const goods=Object.entries(e.goodsCatalog).filter(([id])=>!id.startsWith('seed')).map(([id,c]):Entry=>({id,name:c.name,category:FOOD_LORE.some(f=>f.id===id)?'农作物与食材':uses[id]||/矿|原料|铁料|铜料|铝料/.test(c.name)?'原料与材料':'工具与加工品',planned:false,source:sources(id)?'加工来源：'+sources(id)+'。需满足对应知识与设备条件。':'随阶段与条件开放，查阅主场景的探索或买卖',use:(uses[id]??'')+(destinations(id)?' 可用于：'+destinations(id)+'。':' 可在开放的买卖中查看交易条件。'),art:`item-${id}-ui.webp`,amount:e.goods[id]??0,foodLore:FOOD_LORE.find(f=>f.id===id)}));
+ const goods=Object.entries(e.goodsCatalog).filter(([id])=>!id.startsWith('seed')).map(([id,c]):Entry=>({id,name:c.name,category:FOOD_LORE.some(f=>f.id===loreIdOf(id))?'农作物与食材':uses[id]||/矿|原料|铁料|铜料|铝料/.test(c.name)?'原料与材料':'工具与加工品',planned:false,source:sources(id)?'加工来源：'+sources(id)+'。需满足对应知识与设备条件。':'随阶段与条件开放，查阅主场景的探索或买卖',use:(uses[id]??'')+(destinations(id)?' 可用于：'+destinations(id)+'。':' 可在开放的买卖中查看交易条件。'),art:`item-${id}-ui.webp`,amount:e.goods[id]??0,foodLore:FOOD_LORE.find(f=>f.id===loreIdOf(id))}));
  const tools=ALL_PRODUCTS.map((p):Entry=>({id:'device-'+p.id,name:p.name,category:'工具与加工品',planned:false,source:'制造材料：'+Object.entries(p.inputs).map(([id,n])=>`${e.goodsCatalog[id]?.name??id} ${n}`).join(' + ')+'；还需相应知识与研发条件',use:p.effect,art:`device-${p.id}-ui.webp`}));
- for(const seed of seeds)seed.lore=SEED_LORE.find(l=>l.id===seed.id);
- seeds.push(...SEED_LORE.filter(l=>!seeds.some(x=>x.id===l.id)).map((l):Entry=>({id:l.id,name:l.name,category:'种子',planned:true,source:l.source,use:l.use,lore:l})));
+ for(const seed of seeds)seed.lore=SEED_LORE.find(l=>l.id===loreIdOf(seed.id));
+ seeds.push(...SEED_LORE.filter(l=>!seeds.some(x=>loreIdOf(x.id)===l.id)).map((l):Entry=>({id:l.id,name:l.name,category:'种子',planned:true,source:l.source,use:l.use,lore:l})));
  goods.push({id:'food',name:'即食粮',category:'农作物与食材',planned:false,source:'现有家庭口粮，可从开放的补给渠道取得',use:'直接支持日常生活；种子不作为口粮。',amount:g.family.food,art:'item-food-ui.webp',foodLore:FOOD_LORE.find(f=>f.id==='food')});
- const futureFoods=FOOD_LORE.filter(f=>![...goods,...meals].some(x=>x.id===f.id)).map((f):Entry=>({id:f.id,name:f.name,category:f.kind==='recipe'?'烹饪食谱':'农作物与食材',planned:true,source:f.source,use:f.use,foodLore:f}));
+ const futureFoods=FOOD_LORE.filter(f=>![...goods,...meals].some(x=>loreIdOf(x.id)===f.id)).map((f):Entry=>({id:f.id,name:f.name,category:f.kind==='recipe'?'烹饪食谱':'农作物与食材',planned:true,source:f.source,use:f.use,foodLore:f}));
  return [...seeds,...meals,...goods,...futureFoods,...tools,...plans.map(([name,category,source,use],i):Entry=>({id:'plan-'+i,name,category,source,use,planned:true}))];
 }
 export function atlasPage(g:SessionObservation['game']):string{
@@ -113,14 +119,14 @@ function loreReading(l:CulturalLore):string {
 
 function foodConnections(x:Entry,all:Entry[]):string {
  const linked=(title:string,ids:string[])=>{
-  const entries=[...new Set(ids)].map(id=>all.find(e=>e.id===id)).filter((e):e is Entry=>!!e);
+  const entries=[...new Set(ids)].map(id=>all.find(e=>e.id===id||loreIdOf(e.id)===id)).filter((e):e is Entry=>!!e);
   return entries.length?`<div class="food-relationship"><h4>${title}</h4><div>${entries.map(e=>`<button type="button" data-atlas-jump="${esc(e.id)}">${esc(e.name)}<small>${e.planned?'规划':'已实装'}</small> →</button>`).join('')}</div></div>`:'';
  };
  const sources=x.foodLore?.seedIds??[];
  const ingredients=x.foodLore?.ingredients??[];
- const outputs=all.filter(e=>e.foodLore?.seedIds.includes(x.id)).map(e=>e.id);
- const processed=all.filter(e=>e.foodLore?.kind!=='recipe'&&e.foodLore?.ingredients.includes(x.id)).map(e=>e.id);
- const recipes=all.filter(e=>e.foodLore?.kind==='recipe'&&e.foodLore.ingredients.includes(x.id)).map(e=>e.id);
+ const outputs=all.filter(e=>e.foodLore?.seedIds.includes(loreIdOf(x.id))).map(e=>e.id);
+ const processed=all.filter(e=>e.foodLore?.kind!=='recipe'&&e.foodLore?.ingredients.includes(loreIdOf(x.id))).map(e=>e.id);
+ const recipes=all.filter(e=>e.foodLore?.kind==='recipe'&&e.foodLore.ingredients.includes(loreIdOf(x.id))).map(e=>e.id);
  return linked('种植来源',sources)+linked(x.foodLore?.kind==='recipe'?(x.planned?'食谱原料 · 配比待定':'当前规则投入'):['oil','food-driedgreens'].includes(x.id)?'可选加工来源':'加工原料',ingredients)+linked('对应收获物',outputs)+linked('加工去向',processed)+linked('相关烹饪食谱',recipes);
 }
 function foodDetail(l:FoodLore):string {
