@@ -3,7 +3,7 @@ import {CROPS} from '../../src/game/systems/economy-catalog.js';
 import {esc} from './economy-view.js';
 import {foodPolicyControls} from './social-food-view.js';
 import {uiIcon} from './ui-icons.js';
-import {farmEventArt} from './illustration.js';
+import {farmEventArt,landArt} from './illustration.js';
 import {COOKING,EDIBLE} from '../../src/game/systems/economy-catalog.js';
 import {sowingSeasons,IMPROVEMENT_NAMES,WATER_NAMES} from '../../src/game/systems/agriculture.js';
 import type {Crop} from '../../src/game/model/economy.js';
@@ -17,11 +17,6 @@ export function selectFarmProjectDuration(id:string){projectDurations[selected]=
 function projectSketch(kind:string):string {
  if(kind==='pond'||kind==='drain')return landArt(kind,'farm-route-sketch');
  return `<img class="farm-route-sketch" src="/illustrations/farm-project-${kind}-v2-ui.webp" alt="" width="320" height="320">`;
-}
-const landFrames:Record<string,number>={sand:0,loam:1,clay:2,low:3,flat:4,high:5,dry:6,parched:7,moist:8,wet:9,flood:10,pond:11,drain:12,canal:13,shelter:14,fertility:15};
-function landArt(key:string,extra=''):string {
- const i=landFrames[key]??1;
- return `<span class="farm-land-art ${extra}" style="background-position:${i%4*100/3}% ${Math.floor(i/4)*100/3}%" aria-hidden="true"></span>`;
 }
 function landProfile(p:NonNullable<NonNullable<FarmGame['economy']>['farm']>['plots'][number]):string {
  if(p.kind==='unknown'||!p.land)return '';

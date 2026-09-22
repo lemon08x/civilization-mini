@@ -92,3 +92,10 @@ export function encounterCard(text:string,compact=false):string {
   const [title,group,column,row]=entry;
   return `<figure class="encounter-card${compact?' encounter-compact':''}"><span class="encounter-picture" aria-hidden="true" style="background-image:url('/illustrations/events-${group}.png');background-position:${column*25}% ${row*100}%"></span><figcaption><span class="encounter-heading">${esc(title)}${text.includes(title+'（重大）')?' · 重大':''}</span><p>${esc(text)}</p></figcaption></figure>`;
 }
+
+// Shared painted land atlas for the farm inspector and player guide.
+const landFrames:Record<string,number>={sand:0,loam:1,clay:2,low:3,flat:4,high:5,dry:6,parched:7,moist:8,wet:9,flood:10,pond:11,drain:12,canal:13,shelter:14,fertility:15};
+export function landArt(key:string,extra=''):string {
+ const i=landFrames[key]??1;
+ return `<span class="farm-land-art ${extra}" style="background-position:${i%4*100/3}% ${Math.floor(i/4)*100/3}%" aria-hidden="true"></span>`;
+}
