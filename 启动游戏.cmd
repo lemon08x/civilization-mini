@@ -4,6 +4,9 @@ setlocal
 cd /d "%~dp0"
 title Civilization Mini
 
+if not defined PORT set "PORT=4321"
+if exist "runtime\node.exe" goto portable
+
 where node >nul 2>nul
 if errorlevel 1 (
   echo [错误] 未找到 Node.js，请安装 Node.js 24 或更高版本。
@@ -39,6 +42,19 @@ echo 请保留此窗口；关闭窗口或按 Ctrl+C 可停止服务。
 echo 如果提示端口已被占用，请先关闭先前的游戏服务窗口。
 echo.
 call npm.cmd start
+if errorlevel 1 goto failed
+exit /b 0
+
+:portable
+if not exist "dist\apps\board\server.js" (
+  echo [错误] 游戏文件不完整，请完整解压压缩包后再启动。
+  goto failed
+)
+set "OPEN_BROWSER=1"
+echo 正在启动隐士修所，请保留此窗口。
+echo 如浏览器没有自动打开，请访问：http://127.0.0.1:%PORT%/start
+echo 关闭此窗口或按 Ctrl+C 可停止游戏服务。
+"%~dp0runtime\node.exe" "%~dp0dist\apps\board\server.js"
 if errorlevel 1 goto failed
 exit /b 0
 
