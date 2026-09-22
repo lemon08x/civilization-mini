@@ -21,7 +21,7 @@ export const ELECTRIC_PARENTS:Record<string,string[]>={
   fuel:['F07'],battery:['F07'],aluminium:['ELECTROLYZER'],aluminiumwire:['aluminium'],
 };
 export const electricOnline=(s:GameState,id:string)=>!!s.electric&&s.economy?.modern?.services[id]===s.clock.absoluteTurn;
-export const seasonTime=(s:GameState)=>(s.life?.rules.timePerSeason??0)+(electricOnline(s,'LAMP')?s.electric!.rules.lampTime:0);
+export const seasonTime=(s:GameState)=>s.life?.calendar?.seasonLength??((s.life?.rules.timePerSeason??0)+(electricOnline(s,'LAMP')?s.electric!.rules.lampTime:0));
 export const electricReady=(s:GameState)=>!!s.electric&&APPLIANCES.some(id=>electricOnline(s,id));
 export const electricRewardPercent=(s:GameState)=>s.electric&&s.era?.index===3&&!electricReady(s)?s.electric.rules.unpoweredPercent:100;
 export const ELECTRIC_EPIGRAPHS:Record<string,string>={

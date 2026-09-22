@@ -1,3 +1,4 @@
+import { atlasPage, bindAtlas } from './atlas-view.js';
 import {farm,selectFarmPanel,type FarmPanel} from './farm-view.js';
 import {bindFarmScene,playFarmFeedback,type FarmFeedback} from './farm-animation/controller.js';
 import {socialFoodPage} from './social-food-view.js';
@@ -63,12 +64,12 @@ function feedback(e:GameEvent):string {
   if(e.type==='economy-equipment-used')return `${PRODUCTS.find(p=>p.id===e.product)?.name}生效，剩余${e.remaining}次。`;
   if(e.type==='economy-trade')return `${e.operation==='buy'?'购入':'交付'}${e.amount}${GOODS[e.good]?.name}，${e.money}钱。`;
   if(e.type==='economy-farm')return `${e.plotId?e.plotId+' · ':''}${e.actor}：${{sow:'播种',harvest:'收获',tend:'田间管理',pump:'自动灌溉',waiting:'持续耕作未能执行'}[e.operation]}${CROPS[e.crop as keyof typeof CROPS]?.name??e.crop}${e.operation==='harvest'?' '+e.amount:''}`;
-  if(e.type==='economy-crop-growth')return `${CROPS[e.crop as keyof typeof CROPS].name}生长${e.growth}季，累计天气胁迫${e.stress}。`;
+  if(e.type==='economy-crop-growth')return `${CROPS[e.crop as keyof typeof CROPS].name}生长${e.growth}天，累计天气胁迫${e.stress}。`;
   if(e.type==='economy-process')return `${e.actor}${e.stage==='start'?'开工':'完成'}${PROCESSES.find(p=>p.id===e.recipe)?.name}。`;
   if(e.type==='economy-knowledge')return `${e.operation==='archive'?'留存家族记录':'传播地区知识'}：${SUBJECT_NAMES[e.subject as keyof typeof SUBJECT_NAMES]} ${e.level}阶。`;
   if(e.type==='economy-region')return `地区${e.industry==='iron'?'铁料':'纤维'}供应形成，采购价格下降。`;
   if(e.type==='food-purchased')return `买入${e.amount}粮${e.money?'，支付'+e.money+'钱':''}。`;
-  if(e.type==='season-settled')return `季末消耗${e.consumed}粮，缺口${e.missing}。`;
+  if(e.type==='season-settled')return `本季按日累计消耗${Number(e.consumed.toFixed(3))}批食物，累计缺口${Number(e.missing.toFixed(3))}；季末不重复扣粮。`;
   if(e.type==='food-spoiled')return `保存损耗${e.amount}粮，保护容量${e.protected}。`;
   if(e.type==='income')return `收入${e.amount}钱。`;
   if(e.type==='technology-victory')return `家族发展胜利：${e.mastered}/${e.total}项知识与实际成果均已达标。`;
@@ -119,7 +120,16 @@ async function act(id:string){
     if(next.record.entries.length>before)sectFeedback(id,lines);
     if(page==='农业'&&next.record.entries.length>before){
       const events=next.record.entries.slice(before).flatMap(entry=>entry.events);
-      playFarmFeedback(document,events.flatMap<FarmFeedback>(event=>event.type==='economy-farm'&&['sow','harvest','tend'].includes(event.operation)?[{kind:event.operation as 'sow'|'harvest'|'tend',label:feedback(event)}]:event.type==='life'&&event.operation==='farm-map'||event.type==='branch'&&id.startsWith('economy:neighbor:')?[{kind:id.startsWith('economy:farmreclaim:')?'reclaim' as const:id.startsWith('economy:farmexplore:')?'explore' as const:id.startsWith('economy:farmstory:')?'discovery' as const:'notice' as const,label:feedback(event)}]:[]));
+      const cropName=(id:string)=>CROPS[id as keyof typeof CROPS]?.name??id;
+      playFarmFeedback(document,events.flatMap<FarmFeedback>(event=>{
+        if(event.type==='economy-farm'&&['sow','harvest','tend'].includes(event.operation))
+          return [{kind:event.operation as 'sow'|'harvest'|'tend',label:feedback(event),plotId:event.plotId,float:event.operation==='harvest'?`+${event.amount} ${cropName(event.crop)}`:event.operation==='sow'?`播种 ${cropName(event.crop)}`:'田间养护'}];
+        if(event.type==='economy-crop-growth')
+          return [{kind:'grow' as const,label:feedback(event),crop:event.crop,float:`${cropName(event.crop)}生长`}];
+        if(event.type==='life'&&event.operation==='farm-map'||event.type==='branch'&&id.startsWith('economy:neighbor:'))
+          return [{kind:id.startsWith('economy:farmreclaim:')?'reclaim' as const:id.startsWith('economy:farmexplore:')?'explore' as const:id.startsWith('economy:farmstory:')?'discovery' as const:'notice' as const,label:feedback(event),plotId:/^(p\d+q\d+)/.exec(event.detail)?.[1]}];
+        return [];
+      }));
     }
   }catch(e){error((e as Error).message);}
   finally{busy=false;$('app').removeAttribute('aria-busy');}
@@ -206,6 +216,7 @@ function render():void {
   if(page==='能源'&&e.modern)body=energyPage(o,button,selectedDevice);
   if(page==='生活')body=socialFoodPage(o)+panel('谋生与补给',acts('生活'));
   if(page==='安排')body=arrangementsPage(o,button);
+  if(page==='图鉴')body=atlasPage(o);
   $('app').innerHTML=humanScreen(o,page,body,button,session.record.entries.at(-1)?.events.map(feedback).filter(Boolean)??[],guide,recap);
   // Retain the initial default selection when its available/learned group changes.
   const selection=document.querySelector<HTMLElement>('.lesson-tile.selected, .select-tile.selected')?.dataset;
@@ -214,6 +225,7 @@ function render():void {
   if(selection?.system)selectedSystem=selection.system;
   if(selection?.device)selectedDevice=selection.device;
   bindApp();
+  if(page==='图鉴')bindAtlas();
   restoreFolds(folds);
   restoreFocus(key);
 }

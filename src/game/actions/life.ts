@@ -1,3 +1,4 @@
+import {calendarView} from '../systems/calendar.js';
 import {eraCard} from '../systems/eras.js';
 import { activePerson, blankPerson, heir, type GameState } from '../model/state.js';
 import { branchNodesFor } from '../model/branches.js';
@@ -8,11 +9,16 @@ import { defineAction, type ActionDefinition } from './definition.js';
 export function lifeActions(s:GameState):ActionDefinition[] {
   if(!s.life)return [];
   const v=activePerson(s).vitality!,r=s.life.rules;
+  const nextDate=s.life.calendar?calendarView(s).nextTerm:undefined;
   const actions:ActionDefinition[]=[
-    defineAction(s,'economy:rest:self','休息','身体',{},v.energy>=energyCeiling(v)?['精力已满']:[],`用4时间恢复${r.restRecovery+(hasTalent(v,'resilient')?1:0)}精力，不超过健康决定的上限。`,(d,ev)=>{
+    ...(nextDate?[defineAction(s,'economy:wait:calendar','休整至'+nextDate.name,'日历',{ap:0,time:Math.min(nextDate.days,s.life.timeRemaining),energy:0},[],`前往${nextDate.date}，最多${nextDate.days}天；按日恢复精力和消耗食物；节气会触发随机见闻，其他行动经过同一天也会触发。作物成熟、缺粮、节气、节日或换季时会停下。`,()=>{})]:[]),
+    ...(s.life.calendar?(['simple','hearty'] as const).map(mode=>defineAction(s,'economy:diet:'+mode,mode==='simple'?'采用简单饮食':'采用丰足饮食','饮食',{ap:0,time:0,energy:0},s.life!.calendar!.diet===mode?['当前安排']:[],mode==='simple'?'每日现做现吃；有食材和柴火就做饭，否则吃库存干粮。':'每日食材消耗增加50%，饱食时额外恢复精力；不需要每天点击做饭。',(d)=>{d.life!.calendar!.diet=mode;})):[]),
+    ...(s.life.calendar?[0.5,7].map(days=>defineAction(s,'economy:wait:'+(days===0.5?'half':'week'),days===0.5?'休息半天':'休整7天','日历',{ap:0,time:Math.min(days,s.life!.timeRemaining),energy:0},[],'推进日历，按日恢复、进食、作物生长。成熟、缺粮、节气、节日或换季时提前停下。',()=>{})):[]),
+
+    defineAction(s,'economy:rest:self','休息','身体',{},v.energy>=energyCeiling(v)?['精力已满']:[],`休息半天恢复${r.restRecovery+(hasTalent(v,'resilient')?1:0)}精力，不超过健康决定的上限。`,(d,ev)=>{
       const x=activePerson(d).vitality!,before=x.energy;x.energy=Math.min(energyCeiling(x),x.energy+r.restRecovery+(hasTalent(x,'resilient')?1:0));lifeEvent(ev,d.household.activePersonId,'rest',`休息恢复${x.energy-before}精力`);
     }),
-    defineAction(s,'economy:care:self','营养疗养','身体',{money:Math.max(0,(s.life.renewal?.careMoney??2)-(eraCard(s)?.care??0))},v.health>=healthCeiling(v,r)?['健康已达到当前年龄上限']:[],`用${s.life.renewal?.careTime??4}时间、${s.life.renewal?.careEnergy??1}精力、${Math.max(0,(s.life.renewal?.careMoney??2)-(eraCard(s)?.care??0))}钱购买营养照护，恢复${r.careRecovery}健康；不能逆转衰老。`,(d,ev)=>{
+    defineAction(s,'economy:care:self','营养疗养','身体',{money:Math.max(0,(s.life.renewal?.careMoney??2)-(eraCard(s)?.care??0))},v.health>=healthCeiling(v,r)?['健康已达到当前年龄上限']:[],`投入调养时间、${s.life.renewal?.careEnergy??1}精力、${Math.max(0,(s.life.renewal?.careMoney??2)-(eraCard(s)?.care??0))}钱购买营养照护，恢复${r.careRecovery}健康；不能逆转衰老。`,(d,ev)=>{
       const x=activePerson(d).vitality!,before=x.health;x.health=Math.min(healthCeiling(x,r),x.health+r.careRecovery);lifeEvent(ev,d.household.activePersonId,'care',`疗养恢复${x.health-before}健康`);
     }),
   ];

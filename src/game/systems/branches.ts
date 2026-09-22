@@ -1,3 +1,4 @@
+import {studyQuote} from './life.js';
 import {industryProductsFor} from '../model/industry.js';
 import {APPLIANCES,ELECTRIC_EPIGRAPHS} from '../model/electric.js';
 import {ancestorKnows} from './ancestry.js';
@@ -19,7 +20,7 @@ export function branchProcessNeeds(s:GameState,id:string,worker=false):string[]{
 export function branchActionNeeds(s:GameState,id:string):string[]{
   if(!s.economy?.branches||id==='handover')return [];
   const [,op,target]=id.split(':');
-  if(s.economy.farm&&['cook','farmrare','farmstory','farmplot','farmexplore','farmreclaim','farmfertilize','neighbor'].includes(op))return [];
+  if(s.economy.farm&&['cook','farmproject','farmrare','farmstory','farmplot','farmexplore','farmreclaim','farmfertilize','neighbor'].includes(op))return [];
   if(s.sect&&['sectswitch','sectseek','sectadmit','sectpractice','sectteach','sectimprove','sectdraw','crisis'].includes(op))return [];
   if(s.era&&['tap','dungeonstart','dungeonwork','erasettle','publicmill'].includes(op))return [];
   if(s.socialFood&&['foodpolicy','foodbudget','foodreserve','foodplan'].includes(op))return [];
@@ -28,7 +29,7 @@ export function branchActionNeeds(s:GameState,id:string):string[]{
     if(['assign','pause','farmplan','productionplan','supplyplan','salesplan','careplan','charter'].includes(op))return ['旧经营方式尚未纳入三类树，请使用系统安排与手动采购交付'];
     if(['build','process'].includes(op))return [...productNeeds(s,target),...(op==='build'?productTrialNeeds(s,target):[])];
   }
-  if(['bond','branchlearn','branchteach','brancharchive','channel','rest','care','retire','company','consult','end','cartadd','cartremove','clearcart','checkout','gather','work','sell','sellfood','repair','finish','resumeplans','pause','fertilize','farmcycle'].includes(op))return [];
+  if(['wait','diet','bond','branchlearn','branchteach','brancharchive','channel','rest','care','retire','company','consult','end','cartadd','cartremove','clearcart','checkout','gather','work','sell','sellfood','repair','finish','resumeplans','pause','fertilize'].includes(op))return [];
   if(target==='off'&&['foodplan','farmplan','productionplan','supplyplan','salesplan','careplan'].includes(op))return [];
   if(op==='build')return BRANCH_PRODUCTS[target]?branchNeeds(s,BRANCH_PRODUCTS[target]):['该设备尚未纳入试点'];
   if(op==='process')return branchProcessNeeds(s,target);
@@ -59,7 +60,7 @@ export function recordBranchWork(s:GameState,events:GameEvent[]):void {
 }
 export function branchView(s:GameState){
   const b=s.economy!.branches!;
-  return {nodes:branchNodesFor(s).map(n=>({...n,unlockStage:frameworkUnlockStage(s.era?.frameworkId,n.id),track:courseTrack(n.id),learningMode:n.id==='A4'&&s.economy!.farm?'试种或同门传授':'研习',use:COURSE_TRACKS[courseTrack(n.id)].use,...(s.electric&&ELECTRIC_EPIGRAPHS[n.id]?{epigraph:ELECTRIC_EPIGRAPHS[n.id]}:{}),...(s.economy!.industry?{sample:{}}:{}),known:branchHas(s,n.id),inherited:ancestorKnows(s,n.id),heirInherited:ancestorKnows(s,n.id,s.household.heirId),heirKnown:s.household.heirId!==s.household.activePersonId&&branchHas(s,n.id,s.household.heirId),archived:b.archives.includes(n.id),scope:'第 '+(frameworkUnlockStage(s.era?.frameworkId,n.id)+1)+' 阶段起可学，跨阶段保留',active:nodeInEra(s,n.id),recorded:!!b.learned[s.household.activePersonId]?.includes(n.id),missing:[...branchNeeds(s,n.parents),...(!nodeInEra(s,n.id)?['当前社会尚未开放此课程']:[])]})),
+  return {nodes:branchNodesFor(s).map(n=>({...n,study:studyQuote(s,n.id),unlockStage:frameworkUnlockStage(s.era?.frameworkId,n.id),track:courseTrack(n.id),learningMode:n.id==='A4'&&s.economy!.farm?'试种或同门传授':'研习',use:COURSE_TRACKS[courseTrack(n.id)].use,...(s.electric&&ELECTRIC_EPIGRAPHS[n.id]?{epigraph:ELECTRIC_EPIGRAPHS[n.id]}:{}),...(s.economy!.industry?{sample:{}}:{}),known:branchHas(s,n.id),inherited:ancestorKnows(s,n.id),heirInherited:ancestorKnows(s,n.id,s.household.heirId),heirKnown:s.household.heirId!==s.household.activePersonId&&branchHas(s,n.id,s.household.heirId),archived:b.archives.includes(n.id),scope:'第 '+(frameworkUnlockStage(s.era?.frameworkId,n.id)+1)+' 阶段起可学，跨阶段保留',active:nodeInEra(s,n.id),recorded:!!b.learned[s.household.activePersonId]?.includes(n.id),missing:[...branchNeeds(s,n.parents),...(!nodeInEra(s,n.id)?['当前社会尚未开放此课程']:[])]})),
     paths:BRANCH_PATHS.map(p=>({...p,learned:p.nodes.filter(id=>branchHas(s,id)).length})),
     channels:[...b.channels],protocols:[...b.protocols],delivered:[...b.delivered],products:s.electric?Object.fromEntries(industryProductsFor(s).filter(p=>p.kind==='device').map(p=>[p.id,p.knowledge])):BRANCH_PRODUCTS,processes:s.electric?Object.fromEntries(industryProductsFor(s).filter(p=>p.kind==='goods').map(p=>[p.id,p.knowledge])):BRANCH_PROCESSES};
 }

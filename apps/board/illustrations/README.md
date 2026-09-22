@@ -452,3 +452,61 @@ A precisely aligned 3 column by 4 row sheet of twelve separate Chinese pastoral 
 ```text
 Use case: historical-scene. A precisely aligned 3 column by 2 row contact sheet on pure white background, six equal square cells, generous white margins, no dividers, no labels, no lettering, no watermark. Cohesive Chinese pastoral watercolor and fine ink spot illustrations, muted sage green warm ochre and ink grey. Delicate organic edges dissolve into white; subjects readable at small sizes. Top left: a gently opened blank stitched journal, writing brush, fallen leaf, for personal memories. Top middle: earthen herbal tea bowl, small medicine pot, fresh medicinal leaves, for rest and recovery. Top right: two adult fellow students sitting at a low tea table beneath a tiny bamboo branch, equal status, modest historical robes, for companionship. Bottom left: an adult teacher showing a blank open book to a young adult apprentice at a low desk, for teaching a disciple. Bottom middle: two hands passing a small jade pendant above a rolled blank manuscript, for spiritual inheritance across generations. Bottom right: a small inkstone and bamboo leaf as a spare motif. Objects and figures fully contained in their individual cells, no room backgrounds, no hard rectangular patches or frames. Square canvas at high resolution.
 ```
+
+
+## 地块工程用途插图（2026-09-22）
+
+使用用户指定的本机 Grok Build CLI image_gen 独立生成六张原图 `farm-project-{timber,clearwood,shelter,canal,restore,leave}-v2.jpg`，导出同名 `-ui.webp`（320×320，quality 87）。用于用途选择卡和范围图中心，替换 SVG 简笔图。暖纸水彩、自然地景；通过 multiply 和径向边缘渐隐融入纸色，不声称原图具有透明背景。插图只作示意，作物、材料和供水结果仍由规则文本和真实状态表示。
+
+最终提示词（每张均由公共段＋风格段＋对应主体组成）：
+
+```text
+A single centered isolated item or small coherent arrangement, watercolor and gouache with fine pencil detail, warm ivory paper background, muted sage and umber, restrained Chinese family chronicle game inventory art, bold silhouette readable at 64 pixels, ample margins, no text, labels, symbols, numerals, watermark, border or UI. Aspect 1:1.
+
+timber: Premium hand-painted pastoral game UI illustration, elegant Chinese rural watercolor with natural organic edges fading to ivory, warm sunlight, delicate botanical detail, earthy sage green and honey ochre. A close-up miniature landscape vignette seen from a gentle elevated angle, NOT geometric low-poly, NOT a flat vector diagram. No people, no buildings, no lettering. Subject fills 75 percent of canvas and is clearly readable as a small card illustration. Freshly cut logs with visible growth rings, a small hand axe leaning on a stump, wood shavings and a few ferns. Warm timber is the unmistakable focal point.
+
+clearwood: Premium hand-painted pastoral game UI illustration, elegant Chinese rural watercolor with natural organic edges fading to ivory, warm sunlight, delicate botanical detail, earthy sage green and honey ochre. A close-up miniature landscape vignette seen from a gentle elevated angle, NOT geometric low-poly, NOT a flat vector diagram. No people, no buildings, no lettering. Subject fills 75 percent of canvas and is clearly readable as a small card illustration. A newly cleared cultivated plot with rich brown parallel furrows, a wooden hoe resting at the edge, tiny orderly green seedlings. The open field is the focal point; no trees.
+
+shelter: Premium hand-painted pastoral game UI illustration, elegant Chinese rural watercolor with natural organic edges fading to ivory, warm sunlight, delicate botanical detail, earthy sage green and honey ochre. A close-up miniature landscape vignette seen from a gentle elevated angle, NOT geometric low-poly, NOT a flat vector diagram. No people, no buildings, no lettering. Subject fills 75 percent of canvas and is clearly readable as a small card illustration. A lush small grove of three deciduous trees, varied rounded foliage and graceful trunks, grasses at their roots sheltering the edge of a tiny crop field. The living green grove is the focal point.
+
+canal: Premium hand-painted pastoral game UI illustration, elegant Chinese rural watercolor with natural organic edges fading to ivory, warm sunlight, delicate botanical detail, earthy sage green and honey ochre. A close-up miniature landscape vignette seen from a gentle elevated angle, NOT geometric low-poly, NOT a flat vector diagram. No people, no buildings, no lettering. Subject fills 75 percent of canvas and is clearly readable as a small card illustration. A lovingly restored narrow rural irrigation canal with clear turquoise flowing water, old stone edging, a small wooden sluice and green grasses, leading into a crop bed. Water is the unmistakable focal point.
+
+restore: Premium hand-painted pastoral game UI illustration, elegant Chinese rural watercolor with natural organic edges fading to ivory, warm sunlight, delicate botanical detail, earthy sage green and honey ochre. A close-up miniature landscape vignette seen from a gentle elevated angle, NOT geometric low-poly, NOT a flat vector diagram. No people, no buildings, no lettering. Subject fills 75 percent of canvas and is clearly readable as a small card illustration. A rich fertile garden bed of dark crumbly soil and vigorous green wheat seedlings, a wicker compost basket and a wooden rake on the edge. Healthy thriving sprouts are the focal point.
+
+leave: Premium hand-painted pastoral game UI illustration, elegant Chinese rural watercolor with natural organic edges fading to ivory, warm sunlight, delicate botanical detail, earthy sage green and honey ochre. A close-up miniature landscape vignette seen from a gentle elevated angle, NOT geometric low-poly, NOT a flat vector diagram. No people, no buildings, no lettering. Subject fills 75 percent of canvas and is clearly readable as a small card illustration. An uncultivated patch of pale dry earth with sparse straw-colored wild grasses, a few small stones and a simple resting hoe. Modest fallow land, no crops, no canal, no trees.
+```
+
+
+## 节气栏四季插图（2026-09-22）
+
+由 Grok Build CLI image_gen 独立生成 almanac-{spring,summer,autumn,winter}-v1.jpg，导出 280×280 的 -ui.webp（quality86）。用于节气栏左侧，随真实日历季节切换；仅表达季节意象，不表示实际天气或新增节日奖励。页面以 multiply 和径向渐隐融入纸色。
+
+最终提示词（公共段＋对应主体）：
+
+```text
+A single centered isolated item or small coherent arrangement, watercolor and gouache with fine pencil detail, warm ivory paper background, muted sage and umber, restrained Chinese family chronicle game inventory art, bold silhouette readable at 64 pixels, ample margins, no text, labels, symbols, numerals, watermark, border or UI. Aspect 1:1.
+
+spring: Elegant Chinese pastoral almanac illustration, delicate watercolor and fine botanical pencil drawing on warm ivory paper, natural soft fading edges, restrained sage green and ochre, poetic rural seasonal vignette readable at small size. Not a vector icon. No people, buildings, text, lettering or border. Fresh willow twigs arching over young green shoots, a shallow blue-green puddle with delicate raindrop ripples, tender early spring growth.
+
+summer: Elegant Chinese pastoral almanac illustration, delicate watercolor and fine botanical pencil drawing on warm ivory paper, natural soft fading edges, restrained sage green and ochre, poetic rural seasonal vignette readable at small size. Not a vector icon. No people, buildings, text, lettering or border. Lush green rice leaves with one small lotus flower and tall summer grasses, warm bright summer light.
+
+autumn: Elegant Chinese pastoral almanac illustration, delicate watercolor and fine botanical pencil drawing on warm ivory paper, natural soft fading edges, restrained sage green and ochre, poetic rural seasonal vignette readable at small size. Not a vector icon. No people, buildings, text, lettering or border. Golden ripe wheat heads bending above a few ochre fallen leaves and a small woven harvest basket, gentle autumn warmth.
+
+winter: Elegant Chinese pastoral almanac illustration, delicate watercolor and fine botanical pencil drawing on warm ivory paper, natural soft fading edges, restrained sage green and ochre, poetic rural seasonal vignette readable at small size. Not a vector icon. No people, buildings, text, lettering or border. A bare plum branch with a few red blossoms above lightly snow-covered earth and dry grasses, quiet winter stillness.
+```
+
+
+## 顶部天气插图（2026-09-22）
+
+Grok Build CLI image_gen 生成 weather-{normal,dry,wet}-v1.jpg，分别表示晴和、干燥、连雨；导出280×280、quality86的 -ui.webp。当前天气决定图片，物理作用由真实文本说明，不使用未来天气。以multiply与边缘渐隐融入纸色。
+
+最终提示词：
+```text
+A single centered isolated item or small coherent arrangement, watercolor and gouache with fine pencil detail, warm ivory paper background, muted sage and umber, restrained Chinese family chronicle game inventory art, bold silhouette readable at 64 pixels, ample margins, no text, labels, symbols, numerals, watermark, border or UI. Aspect 1:1.
+
+normal: Premium Chinese pastoral chronicle UI spot illustration, delicate hand painted watercolor with graphite detail, warm ivory paper and soft natural fading edges, muted sage green and honey ochre, one coherent miniature countryside weather vignette, gentle elevated view, clear silhouette at small size, no text, numbers, people, border, buildings or UI. A small luminous sun partly behind two soft white clouds over a thriving green grassy knoll, calm fair weather and comfortably moist soil.
+
+dry: Premium Chinese pastoral chronicle UI spot illustration, delicate hand painted watercolor with graphite detail, warm ivory paper and soft natural fading edges, muted sage green and honey ochre, one coherent miniature countryside weather vignette, gentle elevated view, clear silhouette at small size, no text, numbers, people, border, buildings or UI. A warm golden sun above a patch of pale dry cracked earth, drooping straw grass and a few dry leaves, muted ochre heat haze. Clear dry-weather contrast, tasteful and serene.
+
+wet: Premium Chinese pastoral chronicle UI spot illustration, delicate hand painted watercolor with graphite detail, warm ivory paper and soft natural fading edges, muted sage green and honey ochre, one coherent miniature countryside weather vignette, gentle elevated view, clear silhouette at small size, no text, numbers, people, border, buildings or UI. Soft slate-blue rain clouds with thin visible rain strokes above a shallow puddle, ripples and lush reeds. Cool blue-green continuous rain, gentle elegant watercolor, no thunder.
+```

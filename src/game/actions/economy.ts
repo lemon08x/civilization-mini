@@ -1,3 +1,6 @@
+import {dietView} from '../systems/social-food.js';
+import {lunarDateAt} from '../systems/calendar.js';
+import {FARM_PROJECT_NAMES,workFarmProject,fieldWaterSupport,startFarmProject} from '../systems/agriculture.js';
 import {plotField,blankField,exploreFarm,resolveFarmDiscovery,farmNeighbors,cookMeal} from '../systems/agriculture.js';
 import {COOKING} from '../systems/economy-catalog.js';
 import {stageOf} from '../model/eras.js';
@@ -27,7 +30,7 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
   const add=(op:string,target:string,label:string,group:string,cost:Parameters<typeof defineAction>[4],blockers:string[],description:string,execute:ActionDefinition['execute'])=>out.push(defineAction(s,`economy:${op}:${target}`,label,group,cost,blockers,description,execute));
   if(e.farm)for(const recipe of COOKING){
     const ingredients=Object.entries(recipe.inputs).map(([id,n])=>`${n}份${GOODS[id].name}`).join('、');
-    add('cook',recipe.id,'烹饪'+recipe.name,'烹饪',{time:recipe.time,energy:recipe.energy},missingGoods(s,recipe.inputs),`${ingredients} → ${recipe.food}份即食口粮。当次完成并存入家庭口粮，季末按需食用；不消耗种子。`,(d,ev)=>cookMeal(d,recipe,ev));
+    add('cook',recipe.id,'烹饪'+recipe.name,'烹饪',{time:recipe.time,energy:recipe.energy},[...missingGoods(s,recipe.inputs),...((s.life?.calendar?.mealDays??0)>0?['当前餐食恢复效果尚未结束']:[])],`${ingredients} → ${recipe.food}天餐食恢复加成。当次享用，提供短期精力恢复加成；日常饮食另按天自动现做现吃，不消耗种子。`,(d,ev)=>cookMeal(d,recipe,ev));
   }
   for(const t of topicsFor(s)){
     const current=level(s,t.subject),evidence=(e.evidence[s.household.activePersonId]??[]).includes(t.id);
@@ -84,10 +87,6 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
   for(const crop of Object.keys(CROPS) as Crop[])add('farm',crop,(e.field.crop?'管理／收获':'播种')+CROPS[crop].name,'农业',{ap:e.shop&&!e.field.crop&&equipped(s,'U02')&&e.shop.seededTurn!==s.clock.absoluteTurn?0:1},[
     ...(e.farm&&!e.farm.discovered.includes(crop)?['尚未发现此种子']:[]),...(e.field.crop&&e.field.crop!==crop?['田里种植的是其他作物']:[]),...farmBlocker(s,crop),
   ],'空田播种；生长期缺水时灌溉；成熟后收获。此入口操作起始田，个人与雇工共用。',(draft,events)=>farmWork(draft,crop,events));
-  for(const crop of Object.keys(CROPS) as Crop[])add('farmcycle',crop,'持续耕作：'+CROPS[crop].name,'农业',{ap:0},[
-    ...(e.farm&&!e.farm.discovered.includes(crop)?['尚未发现此种子']:[]),...(e.ongoing?.farm===crop?['已经安排此作物']:[]) ,...(e.branches?(crop==='wheat'?branchNeeds(s,['A0']):branchNeeds(s,['A4'])):requirements(s,{agronomy:CROPS[crop].level})),
-  ],'安排后季末自动收获并按同一作物补种，直到暂停。成熟与播种仍扣一次农事时间或农工工资；缺种子时停在空田。井/泵继续负责缺水季灌溉。',(d)=>{d.economy!.ongoing={farm:crop};});
-  add('farmcycle','off','暂停持续耕作','农业',{ap:0},!e.ongoing?.farm?['没有持续耕作']:[],'停止自动收获和复种；田里现有作物仍可手动管理。',(d)=>{d.economy!.ongoing={farm:null};});
   add('fertilize','field','施用堆肥','农业',{},[...(e.branches?branchNeeds(s,['A3']):requirements(s,{agronomy:3})),...missingGoods(s,{compost:1}),...(e.field.composted||e.field.fertility>=3?['本茬已施肥或肥力充足']:[])],'消耗1堆肥，土壤肥力+1，上限3；不直接创造粮食。',(draft,events)=>{changeGoods(draft,{compost:1},-1,events,'施肥');draft.economy!.field.fertility++;draft.economy!.field.composted=true;recordEvidence(draft,'agronomy',events,'堆肥施用');});
   for(const product of productsFor(s)){
     add('build',product.id,'制造并安装'+product.name,'产品',{},[...requirements(s,product.requires),...missingGoods(s,product.inputs),...(equipped(s,product.id)?['已有可用设备']:[]),...(deviceReserved(s,product.id)?['设备在制、维修或待交付']:[])],
@@ -120,7 +119,7 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
     add('pause',kind,'暂停／恢复'+WORKER_NAMES[kind],'雇佣',{},!worker||worker.job==='rest'?['先招募并安排任务']:[], '保留合同、经验与在制品；暂停期间不工作、不扣工资。',(draft,events)=>{const w=draft.economy!.workers[kind]!;w.active=!w.active;events.push({type:'economy-worker',worker:kind,operation:'pause',money:0,detail:w.active?'恢复':'暂停'});});
     add('train',kind,'培训'+WORKER_NAMES[kind],'雇佣',{food:1},[...(!worker?['尚未招募']:[]),...(org<4?['需培训与知识传授']:[]),...(worker&&worker.experience>=8?['已完成此岗位培训']:[]),...(servicePending(s,'training',kind)?['正在委托培训']:[])],'花1行动与1口粮，使雇员经验+2，上限8；经验8后：普通雇工可播种，农工整地增益+1，工匠可按双份原料批量加工；工资也+1。',(draft,events)=>{draft.economy!.workers[kind]!.experience=Math.min(8,draft.economy!.workers[kind]!.experience+2);events.push({type:'economy-worker',worker:kind,operation:'train',money:0,detail:'经验+2（上限8）'});});
   }
-  add('end','season','结束本季','回合',{ap:0},[],`雇佣与田间先结算，再支付${rules.parameters.foodPerTurn}粮生活；现有可食储备${foodStock(s)}。${s.socialFood?'生产后按生活安排购粮，再进食；实际扣款受当时资金、市场和运输限制。':''}`,()=>{});
+  add('end','season','等到下一季','回合',{ap:0},[],`推进到下一季，按日进食与生长；任何田成熟、缺粮、节气、节日或换季会停下。季末只结算生产、保存损耗和人物时代，不重复进食。现有可食库存${foodStock(s)}批`,()=>{});
   if(e.operations)out.push(...operationsActions(s,rules));
   if(e.shop)out.push(...shopActions(s,rules));
   return [...out,...expeditionActions(s,rules),...workshopActions(s,rules),...towerActions(s,rules)];
@@ -131,21 +130,39 @@ function farmMapActions(s:GameState):ActionDefinition[]{
  const farm=s.economy?.farm;if(!farm)return [];const r=farm.rules,out:ActionDefinition[]=[];
  const event=(d:GameState,ev:import('../model/events.js').GameEvent[],detail:string)=>ev.push({type:'life',personId:d.household.activePersonId,operation:'farm-map',detail});
  for(const p of Object.values(farm.plots)){
-  if(p.kind==='unknown'&&farmNeighbors(p).some(n=>farm.plots[n.id]&&farm.plots[n.id].kind!=='unknown'))out.push(defineAction(s,'economy:farmexplore:'+p.id,'探索 '+p.id,'农业',{time:branchHas(s,'A11')?Math.min(r.exploreTime,r.interactionTime):r.exploreTime,energy:r.exploreEnergy},[],'揭开相邻地块；探索结果永久保留，不提前显示资源。',(d,ev)=>{
+  if(p.kind==='unknown'&&farmNeighbors(p).some(n=>farm.plots[n.id]&&farm.plots[n.id].kind!=='unknown'))out.push(defineAction(s,'economy:farmexplore:'+p.id,'探索 '+p.id,'农业',{time:branchHas(s,'A11')?Math.max(3,r.surveyDays-2):r.surveyDays,energy:r.exploreEnergy},[],'揭开相邻地块；探索结果永久保留，不提前显示资源。',(d,ev)=>{
    exploreFarm(d,p.id,ev);
   }));
-  if(p.kind==='wild')out.push(defineAction(s,'economy:farmreclaim:'+p.id,'开垦 '+p.id,'农业',{time:r.reclaimTime,energy:r.reclaimEnergy,money:r.reclaimMoney},[],'开垦为独立田块。新田手动管理；起始田的公共供水、井泵与持续耕作不自动覆盖新田。',(d,ev)=>{const plot=d.economy!.farm!.plots[p.id];plot.kind='field';plot.field={...blankField(),fertility:plot.fertility??2};event(d,ev,p.id+' 已开垦');}));
+  if(p.kind==='wild')out.push(defineAction(s,'economy:farmreclaim:'+p.id,'开垦 '+p.id,'农业',{time:r.reclaimDays,energy:r.reclaimEnergy,money:r.reclaimMoney},[],'开垦为独立田块。新田手动管理；起始田的公共供水、井泵不自动覆盖新田。',(d,ev)=>{const plot=d.economy!.farm!.plots[p.id];plot.kind='field';plot.field={...blankField(),fertility:plot.fertility??2};event(d,ev,p.id+' 已开垦');}));
   if(p.discovery&&!p.discovery.resolved){
+   const kinds:import('../model/economy.js').FarmProjectKind[]=p.discovery.id==='canal'?['canal']:p.discovery.id==='fallow'?['restore']:p.discovery.id==='woodland'?['timber','clearwood','shelter']:[];
+   for(const kind of kinds){
+    if(p.project&&p.project.kind!==kind)continue;
+    const total=p.project?.total??(kind==='canal'?r.canalDays:kind==='restore'?r.restoreDays:r.woodlandDays),done=p.project?.done??0;
+    const stageEnd=done<total/2?total/2:total;
+    const harvest=Math.min(Infinity,...Object.values(farm.plots).map(t=>plotField(s,t.id)).filter(f=>f?.crop).map(f=>Math.max(0,f!.duration-f!.growth)));
+    const maximum=Math.max(0,Math.floor(Math.min(stageEnd-done,s.life!.timeRemaining,dietView(s)?.days??0,harvest)*2)/2);
+    const options=[...new Set([Math.min(3,maximum),Math.min(7,maximum),maximum])];
+    for(const days of options){
+     const materials=kind==='canal'&&!p.project?missingGoods(s,{wood:r.projectWood}):[];
+     const effect=kind==='canal'?`首段耗${r.projectWood}木材；完成后相邻四格获得2点供水，渠格不再种植`:kind==='restore'?'完成后直接建成肥力3的田':kind==='timber'?`完成后获得${r.timberYield}木材，留下普通荒地`:kind==='clearwood'?'完成后直接建成肥力2的田，不额外获得木材':'完成后相邻四格获得1点保水，林格不再种植';
+     const date=s.life?.calendar?lunarDateAt(s.life.calendar.rules.referenceYear,s.life.calendar.absoluteDay+days).date:'';
+     const definition=defineAction(s,`economy:farmproject:${p.id}-${kind}-${days*2}`,`${FARM_PROJECT_NAMES[kind]} · ${days?`投入${days}天`:'暂缓'}`,'地块工程',{time:days,energy:days?Math.min(6,Math.ceil(days/3)):0},[...materials,...(days<=0?['先收获成熟作物、补给或换季，再继续工程']:[])],`总工期${total}天，已完成${done}天；${done<total/2?'整备':'施工'}阶段。本次至${date}，按当前饮食约需${Number((days*(dietView(s)?.dailyGrain??0)).toFixed(3))}批食材。${effect}。${kind==='canal'||kind==='shelter'?`影响相邻格：${farmNeighbors(p).map(n=>n.id).join('、')}`:'仅改造本格'}。开工后固定用途；进度跨季、换代保留。`,(d,ev)=>workFarmProject(d,p.id,kind,days,total,ev));
+     definition.prepare=(d,ev)=>startFarmProject(d,p.id,kind,total,ev);out.push(definition);
+    }
+   }
+
    const key=p.discovery.id;
    const choice=(id:string,label:string,time:number,energy:number,blockers:string[],description:string,food=0)=>out.push(defineAction(s,`economy:farmstory:${p.id}-${id}`,label,'探索',{time,energy,food},blockers,description,(d,ev)=>resolveFarmDiscovery(d,p.id,id,ev)));
    if(key==='brambles')choice('clear','清理荆棘',r.clearTime,r.clearEnergy,[],'投入劳力清理，此后可以开垦；也可保留并探索旁边。');
    if(key==='seedbag'||key==='heritage')choice('identify','辨种与留种',branchHas(s,'A11')?Math.min(r.identifyTime,r.interactionTime):r.identifyTime,1,branchNeeds(s,['A0']),'辨认一次，领取种子；地块随后可开垦。异穗麦独立留种，不能在集市购买。');
-   if(key==='canal')choice('repair','疏渠归淤',r.clearTime,r.clearEnergy,missingGoods(s,{wood:1}),'耗1木料，恢复土层；此格开垦时肥力为3，不增加水源。');
+
    if(key==='traveler')choice('share','分一份口粮，听旅人讲述',r.interactionTime,0,[],`付${r.storyFood}份即食口粮，回赠${r.discoverySeeds}麦种；不会扣种子当口粮。`,r.storyFood);
    if(key==='shrine')choice('preserve','描下旧界，保留地标',r.interactionTime,0,[],'永久保留此格，不能开垦；周边仍可探索。');
-   if(p.kind==='story')choice('leave',key==='traveler'?'指路告别':'整理为普通荒地',r.interactionTime,0,[],'结束这次事件，放弃奖励，此格可按普通荒地开垦。');
+   if(p.kind==='story'&&!p.project&&key!=='woodland')choice('leave',key==='traveler'?'指路告别':'整理为普通荒地',r.interactionTime,0,[],'结束这次事件，放弃奖励，此格可按普通荒地开垦。');
   }
   if(p.kind!=='field')continue;const field=plotField(s,p.id)!;
+  if(s.life?.calendar&&field.crop&&field.growth<field.duration)out.push(defineAction(s,'economy:wait:'+p.id,'等到 '+p.id+' 收获','日历',{ap:0,time:Math.min(field.duration-field.growth,s.life.calendar.seasonLength-s.life.calendar.day),energy:0},[],'最多等到此田成熟；其他田成熟、缺粮、节气、节日或换季也会提前停下。',()=>{}));
   for(const crop of Object.keys(CROPS) as Crop[]){
    out.push(defineAction(s,`economy:farmplot:${p.id}-${crop}`,`${p.id} ${!field.crop?'播种':field.growth>=field.duration?'收获':'灌溉'}${CROPS[crop].name}`,'农业',{ap:s.economy!.shop&&!field.crop&&equipped(s,'U02')&&s.economy!.shop.seededTurn!==s.clock.absoluteTurn?0:1},[...(field.crop&&field.crop!==crop?['田里是另一种作物']:[]),...(!farm.discovered.includes(crop)?['尚未发现此种子']:[]),...farmBlocker(s,crop,undefined,field)],'只处理指定田块，实际扣种子、水、时间、精力和工具耐用；生长、肥力与留种沿用农业规则。',(d,ev)=>{const start=ev.length;farmWork(d,crop,ev,undefined,plotField(d,p.id)!);for(const e of ev.slice(start))if(e.type==='economy-farm'){e.plotId=p.id;} }));
   }
@@ -160,7 +177,7 @@ function farmMapActions(s:GameState):ActionDefinition[]{
  for(const crop of ['soy','flax'] as const)out.push(defineAction(s,'economy:neighbor:trade-'+crop,`与同门换${CROPS[crop].name}种子`,'同门',{time:r.interactionTime,energy:0},[...available(r.interactionTime),...missingGoods(s,{wheat:r.tradeQuantity}),...((n.goods[CROPS[crop].seed]??0)<r.tradeQuantity?['同门种子存量不足']:[]),...(n.traded===s.clock.absoluteTurn?['本季已交换']:[])],`${r.tradeQuantity}小麦换${r.tradeQuantity}种子；实际从双方独立库存扣除，每季一次。`,(d,ev)=>{use(d,r.interactionTime);const f=d.economy!.farm!,nn=f.neighbor;changeGoods(d,{wheat:r.tradeQuantity},-1,ev,'同门交换');changeGoods(d,{[CROPS[crop].seed]:r.tradeQuantity},1,ev,'同门交换');nn.goods.wheat=(nn.goods.wheat??0)+r.tradeQuantity;nn.goods[CROPS[crop].seed]-=r.tradeQuantity;nn.traded=d.clock.absoluteTurn;if(!f.discovered.includes(crop))f.discovered.push(crop);event(d,ev,`与${person.name}交换种子；发现后可在集市补购`);}));
  out.push(defineAction(s,'economy:neighbor:learn','向同门请教油料与纤维种植','同门',{time:r.exploreTime,energy:r.interactionTime},[...available(r.exploreTime,r.interactionTime),...(trust<1?['先与同门相识']:[]),...branchNeeds(s,['A0']),...(branchHas(s,'A4')?['已经掌握']:[]),...(!branchHas(s,'A4',npc)?['同门尚未掌握']:[])],'双方投入劳动，学习A4；不赠送种子，也不复制其他课程。',(d,ev)=>{use(d,r.exploreTime,r.interactionTime);d.economy!.branches!.learned[d.household.activePersonId].push('A4');ev.push({type:'branch',operation:'learned',node:'A4',detail:`向同门${person.name}学会油料与纤维种植`});}));
  for(const p of Object.values(farm.plots).filter(p=>p.kind==='field')){
-  const f=plotField(s,p.id)!;out.push(defineAction(s,'economy:neighbor:help-'+p.id,'请同门给 '+p.id+' 浇水','同门',{time:r.interactionTime,energy:0},[...available(r.exploreTime,r.exploreEnergy),...(n.helped===s.clock.absoluteTurn?['本季已请求帮助']:[]),...(!f.crop||f.growth>=f.duration||s.location.rain+f.moisture>=2?['此田无需灌溉']:[])],'请求不等于指派：关系不足或同门忙碌会婉拒；接受时耗同门自己的时间、精力与私井供水，每季最多帮助一块田。',(d,ev)=>{const nn=d.economy!.farm!.neighbor;nn.helped=d.clock.absoluteTurn;if(trust<1||nn.busy){event(d,ev,`${person.name}婉拒：${trust<1?'还不熟悉':'本季忙着照料自己的田'}`);return;}use(d,r.exploreTime,r.exploreEnergy);const f=plotField(d,p.id)!;f.moisture+=r.helpWater;f.tended=d.clock.absoluteTurn;event(d,ev,`${person.name}用自家供水照料${p.id}，补水${r.helpWater}`);}));
+  const f=plotField(s,p.id)!;out.push(defineAction(s,'economy:neighbor:help-'+p.id,'请同门给 '+p.id+' 浇水','同门',{time:r.interactionTime,energy:0},[...available(r.exploreTime,r.exploreEnergy),...(n.helped===s.clock.absoluteTurn?['本季已请求帮助']:[]),...(!f.crop||f.growth>=f.duration||s.location.rain+f.moisture+fieldWaterSupport(s,f)>=2?['此田无需灌溉']:[])],'请求不等于指派：关系不足或同门忙碌会婉拒；接受时耗同门自己的时间、精力与私井供水，每季最多帮助一块田。',(d,ev)=>{const nn=d.economy!.farm!.neighbor;nn.helped=d.clock.absoluteTurn;if(trust<1||nn.busy){event(d,ev,`${person.name}婉拒：${trust<1?'还不熟悉':'本季忙着照料自己的田'}`);return;}use(d,r.exploreTime,r.exploreEnergy);const f=plotField(d,p.id)!;f.moisture+=r.helpWater;f.tended=d.clock.absoluteTurn;event(d,ev,`${person.name}用自家供水照料${p.id}，补水${r.helpWater}`);}));
  }
  return out;
 }

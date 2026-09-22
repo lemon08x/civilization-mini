@@ -1,3 +1,5 @@
+import {dietView} from './social-food.js';
+import {electricOnline} from '../model/electric.js';
 import {eraCard} from './eras.js';
 import { ancestorKnows } from './ancestry.js';
 import { nodeInEra } from '../model/branches.js';
@@ -145,7 +147,7 @@ export function consultableNodes(s:GameState,elder:Person):string[] {
 export function lifeEvent(events:GameEvent[],personId:string,operation:string,detail:string):void {events.push({type:'life',personId,operation,detail});}
 const physical=new Set(['cook','farmrare','farmstory','farmplot','farmexplore','farmreclaim','farmfertilize','farm','gather','work','build','process','finish','fertilize','nutrient','reclaim','expeditionship']);
 const learning=new Set(['study','research','tuition','branchlearn']);
-const management=new Set(['channel','hire','checkout','assign','resumeplans','charter','foodplan','farmplan','farmcycle','productionplan','supplyplan','salesplan','careplan','mineplan','steamplan']);
+const management=new Set(['channel','hire','checkout','assign','resumeplans','charter','foodplan','farmplan','productionplan','supplyplan','salesplan','careplan','mineplan','steamplan']);
 // Cost categories describe personal involvement, not the number of UI clicks.
 export function lifeCost(s:GameState,id:string,oldAp:number,useLearningPoint=true):{time:number;energy:number} {
   const [,op,target]=id.split(':');
@@ -192,7 +194,7 @@ export function settleLife(s:GameState,missing:number,events:GameEvent[],foodReq
     const personMissing=independent?0:missing;
     const deficit=Math.min(1,personMissing/Math.max(1,foodRequired));
     const damage=renewal?Math.ceil(r.hungerDamage*deficit*Math.min(1,Math.max(0,s.household.hardship-renewal.graceSeasons)/2)):r.hungerDamage;
-    v.health=Math.max(0,Math.min(healthCeiling(v,r),v.health+(personMissing?-damage:(renewal?.fedHealth??1))));
+    v.health=Math.max(0,Math.min(healthCeiling(v,r),v.health+(s.life?.calendar?(personMissing?0:1):(personMissing?-damage:(renewal?.fedHealth??1)))));
     const recovery=renewal?Math.max(1,Math.ceil(r.recovery*(1-deficit*0.75)))+(hasTalent(v,'resilient')?1:0):missing?0:Math.max(1,Math.floor(r.recovery*v.health/100))+(hasTalent(v,'resilient')?1:0);
     v.energy=Math.min(energyCeiling(v),v.energy+recovery);
     if(v.health===0||v.ageSeasons>=v.lifespanSeasons){v.alive=false;v.energy=0;lifeEvent(events,person.id,'death',`${person.name}因${v.health===0?'健康耗尽':'自然衰老'}离世`);}
@@ -323,7 +325,7 @@ export function recordSeasonChoice(s:GameState,id:string,events:GameEvent[]):voi
   const v=activePerson(s).vitality,e=v?.experiences;if(!e)return;
   const op=id.split(':')[1];
   if(['end','erasettle','retire','sectswitch'].includes(op)||id==='handover')return;
-  if(learning.has(op)&&e.learning>0&&lifeCost(s,id,1,false).time>1){
+  if(learning.has(op)&&!s.life?.calendar?.study[s.household.activePersonId+':'+id.split(':')[2]]&&e.learning>0&&lifeCost(s,id,1,false).time>1){
     e.learning--;
     lifeEvent(events,s.household.activePersonId,'learning-point','消耗1学习点，基础学习时间减少1；剩余'+e.learning+'点');
   }
@@ -424,4 +426,27 @@ export function settleSeasonEncounter(s:GameState,missing:number,events:GameEven
   lifeEvent(events,p.id,'season-encounter',`${p.name}：${e.lastEvent}`);
   characterMemory(s,p.id,`encounter:${s.clock.absoluteTurn}`,`${title}：${story} ${effect}。`,good?'这份经历让人欣慰。':'心中仍有失落，想重新整理生活。',events);
   for(const person of Object.values(s.persons)){const x=person.vitality?.experiences;if(x){x.actions=[];x.contacts=[];}}
+}
+
+/** Calendar quotes use half-days; bodily effort remains a separate resource. */
+export function calendarCost(s:GameState,id:string,cost:{time:number;energy:number}) {
+  const c=s.life?.calendar;if(!c)return cost;
+  const op=id.split(':')[1];
+  if(['farmproject','farmexplore','farmreclaim','wait','diet','branchlearn','cook'].includes(op))return cost;
+  let days=cost.time*c.rules.actionDaysPerUnit;
+  if(['farm','farmplot','farmrare'].includes(op))days=cost.time>0?Math.min(1,days):0;
+  if(['farmfertilize','fertilize','rest'].includes(op))days=cost.time>0?0.5:0;
+  if(learning.has(op))days=cost.time*c.rules.studyDaysPerUnit;
+  return {...cost,energy:electricOnline(s,'LAMP')?Math.round(cost.energy*c.rules.lampEnergyPercent)/100:cost.energy,time:days>0?Math.max(0.5,Math.ceil(days*2)/2):0};
+}
+export {calendarView} from './calendar.js';
+export function studyQuote(s:GameState,node:string) {
+  const c=s.life?.calendar,key=s.household.activePersonId+':'+node;
+  const raw=sectCosts(s,'economy:branchlearn:'+node,lifeCost(s,'economy:branchlearn:'+node,1));
+  const total=c?.study[key]?.total??Math.max(0.5,Math.ceil(raw.time*(c?.rules.studyDaysPerUnit??1)*2)/2);
+  const done=c?.study[key]?.done??0;
+  const fields=s.economy?[s.economy.field,...Object.values(s.economy.farm?.plots??{}).flatMap(p=>p.field?[p.field]:[])]:[];
+  const harvest=Math.min(Infinity,...fields.filter(f=>f.crop&&f.growth<f.duration).map(f=>f.duration-f.growth));
+  const time=c?Math.max(0,Math.floor(Math.min(total-done,c.rules.workChunkDays,s.life!.timeRemaining,harvest,dietView(s)?.days??0)*2)/2):raw.time;
+  return {key,total,done,time,energy:raw.energy};
 }

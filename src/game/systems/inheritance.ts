@@ -12,11 +12,13 @@ export function handover(state: GameState, rules: Ruleset, events: GameEvent[]):
   if(state.sect){
     const ids=sectSuccessors(state);if(!ids.length)throw new Error('自己的弟子须成年且在世');
     const from=state.household.activePersonId;state.sect.current=[ids[0],state.sect.current[1]];selectSectPerson(state,ids[0]);
-    state.clock.generation++;state.clock.turn=1;state.clock.absoluteTurn++;state.status='active';
+    const midSeason=!!state.life?.calendar&&state.life.calendar.day<state.life.calendar.seasonLength;
+    state.clock.generation++;state.clock.turn=1;if(!midSeason)state.clock.absoluteTurn++;state.status='active';
+    if(midSeason)state.life!.timeRemaining=state.life!.calendar!.seasonLength-state.life!.calendar!.day;
     delete state.life!.pendingRetirement;handoverOperations(state,events);
     if(state.economy?.industry)for(const i of Object.values(state.economy.industry.instances))if(i?.operator==='self')i.enabled=false;
     events.push({type:'handed-over',generation:state.clock.generation,fromPersonId:from,personId:ids[0],mastered:[...(state.economy!.branches!.learned[ids[0]]??[])],learning:{}});
-    newSeason(state,rules,events);return;
+    if(!midSeason)newSeason(state,rules,events);return;
   }
   const child = heir(state), fromPersonId = state.household.activePersonId;
   if(state.economy?.lineage){

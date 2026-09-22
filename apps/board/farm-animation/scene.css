@@ -77,6 +77,12 @@
 .pixi-farm-viewport{background:#e8ecdf}.pixi-farm-layout{grid-template-columns:minmax(0,1fr) 280px}.farm-ink-title{position:absolute;left:26px;top:24px;pointer-events:none;color:#536f5d}.farm-ink-title span{display:block;font-size:12px;letter-spacing:2px;color:#788a73}.farm-ink-title strong{display:block;font:32px/1.5 SimSun,serif;letter-spacing:8px;margin-top:5px;font-weight:400}.pixi-map-tools{top:auto;bottom:16px;left:22px;right:18px;align-items:center;color:#657760}.pixi-map-tools>span{background:#f7f6e5bc;font-size:12px;letter-spacing:1px}.pixi-map-tools>div{display:flex;gap:4px;background:#f7f6e5bc;padding:5px}.pixi-map-tools button{min-height:32px;background:#faf8ed;border:1px solid #d6ddcb;border-radius:5px;font-size:12px;color:#4d6956;padding:4px 9px}.pixi-farm-inspector{background:#faf7ed;border-color:#d9dfce;padding:24px 22px}.pixi-farm-inspector>h3{font-size:26px;color:#405c4a;letter-spacing:2px;margin-bottom:18px}.pixi-farm-inspector .game-action{background:#edf0df;border-color:#b8c6a7;color:#365a41}.pixi-farm-inspector .eyebrow{color:#8c947c;letter-spacing:2px}.pixi-farm .farm-effect-layer{bottom:66px}.pixi-farm-heading h2{letter-spacing:2px}
 .farm-item-art.farm-painted-art{width:120px;height:112px;border-radius:0;background:none;justify-content:flex-start}
 .farm-painted-art img{display:block;width:112px;height:112px;object-fit:contain;mix-blend-mode:multiply}
+.farm-map-quick{position:absolute;z-index:6;transform:translate(-50%,-118%);max-width:210px;pointer-events:auto}
+.farm-map-quick .action-option{margin:0}
+.farm-map-quick .game-action{display:flex;align-items:center;gap:6px;width:auto;min-height:0;padding:7px 14px;border-radius:999px;background:#fff8e9f2;border:1px solid #b8a96f;box-shadow:0 5px 14px #334b2630;font-size:13px;color:#4c5e38}
+.farm-map-quick .action-cost{display:flex;gap:5px;font-size:11px;color:#8a8468}
+.farm-map-quick .farm-choice-art{width:30px;height:30px;margin-right:2px}
+.farm-map-quick .blocked-reason{display:none}
 .farm-room-hero>.farm-painted-art{width:144px;height:128px}
 .farm-room-hero>.farm-painted-art img{width:136px;height:128px}
 .farm-choice-art{display:inline-block;width:56px;height:56px;object-fit:contain;flex-shrink:0;mix-blend-mode:multiply;vertical-align:middle;margin-right:8px}
@@ -99,3 +105,38 @@
 .farm-map-dock .action-option{margin:0;flex:1;min-width:165px;max-width:260px}.farm-map-dock .game-action{width:100%;padding:9px 12px;min-height:0;background:#eaf0df;border-color:#b9c7ab;color:#36523b}.farm-map-dock .action-name{display:flex;align-items:center}.farm-map-dock .farm-choice-art{width:42px;height:42px}.farm-map-dock .blocked-reason{font-size:12px;margin:5px 0 0;line-height:1.5}
 .farm-dock-extras{display:flex;gap:20px;flex-wrap:wrap;margin-top:10px;font-size:12px}.farm-dock-extras details{margin:0;border:0;padding:0}.farm-dock-extras details[open]{flex-basis:100%;padding:12px 0;border-top:1px solid #d5ddc9}.farm-dock-extras summary{color:#62745b;cursor:pointer}.farm-dock-extras p{font-size:13px;line-height:1.75}.farm-dock-extras .pixi-seed-bag{margin:8px 0;padding:0;border:0}.farm-dock-options{justify-content:flex-start;margin-top:12px}
 .pixi-farm .farm-live-footer{display:flex;align-items:center;gap:14px;flex-wrap:wrap;min-height:76px}.farm-status-tags{display:flex;gap:8px;flex-wrap:wrap;flex:1}.farm-status-tags>span{background:#e9eedf;color:#516847;padding:6px 10px;border-radius:6px;font-size:12px}.farm-live-footer .pixi-season-end{margin-left:auto}.farm-recent-feedback{position:relative}.farm-recent-feedback:not(:has(.farm-effect-layer:not(:empty))){display:none}.farm-recent-feedback summary{cursor:pointer;color:#607451}.farm-live-footer .farm-effect-layer:not(:empty){position:static;max-width:520px;font-size:12px;box-shadow:none}.farm-live-footer .farm-effect-layer>.farm-event-art{width:56px}
+/* Always-visible discovery vignette: one title, one story, adjacent choices. */
+.farm-story-dock{padding:18px;animation:farm-story-enter .28s ease-out both}
+.farm-story-layout{display:grid;grid-template-columns:160px minmax(0,1fr);gap:24px;align-items:start}
+.farm-story-picture{position:relative;overflow:hidden;border-radius:9px;background:#e5e7d5}
+.farm-story-picture .farm-event-art{width:160px;height:160px;aspect-ratio:auto;border-radius:9px}
+.farm-story-picture>span:last-child{position:absolute;bottom:10px;left:10px;padding:3px 8px;border-radius:4px;background:#fbf8eceb;color:#536848;font-size:11px;letter-spacing:2px}
+.farm-story-meta{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#78836e;font-size:12px}
+.farm-story-state{background:#e7edde;color:#5a7350;border-radius:4px;padding:3px 9px;white-space:nowrap}
+.farm-story-content h3{font:25px/1.4 SimSun,serif;color:#365543;margin:4px 0 10px;letter-spacing:2px}
+.farm-story-content .farm-story-prose{font-size:14px;line-height:1.9;color:#4d6250;margin:0;max-width:76ch}
+.farm-story-outcome{display:flex;gap:10px;align-items:baseline;padding:8px 12px;background:#eef0e3;border-radius:6px;color:#54684c;font-size:13px;margin:12px 0 0}
+.farm-story-outcome>span{font-size:11px;letter-spacing:2px;white-space:nowrap;color:#7a886c}
+.farm-story-choices{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.farm-story-choices .action-option{max-width:350px;min-width:180px}
+.farm-story-choices>.game-action{width:auto;min-width:170px}
+.farm-story-choices .game-action{transition:background .18s,box-shadow .18s,transform .18s}
+.farm-story-choices .game-action:not(:disabled):hover{background:#dfe9d3;box-shadow:0 3px 10px #405c4014;transform:translateY(-2px)}
+.farm-story-source{display:block;margin-top:12px;color:#7d8475;font-size:11px;line-height:1.6}
+@keyframes farm-story-enter{from{opacity:.3;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.farm-story-dock{animation:none}.farm-story-choices .game-action{transition:none}.farm-story-choices .game-action:not(:disabled):hover{transform:none}}
+/* Keep the field canvas independent of event and action card height. */
+.farm-layout-floating>.pixi-farm-viewport{height:clamp(480px,58vh,680px)}
+.farm-layout-floating>.farm-map-dock{position:relative;inset:auto;margin:16px 24px;max-height:none;overflow:visible;box-shadow:0 4px 14px #344a2410}
+.farm-layout-floating .pixi-map-tools{z-index:1}
+.farm-water-guide{margin-top:16px;padding:15px 18px;background:#edf1e7;border-radius:9px;border-left:3px solid #8fa787;color:#50674d}
+.farm-water-heading{display:flex;align-items:baseline;gap:14px}.farm-water-heading strong{font-size:14px}.farm-water-heading>span{font-size:12px;color:#6d7d66}
+.farm-water-flow{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.farm-water-flow>span{background:#fafbf3;padding:7px 12px;border-radius:6px;font-size:13px}.farm-water-flow b{font-variant-numeric:tabular-nums;color:#36543f}
+.farm-water-guide p{font-size:12px;line-height:1.75;margin:5px 0}.farm-water-guide small{display:block;font-size:12px;line-height:1.75;color:#718069}.farm-water-guide .farm-water-blocked{color:#936d46}
+
+.farm-diet-plan{padding:18px 22px;margin:16px 0 24px;background:#f2ecdc;border:1px solid #d8cbb3;border-radius:12px}
+.pixi-season-end{display:flex;gap:8px;flex-wrap:wrap;align-items:start}
+.farm-diet-plan .farm-dock-options{display:flex;gap:12px;margin-top:14px}
+.farm-diet-plan .farm-status-tags{margin:12px 0}
+.study-progress{color:#746244;font-size:13px}
+.course-inspector>progress{width:100%;accent-color:#77815a}

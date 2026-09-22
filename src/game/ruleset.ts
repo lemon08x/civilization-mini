@@ -1,3 +1,4 @@
+import {CALENDAR_BOUNDS,type CalendarRules} from './model/life.js';
 import {ELECTRIC_BOUNDS,type ElectricRules} from './model/electric.js';
 import {FARM_BOUNDS,type FarmRules} from './model/economy.js';
 import type { EraRules } from './model/eras.js';
@@ -30,6 +31,7 @@ export interface Technology {
   helpfulPrerequisites?: string[];
 }
 export interface Ruleset {
+  calendar?:CalendarRules;
   farm?:FarmRules;
   schemaVersion: 1;
   id: string;
@@ -81,6 +83,9 @@ const parameterKeys = ['actionsPerTurn', 'turnsPerGeneration', 'generations', 'i
 export function validateRuleset(value: unknown): Ruleset {
   if (!isRecord(value) || value.schemaVersion !== 1 || typeof value.id !== 'string' || typeof value.rulesVersion !== 'string' || !isRecord(value.parameters) || !isRecord(value.parameterBounds) || !isRecord(value.scenarios) || !Array.isArray(value.technologies) || !strings(value.worldTechnologies) || !isRecord(value.practiceNames)) throw new Error('规则配置格式不完整');
   if (value.rulesVersion !== '0.27.0') throw new Error('只支持规则 0.27.0');
+  if(!isRecord(value.calendar)||Object.keys(value.calendar).length!==Object.keys(CALENDAR_BOUNDS).length||Object.entries(CALENDAR_BOUNDS).some(([k,[min,max]])=>typeof (value.calendar as Record<string,unknown>)[k]!=='number'||!Number.isFinite(Number((value.calendar as Record<string,unknown>)[k]))||Number((value.calendar as Record<string,unknown>)[k])<min||Number((value.calendar as Record<string,unknown>)[k])>max))throw new Error('此存档不含当前农历日历，请新开游戏；旧档不迁移');
+  if(!Number.isInteger(value.calendar.referenceYear))throw new Error('农历参照年须为整数');
+
   if(!isRecord(value.farm)||Object.keys(value.farm).length!==Object.keys(FARM_BOUNDS).length||Object.entries(FARM_BOUNDS).some(([key,[min,max]])=>!Number.isInteger((value.farm as Record<string,unknown>)[key])||Number((value.farm as Record<string,unknown>)[key])<min||Number((value.farm as Record<string,unknown>)[key])>max))throw new Error('缺少有效的地块与同门规则，请新开游戏；旧档不迁移');
   if (!isRecord(value.production)) throw new Error('必须提供完整生产配置');
   if (['0.3.0', '0.4.0', '0.5.0', '0.6.0', '0.7.0', '0.8.0', '0.9.0', '0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0','0.15.0','0.16.0','0.17.0','0.18.0','0.19.0','0.20.0','0.21.0','0.22.0','0.23.0','0.24.0','0.25.0','0.26.0','0.27.0'].includes(value.rulesVersion) !== (value.technologyFeedback !== undefined)) throw new Error('科技反馈机制与规则版本不匹配');
