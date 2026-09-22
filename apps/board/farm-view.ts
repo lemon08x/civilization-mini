@@ -15,8 +15,22 @@ const projectChoices:Record<string,string>={},projectDurations:Record<string,str
 export function selectFarmProject(kind:string){projectChoices[selected]=kind;delete projectDurations[selected];}
 export function selectFarmProjectDuration(id:string){projectDurations[selected]=id;}
 function projectSketch(kind:string):string {
- if(kind==='pond'||kind==='drain')return `<span class="farm-route-symbol" aria-hidden="true">${kind==='pond'?'塘':'沟'}</span>`;
+ if(kind==='pond'||kind==='drain')return landArt(kind,'farm-route-sketch');
  return `<img class="farm-route-sketch" src="/illustrations/farm-project-${kind}-v2-ui.webp" alt="" width="320" height="320">`;
+}
+const landFrames:Record<string,number>={sand:0,loam:1,clay:2,low:3,flat:4,high:5,dry:6,parched:7,moist:8,wet:9,flood:10,pond:11,drain:12,canal:13,shelter:14,fertility:15};
+function landArt(key:string,extra=''):string {
+ const i=landFrames[key]??1;
+ return `<span class="farm-land-art ${extra}" style="background-position:${i%4*100/3}% ${Math.floor(i/4)*100/3}%" aria-hidden="true"></span>`;
+}
+function landProfile(p:NonNullable<NonNullable<FarmGame['economy']>['farm']>['plots'][number]):string {
+ if(p.kind==='unknown'||!p.land)return '';
+ const l=p.land;
+ const property=(art:string,label:string,value:string,note:string)=>`<div class="farm-land-property">${landArt(art)}<div><small>${label}</small><strong>${esc(value)}</strong><span>${esc(note)}</span></div></div>`;
+ const water=['dry','parched','moist','wet','flood'][l.water]??'moist';
+ const fertility=p.field?.fertility??p.fertility;
+ const service=l.service;
+ return `<section class="farm-land-profile" aria-label="${p.id}土地属性"><div class="farm-land-properties">${property({'沙质':'sand','壤质':'loam','黏质':'clay'}[l.soil]??'loam','土质',l.soil+'土',`保水${l.retention} · 排水${l.drainage}`)}${property({'低':'low','平':'flat','高':'high'}[l.elevation]??'flat','地势',l.elevation+'地',`${l.areaM2} 平方米`)}${property(water,'当前水分',l.waterName,`第 ${l.water+1} / 5 档`)}${fertility!==undefined?property('fertility','土地肥力',`${fertility} / 3`,'随田间管理变化'):''}</div>${p.improvement?`<div class="farm-land-facility">${landArt(p.improvement)}<div><strong>${IMPROVEMENT_NAMES[p.improvement]}</strong><span>${service?`本旬剩余 ${service.remaining} / ${service.limit} 次 · ${service.nextCycleIn} 天后恢复额度`:'减缓相邻田块失水'}</span>${service&&p.improvement==='pond'?`<span>储水${service.storageName} · 可补 ${service.stored} / ${service.capacity} 次</span>`:''}${service&&p.improvement==='drain'?`<span>${service.outlet?'排水出口通畅':'无有效排水出口'}</span>`:''}</div></div>`:''}</section>`;
 }
 export function selectFarmStock(id:string){stockSelection=id;}
 export const selectedFarmPlot=()=>selected;
@@ -189,6 +203,7 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing='
   }
 
  }
+ if(panel==='field')body=landProfile(p)+body;
  if(panel==='manufacture')body=manufacturing;
  if(panel==='home'){
   const cooking=g.actions.filter(a=>a.id.startsWith('economy:cook:'));
