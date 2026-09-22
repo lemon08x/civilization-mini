@@ -7,17 +7,10 @@ export interface SaveMeta {
   id: string;
   name: string;
   savedAt: string;
-  scenarioId: string;
+  frameworkId: string;
   status: string;
   turn: number;
 }
-
-export const SCENARIO_NAMES: Record<string, string> = {
-  river: '河渠农地',
-  'clay-valley': '黏土河谷',
-  woodland: '林地聚落',
-  dry: '缺水聚落',
-};
 
 function readIndex(): SaveMeta[] {
   try {
@@ -54,7 +47,7 @@ export function writeSave(id: string, session: Session, name?: string): void {
     id,
     name: name ?? existing?.name ?? '存档',
     savedAt: new Date().toISOString(),
-    scenarioId: session.record.manifest.scenarioId,
+    frameworkId: session.record.manifest.frameworkId,
     status: session.state.status,
     turn: session.state.clock.absoluteTurn,
   };

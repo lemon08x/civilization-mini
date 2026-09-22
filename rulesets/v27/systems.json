@@ -1,4 +1,28 @@
 {
+  "farm": {
+    "surveyDays": 5,
+    "reclaimDays": 10,
+    "canalDays": 48,
+    "restoreDays": 32,
+    "woodlandDays": 40,
+    "projectWood": 2,
+    "timberYield": 6,
+    "exploreTime": 2,
+    "exploreEnergy": 2,
+    "reclaimTime": 3,
+    "reclaimEnergy": 2,
+    "reclaimMoney": 4,
+    "discoverySeeds": 2,
+    "tradeQuantity": 2,
+    "neighborStock": 6,
+    "interactionTime": 1,
+    "helpWater": 2,
+    "clearTime": 3,
+    "clearEnergy": 2,
+    "identifyTime": 2,
+    "storyFood": 1,
+    "rareBonus": 1
+  },
   "economy": {
     "wage": 1,
     "hireCost": 2,
@@ -37,7 +61,7 @@
     "eventTalentPercent": 5,
     "eventPersonalityThreshold": 4,
     "timePerSeason": 12,
-    "baseEnergy": 10,
+    "baseEnergy": 16,
     "recovery": 3,
     "restRecovery": 5,
     "careRecovery": 8,
@@ -89,6 +113,7 @@
   },
   "eras": {
     "generationLimit": 5,
+    "timeCarryPercent": 50,
     "rewardDivisor": 12,
     "dungeonTarget": 6
   },
@@ -128,5 +153,27 @@
     "crisisFee": 8,
     "crisisPower": 2,
     "crisisScore": 10
+  },
+  "calendar": {
+    "businessCycleDays": 90,
+    "waterRetentionDays": 90,
+    "weatherDays": 7,
+    "termGoodPercent": 65,
+    "termGoods": 1,
+    "termEnergy": 3,
+    "daysPerWeek": 7,
+    "actionDaysPerUnit": 0.5,
+    "studyDaysPerUnit": 7,
+    "grainPerDay": 0.025,
+    "woodPerDay": 0.005,
+    "heartyMultiplier": 1.5,
+    "dailyRecovery": 1,
+    "heartyRecovery": 1,
+    "mealRecovery": 1,
+    "hungerDamagePerDay": 1,
+    "harvestGraceDays": 7,
+    "workChunkDays": 7,
+    "lampEnergyPercent": 85,
+    "referenceYear": 2024
   }
 }

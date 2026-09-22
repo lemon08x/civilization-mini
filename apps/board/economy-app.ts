@@ -1,6 +1,6 @@
-import {farm} from './farm-view.js';
-import {bindFarmScene,playFarmFeedback} from './farm-animation/controller.js';
-import {erasPage} from './eras-view.js';
+import { atlasPage, bindAtlas } from './atlas-view.js';
+import {farm,selectFarmPanel,type FarmPanel} from './farm-view.js';
+import {bindFarmScene,playFarmFeedback,type FarmFeedback} from './farm-animation/controller.js';
 import {socialFoodPage} from './social-food-view.js';
 import { cultivationPage, actionButton, humanScreen, energyPage, confirmKind, confirmContent } from './human-view.js';
 import type { Recap } from './human-view.js';
@@ -25,7 +25,10 @@ if(!requested){location.replace('/start');throw new Error('missing save');}
 const saveId=requested;
 const loaded=loadSave(saveId);
 if(!loaded){location.replace('/start');throw new Error('missing save');}
-let failed=false,busy=false,page='聚落',guide=false,selectedCultivation='',selectedCourse='',selectedProduct='',selectedSystem='',selectedDevice='',filter='',shopCategory='物资';
+let failed=false,busy=false,page='家人',guide=false,selectedCultivation='',selectedCourse='',selectedProduct='',selectedSystem='',selectedDevice='',filter='',shopCategory='物资';
+let selectedTechStage=-1;
+const manufactureScenes=['农业','工坊','贸易','资本'];
+function openManufacture(stage:number):void {page=manufactureScenes[stage]??'农业';if(page==='农业')selectFarmPanel('manufacture');}
 let recap:Recap|null=null,pendingAction='';
 let feedbackTimer:ReturnType<typeof setTimeout>|undefined;
 function sectFeedback(id:string,lines:string[]):void {
@@ -39,7 +42,7 @@ function sectFeedback(id:string,lines:string[]):void {
   target?.classList.add('sect-action-flash');
   feedbackTimer=setTimeout(()=>{box.hidden=true;},5000);
 }
-let session=await createSession({runId:saveId,ruleset:rules,seed:17,scenarioId:'river'});
+let session=await createSession({runId:saveId,ruleset:rules,seed:17,frameworkId:'riverine'});
 const error=(message:string)=>{$('error').hidden=!message;$('error').textContent=message;if(message)$('error').focus();};
 try{session=parseSession(loaded);if(session.record.manifest.ruleset.rulesVersion!==rules.rulesVersion)throw new Error('只接受当前规则；请另开新局');}catch(e){failed=true;error('当前存档无法读取，请新开局：'+(e as Error).message);}
 function feedback(e:GameEvent):string {
@@ -60,13 +63,13 @@ function feedback(e:GameEvent):string {
   if(e.type==='economy-built')return `${PRODUCTS.find(p=>p.id===e.product)?.name}已制造安装，耐用${e.durability}。`;
   if(e.type==='economy-equipment-used')return `${PRODUCTS.find(p=>p.id===e.product)?.name}生效，剩余${e.remaining}次。`;
   if(e.type==='economy-trade')return `${e.operation==='buy'?'购入':'交付'}${e.amount}${GOODS[e.good]?.name}，${e.money}钱。`;
-  if(e.type==='economy-farm')return `${e.actor}：${{sow:'播种',harvest:'收获',tend:'田间管理',pump:'自动灌溉',waiting:'持续耕作未能执行'}[e.operation]}${CROPS[e.crop as keyof typeof CROPS]?.name??e.crop}${e.operation==='harvest'?' '+e.amount:''}`;
-  if(e.type==='economy-crop-growth')return `${CROPS[e.crop as keyof typeof CROPS].name}生长${e.growth}季，累计天气胁迫${e.stress}。`;
+  if(e.type==='economy-farm')return `${e.plotId?e.plotId+' · ':''}${e.actor}：${{sow:'播种',harvest:'收获',tend:'田间管理',pump:'自动灌溉',waiting:'持续耕作未能执行'}[e.operation]}${CROPS[e.crop as keyof typeof CROPS]?.name??e.crop}${e.operation==='harvest'?' '+e.amount:''}`;
+  if(e.type==='economy-crop-growth')return `${CROPS[e.crop as keyof typeof CROPS].name}生长${e.growth}天，累计天气胁迫${e.stress}。`;
   if(e.type==='economy-process')return `${e.actor}${e.stage==='start'?'开工':'完成'}${PROCESSES.find(p=>p.id===e.recipe)?.name}。`;
   if(e.type==='economy-knowledge')return `${e.operation==='archive'?'留存家族记录':'传播地区知识'}：${SUBJECT_NAMES[e.subject as keyof typeof SUBJECT_NAMES]} ${e.level}阶。`;
   if(e.type==='economy-region')return `地区${e.industry==='iron'?'铁料':'纤维'}供应形成，采购价格下降。`;
   if(e.type==='food-purchased')return `买入${e.amount}粮${e.money?'，支付'+e.money+'钱':''}。`;
-  if(e.type==='season-settled')return `季末消耗${e.consumed}粮，缺口${e.missing}。`;
+  if(e.type==='season-settled')return `本季按日累计消耗${Number(e.consumed.toFixed(3))}批食物，累计缺口${Number(e.missing.toFixed(3))}；季末不重复扣粮。`;
   if(e.type==='food-spoiled')return `保存损耗${e.amount}粮，保护容量${e.protected}。`;
   if(e.type==='income')return `收入${e.amount}钱。`;
   if(e.type==='technology-victory')return `家族发展胜利：${e.mastered}/${e.total}项知识与实际成果均已达标。`;
@@ -82,7 +85,7 @@ function recapFor(id:string,lines:string[]):Recap|null {
 function focusKey():string {
   const el=document.activeElement as HTMLElement|null;
   if(!el)return '';
-  for(const attr of ['data-action','data-page','data-cultivation','data-course','data-product','data-recipe','data-system','data-device','data-shop-category','data-guide','id'] as const){
+  for(const attr of ['data-action','data-page','data-cultivation','data-course','data-course-stage','data-manufacture-stage','data-product','data-recipe','data-system','data-device','data-shop-category','data-guide','id'] as const){
     const value=el.getAttribute(attr); if(value)return attr+'='+value;
   }
   return '';
@@ -117,7 +120,16 @@ async function act(id:string){
     if(next.record.entries.length>before)sectFeedback(id,lines);
     if(page==='农业'&&next.record.entries.length>before){
       const events=next.record.entries.slice(before).flatMap(entry=>entry.events);
-      playFarmFeedback(document,events.flatMap(event=>event.type==='economy-farm'&&['sow','harvest','tend'].includes(event.operation)?[{kind:event.operation as 'sow'|'harvest'|'tend',label:feedback(event)}]:[]));
+      const cropName=(id:string)=>CROPS[id as keyof typeof CROPS]?.name??id;
+      playFarmFeedback(document,events.flatMap<FarmFeedback>(event=>{
+        if(event.type==='economy-farm'&&['sow','harvest','tend'].includes(event.operation))
+          return [{kind:event.operation as 'sow'|'harvest'|'tend',label:feedback(event),plotId:event.plotId,float:event.operation==='harvest'?`+${event.amount} ${cropName(event.crop)}`:event.operation==='sow'?`播种 ${cropName(event.crop)}`:'田间养护'}];
+        if(event.type==='economy-crop-growth')
+          return [{kind:'grow' as const,label:feedback(event),crop:event.crop,float:`${cropName(event.crop)}生长`}];
+        if(event.type==='life'&&event.operation==='farm-map'||event.type==='branch'&&id.startsWith('economy:neighbor:'))
+          return [{kind:id.startsWith('economy:farmreclaim:')?'reclaim' as const:id.startsWith('economy:farmexplore:')?'explore' as const:id.startsWith('economy:farmstory:')?'discovery' as const:'notice' as const,label:feedback(event),plotId:/^(p\d+q\d+)/.exec(event.detail)?.[1]}];
+        return [];
+      }));
     }
   }catch(e){error((e as Error).message);}
   finally{busy=false;$('app').removeAttribute('aria-busy');}
@@ -125,8 +137,8 @@ async function act(id:string){
 function bindApp():void {
 $('export').onclick=()=>download('economy-run.json',{record:session.record,state:session.state});
 $('import').onchange=async ev=>{const file=(ev.target as HTMLInputElement).files?.[0];if(!file||busy)return;busy=true;try{const value=JSON.parse(await file.text());const next=parseSession(value);if(next.record.manifest.ruleset.rulesVersion!==rules.rulesVersion)throw new Error('仅导入当前规则存档');const id=crypto.randomUUID();writeSave(id,next,`导入 · ${new Date().toLocaleString()}`);location.assign('/play?save='+encodeURIComponent(id));}catch(e){error((e as Error).message);busy=false;}};
-  bindFarmScene(document);
-  document.querySelectorAll<HTMLButtonElement>('[data-page]').forEach(b=>b.onclick=()=>{page=b.dataset.page!;guide=false;filter='';render();});
+  bindFarmScene(document,observeSession(session).game,render);
+  document.querySelectorAll<HTMLButtonElement>('[data-page]').forEach(b=>b.onclick=()=>{page=b.dataset.page!;if(page==='学科'){selectedTechStage=-1;selectedCourse='';}if(page==='制造'){openManufacture(observeSession(session).game.era?.index??0);selectedProduct='';}if(b.dataset.destination)selectFarmPanel(b.dataset.destination as FarmPanel);guide=false;filter='';render();});
   const showSelection=()=>{
     render();
     if(matchMedia('(max-width: 900px)').matches){
@@ -136,8 +148,9 @@ $('import').onchange=async ev=>{const file=(ev.target as HTMLInputElement).files
     }
   };
   document.querySelectorAll<HTMLButtonElement>('[data-cultivation]').forEach(b=>b.onclick=()=>{selectedCultivation=b.dataset.cultivation!;render();});
-  document.querySelectorAll<HTMLButtonElement>('[data-course]').forEach(b=>{const go=()=>{selectedCourse=b.dataset.course!;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
-  document.querySelectorAll<HTMLButtonElement>('[data-product]').forEach(b=>{const go=()=>{selectedProduct=b.dataset.product!;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
+  document.querySelectorAll<HTMLButtonElement>('[data-course-stage]').forEach(b=>b.onclick=()=>{selectedTechStage=Number(b.dataset.courseStage);selectedCourse='';render();});
+  document.querySelectorAll<HTMLButtonElement>('[data-course]').forEach(b=>{const go=()=>{selectedCourse=b.dataset.course!;selectedTechStage=observeSession(session).game.economy!.branchView?.nodes.find(n=>n.id===selectedCourse)?.unlockStage??-1;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
+  document.querySelectorAll<HTMLButtonElement>('[data-product]').forEach(b=>{const go=()=>{selectedProduct=b.dataset.product!;openManufacture(observeSession(session).game.economy!.industryView?.catalog.find(p=>p.id===selectedProduct)?.unlockStage??0);showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
   document.querySelectorAll<HTMLButtonElement>('[data-system]').forEach(b=>{const go=()=>{selectedSystem=b.dataset.system!;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
   document.querySelectorAll<HTMLButtonElement>('[data-device]').forEach(b=>{const go=()=>{selectedDevice=b.dataset.device!;showSelection();};b.onclick=go;if(b.tagName!=='BUTTON')b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};});
   document.querySelectorAll<HTMLElement>('.course-inspector').forEach(detail=>{
@@ -181,25 +194,29 @@ function openConfirm(id:string):void {
 function render():void {
   const key=focusKey(),folds=openFolds();
   const o=observeSession(session).game,e=o.economy!;
+  if(page==='社会'){page='农业';guide=false;}
+  if((o.era?.index??0)===0){const legacy:Record<string,FarmPanel>={仓库:'store',商城:'market',生活:'home',安排:'home'};if(legacy[page]){selectFarmPanel(legacy[page]);page='农业';}if(['系统','家业','能源','雇佣','作坊','副本','试炼'].includes(page))page='农业';}
   const button=(id:string)=>actionButton(o,id,failed);
   const panel=(title:string,body:string)=>`<section class="panel"><div class="panel-head"><h2>${title}</h2></div><div class="panel-body">${body}</div></section>`;
   const acts=(group:string)=>o.actions.filter(a=>a.group===group&&!a.id.startsWith('economy:buyfood:')&&(!filter||a.label.includes(filter))).map(a=>`<div class="family-item">${button(a.id)}</div>`).join('');
   let body='';
   if(page==='修炼')body=cultivationPage(o,button,selectedCultivation);
-  if(page==='社会')body=erasPage(observeSession(session),button);
   if(page==='副本')body=expeditionPage(observeSession(session),button);
   if(page==='试炼')body=towerPage(observeSession(session),button);
   if(page==='系统')body=e.industryView?industrySystems(o,button,selectedSystem):operationsPage(o,button)+(e.workshopView?'<section class="panel"><div class="panel-body"><h2>作坊协作</h2><p>建立纤维与绳索工序，配置跨季供货，观察库存与运输瓶颈。</p><button type="button" data-page="作坊">查看生产网络 →</button></div></section>':'');
   if(page==='家业')body=operationsPage(o,button)+(e.workshopView?'<section class="panel"><div class="panel-body"><h2>作坊协作</h2><p>建立纤维与绳索工序，配置跨季供货，观察库存与运输瓶颈。</p><button type="button" data-page="作坊">查看生产网络 →</button></div></section>':'');
   if(page==='作坊')body=workshopPage(o,button,observeSession(session).recentEvents);
-  if(page==='学科')body=e.branchView?branchPage(o,button,selectedCourse):e.disciplines.map(d=>panel(d.name+` · 本人${d.level}阶 / 后辈${d.heirLevel}阶`, `<p>家族记录${d.notes}阶；下一阶可通过固定研究、生产证据或购买教材学习；家学书室可合并记录与教导。各学科内部暂按单主干顺序学习。</p><div class="flow">${d.topics.map(t=>`<span class="tag">${t.known?'✓ ':''}${t.level} ${t.name}</span>`).join(' → ')}</div>${d.topics.filter(t=>t.level===d.level+1).map(t=>button('economy:study:'+t.id)+(t.level>1?button('economy:research:'+t.id):'')).join('')}${button('economy:archive:'+d.subject)}${button('economy:teach:'+d.subject)}${button('economy:publish:'+d.subject)}`)).join('');
-  if(page==='制造')body=e.industryView?manufacturePage(o,button,selectedProduct):manufactureFallback(o,button);
-  if(page==='农业')body=farm(o,button);
+  if(page==='学科')body=e.branchView?branchPage(o,button,selectedCourse,selectedTechStage):e.disciplines.map(d=>panel(d.name+` · 本人${d.level}阶 / 后辈${d.heirLevel}阶`, `<p>家族记录${d.notes}阶；下一阶可通过固定研究、生产证据或购买教材学习；家学书室可合并记录与教导。各学科内部暂按单主干顺序学习。</p><div class="flow">${d.topics.map(t=>`<span class="tag">${t.known?'✓ ':''}${t.level} ${t.name}</span>`).join(' → ')}</div>${d.topics.filter(t=>t.level===d.level+1).map(t=>button('economy:study:'+t.id)+(t.level>1?button('economy:research:'+t.id):'')).join('')}${button('economy:archive:'+d.subject)}${button('economy:teach:'+d.subject)}${button('economy:publish:'+d.subject)}`)).join('');
+  const production=(stage:number)=>e.industryView?manufacturePage(o,button,selectedProduct,stage,true):manufactureFallback(o,button);
+  if(page==='农业')body=farm(o,button,production(0));
+  if(page==='工坊'&&(o.era?.index??0)>=1)body=production(1);
+  if(page==='贸易'&&(o.era?.index??0)>=2)body=production(2);
   if(page==='雇佣')body=staffPage(o,button);
   if(page==='商城')body=marketPage(o,shopCategory,filter,button);
   if(page==='能源'&&e.modern)body=energyPage(o,button,selectedDevice);
   if(page==='生活')body=socialFoodPage(o)+panel('谋生与补给',acts('生活'));
   if(page==='安排')body=arrangementsPage(o,button);
+  if(page==='图鉴')body=atlasPage(o);
   $('app').innerHTML=humanScreen(o,page,body,button,session.record.entries.at(-1)?.events.map(feedback).filter(Boolean)??[],guide,recap);
   // Retain the initial default selection when its available/learned group changes.
   const selection=document.querySelector<HTMLElement>('.lesson-tile.selected, .select-tile.selected')?.dataset;
@@ -208,6 +225,7 @@ function render():void {
   if(selection?.system)selectedSystem=selection.system;
   if(selection?.device)selectedDevice=selection.device;
   bindApp();
+  if(page==='图鉴')bindAtlas();
   restoreFolds(folds);
   restoreFocus(key);
 }

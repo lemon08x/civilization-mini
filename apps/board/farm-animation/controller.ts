@@ -1,52 +1,262 @@
-/** UI-only bindings. Each render replaces these elements and their handlers. */
-export function bindFarmScene(root:Document):void {
- root.querySelectorAll<HTMLButtonElement>('[data-farm-open]').forEach(button=>{
-  button.onclick=()=>{
-   const panel=root.querySelector<HTMLDetailsElement>(`[data-farm-panel="${button.dataset.farmOpen}"]`);
-   if(!panel)return;
-   panel.open=true;
-   panel.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
-   panel.querySelector<HTMLElement>('summary')?.focus({preventScroll:true});
-  };
+import {farmArt} from './scene.js';
+import {farmEventArt,type FarmArt} from '../illustration.js';
+import {type FarmGame,selectedFarmPlot,selectFarmPlot,selectFarmPanel,selectFarmStock,selectFarmProject,selectFarmProjectDuration,type FarmPanel} from '../farm-view.js';
+
+type Pixi=typeof import('pixi.js-legacy');
+type Sprite=import('pixi.js-legacy').Sprite;
+type Graphics=import('pixi.js-legacy').Graphics;
+type Container=import('pixi.js-legacy').Container;
+type Application=import('pixi.js-legacy').Application;
+
+type FarmMap=NonNullable<NonNullable<FarmGame['economy']>['farm']>;
+type Tween={t:number;dur:number;ease:(k:number)=>number;update:(k:number)=>void;done?:()=>void};
+type Particle={g:Graphics;vx:number;vy:number;life:number;max:number};
+
+// Scene singletons: the Pixi app, textures and canvas survive re-renders so the
+// map never flashes; only the world contents are rebuilt from the latest state.
+let P:Pixi|null=null;
+let app:Application|null=null;
+let art:ReturnType<typeof farmArt>|null=null;
+let canvas:HTMLCanvasElement|null=null;
+let world:Container|null=null,floor:Container|null=null,mistLayer:Container|null=null,items:Container|null=null;
+let background:Sprite|null=null,distantHouse:Sprite|null=null;
+let observer:ResizeObserver|null=null;
+let zoom=1.45,pan={x:0,y:0},viewW=1,viewH=360;
+let lastSelection='';
+let drag:null|{x:number;y:number;px:number;py:number;moved:boolean}=null;
+let currentMap:FarmMap|null=null;
+let quickEl:HTMLElement|null=null;
+let elapsed=0;
+const plotViews=new Map<string,{x:number;y:number;crop?:Sprite;cropScale?:number}>();
+let mistDrift:{sp:Sprite;baseX:number;seed:number}[]=[];
+let cropSway:Sprite[]=[];
+let selectedRing:Graphics|null=null;
+let tweens:Tween[]=[];
+let particles:Particle[]=[];
+
+const easeOut=(k:number)=>1-Math.pow(1-k,3);
+const easeOutBack=(k:number)=>{const c=1.70158,c3=c+1;return 1+c3*Math.pow(k-1,3)+c*Math.pow(k-1,2);};
+const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function tick(dt:number):void {
+ elapsed+=dt;
+ for(const m of mistDrift){m.sp.x=m.baseX+Math.sin(elapsed*.012+m.seed)*5;m.sp.alpha=.82+Math.sin(elapsed*.017+m.seed*1.7)*.14;}
+ for(const c of cropSway)c.skew.x=Math.sin(elapsed*.025+c.position.x)*.012;
+ if(selectedRing)selectedRing.alpha=.72+Math.sin(elapsed*.07)*.28;
+ for(let i=tweens.length-1;i>=0;i--){const tw=tweens[i];tw.t+=dt/60;const k=Math.min(1,tw.t/tw.dur);tw.update(tw.ease(k));if(k>=1){tweens.splice(i,1);tw.done?.();}}
+ for(let i=particles.length-1;i>=0;i--){const pt=particles[i];pt.life-=dt/60;pt.g.x+=pt.vx*dt;pt.g.y+=pt.vy*dt;pt.vy+=.06*dt;pt.g.alpha=Math.max(0,pt.life/pt.max);if(pt.life<=0){pt.g.destroy();particles.splice(i,1);}}
+}
+
+function placeQuick():void {
+ if(!quickEl||!world)return;
+ const view=plotViews.get(selectedFarmPlot());
+ if(!view){quickEl.hidden=true;return;}
+ quickEl.style.left=view.x*zoom+world.position.x+'px';
+ quickEl.style.top=view.y*zoom+world.position.y+'px';
+ quickEl.hidden=false;
+}
+
+function fit():void {
+ if(!app||!world)return;
+ world.scale.set(zoom);
+ world.position.set(viewW/2+pan.x,85+pan.y);
+ placeQuick();
+ if(!app.ticker.started)app.render();
+}
+
+function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
+ if(!P||!floor||!mistLayer||!items)return;
+ floor.removeChildren().forEach(c=>c.destroy());
+ mistLayer.removeChildren().forEach(c=>c.destroy());
+ items.removeChildren().forEach(c=>c.destroy());
+ tweens=[];particles=[];mistDrift=[];cropSway=[];plotViews.clear();selectedRing=null;
+ const xy=(x:number,y:number)=>({x:(x-y)*36,y:(x+y)*18});
+ const selected=selectedFarmPlot();
+ const targets=new P.Container();
+ const hint=new P.Text('',{fontFamily:'SimSun',fontSize:11,fill:0x40543c,stroke:0xf7f3e8,strokeThickness:3});
+ hint.anchor.set(.5,1);hint.visible=false;hint.eventMode='none';hint.zIndex=10000;hint.scale.set(.9/Math.max(.8,zoom));
+ const hintFor=(p:FarmMap['plots'][number]):string=>{
+  const id=p.kind==='unknown'?'economy:farmexplore:'+p.id:p.kind==='wild'?'economy:farmreclaim:'+p.id:'';
+  if(p.improvement)return `${p.id} · ${p.improvement==='canal'?'旧渠 · 相邻供水+2':'护田林 · 相邻保水+1'}`;
+  if(p.project&&!p.discovery?.resolved)return `${p.id} · ${p.project.name} ${p.project.done}/${p.project.total}天 · 点击续建`;
+  if(!id)return `${p.id} · ${p.kind==='field'?'田地':p.kind==='tree'?'古树 · 不可开垦':p.kind==='rock'?'岩石 · 不可开垦':'查看地块'}`;
+  const a=g.actions.find(a=>a.id===id);
+  if(!a||!a.enabled)return `${p.id} · ${a?.reason??'先探索相邻地块'}`;
+  const name=a.label.replace(/\s*p\d+q\d+$/,'');
+  return `${name} · ${a.time??a.ap} 天${a.energy?` · 精力 ${a.energy}`:''}${a.money?` · 钱 ${a.money}`:''}`;
+ };
+ const tap=(id:string)=>{if(!drag?.moved)select(id);};
+ for(const p of [...map.plots].sort((a,b)=>a.x+a.y-b.x-b.y)){
+  const pos=xy(p.x,p.y),fog=p.kind==='unknown',field=p.kind==='field';
+  plotViews.set(p.id,{x:pos.x,y:pos.y});
+  if(!fog)floor.addChild(art!.sprite(art!.groundTexture(field),pos.x,pos.y+26,.52));
+  const tile=new P.Graphics();tile.position.set(pos.x,pos.y);tile.lineStyle(fog?1.1:.7,fog&&p.reachable?0x708668:0x91a080,fog&&!p.reachable?.28:.65).beginFill(0xd6e0cf,fog?.12:.01).drawPolygon([0,0,36,18,0,36,-36,18]).endFill();
+  if(p.kind==='wild')for(let k=0;k<3;k++){const x=(p.x*13+k*19)%30-15,y=14+(p.y*7+k*9)%9;tile.lineStyle(.7,0x879b6f,.55).moveTo(x-2,y-3).lineTo(x,y).lineTo(x+2,y-4);}
+  tile.eventMode='static';tile.cursor='pointer';tile.hitArea=new P.Polygon([0,0,36,18,0,36,-36,18]);tile.on('pointertap',()=>tap(p.id));targets.addChild(tile);
+  if(p.id===selected){
+   const ring=new P.Graphics().lineStyle(3,0xfff8dc,.95).drawPolygon([0,0,36,18,0,36,-36,18]).lineStyle(.7,0x5c7864,.9).drawPolygon([0,0,36,18,0,36,-36,18]);
+   ring.position.set(pos.x,pos.y);ring.eventMode='none';targets.addChild(ring);selectedRing=ring;
+  }
+  const hover=new P.Graphics().lineStyle(1,0x728b76,.7).drawPolygon([0,0,36,18,0,36,-36,18]);hover.position.copyFrom(tile.position);hover.visible=false;hover.eventMode='none';targets.addChild(hover);
+  const hintText=hintFor(p);
+  tile.on('pointerover',()=>{hover.visible=true;if(hintText){hint.text=hintText;hint.position.set(pos.x,pos.y-8);hint.visible=true;}if(app&&!app.ticker.started)app.render();});
+  tile.on('pointerout',()=>{hover.visible=false;hint.visible=false;if(app&&!app.ticker.started)app.render();});
+  if(fog){const cloud=new P.Sprite(art!.mistTexture());cloud.anchor.set(.5);cloud.position.set(pos.x,pos.y+18);cloud.width=110;cloud.height=68;cloud.eventMode='none';mistLayer.addChild(cloud);mistDrift.push({sp:cloud,baseX:pos.x,seed:p.x*3.1+p.y*1.7});
+   if(p.id===selected||p.reachable){const label=new P.Text(p.reachable?'?':'·',{fontFamily:'SimSun',fontSize:p.id===selected?10:16,fill:0x73836e});label.anchor.set(.5);label.position.set(pos.x,pos.y+18);label.eventMode='none';items.addChild(label);}
+  }
+  let sp:Sprite|undefined;
+  if(p.kind==='tree'||p.improvement==='shelter'||p.discovery?.id==='woodland'&&!p.discovery.resolved)sp=art!.sprite(art!.treeTexture(),pos.x,pos.y+25,.65);
+  if(field&&p.field?.crop){sp=art!.sprite(art!.cropTexture(p.field.crop,p.field.growth>=p.field.duration?2:p.field.growth>=p.field.duration/3?1:0),pos.x,pos.y+30,.85);plotViews.get(p.id)!.crop=sp;plotViews.get(p.id)!.cropScale=.85/2;cropSway.push(sp);}
+  if(sp){sp.zIndex=(p.x+p.y)*100+20;sp.eventMode='none';items.addChild(sp);}
+  if((p.kind==='rock'||p.kind==='brush')&&!p.improvement){
+   const obstacle=new P.Graphics();
+   if(p.kind==='rock')obstacle.beginFill(0x8a9184).drawPolygon([-22,5,-15,-10,4,-17,22,-3,17,10,-4,16]).endFill().beginFill(0xa7aa96).drawPolygon([-15,-10,4,-17,8,-2,-8,2]).endFill();
+   else for(let k=0;k<5;k++)obstacle.lineStyle(2,0x707c4c).moveTo(-15+k*7,10).lineTo(-20+k*7,-9).moveTo(-15+k*7,10).lineTo(-10+k*7,-14);
+   obstacle.position.set(pos.x,pos.y+17);obstacle.zIndex=(p.x+p.y)*100+20;obstacle.eventMode='none';items.addChild(obstacle);
+  }
+  if(p.improvement==='canal'){
+   const channel=new P.Graphics().lineStyle(9,0x9d9270).moveTo(-24,29).lineTo(24,6).lineStyle(5,0x6ca2ad).moveTo(-24,29).lineTo(24,6).lineStyle(1,0xcce6df).moveTo(-20,27).lineTo(20,8);
+   channel.position.set(pos.x,pos.y);channel.zIndex=(p.x+p.y)*100+20;channel.eventMode='none';items.addChild(channel);
+  }
+  if(p.kind==='story'){
+   const marker=new P.Text('◇',{fontFamily:'Microsoft YaHei',fontSize:24,fill:0x967245});marker.anchor.set(.5);marker.position.set(pos.x,pos.y+17);marker.zIndex=(p.x+p.y)*100+25;marker.eventMode='none';items.addChild(marker);
+  }
+ }
+ items.addChild(targets);targets.zIndex=9998;
+ items.addChild(hint);
+}
+
+export function bindFarmScene(root:Document,g:FarmGame,rerender:()=>void):void {
+ observer?.disconnect();observer=null;
+ app?.ticker.stop();
+ const select=(id:string)=>{selectFarmPlot(id);rerender();};
+ root.querySelectorAll<HTMLButtonElement>('[data-farm-panel]').forEach(b=>b.onclick=()=>{selectFarmPanel(b.dataset.farmPanel as FarmPanel);rerender();});
+ root.querySelectorAll<HTMLButtonElement>('[data-farm-stock]').forEach(b=>b.onclick=()=>{selectFarmStock(b.dataset.farmStock!);rerender();});
+ root.querySelectorAll<HTMLButtonElement>('[data-farm-jump]').forEach(b=>b.onclick=()=>select(b.dataset.farmJump!));
+ root.querySelectorAll<HTMLButtonElement>('[data-farm-project]').forEach(b=>b.onclick=()=>{selectFarmProject(b.dataset.farmProject!);rerender();});
+ root.querySelectorAll<HTMLButtonElement>('[data-farm-duration]').forEach(b=>b.onclick=()=>{selectFarmProjectDuration(b.dataset.farmDuration!);rerender();});
+ const picker=root.getElementById('farm-plot-select') as HTMLSelectElement|null;if(picker)picker.onchange=()=>select(picker.value);
+ quickEl=root.querySelector<HTMLElement>('.farm-map-quick');
+ const host=root.getElementById('farm-map'),map=g.economy?.farm;
+ if(!host||!map)return;
+ P=P??(window as unknown as {PIXI:Pixi}).PIXI;
+ if(!P){host.textContent='地图加载失败，请刷新。仍可使用右上角地块选择器进行操作。';return;}
+ currentMap=map;
+ const sizeMap=()=>{viewH=Math.max(1,host.clientHeight);};
+ sizeMap();
+ const W=Math.max(1,host.clientWidth);viewW=W;
+ if(!app){
+  app=new P.Application({width:W,height:viewH,backgroundAlpha:0,antialias:true,resolution:Math.min(devicePixelRatio,2),autoDensity:true,autoStart:false});
+  canvas=app.view as HTMLCanvasElement;canvas.setAttribute('aria-label','田地与探索地图；也可用右上角选择器操作');
+  art=farmArt(P);
+  background=new P.Sprite(art.landscapeTexture());background.height=viewH;
+  distantHouse=art.sprite(art.houseTexture(),W*.77,105,.7);distantHouse.alpha=.7;distantHouse.eventMode='none';
+  floor=new P.Container();mistLayer=new P.Container();items=new P.Container();items.sortableChildren=true;
+  world=new P.Container();world.addChild(floor,mistLayer,items);
+  app.stage.addChild(background,distantHouse,world);
+  app.stage.eventMode='static';
+  app.stage.on('pointerdown',e=>{drag={x:e.global.x,y:e.global.y,px:pan.x,py:pan.y,moved:false};});
+  app.stage.on('globalpointermove',e=>{if(!drag)return;const dx=e.global.x-drag.x,dy=e.global.y-drag.y;if(Math.abs(dx)+Math.abs(dy)>7)drag.moved=true;if(drag.moved){pan={x:drag.px+dx,y:drag.py+dy};fit();}});
+  const release=()=>{setTimeout(()=>{drag=null;},0);};app.stage.on('pointerup',release);app.stage.on('pointerupoutside',release);
+  app.ticker.add(tick);
+ }
+ host.replaceChildren(canvas!);
+ app.renderer.resize(W,viewH);background!.height=viewH;
+ background!.width=W;distantHouse!.x=W*.77;
+ app.stage.hitArea=new P.Rectangle(0,0,W,viewH);
+ buildWorld(map,g,select);
+ const focus=()=>{const selected=map.plots.find(p=>p.id===selectedFarmPlot())!;pan={x:-(selected.x-selected.y)*36*zoom,y:viewH*.53-85-((selected.x+selected.y)*18+18)*zoom};};
+ if(lastSelection!==selectedFarmPlot()){focus();lastSelection=selectedFarmPlot();}
+ fit();
+ root.querySelectorAll<HTMLButtonElement>('[data-farm-zoom]').forEach(b=>b.onclick=()=>{zoom=Math.min(2.6,Math.max(.4,zoom+Number(b.dataset.farmZoom)*.15));fit();});
+ const center=root.querySelector<HTMLButtonElement>('[data-farm-center]');
+ if(center)center.onclick=()=>{focus();fit();};
+ observer=new ResizeObserver(()=>{if(host.clientWidth){const oldHeight=viewH;sizeMap();viewW=host.clientWidth;app!.renderer.resize(viewW,viewH);background!.width=viewW;background!.height=viewH;distantHouse!.x=viewW*.77;app!.stage.hitArea=new P!.Rectangle(0,0,viewW,viewH);if(oldHeight!==viewH)focus();fit();}});
+ observer.observe(host);
+ if(!reduced())app.ticker.start();else app.render();
+ // Complete the artwork swap only for the still-mounted, current observation.
+ // Switching panels or acting while an image loads must never restore stale state.
+ void art!.loadCrops(['wheat','soy',...map.plots.flatMap(p=>p.field?.crop?[p.field.crop]:[])]).then(changed=>{
+  if(changed&&host.isConnected&&currentMap===map)rerender();
  });
- const pause=root.querySelector<HTMLInputElement>('.scene-pause');
- if(pause){
-  pause.checked=paused;
-  pause.onchange=()=>{
-   paused=pause.checked;
-   root.querySelector('.farm-effect-layer')?.getAnimations({subtree:true}).forEach(animation=>paused?animation.pause():animation.play());
-  };
+}
+
+// Tile-anchored feedback: effects are looked up by plot id in the freshly
+// rebuilt scene, never held across re-renders.
+function floatText(txt:string,x:number,y:number,color=0x42563a):void {
+ if(!P||!items||!txt)return;
+ const t=new P.Text(txt,{fontFamily:'"Microsoft YaHei",sans-serif',fontSize:13,fontWeight:'bold',fill:color,stroke:0xfffbee,strokeThickness:3});
+ t.anchor.set(.5,1);t.position.set(x,y-14);t.zIndex=10001;t.eventMode='none';t.scale.set(.95/Math.max(.8,zoom));
+ items.addChild(t);
+ tweens.push({t:0,dur:1.05,ease:easeOut,update:k=>{t.position.y=y-14-k*22;t.alpha=k<.65?1:1-(k-.65)/.35;},done:()=>t.destroy()});
+}
+function burst(x:number,y:number,color:number,n:number):void {
+ if(!P||!items)return;
+ for(let i=0;i<n;i++){
+  const g=new P.Graphics().beginFill(color).drawCircle(0,0,1.5+Math.random()*1.8).endFill();
+  g.position.set(x+(Math.random()-.5)*22,y+(Math.random()-.5)*8);g.zIndex=10000;g.eventMode='none';items.addChild(g);
+  particles.push({g,vx:(Math.random()-.5)*1.8,vy:-(Math.random()*1.6+.7),life:.7,max:.7});
  }
 }
-let paused=false;
-export type FarmFeedback=Readonly<{kind:'sow'|'harvest'|'tend';label:string}>;
-/** Only fresh, successful action events reach this function; no replay on navigation. */
+function ring(x:number,y:number,color:number):void {
+ if(!P||!items)return;
+ const g=new P.Graphics().lineStyle(2,color,.9).drawPolygon([0,0,36,18,0,36,-36,18]);
+ g.position.set(x,y);g.zIndex=9999;g.eventMode='none';items.addChild(g);
+ tweens.push({t:0,dur:.6,ease:easeOut,update:k=>{g.scale.set(.6+k*.6);g.alpha=1-k;},done:()=>g.destroy()});
+}
+function mistLift(x:number,y:number):void {
+ if(!P||!items||!art)return;
+ const cloud=new P.Sprite(art.mistTexture());cloud.anchor.set(.5);cloud.position.set(x,y+18);cloud.width=110;cloud.height=68;cloud.eventMode='none';cloud.zIndex=9990;
+ items.addChild(cloud);
+ tweens.push({t:0,dur:.7,ease:easeOut,update:k=>{cloud.alpha=1-k;const s=1+k*.7;cloud.width=110*s;cloud.height=68*s;cloud.y=y+18-k*14;},done:()=>cloud.destroy()});
+}
+function popCrop(view:{crop?:Sprite;cropScale?:number},from:number):void {
+ if(!view.crop||!view.cropScale)return;
+ const sp=view.crop,base=view.cropScale;
+ tweens.push({t:0,dur:.45,ease:easeOutBack,update:k=>{const s=base*(from+(1-from)*k);sp.scale.set(s);},done:()=>sp.scale.set(base)});
+}
+function seedDrop(x:number,y:number):void {
+ if(!P||!items)return;
+ for(let i=0;i<3;i++){
+  const g=new P.Graphics().beginFill(0x795330).drawCircle(0,0,1.8).endFill();
+  g.position.set(x+(i-1)*8,y-26-Math.random()*8);g.zIndex=10000;g.eventMode='none';items.addChild(g);
+  particles.push({g,vx:0,vy:1.1+Math.random()*.5,life:.45, max:.45});
+ }
+}
+const shortLabel=(label:string):string=>{
+ const s=label.replace(/^p\d+q\d+\s*[· ]?\s*/,'');
+ const parts=s.split(/[：:，。；]/).filter(Boolean);
+ return (parts.length>1?parts[0]:s).slice(0,12);
+};
+
+export type FarmFeedback=Readonly<{kind:FarmArt|'notice'|'grow';label:string;plotId?:string;crop?:string;float?:string}>;
 export function playFarmFeedback(root:Document,events:readonly FarmFeedback[]):void {
- const layer=root.querySelector<HTMLElement>('.farm-effect-layer');
- if(!layer||!events.length)return;
- const message=root.createElement('div');
- message.className='farm-feedback';
- message.textContent=events.map(event=>event.label).join('；');
- layer.replaceChildren(message);
- if(paused||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
- const kind=events.at(-1)!.kind;
- let seed=0;
- for(const ch of events.map(event=>event.label).join(''))seed=(seed*31+ch.charCodeAt(0))%233280;
- const rand=()=>{seed=(seed*9301+49297)%233280;return seed/233280;};
- for(let i=0;i<9;i++){
-  const particle=root.createElement('span');
-  particle.className='farm-particle farm-particle-'+kind;
-  particle.setAttribute('aria-hidden','true');
-  particle.textContent=kind==='harvest'?'✦':kind==='tend'?'•':'·';
-  particle.style.left=(35+i%3*9+(rand()-.5)*7)+'%';
-  particle.style.top=(40+Math.floor(i/3)*9+(rand()-.5)*6)+'%';
-  layer.append(particle);
-  const keyframes:Keyframe[]=kind==='sow'
-   ?[{transform:'translateY(-26px) scale(.7)',opacity:0},{opacity:1,offset:.3},{transform:'translateY(16px) scale(1)',opacity:1,offset:.72},{transform:'translateY(30px) scale(.55)',opacity:0}]
-   :kind==='tend'
-   ?[{transform:'translateY(18px)',opacity:0},{opacity:1,offset:.35},{transform:'translateY(-52px)',opacity:0}]
-   :[{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${[-110,10,130][i%3]*(.8+rand()*.5)}px,${[-80,-140,-70][i%3]}px) scale(.3)`,opacity:0}];
-  const animation=particle.animate(keyframes,{duration:kind==='sow'?1250:1100,delay:i*65,easing:kind==='sow'?'ease-in':'ease-out',fill:'both'});
-  animation.onfinish=()=>particle.remove();
+ const layer=root.querySelector<HTMLElement>('.farm-effect-layer,.farm-room-feedback');
+ if(layer&&events.length){
+  const topic=events.find(e=>e.kind!=='notice'&&e.kind!=='grow')?.kind;
+  layer.innerHTML=layer.classList.contains('farm-effect-layer')&&topic?farmEventArt(topic as FarmArt):'';
+  const text=root.createElement('span');text.textContent=events.map(e=>e.label).join('；');layer.append(text);
+  if(!reduced())layer.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:350,fill:'both'});
+ }
+ if(reduced())return;
+ for(const e of events){
+  if(e.kind==='grow'){
+   for(const [pid,view] of plotViews){
+    const plot=currentMap?.plots.find(pp=>pp.id===pid);
+    if(plot?.field?.crop===e.crop&&view.crop){popCrop(view,.72);floatText(e.float??'',view.x,view.y-6);}
+   }
+   continue;
+  }
+  const pid=e.plotId??/^(p\d+q\d+)/.exec(e.label)?.[1];
+  if(!pid)continue;
+  const view=plotViews.get(pid);
+  if(!view)continue;
+  const float=e.float??shortLabel(e.label);
+  if(e.kind==='explore'){mistLift(view.x,view.y);ring(view.x,view.y,0x8ba888);floatText(float,view.x,view.y-6);}
+  else if(e.kind==='discovery'){ring(view.x,view.y,0x967245);floatText(float,view.x,view.y-6,0x7c5a30);}
+  else if(e.kind==='reclaim'){burst(view.x,view.y+14,0x8a6d4a,8);ring(view.x,view.y,0xa08c5c);floatText(float,view.x,view.y-6);}
+  else if(e.kind==='sow'){seedDrop(view.x,view.y);popCrop(view,.25);floatText(float,view.x,view.y-6);}
+  else if(e.kind==='harvest'){burst(view.x,view.y+8,0xd9a83c,10);floatText(float,view.x,view.y-6,0x8a6a1e);}
+  else if(e.kind==='tend'){burst(view.x,view.y+8,0x7fa8c9,6);floatText(float,view.x,view.y-6,0x46657c);}
  }
 }

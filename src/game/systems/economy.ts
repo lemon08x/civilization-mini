@@ -16,12 +16,12 @@ import type { GameEvent } from '../model/events.js';
 import { ALL_PROCESSES as PROCESSES, CROPS, SUBJECT_NAMES, WORKER_NAMES, ALL_JOB_NAMES as JOB_NAMES } from './economy-catalog.js';
 import { amount, changeGoods, consumeEquipment, equipped, foodStock, storage } from './inventory.js';
 import { level, organizationLevel, recordEvidence, wage } from './knowledge.js';
-import { farmBlocker, farmWork, fieldYield, settleOngoingFarm } from './agriculture.js';
+import { farmBlocker, farmWork, fieldYield, growField, farmView, settleNeighbor } from './agriculture.js';
 import { finishProcess, processBlockers, runProcess } from './processing.js';
 
 export { amount, changeGoods, consumeEquipment, equipped, foodStock, missingGoods, storage } from './inventory.js';
 export { level, organizationLevel, recordEvidence, requirements, wage } from './knowledge.js';
-export { farmBlocker, farmCycleLabor, farmWork, fieldYield, settleOngoingFarm } from './agriculture.js';
+export { farmBlocker, farmWork, fieldYield } from './agriculture.js';
 export { assemblyReady, finishProcess, processBlockers, processInputs, processMultiplier, runProcess } from './processing.js';
 
 export function initialEconomy():EconomyState {
@@ -60,13 +60,16 @@ export function settleEconomy(s:GameState,rules:Ruleset,events:GameEvent[]):void
     }
   }
   settleIndustry(s,events);
+  if(!s.life?.calendar){
   if(f.crop&&f.growth<f.duration){
     if(!modernOnline(s,'U08M')&&s.location.rain+f.moisture<2)f.stress++;
     if(!modernOnline(s,'U08M')&&s.location.rain>=3){if(equipped(s,'U08'))consumeEquipment(s,'U08',events);else f.stress++;}
     f.growth++;f.moisture=0;
     events.push({type:'economy-crop-growth',crop:f.crop,growth:f.growth,stress:f.stress});
   }else if(f.crop)f.growth++;
-  settleOngoingFarm(s,rules,events);
+  for(const p of Object.values(e.farm?.plots??{}))if(p.field)growField(s,p.field,events,p.id);
+  }
+  settleNeighbor(s);
   for(const [id,batches,key]of [['iron',e.ironBatches,'iron'],['fiber',e.fiberBatches,'fiber']] as const){
     const d=id==='iron'?'chemistry':'materials';
     if(!e.regional[key]&&batches>=3&&(e.published[d]??0)>0){e.regional[key]=true;events.push({type:'economy-region',industry:key});}
@@ -75,17 +78,18 @@ export function settleEconomy(s:GameState,rules:Ruleset,events:GameEvent[]):void
   let need=Math.max(0,rules.parameters.foodPerTurn-s.household.food);
   for(const id of ['flour','wheat','soy']){const n=Math.min(need,amount(s,id));if(n){changeGoods(s,{[id]:n},-1,events,'家庭生活取粮');s.household.food+=n;need-=n;}}
 }
-export function spoilEconomy(s:GameState,events:GameEvent[]):void{
+export function spoilEconomy(s:GameState,events:GameEvent[],days?:number):void{
   const protectedFood=modernOnline(s,'S08')?Math.max(30,storage(s)):storage(s);
   let excess=Math.max(0,foodStock(s)-protectedFood);if(!excess)return;
-  let loss=Math.ceil(excess/3);const loose=Math.min(loss,s.household.food);s.household.food-=loose;loss-=loose;
+  let loss=days===undefined?Math.ceil(excess/3):Math.round(excess*(1-Math.pow(2/3,days/s.life!.calendar!.rules.businessCycleDays))*1000000)/1000000;const loose=Math.min(loss,s.household.food);s.household.food=Math.round((s.household.food-loose)*1000000)/1000000;loss-=loose;
   const changes:Record<string,number>={};for(const id of ['flour','soy','wheat']){const n=Math.min(loss,amount(s,id));if(n){changes[id]=n;loss-=n;}}
   if(Object.keys(changes).length)changeGoods(s,changes,-1,events,'食品保存损耗');
   events.push({type:'food-spoiled',amount:loose+Object.values(changes).reduce((a,b)=>a+b,0),protected:protectedFood});
 }
 export function economyView(s:GameState,rules:Ruleset){
   const e=s.economy!;
-  return {...structuredClone(e),...(s.electric?{electricView:{rules:structuredClone(s.electric.rules),ready:electricReady(s),rewardPercent:electricRewardPercent(s),hydroOutput:s.location.weather==='dry'?s.electric.rules.dryHydroPower:6,loadOrder:['LAMP','TELEGRAPH'],description:'手动调度供能；电灯和电报按顺序耗电，电解按批耗电。季末余电可储存，否则跨季耗散。'}}:{}),ongoing:structuredClone(e.ongoing??{farm:null}),...(e.industry?{industryView:industryView(s)}:{}),...(e.branches?{branchView:branchView(s)}:{}),...(e.expeditions?{expeditionView:expeditionView(s)}:{}),...(e.tower?{towerView:towerView(s,rules)}:{}),...(e.workshops?{workshopView:workshopView(s,rules)}:{}),...(e.shop?{marketView:shopView(s,rules)}:{}),...(e.operations?{operationsView:operationsView(s,rules)}:{}),foodTotal:foodStock(s),storage:modernOnline(s,'S08')?Math.max(30,storage(s)):storage(s),harvest:fieldYield(s),
+  const {farm:privateFarm,ongoing:retiredOngoing,...visible}=e;
+  return {...structuredClone(visible),farm:farmView(s),...(s.electric?{electricView:{rules:structuredClone(s.electric.rules),ready:electricReady(s),rewardPercent:electricRewardPercent(s),hydroOutput:s.location.weather==='dry'?s.electric.rules.dryHydroPower:6,loadOrder:['LAMP','TELEGRAPH'],description:'手动调度供能；电灯和电报按顺序耗电，电解按批耗电。季末余电可储存，否则跨季耗散。'}}:{}),...(e.industry?{industryView:industryView(s)}:{}),...(e.branches?{branchView:branchView(s)}:{}),...(e.expeditions?{expeditionView:expeditionView(s)}:{}),...(e.tower?{towerView:towerView(s,rules)}:{}),...(e.workshops?{workshopView:workshopView(s,rules)}:{}),...(e.shop?{marketView:shopView(s,rules)}:{}),...(e.operations?{operationsView:operationsView(s,rules)}:{}),foodTotal:foodStock(s),storage:modernOnline(s,'S08')?Math.max(30,storage(s)):storage(s),harvest:fieldYield(s),
     disciplines:(e.branches?[]:SUBJECTS).map(subject=>({subject,name:SUBJECT_NAMES[subject],level:level(s,subject),heirLevel:level(s,subject,s.household.heirId),notes:e.notes[subject]??0,
       topics:topicsFor(s).filter(t=>t.subject===subject).map(t=>({...t,known:level(s,subject)>=t.level,evidence:(e.evidence[s.household.activePersonId]??[]).includes(t.id)}))})),
     staff:Object.values(e.workers).map(w=>({...structuredClone(w!),name:WORKER_NAMES[w!.kind],jobName:JOB_NAMES[w!.job],wage:wage(s,rules,w!),blockers:[...workerBlocker(s,w!),...planBlocker(s,w!,rules)]})),

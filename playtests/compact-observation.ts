@@ -20,6 +20,9 @@ export interface CompactActionQuote {
 }
 
 export interface CompactObservation {
+  farm?:NonNullable<SessionObservation['game']['economy']>['farm'];
+  calendar?:NonNullable<SessionObservation['game']['life']>['calendar'];
+  diet?:NonNullable<SessionObservation['game']['life']>['diet'];
   seasonalEvents: SessionObservation['game']['seasonalEvents'];
   sect?: SessionObservation['game']['sect'];
   crises?: NonNullable<SessionObservation['game']['era']>['crises'];
@@ -47,7 +50,7 @@ export interface CompactObservation {
     seasonCompany: boolean;
     elderConsults: number;
   };
-  stage?: { era?: string; generationsLived?: number; generationLimit?: number | null; lastGeneration?: boolean; farm?: string; tasks: string[] };
+  stage?: { timeBudget?: NonNullable<SessionObservation['game']['era']>['timeBudget']; era?: string; generationsLived?: number; generationLimit?: number | null; lastGeneration?: boolean; tasks: string[] };
   events: unknown[];
   actions: CompactActionQuote[];
   urgentBlockers: { id: string; reason: string }[];
@@ -70,7 +73,7 @@ type ActionLike = {
 };
 
 const URGENT_REASON = /时间不足|精力不足|口粮不足|钱财不足|健康|食物|预留|饥饿|困境|hardship|食品/;
-const LIFE_ACTIONS = /^(economy:(rest|care|end|farm|farmcycle|buyfood|foodpolicy|foodbudget|foodreserve)|end-turn|buy-food|cultivate)/;
+const LIFE_ACTIONS = /^(economy:(cook|rest|care|end|farm|buyfood|foodpolicy|foodbudget|foodreserve)|end-turn|buy-food|cultivate)/;
 
 function record(value: unknown): Record<string, unknown> | undefined {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
@@ -102,11 +105,6 @@ function isUrgent(action: ActionLike): boolean {
   return URGENT_REASON.test(action.reason) || LIFE_ACTIONS.test(action.id);
 }
 
-function cropName(ongoing: unknown): string | undefined {
-  const farm = record(ongoing)?.farm;
-  return typeof farm === 'string' ? farm : undefined;
-}
-
 export function compactObservation(
   observation: SessionObservation,
   extras?: { receipt?: { duplicate: boolean; revision: number } },
@@ -129,11 +127,11 @@ export function compactObservation(
   const tasks = Array.isArray(budget?.tasks)
     ? (budget.tasks as { name?: string; id?: string }[]).map(task => str(task.name) ?? str(task.id) ?? '').filter(Boolean)
     : [];
-  const farm = cropName(economy?.ongoing);
   const eraStage = record(era?.stage);
   return {
+    calendar:observation.game.life?.calendar,diet:observation.game.life?.diet,
     seasonalEvents:observation.game.seasonalEvents,
-    sect:observation.game.sect,crises:observation.game.era?.crises,
+    farm:observation.game.economy?.farm,sect:observation.game.sect,crises:observation.game.era?.crises,
     runId: observation.runId,
     revision: observation.revision,
     status: str(game.status) ?? 'unknown',
@@ -170,11 +168,11 @@ export function compactObservation(
       },
     } : {}),
     stage: {
+      ...(observation.game.era?{timeBudget:observation.game.era.timeBudget}:{}),
       ...(str(eraStage?.name) ? { era: str(eraStage?.name) } : {}),
       ...(typeof era?.generationsLived === 'number' ? { generationsLived: era.generationsLived } : {}),
       ...(era && (typeof era.generationLimit === 'number' || era.generationLimit === null) ? { generationLimit: era.generationLimit as number | null } : {}),
       ...(era?.lastGeneration === true ? { lastGeneration: true } : {}),
-      ...(farm ? { farm } : {}),
       tasks,
     },
     events: observation.recentEvents ?? [],
@@ -213,10 +211,15 @@ export function formatCompactObservation(compact: CompactObservation): string {
       + (compact.resources.storage !== undefined ? ` / 仓储 ${compact.resources.storage}` : ''),
   ];
   if (budget) {
-    lines.push(`预算: 时间 ${budget.timeRemaining}（预留 ${budget.reservedTime}，可用 ${budget.availableTime}） / 精力 ${budget.energy}（预留 ${budget.reservedEnergy}，可用 ${budget.availableEnergy}） / 困境 ${budget.hardship}`
+    lines.push(`预算: 天数 ${budget.timeRemaining}（预留 ${budget.reservedTime}，可用 ${budget.availableTime}） / 精力 ${budget.energy}（预留 ${budget.reservedEnergy}，可用 ${budget.availableEnergy}） / 困境 ${budget.hardship}`
       + (budget.health !== undefined ? ` / 健康 ${budget.health}` : ''));
   }
-  lines.push(`季末经历：${JSON.stringify(compact.seasonalEvents)}`);
+  if(compact.calendar){lines.push(`日历：${compact.calendar.date}；${compact.calendar.lastNotice}`);lines.push(`经营周期兼容：${compact.calendar.businessCycle.nextDate}到期，剩余${compact.calendar.businessCycle.remaining}天；${compact.calendar.businessCycle.description}`);}
+  if(compact.calendar){const c=compact.calendar;lines.push(`天气：${c.weather.name}；${c.weather.effect}；约${c.weather.days}天后变化`);lines.push(`节气见闻：${c.termEvents.map(e=>e.date+' '+e.term+' '+e.title+'：'+e.text+' '+e.effect).join('；')||'尚未触发'}；任何推进时间的行动均可触发，同日不重复。`);}
+  if(compact.calendar)lines.push(`节令：${compact.calendar.currentTerm}${compact.calendar.solarTerm?'（今日交节）':''}；今日节日：${compact.calendar.festivals.map(f=>f.name).join('、')||'无'}；将至：${compact.calendar.upcoming.map(d=>d.name+' ' +d.days+'天后').join('、')}`);
+  if(compact.diet)lines.push(`饮食：${compact.diet.name}；可支持${compact.diet.days}天，每天${compact.diet.dailyGrain}批食材、做饭需${compact.diet.dailyWood}批柴火；餐食调养剩${compact.diet.mealDays}天`);
+  if(compact.farm)lines.push(`地块与同门：${JSON.stringify(compact.farm)}`);
+  lines.push(`近期生活经历：${JSON.stringify(compact.seasonalEvents)}`);
   if(compact.sect)lines.push(`师徒与道：${JSON.stringify(compact.sect)}`);
   if(compact.crises)lines.push(`现代使命：${JSON.stringify(compact.crises)}`);
   if (compact.family&&!compact.sect) {
@@ -231,13 +234,13 @@ export function formatCompactObservation(compact: CompactObservation): string {
       f.elderConsults > 0 ? `在世长辈可请教${f.elderConsults}门课程` : '',
     ].filter(Boolean).join('；')}`);
   }
-  if (compact.stage?.era || compact.stage?.farm || (compact.stage?.tasks.length ?? 0) > 0) {
+  if (compact.stage?.era || (compact.stage?.tasks.length ?? 0) > 0) {
     const stageGeneration = compact.stage?.generationsLived !== undefined
       ? (compact.stage.generationLimit == null
         ? '不限代'
-        : `第${compact.stage.generationsLived + 1}/${compact.stage.generationLimit}代${compact.stage.lastGeneration ? '（最后一代）' : ''}`)
+        : `第${compact.stage.generationsLived + 1}代`)
       : '';
-    lines.push(`阶段: ${[compact.stage?.era, stageGeneration, compact.stage?.farm ? `持续耕作 ${compact.stage.farm}` : '', ...(compact.stage?.tasks ?? [])].filter(Boolean).join('；')}`);
+    lines.push(`阶段: ${[compact.stage?.era, stageGeneration, compact.stage?.timeBudget?`剩余${compact.stage.timeBudget.remaining}/${compact.stage.timeBudget.limit}${compact.stage.timeBudget.unit}；提前结转${compact.stage.timeBudget.carry}${compact.stage.timeBudget.unit}，损耗${compact.stage.timeBudget.lost}${compact.stage.timeBudget.unit}`:'', ...(compact.stage?.tasks ?? [])].filter(Boolean).join('；')}`);
   }
   if (compact.receipt) lines.push(`回执: revision ${compact.receipt.revision}${compact.receipt.duplicate ? '（重复命令）' : ''}`);
   lines.push('', '成功行动后直接用本摘要决策，不必再 observe。冲突、失败或文件更新警告时重新观察。', '', '## 可用行动');
@@ -245,7 +248,7 @@ export function formatCompactObservation(compact: CompactObservation): string {
     const materials = action.materials
       ? ' / 材料 ' + Object.entries(action.materials).map(([id, n]) => `${id}:${n}`).join(',')
       : '';
-    lines.push(`- ${action.id} | ${action.label} | 时间 ${action.time ?? 0} / 精力 ${action.energy ?? 0} / 钱 ${action.money} / 粮 ${action.food}${materials}`);
+    lines.push(`- ${action.id} | ${action.label} | 天数 ${action.time ?? 0} / 精力 ${action.energy ?? 0} / 钱 ${action.money} / 粮 ${action.food}${materials}`);
     lines.push(`  ${action.description}`);
   }
   lines.push('', '## 紧急阻碍');
@@ -266,8 +269,8 @@ function sectionPayload(observation: SessionObservation, section: CompactSection
   const economy = record(game.economy) ?? {};
   const actions = (game.actions as ActionLike[] | undefined) ?? [];
   switch (section) {
-    case 'branches': return economy.branchView ?? null;
-    case 'industry': return economy.industryView ?? null;
+    case 'branches': return economy.branchView ? {...record(economy.branchView), learningActions:actions.filter(a=>a.id.startsWith('economy:branchlearn:'))} : null;
+    case 'industry': return economy.industryView ? {...record(economy.industryView), manufactureActions:actions.filter(a=>/^economy:(build|process|inspect|finish):/.test(a.id))} : null;
     case 'systems': return {
       operations: economy.operationsView ?? null,
       workshop: economy.workshopView ?? null,

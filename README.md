@@ -63,7 +63,7 @@ npm start
 
 ```powershell
 npm run build
-npm run lab -- new --run demo --seed 17 --scenario river
+npm run lab -- new --run demo --seed 17 --framework riverine
 node playtests/player.mjs observe --run demo
 node playtests/player.mjs act --run demo --revision 0 --action <可用行动ID>
 ```

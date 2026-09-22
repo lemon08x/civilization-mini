@@ -1,4 +1,6 @@
-import {sectCosts} from './life.js';
+import {availableDays} from './calendar.js';
+import {manufacturingStage} from '../model/industry.js';
+import {sectCosts,calendarCost} from './life.js';
 import {seasonTime} from '../model/electric.js';
 import {publicWaterFee} from './eras.js';
 import {foodLabor} from './social-food.js';
@@ -7,7 +9,6 @@ import {activePerson,type GameState} from '../model/state.js';
 import type {GameEvent} from '../model/events.js';
 import {knowledgeNeeds,productName} from './industry-products.js';
 import {changeGoods,consumeEquipment,equipped,missingGoods} from './inventory.js';
-import {farmCycleLabor} from './agriculture.js';
 import {servicePending} from './shop.js';
 
 export function systemDefinitions(s:GameState):SystemDefinition[]{
@@ -24,6 +25,7 @@ export function systemUnlockNeeds(s:GameState,def:SystemDefinition):string[]{
  return [...knowledgeNeeds(s,def.knowledge),...def.products.filter(id=>!x.products[id]).map(id=>'需验证'+productName(id)),...def.systems.filter(id=>!x.commissioned.includes(id)).map(id=>'需调试前置系统'+id)];
 }
 export function systemDemand(s:GameState,def:SystemDefinition):boolean{
+ if(s.life?.calendar?.systemsSettled)return false;
  if(def.id==='shaft')return true;
  if(publicWaterFee(s))return false;
  const f=s.economy!.field;return !!f.crop&&f.growth<f.duration&&s.location.rain+f.moisture<2;
@@ -44,17 +46,16 @@ export function operatorBudget(s:GameState,operator:OperatorId){
 }
 export function systemLabor(s:GameState,operator:OperatorId='self',exclude?:string){
  let time=0,energy=0;
- for(const def of systemDefinitions(s)){const i=s.economy?.industry?.instances[def.id];if(i?.enabled&&i.commissioned&&i.operator===operator&&def.id!==exclude&&systemDemand(s,def)){const cost=operator==='self'?sectCosts(s,'economy:sysrun:'+def.id,def):def;time+=cost.time;energy+=cost.energy;}}
+ for(const def of systemDefinitions(s)){const i=s.economy?.industry?.instances[def.id];if(i?.enabled&&i.commissioned&&i.operator===operator&&def.id!==exclude&&systemDemand(s,def)){const cost=operator==='self'?calendarCost(s,'economy:sysrun:'+def.id,sectCosts(s,'economy:sysrun:'+def.id,def)):def;time+=cost.time;energy+=cost.energy;}}
  return {time,energy};
 }
 export function reservedLabor(s:GameState,operator:OperatorId='self',exclude?:string){
  const systems=systemLabor(s,operator,exclude);
  const food=operator==='self'?foodLabor(s,systemLabor(s).time):{time:0,energy:0};
- const farm=operator==='self'?farmCycleLabor(s):{time:0,energy:0};
- return {time:systems.time+food.time+farm.time,energy:systems.energy+food.energy+farm.energy};
+ return {time:systems.time+food.time,energy:systems.energy+food.energy};
 }
 export function assignmentNeeds(s:GameState,def:SystemDefinition,operator:OperatorId):string[]{
- if(operator==='self')def={...def,...sectCosts(s,'economy:sysrun:'+def.id,def)};
+ if(operator==='self')def={...def,...calendarCost(s,'economy:sysrun:'+def.id,sectCosts(s,'economy:sysrun:'+def.id,def))};
  const budget=operatorBudget(s,operator),reserved=reservedLabor(s,operator,def.id),needs=operatorNeeds(s,def,operator);
  // Reserve potential demand when assigning; idle systems do not lock personal time in later observations.
  if(budget.timeRemaining<reserved.time+def.time)needs.push(`分配容量不足：人员剩余${budget.timeRemaining}时间，其他任务预留${reserved.time}，本任务需具备${def.time}时间；无需求时不实际预留`);
@@ -71,7 +72,7 @@ export function physicalNeeds(s:GameState,def:SystemDefinition):string[]{
 }
 export function wageFor(s:GameState,def:SystemDefinition,operator:OperatorId|null):number{return !operator||operator==='self'?0:Math.ceil(def.time/s.economy!.industry!.rules.wageTimeUnit);}
 export function systemBlockers(s:GameState,def:SystemDefinition,i:SystemInstance):string[]{
- if(i.operator==='self')def={...def,...sectCosts(s,'economy:sysrun:'+def.id,def)};
+ if(i.operator==='self')def={...def,...calendarCost(s,'economy:sysrun:'+def.id,sectCosts(s,'economy:sysrun:'+def.id,def))};
  if(!i.commissioned)return ['尚未调试'];if(!i.enabled)return ['主动暂停'];
  if(!systemDemand(s,def))return ['本季无需供水'];
  const needs=[...operatorNeeds(s,def,i.operator),...physicalNeeds(s,def)];
@@ -84,6 +85,8 @@ export function systemBlockers(s:GameState,def:SystemDefinition,i:SystemInstance
  return needs;
 }
 export function settleIndustry(s:GameState,events:GameEvent[]):void{
+ if(s.life?.calendar?.systemsSettled)return;
+ const eventStart=events.length;
  const x=s.economy?.industry;if(!x)return;
  for(const def of systemDefinitions(s)){const i=x.instances[def.id];if(!i)continue;
   const blockers=systemBlockers(s,def,i);
@@ -91,7 +94,7 @@ export function settleIndustry(s:GameState,events:GameEvent[]):void{
   const operator=i.operator!,r=x.rules,budget=operatorBudget(s,operator),pay=wageFor(s,def,operator);
   // All physical, wage and work conditions passed before any resource is changed.
   if(operator!=='self'&&budget.energy<def.energy){budget.timeRemaining-=r.workerRestTime;budget.energy=Math.min(r.workerEnergy,budget.energy+r.workerRestRecovery);industryEvent(events,'rest',def.id,operator,'员工休息恢复精力，不计工作工资',r.workerRestTime,0);}
-  if(operator==='self'){const cost=sectCosts(s,'economy:sysrun:'+def.id,def);s.life!.timeRemaining=Math.round((s.life!.timeRemaining-cost.time)*100)/100;activePerson(s).vitality!.energy=Math.round((activePerson(s).vitality!.energy-cost.energy)*100)/100;}
+  if(operator==='self'){const cost=calendarCost(s,'economy:sysrun:'+def.id,sectCosts(s,'economy:sysrun:'+def.id,def));s.life!.timeRemaining=Math.round((s.life!.timeRemaining-cost.time)*100)/100;activePerson(s).vitality!.energy=Math.round((activePerson(s).vitality!.energy-cost.energy)*100)/100;}
   else{budget.timeRemaining-=def.time;budget.energy-=def.energy;}
   s.household.money-=pay;
   changeGoods(s,systemInputs(def),-1,events,def.name+'投入');
@@ -103,8 +106,9 @@ export function settleIndustry(s:GameState,events:GameEvent[]):void{
    if(def.id==='well')s.era!.groundwater--;else s.location.water--;s.economy!.field.moisture+=2;s.economy!.field.tended=s.clock.absoluteTurn;
    events.push({type:'economy-farm',operation:def.id==='pump'?'pump':'tend',crop:s.economy!.field.crop!,actor:'系统：'+operator,amount:1});
   }
-  industryEvent(events,'worked',def.id,operator,def.name+'完成；实际扣费',operator==='self'?sectCosts(s,'economy:sysrun:'+def.id,def).time:def.time,operator==='self'?sectCosts(s,'economy:sysrun:'+def.id,def).energy:def.energy,pay);
+  industryEvent(events,'worked',def.id,operator,def.name+'完成；实际扣费',operator==='self'?calendarCost(s,'economy:sysrun:'+def.id,sectCosts(s,'economy:sysrun:'+def.id,def)).time:def.time,operator==='self'?calendarCost(s,'economy:sysrun:'+def.id,sectCosts(s,'economy:sysrun:'+def.id,def)).energy:def.energy,pay);
  }
+ if(s.life?.calendar&&events.slice(eventStart).some(e=>e.type==='industry'&&e.operation==='worked'))s.life.calendar.systemsSettled=true;
 }
 export function renewIndustry(s:GameState):void{
  const x=s.economy?.industry;if(!x)return;
@@ -114,10 +118,10 @@ export function renewIndustry(s:GameState):void{
 }
 export function personalBudget(s:GameState){
  const reserved=s.economy?.industry?reservedLabor(s):{time:0,energy:0};
- return {spentTime:seasonTime(s)-s.life!.timeRemaining,reservedTime:reserved.time,reservedEnergy:reserved.energy,freeTime:Math.max(0,s.life!.timeRemaining-reserved.time),freeEnergy:Math.max(0,activePerson(s).vitality!.energy-reserved.energy),tasks:systemDefinitions(s).filter(def=>{const i=s.economy?.industry?.instances[def.id];return i?.enabled&&i.commissioned&&i.operator==='self'&&systemDemand(s,def);}).map(def=>({id:String(def.id),name:def.name,...sectCosts(s,'economy:sysrun:'+def.id,def)})).concat(foodLabor(s).time?[{id:'food-shopping',name:'生活食品赶集',...foodLabor(s)}]:[]).concat(farmCycleLabor(s).time?[{id:'farm-cycle',name:'持续耕作',...farmCycleLabor(s)}]:[])};
+ return {spentTime:s.life?.calendar?Math.round((s.life.calendar.absoluteDay-(s.era?.dayBudget?.started??0))*100)/100:seasonTime(s)-s.life!.timeRemaining,reservedTime:reserved.time,reservedEnergy:reserved.energy,freeTime:Math.max(0,availableDays(s)-reserved.time),freeEnergy:Math.max(0,Math.round((activePerson(s).vitality!.energy-reserved.energy)*100)/100),tasks:systemDefinitions(s).filter(def=>{const i=s.economy?.industry?.instances[def.id];return i?.enabled&&i.commissioned&&i.operator==='self'&&systemDemand(s,def);}).map(def=>({id:String(def.id),name:def.name,...calendarCost(s,'economy:sysrun:'+def.id,sectCosts(s,'economy:sysrun:'+def.id,def))})).concat(foodLabor(s).time?[{id:'food-shopping',name:'生活食品赶集',...foodLabor(s)}]:[])};
 }
 export function industryView(s:GameState){
  const x=s.economy!.industry!;
- return {catalog:structuredClone(industryProductsFor(s)),reserved:reservedLabor(s),products:structuredClone(x.products),workers:structuredClone(x.workers),rules:structuredClone(x.rules),
+ return {catalog:industryProductsFor(s).map(p=>({...structuredClone(p),unlockStage:manufacturingStage(s,p.id)})),reserved:reservedLabor(s),products:structuredClone(x.products),workers:structuredClone(x.workers),rules:structuredClone(x.rules),
   systems:systemDefinitions(s).map(def=>{const instance=x.instances[def.id];return {...def,instance:instance?structuredClone(instance):null,unlockNeeds:systemUnlockNeeds(s,def),blockers:instance?systemBlockers(s,def,instance):['尚未建设'],wage:instance?wageFor(s,def,instance.operator):0};})};
 }

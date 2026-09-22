@@ -12,7 +12,7 @@ export interface RunManifest {
   runId: string;
   ruleset: Ruleset;
   seed: number;
-  scenarioId: string;
+  frameworkId: string;
 }
 export interface Entry {
   revision: number;

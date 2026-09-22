@@ -5,7 +5,7 @@ import { loadCurrentContext, projectRoot } from '../host/context.js';
 
 await loadCurrentContext();
 const port = Number(process.env.PORT ?? 4317);
-const types: Record<string, string> = { '.jpg': 'image/jpeg', '.webp': 'image/webp', '.png': 'image/png', '.md': 'text/plain; charset=utf-8', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
+const types: Record<string, string> = { '.jpg': 'image/jpeg', '.webp': 'image/webp', '.png': 'image/png', '.md': 'text/plain; charset=utf-8', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
 const server = http.createServer(async (req, res) => {
   if (!['GET', 'HEAD'].includes(req.method ?? '')) { res.writeHead(405); res.end(); return; }
   try {
@@ -13,7 +13,10 @@ const server = http.createServer(async (req, res) => {
     const path = decodeURIComponent(url.pathname);
     let absolute: string;
     if (path === '/') absolute = join(projectRoot, 'apps/board/entry.html');
+    else if (path === '/vendor/lunar-typescript.mjs') absolute = join(projectRoot, 'node_modules/lunar-typescript/dist/index.mjs');
+    else if (path === '/vendor/pixi.js') absolute = join(projectRoot, 'node_modules/pixi.js-legacy/dist/pixi-legacy.min.js');
     else if (path === '/start') absolute = join(projectRoot, 'apps/board/start.html');
+    else if (path === '/crop-preview') absolute = join(projectRoot, 'apps/board/crop-preview.html');
     else if (path === '/play') absolute = join(projectRoot, 'apps/board/index.html');
     else if (path === '/ai') absolute = join(projectRoot, 'apps/board/ai.html');
     else if (path === '/ai-guide.md') absolute = join(projectRoot, 'docs/AI_PLAYER.md');
@@ -26,7 +29,12 @@ const server = http.createServer(async (req, res) => {
     }
     else if (path === '/rulesets/current.json') {
       try {
-        const { base } = await loadCurrentContext();
+        // Serve the current files; the shared game engine validates them in the client.
+        // A long-lived HTTP process must not pair a stale validator with newly built rules.
+        const [meta,parameters,systems,legacy,scenarios,catalogs] = await Promise.all(
+          ['meta','parameters','systems','legacy','scenarios','catalogs'].map(async name => JSON.parse(await readFile(join(projectRoot,'rulesets/v27',name+'.json'),'utf8')) as Record<string,unknown>)
+        );
+        const base = {...meta,...parameters,...legacy,...systems,scenarios,catalogs};
         const body = Buffer.from(JSON.stringify(base), 'utf8');
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
         res.end(req.method === 'HEAD' ? undefined : body);

@@ -21,8 +21,7 @@ import { developmentActions } from './development.js';
 export function actionDefinitions(state: GameState, rules: Ruleset): ActionDefinition[] {
   if (state.status === 'complete' || state.status === 'ended') return [];
   if (state.status === 'handover') {
-    const eraEnd=!!state.era&&state.era.index<3&&state.clock.generation+1-state.era.startGeneration>=state.era.rules.generationLimit;
-    return [defineAction(state, 'handover', state.sect?'交接给下一代两位弟子':eraEnd?'结束本时代，开始新人物':'交接给后辈', '传承', { ap: 0 }, [], state.sect?'两名真实弟子接班；门派道法与资产保留，个人修为和所学不复制。':eraEnd?'结清本时代实际回报，下一时代从无亲属关系的新随机角色开始；个人知识从基础开始。':'保留后辈真实学习状态、家学、资产和未完项目；前代个人能力不会复制。', (draft, events) => handover(draft, rules, events))];
+    return [defineAction(state, 'handover', state.sect?'交接给自己的成年弟子':'交接给后辈', '传承', { ap: 0 }, [], state.sect?'自己的成年弟子接班，同门不参与交接；门派道法与资产保留，个人修为和所学不复制。':'保留后辈真实学习状态、家学、资产和未完项目；前代个人能力不会复制。', (draft, events) => handover(draft, rules, events))];
   }
   if(state.economy)return [...eraActions(state),...socialFoodActions(state),...industryActions(state),...lifeActions(state),...branchActions(state,rules),...economyActions(state,rules)].filter(a=>!state.economy?.branches||!branchActionNeeds(state,a.offer.id).some(reason=>reason.includes('尚未')||reason.includes('当前仅')));
   return [...livelihoodActions(state, rules), ...craftActions(state, rules), ...educationActions(state, rules), ...societyActions(state, rules), ...researchActions(state, rules), ...developmentActions(state,rules), ...productNetworkActions(state,rules), defineAction(state, 'end-turn', '结束本季', '回合', { ap: 0 }, [], `消耗 ${rules.parameters.foodPerTurn} 口粮，结算生活${rules.production ? '与余粮损耗' : ''}。剩余行动点不结转。`, () => {})];

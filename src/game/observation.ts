@@ -1,8 +1,8 @@
 import {seasonTime} from './model/electric.js';
 import {eraView} from './systems/eras.js';
-import {socialFoodQuote} from './systems/social-food.js';
+import {socialFoodQuote,dietView} from './systems/social-food.js';
 import {personalBudget,systemLabor} from './systems/industry.js';
-import { lifeView, livingElders, consultableNodes, sectView } from './systems/life.js';
+import { lifeView, calendarView, livingElders, consultableNodes, sectView } from './systems/life.js';
 import { economyView } from './systems/economy.js';
 import { technologyVictory } from './systems/investment.js';
 import { productNetworkView } from './systems/product-network.js';
@@ -41,9 +41,9 @@ export function getObservation(state: GameState, rules: Ruleset) {
     status: state.status,
     scenario: { id: scenario.id, name: scenario.name, description: scenario.text },
     clock: { ...state.clock, generations: rules.parameters.generations, turnsPerGeneration: rules.parameters.turnsPerGeneration },
-    ...(state.life?{life:{budget:personalBudget(state),recovery:state.life.renewal??null,timeRemaining:state.life.timeRemaining,timePerSeason:seasonTime(state),calendar:{year:Math.floor((state.clock.absoluteTurn-1)/4)+1,season:['春','夏','秋','冬'][(state.clock.absoluteTurn-1)%4]},person:lifeView(person,state.life.rules)!,heir:family.heirId!==family.activePersonId?lifeView(child,state.life.rules):null,adultYears:state.life.rules.adultYears,birthYears:state.life.rules.birthYears,pendingRetirement:!!state.life.pendingRetirement,seasonCompany:!!state.life.seasonCompany,consultPending:state.life.consultPending??null,elders:livingElders(state).map(e=>({name:e.name,...lifeView(e,state.life!.rules)!,consultable:consultableNodes(state,e).length}))}}:{}),
+    ...(state.life?{life:{budget:personalBudget(state),recovery:state.life.renewal??null,timeRemaining:state.life.timeRemaining,timePerSeason:seasonTime(state),calendar:calendarView(state),diet:dietView(state),person:lifeView(person,state.life.rules)!,heir:family.heirId!==family.activePersonId?lifeView(child,state.life.rules):null,adultYears:state.life.rules.adultYears,birthYears:state.life.rules.birthYears,pendingRetirement:!!state.life.pendingRetirement,seasonCompany:!!state.life.seasonCompany,consultPending:state.life.consultPending??null,elders:livingElders(state).map(e=>({name:e.name,...lifeView(e,state.life!.rules)!,consultable:consultableNodes(state,e).length}))}}:{}),
     ap: state.ap, parameters: structuredClone(rules.parameters),
-    world: { ...structuredClone(state.world), teachers: [...state.location.teachers], weather: state.location.weather, rain: state.location.rain, water: state.location.water, weatherName: { dry: '干旱', normal: '平水', wet: '丰水' }[state.location.weather] },
+    world: { ...structuredClone(state.world), teachers: [...state.location.teachers], weather: state.location.weather, rain: state.location.rain, water: state.location.water, weatherName: { dry: '干燥', normal: '晴和', wet: '连雨' }[state.location.weather] },
     person: personView(person), heir: personView(child),
     family: { food: family.food, money: family.money, hardship: family.hardship, channel: canal ? { durability: canal.durability } : null, archives: [...state.knowledge.archives], stock: seedValue(stock(state)), candidate: family.candidateId ? seedValue(stock(state, family.candidateId)) : null, project: projectView(project(state)), reports: state.knowledge.reportIds.map(id => projectView(state.projects[id])!) },
     harvest: harvestPreview(state, rules),

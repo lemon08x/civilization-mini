@@ -11,7 +11,7 @@ import {settleIndustry,reservedLabor} from '../src/game/systems/industry.js';
 import {getObservation} from '../src/game/observation.js';
 import {createSession,observeSession} from '../src/runtime/session.js';
 import {rules} from './v27.js';
-const fresh=()=>structuredClone(createInitialState(rules,17,'river'));
+const fresh=()=>structuredClone(createInitialState(rules,17,'riverine'));
 type State=ReturnType<typeof fresh>;
 const offer=(s:State,id:string)=>getAvailableActions(s,rules).find(a=>a.id==='economy:'+id)!;
 const act=(s:State,id:string)=>transition(s,parseActionId(id==='handover'?id:'economy:'+id),rules);
@@ -91,7 +91,7 @@ test('传承保留验证与工匠系统，不复制个人知识；本人岗位�
 });
 test('观察不含隐藏状态',async()=>{
  const s=fresh();assert.ok(getObservation(s,rules).economy!.industryView);
- const session=await createSession({runId:'three-trees-test',ruleset:rules,seed:17,scenarioId:'river'});
+ const session=await createSession({runId:'three-trees-test',ruleset:rules,seed:17,frameworkId:'riverine'});
  const raw=JSON.stringify(observeSession(session).game);for(const secret of ['randomState','lifespanSeasons','constitution'])assert.ok(!raw.includes(secret));
  assert.equal(activePerson(s).vitality!.health,100);
 });

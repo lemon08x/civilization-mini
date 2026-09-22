@@ -16,7 +16,7 @@ import {createSession,observeSession,submitCommand} from '../src/runtime/session
 import type {GameEvent} from '../src/game/model/events.js';
 import {rules as base} from './v27.js';
 const rules=resolveRuleset(base,{'eras.generationLimit':1});
-const fresh=()=>{const s=structuredClone(createInitialState(rules,17,'river'));s.household.food=100;s.household.money=100;s.era!.card='trade';renewEraServices(s,rules);return s;};
+const fresh=()=>{const s=structuredClone(createInitialState(rules,17,'riverine'));s.household.food=100;s.household.money=100;s.era!.card='trade';renewEraServices(s,rules);return s;};
 type State=ReturnType<typeof fresh>;
 const act=(s:State,id:string)=>transition(s,parseActionId(id==='handover'?id:'economy:'+id),rules);
 const offer=(s:State,id:string)=>getAvailableActions(s,rules).find(a=>a.id==='economy:'+id);
@@ -103,7 +103,7 @@ test('society card affects actual prices, income, education and metal supply',()
 });
 
 test('short social sequence observations hide RNG',async()=>{
- const short=resolveRuleset(base,{'eras.generationLimit':1});let session=await createSession({runId:'eras-observe',ruleset:short,seed:17,scenarioId:'river'});
+ const short=resolveRuleset(base,{'eras.generationLimit':1});let session=await createSession({runId:'eras-observe',ruleset:short,seed:17,frameworkId:'riverine'});
  for(let i=0;i<4;i++)session=(await submitCommand(session,{commandId:'settle-'+i,expectedRevision:i,actionId:'economy:erasettle:stage'})).session;
  const o=observeSession(session);assert.equal(o.eraSettlements!.length,4);assert.equal(o.game.status,'complete');
  assert.doesNotMatch(JSON.stringify(o),/randomState|lifespanSeasons|futureCards/);
@@ -182,11 +182,12 @@ test('agriculture commons gather and work without tech; later eras drop the bonu
  assert.equal(townPay?.type,'income');if(townPay?.type!=='income')return;
  assert.equal(townPay.amount,4);
 });
-test('town public well waters fields without pump tech; public mill needs industry',()=>{
+test('town public well waters fields without pump tech; public mill opens with the township stage',()=>{
  const s=fresh();s.era!.index=1;s.location.rain=0;s.economy!.field={...s.economy!.field,crop:'wheat',growth:0,duration:2};
  const n=act(s,'end:season');assert.ok(n.events.some(e=>e.type==='era'&&e.operation==='water-service'));
- assert.equal(offer(s,'publicmill:grain')!.enabled,false);
- const mill=fresh();mill.era!.index=2;mill.economy!.goods.wheat=4;
+ const village=fresh();village.economy!.goods.wheat=4;
+ assert.equal(offer(village,'publicmill:grain')!.enabled,false);
+ const mill=fresh();mill.era!.index=1;mill.economy!.goods.wheat=4;
  assert.equal(offer(mill,'publicmill:grain')!.enabled,true);
  const ground=act(mill,'publicmill:grain');assert.equal(ground.state.economy!.goods.flour,1);assert.equal(ground.state.economy!.goods.wheat,2);
 });

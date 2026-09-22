@@ -1,4 +1,6 @@
+import {CALENDAR_BOUNDS,type CalendarRules} from './model/life.js';
 import {ELECTRIC_BOUNDS,type ElectricRules} from './model/electric.js';
+import {FARM_BOUNDS,type FarmRules} from './model/economy.js';
 import type { EraRules } from './model/eras.js';
 import type { SocialFoodRules } from './model/social-food.js';
 import type { RenewalRules } from './model/renewal.js';
@@ -29,6 +31,8 @@ export interface Technology {
   helpfulPrerequisites?: string[];
 }
 export interface Ruleset {
+  calendar?:CalendarRules;
+  farm?:FarmRules;
   schemaVersion: 1;
   id: string;
   rulesVersion: string;
@@ -79,6 +83,10 @@ const parameterKeys = ['actionsPerTurn', 'turnsPerGeneration', 'generations', 'i
 export function validateRuleset(value: unknown): Ruleset {
   if (!isRecord(value) || value.schemaVersion !== 1 || typeof value.id !== 'string' || typeof value.rulesVersion !== 'string' || !isRecord(value.parameters) || !isRecord(value.parameterBounds) || !isRecord(value.scenarios) || !Array.isArray(value.technologies) || !strings(value.worldTechnologies) || !isRecord(value.practiceNames)) throw new Error('规则配置格式不完整');
   if (value.rulesVersion !== '0.27.0') throw new Error('只支持规则 0.27.0');
+  if(!isRecord(value.calendar)||Object.keys(value.calendar).length!==Object.keys(CALENDAR_BOUNDS).length||Object.entries(CALENDAR_BOUNDS).some(([k,[min,max]])=>typeof (value.calendar as Record<string,unknown>)[k]!=='number'||!Number.isFinite(Number((value.calendar as Record<string,unknown>)[k]))||Number((value.calendar as Record<string,unknown>)[k])<min||Number((value.calendar as Record<string,unknown>)[k])>max))throw new Error('此存档不含当前农历日历，请新开游戏；旧档不迁移');
+  if(!Number.isInteger(value.calendar.referenceYear))throw new Error('农历参照年须为整数');
+
+  if(!isRecord(value.farm)||Object.keys(value.farm).length!==Object.keys(FARM_BOUNDS).length||Object.entries(FARM_BOUNDS).some(([key,[min,max]])=>!Number.isInteger((value.farm as Record<string,unknown>)[key])||Number((value.farm as Record<string,unknown>)[key])<min||Number((value.farm as Record<string,unknown>)[key])>max))throw new Error('缺少有效的地块与同门规则，请新开游戏；旧档不迁移');
   if (!isRecord(value.production)) throw new Error('必须提供完整生产配置');
   if (['0.3.0', '0.4.0', '0.5.0', '0.6.0', '0.7.0', '0.8.0', '0.9.0', '0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0','0.15.0','0.16.0','0.17.0','0.18.0','0.19.0','0.20.0','0.21.0','0.22.0','0.23.0','0.24.0','0.25.0','0.26.0','0.27.0'].includes(value.rulesVersion) !== (value.technologyFeedback !== undefined)) throw new Error('科技反馈机制与规则版本不匹配');
   if ((['0.4.0','0.5.0', '0.6.0', '0.7.0', '0.8.0', '0.9.0', '0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0','0.15.0','0.16.0','0.17.0','0.18.0','0.19.0','0.20.0','0.21.0','0.22.0','0.23.0','0.24.0','0.25.0','0.26.0','0.27.0'].includes(value.rulesVersion)) !== (value.socialInheritance !== undefined)) throw new Error('社会传承机制与规则版本不匹配');
@@ -149,7 +157,7 @@ export function validateRuleset(value: unknown): Ruleset {
   if((['0.21.0','0.22.0','0.23.0','0.24.0','0.25.0','0.26.0','0.27.0'].includes(value.rulesVersion))!==(value.socialFood!==undefined))throw new Error('社会食品版本不匹配');
   if(value.socialFood!==undefined&&(!integerFields(value.socialFood,['storage','imports','serviceCapacity','pickupTime','defaultBudget','defaultReserve'])||(value.socialFood as Record<string,number>).storage<1||(value.socialFood as Record<string,number>).pickupTime<1))throw new Error('社会食品参数无效');
   if((['0.22.0','0.23.0','0.24.0','0.25.0','0.26.0','0.27.0'].includes(value.rulesVersion))!==(value.eras!==undefined))throw new Error('社会阶段版本不匹配');
-  if(value.eras!==undefined){if(!isRecord(value.eras)||Object.keys(value.eras).length!==3)throw new Error('社会阶段参数无效');const g=(value.eras as Record<string,unknown>).generationLimit;if(!Number.isInteger(g)||(g as number)<1||(g as number)>10)throw new Error('社会阶段参数无效：generationLimit 限 1—10');if(!['rewardDivisor','dungeonTarget'].every(k=>Number.isInteger((value.eras as Record<string,unknown>)[k])&&((value.eras as Record<string,unknown>)[k] as number)>=1&&((value.eras as Record<string,unknown>)[k] as number)<=400))throw new Error('社会阶段参数无效');}
+  if(value.eras!==undefined){if(!isRecord(value.eras)||Object.keys(value.eras).length!==4)throw new Error('社会阶段参数无效');const carry=(value.eras as Record<string,unknown>).timeCarryPercent;if(!Number.isInteger(carry)||(carry as number)<0||(carry as number)>100)throw new Error('社会阶段参数无效：timeCarryPercent 限 0—100');const g=(value.eras as Record<string,unknown>).generationLimit;if(!Number.isInteger(g)||(g as number)<1||(g as number)>10)throw new Error('社会阶段参数无效：generationLimit 限 1—10');if(!['rewardDivisor','dungeonTarget'].every(k=>Number.isInteger((value.eras as Record<string,unknown>)[k])&&((value.eras as Record<string,unknown>)[k] as number)>=1&&((value.eras as Record<string,unknown>)[k] as number)<=400))throw new Error('社会阶段参数无效');}
   if((value.rulesVersion==='0.27.0')!==(value.electric!==undefined))throw new Error('电气规则版本不匹配');
   if(value.electric!==undefined){
     if(!isRecord(value.electric)||Object.keys(value.electric).length!==Object.keys(ELECTRIC_BOUNDS).length)throw new Error('电气参数不完整');
@@ -191,7 +199,7 @@ export function resolveRuleset(base: Ruleset, overrides: unknown = {}): Ruleset 
   const development = base.development ? structuredClone(base.development) : undefined;
   for (const [key, value] of Object.entries(overrides)) {
     if(electric&&key.startsWith('electric.')){const name=key.slice(9) as keyof ElectricRules;if(!Object.hasOwn(ELECTRIC_BOUNDS,name))throw new Error('未知电气参数');const [min,max]=ELECTRIC_BOUNDS[name];if(!Number.isInteger(value)||(value as number)<min||(value as number)>max)throw new Error('电气参数越界');electric[name]=value as number;continue;}
-    if(eras&&key.startsWith('eras.')){const name=key.slice(5) as keyof EraRules;if(!Object.hasOwn(eras,name)||!Number.isInteger(value)||(value as number)<1||(value as number)>400)throw new Error('社会阶段参数无效');eras[name]=value as number;continue;}
+    if(eras&&key.startsWith('eras.')){const name=key.slice(5) as keyof EraRules;if(!Object.hasOwn(eras,name)||!Number.isInteger(value)||(value as number)<(name==='timeCarryPercent'?0:1)||(value as number)>(name==='timeCarryPercent'?100:400))throw new Error('社会阶段参数无效');eras[name]=value as number;continue;}
     if(socialFood&&key.startsWith('socialFood.')){const name=key.slice(11) as keyof SocialFoodRules;if(!Object.hasOwn(socialFood,name)||!Number.isInteger(value)||(value as number)<0||(value as number)>100)throw new Error('社会食品参数无效');socialFood[name]=value as number;continue;}
     if(renewal&&key.startsWith('renewal.')){const name=key.slice(8) as keyof RenewalRules;if(!Object.hasOwn(renewal,name)||!Number.isInteger(value)||(value as number)<1||(value as number)>12)throw new Error('恢复与传承参数无效');renewal[name]=value as number;continue;}
     if(industry&&key.startsWith('industry.')){const name=key.slice(9) as keyof IndustryRules;if(!Object.hasOwn(industry,name)||!Number.isInteger(value)||(value as number)<1||(value as number)>24)throw new Error('系统劳动参数无效');industry[name]=value as number;continue;}

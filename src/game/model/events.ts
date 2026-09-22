@@ -31,7 +31,7 @@ export type GameEvent =
   | {type:'economy-knowledge';operation:'archive'|'publish';subject:string;level:number}
   | {type:'economy-built';product:string;durability:number}
   | {type:'economy-process';recipe:string;actor:string;stage:'start'|'complete';factor:number}
-  | {type:'economy-farm';operation:'sow'|'harvest'|'tend'|'pump'|'waiting';crop:string;actor:string;amount:number}
+  | {type:'economy-farm';operation:'sow'|'harvest'|'tend'|'pump'|'waiting';crop:string;actor:string;amount:number;plotId?:string}
   | {type:'economy-crop-growth';crop:string;growth:number;stress:number}
   | {type:'economy-worker';worker:string;operation:'hire'|'assign'|'pause'|'train'|'waiting'|'worked'|'share';money:number;detail:string}
   | {type:'economy-trade';good:string;operation:'buy'|'sell';amount:number;money:number}

@@ -1,4 +1,34 @@
 {
+  "cooking": {
+    "porridge": {
+      "inputs": {
+        "wheat": 0.1,
+        "wood": 0.01
+      },
+      "food": 3,
+      "time": 0.5,
+      "energy": 1
+    },
+    "beans": {
+      "inputs": {
+        "soy": 0.1,
+        "wood": 0.01
+      },
+      "food": 3,
+      "time": 0.5,
+      "energy": 1
+    },
+    "mixed": {
+      "inputs": {
+        "wheat": 0.05,
+        "soy": 0.05,
+        "wood": 0.01
+      },
+      "food": 4,
+      "time": 0.5,
+      "energy": 1
+    }
+  },
   "goods": {
     "wood": {
       "price": 1,
@@ -163,19 +193,19 @@
   },
   "crops": {
     "wheat": {
-      "duration": 2,
+      "duration": 126,
       "yield": 6,
       "straw": 2,
       "level": 1
     },
     "soy": {
-      "duration": 2,
+      "duration": 112,
       "yield": 4,
       "straw": 1,
       "level": 2
     },
     "flax": {
-      "duration": 3,
+      "duration": 91,
       "yield": 5,
       "straw": 1,
       "level": 2

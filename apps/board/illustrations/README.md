@@ -1,5 +1,49 @@
 # 插画素材使用说明
 
+## 2026-09-22 图鉴物产插画
+
+使用内置 image_gen 生成，原始 PNG 已保存在本目录。图鉴以 CSS 等分裁切，不改写物品库存、规则或规划状态。作物的种子与收获物共享同一幅植株及物产合绘，详情明确标注示意。图片同时用于卡片与详情，并关联已有故事标题。
+
+- `atlas-botanical-v1.png`：6×6，33 种种植材料与对应农作物，以及蚕丝、竹蒸笼、酿造缸。
+- `atlas-ingredients-v1.png`：5×4，18 种食材及自动包装线；最后一格书籍为备用。
+- `atlas-meals-v1.png`：5×5，25 道餐食。
+- `atlas-equipment-v1.png`：3×2，热处理炉、蒸馏装置、光伏阵列、材料回收与复合设备、数字协同控制中心、定量杂粮饭。
+
+具体格位以 `atlas-view.ts` 中四组固定 ID 列表为准，不随目录排序改变。菜肴图二次生成后，按留白处记录五行裁切边界，避免相邻碗沿串入。图鉴其余已有工具与原料图继续复用独立 WebP。
+
+菜肴图修订提示词：
+
+```text
+Edit this cooking atlas for exact CSS sprite slicing. Keep the same 25 dishes and row-major order, and same appealing watercolor style. The current rows have uneven spacing and some bowls bleed into adjacent crops. Re-layout all 25 complete illustrations into an EXACT 5 column by 5 row uniform mathematical grid on a square canvas, each cell exactly 20% width and 20% height. Scale each full dish AND props DOWN so all visible painted pixels fit inside the central 70% width and 70% height of its own cell, with at least 15% blank margin on ALL FOUR sides. Use a SOLID opaque warm ivory #faf6eb background throughout, NO transparency. No grid lines. No text. Do not add or remove dishes or swap their order. Each of five rows occupies exactly one fifth canvas with its subjects centered vertically within that row. Return corrected atlas only.
+```
+
+### 本轮生成提示词
+
+#### botanical
+
+```text
+Use case: illustration-story. Create ONE production game sprite atlas image, square 2048x2048, precisely SIX columns by SIX rows, 36 equal square cells, no gutters, no grid lines, no borders, no text or letters anywhere. Every subject fully contained in its own cell with 12% empty margin for safe CSS cropping. Unified warm ivory paper background, delicate Chinese rural botanical watercolor and fine ink, sage green, golden grain, earthy terracotta, cozy illustrated encyclopedia, highly legible small silhouettes. Each cell is a detailed specimen vignette with plant AND seeds/harvest sample in a small ceramic dish or seed cloth; scientifically distinguish species. Exact row-major cell order: row1: wheat golden ears with two little seed sacks; soybean plant pods and exposed roots nodules with yellow beans; blue-flowered flax tall stalks brown seeds and fiber bundle; unusual extra-long wheat ears with visibly variable lengths and seeds; rice panicle with paddy seedlings and unhusked grain; foxtail millet dense drooping golden seed head and fine grains. row2: broomcorn millet loose branching airy panicle and yellow grain; long-awned barley ears and sprouted barley; red adzuki beans and splitting pods; edible mallow round scalloped leaves and seed dish beside a tiny blank bamboo marker; white purple-top turnip with leaves and seeds; leafy mustard and tiny round seeds next to closed pickling jar. row3: pale bottle gourd on vine, dried gourd scoop and seeds; sweet yellow melon cut open with pale seeds and tiny bee near flower; large waxy green winter melon and pale seeds on storage rack; fiber hemp slender stems leaves, coarse rope and seed dish NO drug imagery; buckwheat triangular brown seeds and white blossoms; sesame seed pods and pale seeds on catching cloth. row4: white daikon radish cross-section and seeds; loose-leaf ancient Chinese cabbage NOT headed cabbage and seed dish; spinach leaves seed dish and flowering stalk; purple and orange carrots with fine feathery leaves and seeds; whole watermelon and red cut wedge with black seeds; cotton open white boll and fuzzy seeds. row5: maize cob kernels tassel; sweet potato reddish tuber plus green vine cutting in damp soil; healthy potato seed tuber with short sprouts and small green seedling; peanut pulled-up plant with underground pods and shelled nuts; red chili fruits pale seeds white flower; ripe tomatoes on vine seed dish and wicker basket. row6: extra-long-staple cotton boll and a long stretched clean fiber sample; modern hybrid rice dense panicles with two separate seed trays; greenhouse tomatoes with small subtle greenhouse trellis arch; silk cocoons on bamboo tray with a reeled silk spool and mulberry leaf; bamboo steamer stacked with woven lid; brown earthenware fermentation crock with cloth seal. No people, no logos. Keep all 36 cells exactly aligned and separate; no elements cross cell boundaries. Output only atlas image.
+```
+
+#### ingredients
+
+```text
+Use case: illustration-story. ONE game encyclopedia ingredient sprite atlas, 2048x2048 square, EXACTLY FIVE columns and FOUR rows =20 equal cells (each cell 409.6 wide by 512 tall); no grid lines or gutters, uniform warm ivory paper background. Chinese rural watercolor with delicate ink, muted sage green and earthy warm ceramic browns, same scale, detailed but clear at thumbnail size. Center each still life inside its own cell with 15% margin; all elements remain within cell. No typography, labels, text, logos, watermark, people. Exact row-major order: row1 cell1 two small bowls of white polished rice and light brown rice beside tiny milling pestle; cell2 yellow foxtail millet grains in bowl with little bamboo sieve; cell3 glossy golden broomcorn millet grain in small bowl and one tiny steamed test cake; cell4 wheat flour mound wooden scoop and small kneaded dough; cell5 amber vegetable oil in small ceramic pouring jar with sesame seeds. row2 cell1 two different-textured white tofu blocks on wooden draining board and cloth; cell2 food-grade tofu coagulant white crystals in tiny spoon beside bowl of gently forming soy curds (no chemical labels); cell3 tied bunch of dried leafy greens beside open storage cloth bag; cell4 open earthenware crock of pickled mustard greens and a second closed jar; cell5 coarse white salt on folded paper beside tied cloth salt parcel. row3 cell1 clean cooking water in wooden bucket and ceramic ladle; cell2 brown and pale whole chicken eggs in straw nest and one cracked egg in bowl; cell3 fresh whole silver freshwater fish on wooden board beside woven fish basket, no blood; cell4 fresh pink pork cuts neatly separated on wooden board with kitchen knife, no gore; cell5 honey earthenware jar with wooden dipper and tiny honeycomb, some pale crystallized honey. row4 cell1 pale amber cane sugar crystals and pieces in bowl with sugarcane stalk; cell2 green scallions whole with roots plus chopped greens on board; cell3 ready-to-eat travel ration of flatbread and cooked grain cakes wrapped in clean cloth; cell4 compact modern automated packaging conveyor with pale sacks and sealing machine, no brand; cell5 open illustrated botanical reference book with tiny seed dishes, no readable text. Each illustration a unique authentic object composition inspired by cultivation, food processing and storage stories. Do not add background scenery. Preserve exact 5x4 cell layout.
+```
+
+#### meals
+
+```text
+Use case: illustration-story. ONE production sprite atlas of Chinese rural cooking, square 2048x2048, EXACTLY FIVE columns by FIVE rows =25 equal square cells. Uniform warm ivory paper, finely inked botanical watercolor, handmade celadon and earthenware bowls, muted sage and warm grain colors, appetizing but historically modest rural food. No labels, no words, no gridlines, no gutters, no people, no logos. Every complete bowl with subtle story-related ingredient or utensil contained within its own cell, 12% safe margin, distinct food colors and silhouettes, top three-quarter viewpoint. Exact row-major order: Row1: wheat grain porridge in clay bowl with wooden stirring spoon; soft yellow soybean stew with a few dry beans beside bowl; cooked whole wheat and soybean mixed grain rice in deep rustic bowl; golden fine millet porridge with wooden water ladle; fluffy steamed white rice in ceramic bowl beside small rice measuring cup. Row2: three small golden broomcorn millet steamed cakes on ceramic plate; green round-leaf edible mallow soup in bowl with leafy sprig; turnip root cubes and chopped turnip greens in clear soup; deep red adzuki bean thick savory soup no sugar; translucent winter melon cubes and soybeans in broth. Row3: pale tender bottle gourd slices in soup with tiny dry gourd ladle beside; freshwater fish soup with a silver fish portion herbs and chopsticks; loose Chinese cabbage leaves and soybean soup; pale round steamed wheat buns in open bamboo steamer; long wheat noodles with green scallions and glossy scallion oil in celadon bowl. Row4: white daikon chunks and yellow beans in earthen pot; decorative white festival rice cakes with carved wooden cake mold beside; darker brown buckwheat noodles coiled in bowl with a few shorter strands and buckwheat seeds; two roasted sweet potatoes of different sizes one split open orange inside with subtle charcoal crumbs; red tomato and pale potato chunky stew in clay casserole. Row5: smooth golden steamed egg custard with green leaf flecks in shallow bowl with lid; white soft tofu cubes and loose cabbage green leaves in light soup with spoon; turnip chunks and brown cooked pork stew in terracotta pot; dark red adzuki beans with light honey drizzle and small wooden honey dipper; straight dried noodles bundled beside plain unprinted paper packaging. ONLY these 25 dishes, no extra cells or overlapping subjects. Image is for CSS sprite cropping, exact equal cell alignment essential.
+```
+
+#### equipment
+
+```text
+Use case: stylized-concept. One game encyclopedia sprite sheet, landscape 1536x1024, exactly THREE columns by TWO rows, SIX equal square cells, seamless warm ivory paper background, fine hand-drawn ink and watercolor, muted sage green and umber with softly modeled materials. Each object centered with ample 12 percent margin, no cropped edges, no text, no logos, no labels, no gridlines. Exact row-major: top left small early industrial heat treatment furnace, square brick refractory chamber glowing orange inside, iron tongs and coiled steel spring sample; top middle traditional laboratory distillation apparatus with copper heated kettle, curling cooling coil, cooling water vessel and clear receiving glass flask, coherent connected tubing; top right modern photovoltaic array of several blue solar panels on angled metal support legs, small inverter at base, no surrounding scenery. Bottom left modern materials recycling and composite fabrication equipment, compact shredder hopper with sorted metal offcuts, extruder roller station and a stack of finished composite panels; bottom middle modern digital coordination control desk, three dark blue monitoring screens showing small abstract unlabeled process lines, connected small server rack and industrial control cabinet, no characters; bottom right precisely portioned multigrain cooked rice containing white rice and colorful grain beans in a neat ceramic meal bowl, small measuring scoop and blank kitchen ledger beside it, distinct from rustic wheat soybean rice. Standalone specimen compositions; modest factual machinery, no sci-fi. All six equal cells separately crop-safe, no objects cross into neighbor.
+```
+
+
 更新：2026-09-20。已接入页面，下面的「当前接入」为现状；后文保留原素材交付说明与生成提示词。
 
 
@@ -395,3 +439,147 @@ Use the reference ONLY for face identity, painterly style, six-cell grid alignme
 - `story-token.jpg`（1024×1024）→ `story-token-ui.webp`（384×384，q84）：开始页题图。无字素玉佩、编绳与银杏叶静物，呼应家族信物。信物机制尚未实装，图片只是主题示意。
 
 两图均为不透明暖纸底，页面以 `mix-blend-mode:multiply` 融入纸色容器；已目视检查主题、风格与无文字。
+
+
+## 农舍事务卡片插画（2026-09-21）
+
+通过本机 Grok Build CLI 的 `image_gen` 生成 `farm-home-atlas.jpg`（1024×1024），按用户红框位置替换农舍横幅及六张功能卡片的线框图标。只改呈现。
+
+页面使用七张 300×300 WebP：`farm-home-home`（农舍）、`farm-home-porridge`（麦粥）、`farm-home-beans`（炖豆）、`farm-home-mixed`（麦豆饭）、`farm-home-rest`（休息）、`farm-home-reserves`（储粮）、`farm-home-gather`（采集）。图集第三行余下两格未用于页面。裁掉生成的纸片边框，对边缘连通的浅灰底做透明度处理，保留器物和水彩阴影；页面以 multiply 融入原有纸色。原始图集保留，便于重新裁切。
+
+最终绘图提示词：
+
+```text
+A precisely aligned 3 by 3 contact sheet of nine separate Chinese pastoral watercolor spot illustrations on pure white background, equal square cells, no borders, no text, no letters, no people. Each object centered in its cell with generous white margins, completely contained in its cell. Muted sage green, warm ochre, ink grey, delicate handpainted rice-paper watercolor aesthetic. Row 1: small rustic tiled farmhouse with warm kitchen window; ceramic bowl of wheat porridge and wheat stalk; earthenware bowl of stewed brown soybeans. Row 2: ceramic bowl of mixed wheat grains and beans; resting bamboo mat with cushion and herbal tea; woven basket of grain and storage jar. Row 3: gathering basket with firewood and small hand hoe; a sprouting seed; small cooking stove. Square image at highest supported resolution.
+```
+
+接入位置：`farm-view.ts` 的农舍 panel；`farm-animation/scene.css` 的 `.farm-painted-art`。图片为装饰性，名称、材料、状态与行动仍由原有可访问文本表达。未修改田地场景、游戏机制或数值。
+
+
+## 仓库、同门、买卖与田地选项（2026-09-21）
+
+继续使用 Grok Build CLI 的 `image_gen`。新增两张原始图集和 21 张 300×300 WebP，文件均在本目录。`farm-goods-*.webp` 在仓库、选中详情、买卖和播种选项共用；`farm-affairs-*.webp` 用于同门互动、采购篮、探索、开垦、灌溉、异种和事件选项。仓库横幅复用上一批储粮图。未知地块只使用通用地图与手杖，不依据隐藏结果选图。图标为装饰，原有行动名称、消耗、禁用状态与原因保留。
+
+后处理：按图集格子裁切，去除边缘连通的浅色底；事务图边沿额外渐隐，减轻生成纸片的方框。保留原始 JPG。未改变游戏规则。
+
+`farm-affairs-atlas.jpg` 最终提示词：
+
+```text
+A precisely aligned 3 by 3 sheet of nine separate Chinese pastoral watercolor spot illustrations, equal square cells on flat pure white background. No panel borders, no shadows around cells, no text, no letters, no humans. Objects fully inside cells with generous white margins. Muted sage green, warm ochre, grey ink, delicate handpainted watercolor matching Chinese farming game inventory illustrations. Row 1: two cups of tea on a small wooden tray for conversation between fellow disciples; two open cloth seed pouches exchanging different seeds; open blank farming notebook with wheat stalk and a simple wooden watering bucket for learning and mutual help. Row 2: wicker shopping basket with a few ancient copper coins; a folded blank trail map beside a walking staff for exploring unknown terrain; a hoe resting in a small patch of freshly tilled earth for reclaiming land. Row 3: small wooden watering bucket with water and green shoot for tending crops; unusual golden wheat ear with three violet kernels for rare seed; old rolled blank scroll and a small mossy stone for countryside stories. Square image at highest supported resolution.
+```
+
+按行导出：`talk / exchange / learn / basket / explore / reclaim / water / rare / story`。
+
+`farm-goods-atlas.jpg` 最终提示词：
+
+```text
+A precisely aligned 3 column by 4 row sheet of twelve separate Chinese pastoral watercolor inventory spot illustrations, equal cells, pure white flat background. No borders, no framed panels, no text, no letters, no people. Each object centered fully within its cell with generous margins. Muted sage green warm ochre grey ink delicate handpainted watercolor style. Row 1: harvested golden wheat sheaf; small bowl of dry soybeans with green soybean pod; bundle of flax stalks with tiny blue flowers. Row 2: open cloth pouch of wheat seeds with one wheat ear beside it; open cloth pouch of soybean seeds with soybean pod beside it; open cloth pouch of flax seeds with blue flax flower beside it. Row 3: tied split firewood logs; lump of moist clay; basket of dark compost with a leaf. Row 4: tied bundle of straw; open sack of white flour with a wooden scoop; cooked grains in ceramic bowl for food rations. Portrait image, 3 columns 4 rows at highest supported resolution.
+```
+
+按行导出：`wheat / soy / flax / seedWheat / seedSoy / seedFlax / wood / clay / compost / straw / flour / food`。
+
+
+## 文明模块导航（2026-09-22）
+
+由 Grok Build CLI `image_gen` 生成 `era-navigation-atlas.jpg`（1280×576），裁切并清理浅灰背景后导出 `era-nav-workshop.webp`、`era-nav-trade.webp`、`era-nav-capital.webp`。用于农场右侧的工坊、贸易、资本导航及页面题图。只提供 UI 骨架，具体生产、市场、金融行动尚未接入。
+
+提示词：A horizontal triptych of exactly three equal square cells, all on pure white flat background, no panels, no borders, no text, no lettering, no people. Three Chinese pastoral watercolor spot illustrations for game navigation, muted sage green, ochre and ink grey, delicate handmade appearance, centered objects with generous margins within each cell. Left: a modest traditional wooden workshop with a small workbench, wooden gear and sack of grain, representing farm produce processing and toolmaking. Middle: a twentieth century industrial warehouse with a small conveyor belt and shipping crates, representing production and market trade. Right: an elegant contemporary financial office silhouette with an abacus and a restrained stack of coins in foreground, representing capital and investment, no charts or letters. Cohesive style and similar visual weight.
+
+原定 3:1 比例不受生成器支持，实际采用 20:9。原图浅色面板经本地后处理去除，页面使用 multiply 融入纸色。
+
+## 个人事务行插图（2026-09-22）
+
+使用用户指定的 Grok Build CLI `image_gen` 生成 `self-records-atlas.jpg`，按格裁切并移除边缘连通的浅色底，柔化边缘，导出五张 336×264 透明 WebP：`self-record-story.webp`、`self-record-rest.webp`、`self-record-peers.webp`、`self-record-disciple.webp`、`self-record-lineage.webp`。对应我的经历、身体休养、我的同门、我的弟子、我的传承。作为行内装饰，保留原有可访问标题与展开交互，不重复主导航。CSS multiply 与页面纸色融合。
+
+生成提示词：
+
+```text
+Use case: historical-scene. A precisely aligned 3 column by 2 row contact sheet on pure white background, six equal square cells, generous white margins, no dividers, no labels, no lettering, no watermark. Cohesive Chinese pastoral watercolor and fine ink spot illustrations, muted sage green warm ochre and ink grey. Delicate organic edges dissolve into white; subjects readable at small sizes. Top left: a gently opened blank stitched journal, writing brush, fallen leaf, for personal memories. Top middle: earthen herbal tea bowl, small medicine pot, fresh medicinal leaves, for rest and recovery. Top right: two adult fellow students sitting at a low tea table beneath a tiny bamboo branch, equal status, modest historical robes, for companionship. Bottom left: an adult teacher showing a blank open book to a young adult apprentice at a low desk, for teaching a disciple. Bottom middle: two hands passing a small jade pendant above a rolled blank manuscript, for spiritual inheritance across generations. Bottom right: a small inkstone and bamboo leaf as a spare motif. Objects and figures fully contained in their individual cells, no room backgrounds, no hard rectangular patches or frames. Square canvas at high resolution.
+```
+
+
+## 地块工程用途插图（2026-09-22）
+
+使用用户指定的本机 Grok Build CLI image_gen 独立生成六张原图 `farm-project-{timber,clearwood,shelter,canal,restore,leave}-v2.jpg`，导出同名 `-ui.webp`（320×320，quality 87）。用于用途选择卡和范围图中心，替换 SVG 简笔图。暖纸水彩、自然地景；通过 multiply 和径向边缘渐隐融入纸色，不声称原图具有透明背景。插图只作示意，作物、材料和供水结果仍由规则文本和真实状态表示。
+
+最终提示词（每张均由公共段＋风格段＋对应主体组成）：
+
+```text
+A single centered isolated item or small coherent arrangement, watercolor and gouache with fine pencil detail, warm ivory paper background, muted sage and umber, restrained Chinese family chronicle game inventory art, bold silhouette readable at 64 pixels, ample margins, no text, labels, symbols, numerals, watermark, border or UI. Aspect 1:1.
+
+timber: Premium hand-painted pastoral game UI illustration, elegant Chinese rural watercolor with natural organic edges fading to ivory, warm sunlight, delicate botanical detail, earthy sage green and honey ochre. A close-up miniature landscape vignette seen from a gentle elevated angle, NOT geometric low-poly, NOT a flat vector diagram. No people, no buildings, no lettering. Subject fills 75 percent of canvas and is clearly readable as a small card illustration. Freshly cut logs with visible growth rings, a small hand axe leaning on a stump, wood shavings and a few ferns. Warm timber is the unmistakable focal point.
+
+clearwood: Premium hand-painted pastoral game UI illustration, elegant Chinese rural watercolor with natural organic edges fading to ivory, warm sunlight, delicate botanical detail, earthy sage green and honey ochre. A close-up miniature landscape vignette seen from a gentle elevated angle, NOT geometric low-poly, NOT a flat vector diagram. No people, no buildings, no lettering. Subject fills 75 percent of canvas and is clearly readable as a small card illustration. A newly cleared cultivated plot with rich brown parallel furrows, a wooden hoe resting at the edge, tiny orderly green seedlings. The open field is the focal point; no trees.
+
+shelter: Premium hand-painted pastoral game UI illustration, elegant Chinese rural watercolor with natural organic edges fading to ivory, warm sunlight, delicate botanical detail, earthy sage green and honey ochre. A close-up miniature landscape vignette seen from a gentle elevated angle, NOT geometric low-poly, NOT a flat vector diagram. No people, no buildings, no lettering. Subject fills 75 percent of canvas and is clearly readable as a small card illustration. A lush small grove of three deciduous trees, varied rounded foliage and graceful trunks, grasses at their roots sheltering the edge of a tiny crop field. The living green grove is the focal point.
+
+canal: Premium hand-painted pastoral game UI illustration, elegant Chinese rural watercolor with natural organic edges fading to ivory, warm sunlight, delicate botanical detail, earthy sage green and honey ochre. A close-up miniature landscape vignette seen from a gentle elevated angle, NOT geometric low-poly, NOT a flat vector diagram. No people, no buildings, no lettering. Subject fills 75 percent of canvas and is clearly readable as a small card illustration. A lovingly restored narrow rural irrigation canal with clear turquoise flowing water, old stone edging, a small wooden sluice and green grasses, leading into a crop bed. Water is the unmistakable focal point.
+
+restore: Premium hand-painted pastoral game UI illustration, elegant Chinese rural watercolor with natural organic edges fading to ivory, warm sunlight, delicate botanical detail, earthy sage green and honey ochre. A close-up miniature landscape vignette seen from a gentle elevated angle, NOT geometric low-poly, NOT a flat vector diagram. No people, no buildings, no lettering. Subject fills 75 percent of canvas and is clearly readable as a small card illustration. A rich fertile garden bed of dark crumbly soil and vigorous green wheat seedlings, a wicker compost basket and a wooden rake on the edge. Healthy thriving sprouts are the focal point.
+
+leave: Premium hand-painted pastoral game UI illustration, elegant Chinese rural watercolor with natural organic edges fading to ivory, warm sunlight, delicate botanical detail, earthy sage green and honey ochre. A close-up miniature landscape vignette seen from a gentle elevated angle, NOT geometric low-poly, NOT a flat vector diagram. No people, no buildings, no lettering. Subject fills 75 percent of canvas and is clearly readable as a small card illustration. An uncultivated patch of pale dry earth with sparse straw-colored wild grasses, a few small stones and a simple resting hoe. Modest fallow land, no crops, no canal, no trees.
+```
+
+
+## 节气栏四季插图（2026-09-22）
+
+由 Grok Build CLI image_gen 独立生成 almanac-{spring,summer,autumn,winter}-v1.jpg，导出 280×280 的 -ui.webp（quality86）。用于节气栏左侧，随真实日历季节切换；仅表达季节意象，不表示实际天气或新增节日奖励。页面以 multiply 和径向渐隐融入纸色。
+
+最终提示词（公共段＋对应主体）：
+
+```text
+A single centered isolated item or small coherent arrangement, watercolor and gouache with fine pencil detail, warm ivory paper background, muted sage and umber, restrained Chinese family chronicle game inventory art, bold silhouette readable at 64 pixels, ample margins, no text, labels, symbols, numerals, watermark, border or UI. Aspect 1:1.
+
+spring: Elegant Chinese pastoral almanac illustration, delicate watercolor and fine botanical pencil drawing on warm ivory paper, natural soft fading edges, restrained sage green and ochre, poetic rural seasonal vignette readable at small size. Not a vector icon. No people, buildings, text, lettering or border. Fresh willow twigs arching over young green shoots, a shallow blue-green puddle with delicate raindrop ripples, tender early spring growth.
+
+summer: Elegant Chinese pastoral almanac illustration, delicate watercolor and fine botanical pencil drawing on warm ivory paper, natural soft fading edges, restrained sage green and ochre, poetic rural seasonal vignette readable at small size. Not a vector icon. No people, buildings, text, lettering or border. Lush green rice leaves with one small lotus flower and tall summer grasses, warm bright summer light.
+
+autumn: Elegant Chinese pastoral almanac illustration, delicate watercolor and fine botanical pencil drawing on warm ivory paper, natural soft fading edges, restrained sage green and ochre, poetic rural seasonal vignette readable at small size. Not a vector icon. No people, buildings, text, lettering or border. Golden ripe wheat heads bending above a few ochre fallen leaves and a small woven harvest basket, gentle autumn warmth.
+
+winter: Elegant Chinese pastoral almanac illustration, delicate watercolor and fine botanical pencil drawing on warm ivory paper, natural soft fading edges, restrained sage green and ochre, poetic rural seasonal vignette readable at small size. Not a vector icon. No people, buildings, text, lettering or border. A bare plum branch with a few red blossoms above lightly snow-covered earth and dry grasses, quiet winter stillness.
+```
+
+
+## 顶部天气插图（2026-09-22）
+
+Grok Build CLI image_gen 生成 weather-{normal,dry,wet}-v1.jpg，分别表示晴和、干燥、连雨；导出280×280、quality86的 -ui.webp。当前天气决定图片，物理作用由真实文本说明，不使用未来天气。以multiply与边缘渐隐融入纸色。
+
+最终提示词：
+```text
+A single centered isolated item or small coherent arrangement, watercolor and gouache with fine pencil detail, warm ivory paper background, muted sage and umber, restrained Chinese family chronicle game inventory art, bold silhouette readable at 64 pixels, ample margins, no text, labels, symbols, numerals, watermark, border or UI. Aspect 1:1.
+
+normal: Premium Chinese pastoral chronicle UI spot illustration, delicate hand painted watercolor with graphite detail, warm ivory paper and soft natural fading edges, muted sage green and honey ochre, one coherent miniature countryside weather vignette, gentle elevated view, clear silhouette at small size, no text, numbers, people, border, buildings or UI. A small luminous sun partly behind two soft white clouds over a thriving green grassy knoll, calm fair weather and comfortably moist soil.
+
+dry: Premium Chinese pastoral chronicle UI spot illustration, delicate hand painted watercolor with graphite detail, warm ivory paper and soft natural fading edges, muted sage green and honey ochre, one coherent miniature countryside weather vignette, gentle elevated view, clear silhouette at small size, no text, numbers, people, border, buildings or UI. A warm golden sun above a patch of pale dry cracked earth, drooping straw grass and a few dry leaves, muted ochre heat haze. Clear dry-weather contrast, tasteful and serene.
+
+wet: Premium Chinese pastoral chronicle UI spot illustration, delicate hand painted watercolor with graphite detail, warm ivory paper and soft natural fading edges, muted sage green and honey ochre, one coherent miniature countryside weather vignette, gentle elevated view, clear silhouette at small size, no text, numbers, people, border, buildings or UI. Soft slate-blue rain clouds with thin visible rain strokes above a shallow puddle, ripples and lush reeds. Cool blue-green continuous rain, gentle elegant watercolor, no thunder.
+```
+
+
+## 田间植物样板（2026-09-22）
+
+- 入口：`/crop-preview`，独立 PixiJS 美术预览，不读写存档。
+- 原稿：`farm-plants-study-v1.jpg`；校正稿：`farm-plants-corrections-v1.jpg`。由现有 Grok Build ACP image_gen 流程生成。
+- 使用素材：`farm-plant-{wheat,soy,radish,waxgourd}-{0,1,2}-v1.png`，12张透明底精灵。原稿没有原生透明通道，采用颜色分离、连通区域清理、根部裁切得到alpha。
+- 校正稿替换小麦幼苗、大豆适收株与冬瓜适收株；其它保留首版样板。幼苗、成株、适收是美术对照，不是新增规则。
+- 细茎边缘与部分叶形仍需后续精修；这是用于确认风格、比例和排列方式的首版样板。
+- 微风使用固定底部锚点的小幅形变，藤蔓幅度更低；未声称逐叶骨骼动画。
+
+### 生成提示词（原样记录）
+
+共同风格前缀：
+
+A single centered isolated item or small coherent arrangement, watercolor and gouache with fine pencil detail, warm ivory paper background, muted sage and umber, restrained Chinese family chronicle game inventory art, bold silhouette readable at 64 pixels, ample margins, no text, labels, symbols, numerals, watermark, border or UI. Aspect 1:1.
+
+farm-plants-study-v1：
+
+OVERRIDE composition and background: production sprite sheet, exact 3 columns by 4 rows, 12 equal square cells, NO drawn grid, pure solid white #FFFFFF background, no paper texture, no shadows, no text. All plant subjects fully isolated with wide blank margins. Camera: fixed isometric farming game view looking down 30 degrees, consistent light upper left. Delicate botanical watercolor-gouache, muted sage leaves, ochre wheat, clear painted silhouettes; same visual language as a warm antique botanical atlas. Each cell contains ONLY a living rooted plant or small coherent clump, rooted at same bottom-center baseline, NO pots, seed bowls, baskets, cut produce, landscape, soil base, visible root systems, diagrams or detached harvested items. Row 1 wheat: left tiny 3-leaf seedling; middle green tillering clump with unripe upright ears; right ripe golden clump with wheat ears, narrow leaves and fine awns. Row 2 soybean: left two-cotyledon seedling with small true leaves; middle compact upright branching bush with trifoliate broad leaves; right bush with visible hanging mature tan bean pods and some yellow leaves. Row 3 white daikon radish: left small two-leaf seedling; middle low lush rosette of deeply lobed leaves; right larger green rosette with ONLY a tiny white root shoulder visible at ground level, underground white root MUST NOT be shown. Row 4 winter melon: left two-cotyledon small seedling; middle low sprawling leafy vine with tendrils, NO fruit; right sprawling vine with one attached whole dark green oblong wax gourd lying at ground level, correct botanical scale, NO cut fruit. Young plants smaller than mature plants; all rooted plants visible in full. 1536x2048 or nearest portrait sheet, equal cell layout.
+
+farm-plants-corrections-v1：
+
+OVERRIDE COMPOSITION: Exactly THREE separate isolated botanical game sprites side by side in equal-width columns, one horizontal row on PURE WHITE background. Do not draw grid borders or shadows or ground. Upper-left light, isometric farming game camera looking down 30 degrees, warm botanical watercolor-gouache matching a sage-green antique illustrated atlas, crisp legible shapes. LEFT column: a tiny young WHEAT GRASS seedling: exactly three NARROW LINEAR GRASS BLADES arising from the basal crown, long thin pointed blade tips, monocot grass, NO broad oval leaves, NO visible cotyledons, NO branched stem, NO roots. MIDDLE column: ONE ripe SOYBEAN plant Glycine max, bushy branching upright stem, correctly TRIFOLIATE leaves with three OVAL ENTIRE-MARGIN UNLOBED leaflets each, green and yellow foliage, attached clusters of small dry tan soybean pods, NO palmate leaves, NO lobed leaves, NO maple or cotton leaves, no visible roots. RIGHT column: a mature WINTER MELON vine Benincasa hispida with a single whole elongated cylindrical dark green wax gourd laying on ground under green lobed leaves and attached curling tendrils; gourd has light waxy bloom and absolutely NO watermelon stripes, no cut face, no basket. All three subjects fully shown with 12% margins, each isolated no overlap across columns, no bowls or loose produce. Background uniform white with NO drop shadow, NO soil and NO paper grain.
+
+
+### 正式农场接入
+
+小麦与大豆已使用 `farm-plant-*-v1.png` 三阶段精灵，按现有生长进度切换。场景缓存并合成三簇植株，加载失败保留原程序绘图，亚麻继续使用原绘图。萝卜和冬瓜已保留素材映射，但未新增种植规则。画面使用底部锚点的小幅倾斜微风，沿用原地块点击、选择和收获反馈接口。

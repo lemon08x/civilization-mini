@@ -26,7 +26,7 @@ try {
   if (command === 'help') {
     console.log(`隐士修所 — 0.27.0
   npm run lab -- list
-  npm run lab -- new --run demo --seed 17 --scenario river
+  npm run lab -- new --run demo --seed 17 --framework riverine
   npm run lab -- observe --run demo
   npm run lab -- act --run demo --revision 0 --action <行动ID>
   npm run lab -- delete --run demo
@@ -40,7 +40,7 @@ try {
     } else if (!opts.run) throw new Error('请指定 --run');
     else if (command === 'new') {
       const overrides = opts.params ? await readJson(resolve(opts.params)) : {};
-      const session = await createSession({ runId: opts.run, ruleset: resolveRuleset(base, overrides), seed: Number(opts.seed ?? 1), scenarioId: opts.scenario ?? 'river' });
+      const session = await createSession({ runId: opts.run, ruleset: resolveRuleset(base, overrides), seed: Number(opts.seed ?? 1), frameworkId: opts.framework ?? 'riverine' });
       await store.create(session);
       printObservation(observeSession(session));
     } else if (command === 'delete') {

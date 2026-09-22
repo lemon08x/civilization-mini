@@ -78,3 +78,26 @@ export interface SectState {
   fortune:number; cards:Record<SectCard,number>; draws:number; lastDraw:string;
   seasonChance:number; seasonBonus:SectCard|null; nextBonus:SectCard|null; lastEvent:string;
 }
+
+export interface CalendarRules {
+  businessCycleDays:number; waterRetentionDays:number;
+  weatherDays:number; termGoodPercent:number; termGoods:number; termEnergy:number;
+  referenceYear:number; daysPerWeek:number; actionDaysPerUnit:number; studyDaysPerUnit:number;
+  grainPerDay:number; woodPerDay:number; heartyMultiplier:number;
+  dailyRecovery:number; heartyRecovery:number; mealRecovery:number; hungerDamagePerDay:number;
+  harvestGraceDays:number; workChunkDays:number; lampEnergyPercent:number;
+}
+export const CALENDAR_BOUNDS:Record<keyof CalendarRules,readonly [number,number]>={
+  businessCycleDays:[90,90],waterRetentionDays:[90,90],
+  weatherDays:[3,14],termGoodPercent:[40,90],termGoods:[1,3],termEnergy:[1,6],
+  lampEnergyPercent:[50,100],referenceYear:[1900,2300],daysPerWeek:[7,7],actionDaysPerUnit:[0.5,1],studyDaysPerUnit:[1,14],
+  grainPerDay:[0.01,1],woodPerDay:[0.001,0.1],heartyMultiplier:[1,2],dailyRecovery:[0,4],
+  heartyRecovery:[0,2],mealRecovery:[0,2],hungerDamagePerDay:[0.1,5],harvestGraceDays:[1,28],workChunkDays:[1,14],
+};
+export interface CalendarState {
+  continuousVersion:1; nextBusinessDay:number;
+  rules:CalendarRules; absoluteDay:number; seasonStarted:number; seasonLength:number; day:number; diet:'simple'|'hearty'; mealDays:number;
+  consumed:number; missing:number; purchaseSpent:number; systemsSettled:boolean; study:Record<string,{done:number;total:number}>;
+  weatherNextDay:number; lastTermDay:number; termEvents:{day:number;date:string;term:string;title:string;text:string;effect:string;positive:boolean}[];
+  lastNotice:string;
+}

@@ -19,6 +19,8 @@ try {
     `--allow-fs-read=${resolve(root, 'dist')}`,
     `--allow-fs-read=${resolve(root, 'rulesets')}`,
     `--allow-fs-read=${resolve(root, 'package.json')}`,
+    // Offline calendar code is a runtime dependency; retain the other player restrictions.
+    `--allow-fs-read=${resolve(root, 'node_modules/lunar-typescript')}`,
     `--allow-fs-read=${resolve(root, 'saves')}`,
     ...(command === 'act' ? [`--allow-fs-write=${run}`] : []),
     resolve(root, 'dist/playtests/player.js'), command, ...args,

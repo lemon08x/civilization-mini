@@ -1,3 +1,5 @@
+import {seasonAt} from '../game/systems/calendar.js';
+import {FARM_DISCOVERIES} from '../game/model/economy.js';
 import { createInitialState, transition } from '../game/game.js';
 import { getObservation } from '../game/observation.js';
 import { parseActionId } from '../game/model/action.js';
@@ -15,11 +17,11 @@ export function validateCommand(value: unknown): Command {
   parseActionId(value.actionId);
   return { commandId: value.commandId, expectedRevision: value.expectedRevision as number, actionId: value.actionId, ...(value.reason !== undefined ? { reason: value.reason as string } : {}) };
 }
-export async function createSession(options: { runId: string; ruleset: Ruleset; seed: number; scenarioId: string }): Promise<Session> {
+export async function createSession(options: { runId: string; ruleset: Ruleset; seed: number; frameworkId: string }): Promise<Session> {
   validateRunId(options.runId);
   const ruleset = validateRuleset(options.ruleset);
-  const state = createInitialState(ruleset, options.seed, options.scenarioId);
-  const record: RunRecord = { format: 'civilization-mini-run', formatVersion: 3, manifest: { runId: options.runId, ruleset, seed: options.seed, scenarioId: options.scenarioId }, entries: [] };
+  const state = createInitialState(ruleset, options.seed, options.frameworkId);
+  const record: RunRecord = { format: 'civilization-mini-run', formatVersion: 3, manifest: { runId: options.runId, ruleset, seed: options.seed, frameworkId: options.frameworkId }, entries: [] };
   return deepFreeze({ state, record });
 }
 export async function submitCommand(session: Session, input: unknown): Promise<{ session: Session; duplicate: boolean; revision: number }> {
@@ -32,7 +34,7 @@ export async function submitCommand(session: Session, input: unknown): Promise<{
   const revision = session.record.entries.length;
   if (command.expectedRevision !== revision) throw new Error(`过期命令：当前 revision=${revision}`);
   // 行动上限按代际口径估算：前三个限代时代各 generationLimit 代（每代 birthYears×4 季），外加现代两代人的余量。
-  const limit = session.state.era ? (3 * session.state.era.rules.generationLimit * session.state.life!.rules.birthYears * 4 + 2 * session.state.life!.rules.lifespanMax * 4) * (session.state.life!.rules.timePerSeason + 5) + 100 : 1500;
+  const limit = session.state.era ? (3 * session.state.era.rules.generationLimit * session.state.life!.rules.birthYears * 4 + 2 * session.state.life!.rules.lifespanMax * 4) * ((session.state.life!.calendar?94*2:session.state.life!.rules.timePerSeason) + 5) + 100 : 1500;
   if (revision >= limit) throw new Error(`实验已达到 ${limit} 条行动的运行上限`);
   const result = transition(session.state, parseActionId(command.actionId), session.record.manifest.ruleset);
   const entry = { revision: revision + 1, command, events: result.events };
@@ -54,9 +56,34 @@ export function parseSession(value: unknown): Session {
   // Current save shape is deliberately not migrated: preserve incompatible files.
   const sect=value.state.sect,persons=value.state.persons;
   const invalid=()=>{throw new Error('存档缺少有效人物经历、生平、师徒、道术或现代使命数据，请新开游戏；原存档不修改。');};
+  if(typeof (record.manifest as Record<string,unknown>).frameworkId!=='string')invalid();
+  if(isRecord(value.state.era)&&typeof (value.state.era as Record<string,unknown>).frameworkId!=='string')invalid();
   const finite=(n:unknown)=>typeof n==='number'&&Number.isFinite(n)&&n>=0;
   if(!isRecord(sect)||!isRecord(persons)||!isRecord(sect.members)||!Array.isArray(sect.current)||sect.current.length!==2||new Set(sect.current).size!==2||!isRecord(sect.rules)||canonical(sect.rules)!==canonical(record.manifest.ruleset.sect))invalid();
   const q=sect as Record<string,any>,people=persons as Record<string,any>;
+  const economy=value.state.economy;
+  const farmInvalid=()=>{throw new Error('存档缺少有效地块或独立同门数据，请新开游戏；原存档不修改。');};
+  if(!isRecord(economy)||!isRecord(economy.farm))farmInvalid();
+  const farm=(economy as Record<string,any>).farm;
+  const validField=(f:unknown)=>isRecord(f)&&[null,'wheat','soy','flax'].includes(f.crop as null|string)&&[null,'wheat','soy','flax'].includes(f.lastCrop as null|string)&&['planted','moisture','growth','stress','fertility','tended','bonus','duration'].every(k=>finite(f[k]))&&Number(f.fertility)<=3&&Number(f.duration)>=1&&typeof f.composted==='boolean'&&(f.variety===undefined||f.variety==='heritage'&&f.crop==='wheat');
+  if(farm.explorationVersion!==3||!Number.isSafeInteger(farm.rareSeeds)||farm.rareSeeds<0)farmInvalid();
+  if(!isRecord(farm.rules)||canonical(farm.rules)!==canonical(record.manifest.ruleset.farm)||!isRecord(farm.plots)||!Array.isArray(farm.discovered)||!farm.discovered.includes('wheat')||new Set(farm.discovered).size!==farm.discovered.length||farm.discovered.some((c:unknown)=>!['wheat','soy','flax'].includes(String(c)))||!Number.isSafeInteger(farm.explored)||farm.explored<0)farmInvalid();
+  if(!validField((economy as Record<string,any>).field)||farm.plots.p2q2?.kind!=='field')farmInvalid();
+  for(const [id,raw] of Object.entries(farm.plots)){
+    if(!isRecord(raw)||raw.id!==id||!Number.isSafeInteger(raw.x)||!Number.isSafeInteger(raw.y)||Number(raw.x)<0||Number(raw.y)<0||id!==`p${raw.x}q${raw.y}`||!['unknown','wild','field','tree','rock','brush','story'].includes(String(raw.kind)))farmInvalid();
+    const p=raw as Record<string,any>;
+    if(p.kind==='field'&&id!=='p2q2'?!validField(p.field):p.field!==undefined)farmInvalid();
+    if(p.fertility!==undefined&&(!Number.isInteger(p.fertility)||p.fertility<0||p.fertility>3))farmInvalid();
+    if(p.discovery!==undefined&&(!isRecord(p.discovery)||!(FARM_DISCOVERIES as readonly unknown[]).includes(p.discovery.id)||typeof p.discovery.resolved!=='boolean'||typeof p.discovery.outcome!=='string'))farmInvalid();
+    if(['tree','rock','brush','story'].includes(p.kind)&&!p.discovery)farmInvalid();
+    if(p.kind==='story'&&(p.discovery.resolved||!['fallow','woodland','seedbag','heritage','canal','traveler','shrine'].includes(p.discovery.id)))farmInvalid();
+    if(p.kind==='brush'&&(p.discovery.id!=='brambles'||p.discovery.resolved))farmInvalid();
+    if(p.project!==undefined&&(!isRecord(p.project)||!['canal','restore','timber','clearwood','shelter'].includes(String(p.project.kind))||!finite(p.project.done)||!finite(p.project.total)||Number(p.project.total)<=0||Number(p.project.done)>Number(p.project.total)||!Number.isInteger(Number(p.project.done)*2)||!p.discovery||!({canal:['canal'],fallow:['restore'],woodland:['timber','clearwood','shelter']} as Record<string,string[]>)[p.discovery.id]?.includes(String(p.project.kind))))farmInvalid();
+    if(p.improvement!==undefined&&(!['canal','shelter'].includes(p.improvement)||p.kind!=='rock'||p.project?.kind!==p.improvement||p.project.done!==p.project.total))farmInvalid();
+    if(p.kind==='unknown'&&Object.keys(p).some(k=>!['id','x','y','kind'].includes(k)))farmInvalid();
+  }
+  const neighbor=farm.neighbor;
+  if(!isRecord(neighbor)||neighbor.personId!==q.current[1]||!validField(neighbor.field)||!isRecord(neighbor.goods)||!Object.values(neighbor.goods).every(finite)||typeof neighbor.busy!=='boolean'||!['talked','traded','helped'].every(k=>Number.isSafeInteger(neighbor[k])&&Number(neighbor[k])>=-1))farmInvalid();
   if(!['doctrine','research','fortune','draws','seasonChance'].every(k=>finite(q[k]))||!Array.isArray(q.improvements)||!isRecord(q.cards)||!['study','craft','teach','prepare'].every(k=>Number.isInteger(q.cards[k])&&q.cards[k]>=0&&q.cards[k]<=q.rules.cardMax)||q.doctrine>q.rules.doctrineMax||q.research>=q.rules.doctrineSteps||q.fortune>q.rules.fortuneCap)invalid();
   const generations=new Map<number,number>();
   for(const [id,raw] of Object.entries(q.members)){
@@ -79,13 +106,22 @@ export function parseSession(value: unknown): Session {
   }
   if([...generations.values()].some(n=>n>2)||q.current.some((id:unknown)=>typeof id!=='string'||!q.members[id]?.admitted))invalid();
   const household=value.state.household,clock=value.state.clock;
-  if(!isRecord(household)||!isRecord(clock)||!q.current.includes(household.activePersonId)||q.current.some((id:string)=>q.members[id].generation!==clock.generation))invalid();
+  if(!isRecord(household)||!isRecord(clock)||household.activePersonId!==q.current[0]||q.members[q.current[0]].generation!==clock.generation)invalid();
   if(isRecord(value.state.era)&&value.state.era.index===3){
     const c=value.state.era.crises;if(!isRecord(c)||!finite(c.remaining)||!isRecord(c.entries)||![null,true,false].includes(c.won as null|boolean))invalid();
     const entries=(c as Record<string,any>).entries;
     for(const spec of CRISES){const p=entries[spec.id];if(!isRecord(p)||!Number.isInteger(p.level)||(p.level as number)<0||(p.level as number)>3||!Number.isInteger(p.step)||(p.step as number)<0||(p.step as number)>2||!Number.isInteger(p.lastTurn)||!['','technical','coordination'].includes(p.route as string))invalid();}
   }
   if (value.state.life) {
+    const life=value.state.life;
+    const c=isRecord(life)?life.calendar:undefined;
+    if(!isRecord(c)||c.continuousVersion!==1||!finite(c.nextBusinessDay)||Number(c.nextBusinessDay)<=Number(c.absoluteDay)&&value.state.status==='active')throw new Error('此存档使用旧季度结算，请新开连续日历游戏；原存档保留，不自动迁移。');
+    const era=value.state.era;
+    if(isRecord(era)&&(!isRecord(era.dayBudget)||!['started','limit','received'].every(k=>finite((era.dayBudget as Record<string,unknown>)[k]))||Number(era.dayBudget.started)>Number(c.absoluteDay)))throw new Error('存档缺少按天计算的阶段期限，请新开游戏；原存档保留。');
+    if(!isRecord(c)||!isRecord(c.rules)||!finite(c.weatherNextDay)||!Number.isInteger(c.lastTermDay)||Number(c.lastTermDay)<-1||Number(c.lastTermDay)>Math.floor(Number(c.absoluteDay))||!Array.isArray(c.termEvents)||c.termEvents.length>6||c.termEvents.some((e:unknown)=>!isRecord(e)||!finite(e.day)||!['date','term','title','text','effect'].every(k=>typeof e[k]==='string')||typeof e.positive!=='boolean')||!isRecord(c.study)||!['simple','hearty'].includes(String(c.diet))||typeof c.systemsSettled!=='boolean'||typeof c.lastNotice!=='string'||!['absoluteDay','seasonLength','day','mealDays','consumed','missing','purchaseSpent'].every(k=>finite(c[k]))||Number(c.day)>Number(c.seasonLength)||!Number.isInteger(c.seasonStarted)||!Number.isInteger(c.seasonLength)||Number(c.seasonLength)<=0||Number(c.absoluteDay)!==Number(c.seasonStarted)+Number(c.day)||Number(c.absoluteDay)*2%1!==0||Object.entries(record.manifest.ruleset.calendar!).some(([k,v])=>(c.rules as Record<string,unknown>)[k]!==v)||Object.values(c.study).some(p=>!isRecord(p)||!finite(p.done)||!finite(p.total)||Number(p.done)>Number(p.total)))throw new Error('存档缺少有效农历日历或研习进度，请新开游戏；原存档不修改。');
+
+    const span=seasonAt(record.manifest.ruleset.calendar!.referenceYear,Math.max(0,Number(c.absoluteDay)-(Number(c.day)===Number(c.seasonLength)?0.5:0)));
+    if(span.start!==c.seasonStarted||span.days!==c.seasonLength)throw new Error('农历节气边界不匹配，请新开游戏；原档不修改。');
     if (!isRecord(value.state.persons) || Object.values(value.state.persons).some(person => {
       if (!isRecord(person) || !isRecord(person.vitality)) return true;
       const v=person.vitality;

@@ -15,7 +15,7 @@ import {getObservation} from '../src/game/observation.js';
 import {createSession,observeSession,submitCommand} from '../src/runtime/session.js';
 import {rules as r} from './v27.js';
 function fixture(rules=r){
- const s=structuredClone(createInitialState(rules,17,'river'));
+ const s=structuredClone(createInitialState(rules,17,'riverine'));
  s.era!.index=3;s.household.money=200;s.household.food=8;s.location.weather='normal';s.location.water=2;
  s.economy!.branches!.learned[s.household.activePersonId]=branchNodesFor(s).map(n=>n.id);
  activePerson(s).vitality!.energy=12;renewShop(s,rules,[]);return s;
@@ -106,7 +106,7 @@ test('dungeon requires real power, delivery removes an unused appliance, and com
 });
 
 test('observation hides run internals and keeps electric flavour text',async()=>{
- let session=await createSession({runId:'electric-observe',ruleset:r,seed:17,scenarioId:'river'});
+ let session=await createSession({runId:'electric-observe',ruleset:r,seed:17,frameworkId:'riverine'});
  for(const id of ['economy:branchlearn:L0','economy:end:season','economy:erasettle:stage'])session=(await submitCommand(session,{commandId:String(session.record.entries.length),expectedRevision:session.record.entries.length,actionId:id})).session;
  const o=observeSession(session);
  assert.doesNotMatch(JSON.stringify(o),/randomState|lifespanSeasons|futureWeather/);

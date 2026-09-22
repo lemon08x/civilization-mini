@@ -1,3 +1,4 @@
+import {availableDays} from './calendar.js';
 import { sectSuccessors, selectSectPerson } from './life.js';
 import { handoverOperations } from './operations.js';
 import { blankPerson, heir } from '../model/state.js';
@@ -5,26 +6,20 @@ import type { GameState } from '../model/state.js';
 import type { Ruleset } from '../ruleset.js';
 import type { GameEvent } from '../model/events.js';
 import { newSeason } from './time.js';
-import { advanceEra, eraEvent } from './eras.js';
 import { SUBJECTS } from '../model/economy.js';
 import { level } from './knowledge.js';
 
 export function handover(state: GameState, rules: Ruleset, events: GameEvent[]): void {
   if(state.sect){
-    const ids=sectSuccessors(state);if(ids.length!==2)throw new Error('下一代两位弟子须均成年且在世');
-    const from=state.household.activePersonId;state.sect.current=[ids[0],ids[1]];selectSectPerson(state,ids[0]);
-    state.clock.generation++;state.clock.turn=1;state.clock.absoluteTurn++;state.status='active';
+    const ids=sectSuccessors(state);if(!ids.length)throw new Error('自己的弟子须成年且在世');
+    const from=state.household.activePersonId;state.sect.current=[ids[0],state.sect.current[1]];selectSectPerson(state,ids[0]);
+    const midSeason=!!state.life?.calendar;
+    state.clock.generation++;state.clock.turn=1;if(!midSeason)state.clock.absoluteTurn++;state.status='active';
+    if(midSeason)state.life!.timeRemaining=availableDays(state);
     delete state.life!.pendingRetirement;handoverOperations(state,events);
     if(state.economy?.industry)for(const i of Object.values(state.economy.industry.instances))if(i?.operator==='self')i.enabled=false;
     events.push({type:'handed-over',generation:state.clock.generation,fromPersonId:from,personId:ids[0],mastered:[...(state.economy!.branches!.learned[ids[0]]??[])],learning:{}});
-    if(state.era&&state.era.index<3&&state.clock.generation-state.era.startGeneration>=state.era.rules.generationLimit)advanceEra(state,events,'完成整代师徒交接，本时代驻留代数已满');
-    newSeason(state,rules,events);return;
-  }
-  // The last handover of an era starts an unrelated household, not the old heir.
-  if(state.era&&state.era.index<3&&state.clock.generation+1-state.era.startGeneration>=state.era.rules.generationLimit){
-    advanceEra(state,events,'本时代代际预算用尽，结束本时代家族');
-    state.clock.turn=1;state.clock.absoluteTurn++;
-    newSeason(state,rules,events);return;
+    if(!midSeason)newSeason(state,rules,events);return;
   }
   const child = heir(state), fromPersonId = state.household.activePersonId;
   if(state.economy?.lineage){
@@ -40,10 +35,7 @@ export function handover(state: GameState, rules: Ruleset, events: GameEvent[]):
   }
   state.household.activePersonId = child.id;
   if(!state.life)child.name = '本代经营者';
-  state.clock.generation++; state.clock.turn = 1; state.clock.absoluteTurn++;
-  if(state.era&&state.era.index<3){
-    if(state.era.index<3&&state.clock.generation-state.era.startGeneration===state.era.rules.generationLimit-1)eraEvent(state,events,'warning','这是本时代能住的最后一代，下一代将强制结算并进入新社会。');
-  }
+  state.clock.generation++; state.clock.turn = 1; if(!state.life?.calendar)state.clock.absoluteTurn++;
   if(state.life){
     if(!child.vitality?.alive||child.vitality.ageSeasons<state.life.rules.adultYears*4)throw new Error('没有成年继任者');
     state.household.heirId=child.vitality.childId??child.id;
@@ -59,5 +51,5 @@ export function handover(state: GameState, rules: Ruleset, events: GameEvent[]):
   events.push({ type: 'handed-over', generation: state.clock.generation, fromPersonId, personId: child.id, mastered: [...(state.economy?.branches?.learned[child.id]??child.mastered)], learning: { ...child.learning } });
   handoverOperations(state,events);
   if(state.economy?.industry){state.economy.operations!.paused=false;for(const i of Object.values(state.economy.industry.instances))if(i&&i.operator==='self')i.enabled=false;}
-  newSeason(state, rules, events);
+  if(state.life?.calendar)state.life.timeRemaining=availableDays(state);else newSeason(state, rules, events);
 }

@@ -2,15 +2,38 @@ import {esc} from './economy-view.js';
 
 // Topic illustrations are decorative, never a representation of owned equipment.
 export const subjectArt=(subject:string):string=>({agronomy:'chronicle-farming',materials:'tech-materials',mechanics:'tech-mechanics',organization:'chronicle-journal'}[subject]??'chronicle-study');
+// Each course has a concrete visual cue shared by its node and inspector.
+const COURSE_ART:Record<string,string>={
+ A0:'farm-goods-wheat.webp',A1:'farm-affairs-water.webp',A2:'device-W07-ui.webp',
+ A3:'farm-goods-compost.webp',A4:'farm-goods-flax.webp',A5:'field-growing-ui.webp',
+ A6:'item-seedWheat-ui.webp',A7:'device-U09-ui.webp',A8:'device-U08-ui.webp',
+ A9:'device-U04-ui.webp',A10:'device-U10-ui.webp',A11:'farm-affairs-explore.webp',
+ M0:'tech-materials-ui.webp',M1:'device-T01-ui.webp',M2:'item-seal-ui.webp',
+ M3:'device-S01-ui.webp',M4:'item-polymer-ui.webp',M5:'item-wire-ui.webp',
+ L0:'device-W01-ui.webp',L1:'item-shaft-ui.webp',L2:'item-valve-ui.webp',
+ L3:'device-W03-ui.webp',L4:'device-P03-ui.webp',L5:'item-coil-ui.webp',
+ L6:'device-E01-ui.webp',L7:'item-cable-ui.webp',
+ O0:'ui-nav-family-ui.webp',O1:'chronicle-workbench-ui.webp',O2:'farm-affairs-basket.webp',
+ O3:'chronicle-market-ui.webp',O4:'device-T07-ui.webp',O5:'era-nav-trade.webp',
+ Q0:'item-book-ui.webp',Q1:'tech-mechanics-ui.webp',Q2:'chronicle-journal-ui.webp',
+};
+export const courseArtUrl=(id:string):string=>'/illustrations/'+(COURSE_ART[id]??'chronicle-study-ui.webp');
 export function productArt(id:string):string {
   if(['W01','W03','U08','valve'].includes(id))return 'product-water';
   if(['S01','S02','mill','U06'].includes(id))return 'chronicle-pantry';
-  if(['T01','T03','U01'].includes(id))return 'product-tools';
+  if(['T01','T03','U01','U04'].includes(id))return 'product-tools';
+  if(['U09','compost','U10'].includes(id))return 'chronicle-farming';
+  if(['fiber','rope','oil'].includes(id))return 'tech-materials';
   if(['seal','fuel','aluminium','battery'].includes(id))return 'tech-materials';
   if(['P01','P03','shaft'].includes(id))return 'tech-mechanics';
   return 'chronicle-power';
 }
 export const artUrl=(name:string)=>`/illustrations/${name}-ui.webp`;
+export type FarmArt='explore'|'reclaim'|'sow'|'tend'|'harvest'|'discovery';
+export function farmEventArt(topic:FarmArt):string {
+  const cell={explore:0,reclaim:1,sow:2,tend:3,harvest:4,discovery:5}[topic];
+  return `<span class="farm-event-art" aria-hidden="true" style="background-position:${cell%3*50}% ${Math.floor(cell/3)*100}%"></span>`;
+}
 export const illustration=(name:string,className='detail-illustration')=>`<img class="${esc(className)}" src="${artUrl(name)}" alt="" aria-hidden="true" width="384" height="384" loading="lazy" decoding="async">`;
 
 export const itemImage=(id:string)=>`<img class="item-illustration" src="/illustrations/item-${esc(id)}-ui.webp" alt="" aria-hidden="true" width="128" height="128" loading="lazy" decoding="async">`;

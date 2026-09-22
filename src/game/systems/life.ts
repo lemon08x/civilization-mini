@@ -1,3 +1,6 @@
+import {availableDays,calendarYearDays} from './calendar.js';
+import {dietView} from './social-food.js';
+import {electricOnline} from '../model/electric.js';
 import {eraCard} from './eras.js';
 import { ancestorKnows } from './ancestry.js';
 import { nodeInEra } from '../model/branches.js';
@@ -10,7 +13,7 @@ export const TALENTS: Record<Talent, {name:string;effect:string}> = {
   scholar:{name:'善学',effect:'学习、实验与付费授课少用1时间'},
   mentor:{name:'善教',effect:'教导后辈少用1时间、1精力'},
   organizer:{name:'善组织',effect:'招聘、采购与建立经营安排少用1时间'},
-  resilient:{name:'善恢复',effect:'主动休息与季末基本恢复额外恢复1精力'},
+  resilient:{name:'善恢复',effect:'主动休息额外恢复1精力'},
 };
 export function draw(s:GameState):number {
   let x=s.randomState;x^=x<<13;x^=x>>>17;x^=x<<5;s.randomState=x>>>0;return s.randomState/4294967296;
@@ -122,7 +125,7 @@ export function healthCeiling(v:Vitality,r:LifeRules):number {return Math.max(30
 export function energyCeiling(v:Vitality):number {return Math.max(v.minimumEnergy??2,Math.floor(v.constitution*(0.4+v.health*0.006)));}
 export function lifeView(p:Person,r?:LifeRules) {
   const v=p.vitality;
-  return v?{sex:v.sex,portrait:v.portrait,portraitEra:v.portraitEra,ageYears:Math.floor(v.ageSeasons/4),ageQuarter:v.ageSeasons%4,health:v.health,...(r?{maxHealth:healthCeiling(v,r)}:{}),energy:v.energy,maxEnergy:energyCeiling(v),alive:v.alive,character:v.character?structuredClone(v.character):null,talent:TALENTS[v.talent],experiences:v.experiences?structuredClone(v.experiences):null,earnedTalents:(v.experiences?.talents??[]).map(t=>TALENTS[t]),upbringing:v.upbringing?{...v.upbringing}:null}:undefined;
+  return v?{sex:v.sex,portrait:v.portrait,portraitEra:v.portraitEra,ageYears:Math.floor(v.ageSeasons/4),ageQuarter:Math.floor(v.ageSeasons%4),health:Math.round(v.health*100)/100,...(r?{maxHealth:healthCeiling(v,r)}:{}),energy:Math.round(v.energy*100)/100,maxEnergy:energyCeiling(v),alive:v.alive,character:v.character?structuredClone(v.character):null,talent:TALENTS[v.talent],experiences:v.experiences?structuredClone(v.experiences):null,earnedTalents:(v.experiences?.talents??[]).map(t=>TALENTS[t]),upbringing:v.upbringing?{...v.upbringing}:null}:undefined;
 }
 // Living direct ancestors of the active person; retired elders stay consultable while alive.
 export function livingElders(s:GameState):Person[] {
@@ -143,9 +146,9 @@ export function consultableNodes(s:GameState,elder:Person):string[] {
   return (b.learned[elder.id]??[]).filter(id=>nodeInEra(s,id)&&!mine.includes(id)&&!(s.life?.consulted??[]).includes(id));
 }
 export function lifeEvent(events:GameEvent[],personId:string,operation:string,detail:string):void {events.push({type:'life',personId,operation,detail});}
-const physical=new Set(['farm','gather','work','build','process','finish','fertilize','nutrient','reclaim','expeditionship']);
+const physical=new Set(['cook','farmrare','farmstory','farmplot','farmexplore','farmreclaim','farmfertilize','farm','gather','work','build','process','finish','fertilize','nutrient','reclaim','expeditionship']);
 const learning=new Set(['study','research','tuition','branchlearn']);
-const management=new Set(['channel','hire','checkout','assign','resumeplans','charter','foodplan','farmplan','farmcycle','productionplan','supplyplan','salesplan','careplan','mineplan','steamplan']);
+const management=new Set(['channel','hire','checkout','assign','resumeplans','charter','foodplan','farmplan','productionplan','supplyplan','salesplan','careplan','mineplan','steamplan']);
 // Cost categories describe personal involvement, not the number of UI clicks.
 export function lifeCost(s:GameState,id:string,oldAp:number,useLearningPoint=true):{time:number;energy:number} {
   const [,op,target]=id.split(':');
@@ -153,12 +156,12 @@ export function lifeCost(s:GameState,id:string,oldAp:number,useLearningPoint=tru
   if(op==='rest')return {time:4,energy:0};
   if(op==='care')return {time:s.life?.renewal?.careTime??4,energy:s.life?.renewal?.careEnergy??1};
   if(op==='company')return {time:s.life?.renewal?.companyTime??2,energy:s.life?.renewal?.companyEnergy??1};
-  if(op==='pause'||op==='assign'||target==='off'||oldAp===0&&op!=='farm'&&op!=='process')return {time:0,energy:0};
+  if(op==='pause'||op==='assign'||target==='off'||oldAp===0&&op!=='farm'&&op!=='farmplot'&&op!=='process')return {time:0,energy:0};
   // Powered tools still require a brief personal instruction, but remove bodily labour.
   if(oldAp===0)return {time:1,energy:0};
   let time=physical.has(op)||learning.has(op)||op==='teach'||op==='branchteach'?4:2;
   let energy=physical.has(op)?4:learning.has(op)||op==='teach'||op==='branchteach'?2:1;
-  if(s.life?.renewal&&op==='farm'){time=s.life.renewal.farmTime;energy=s.life.renewal.farmEnergy;}
+  if(s.life?.renewal&&['farm','farmplot'].includes(op)){time=s.life.renewal.farmTime;energy=s.life.renewal.farmEnergy;}
   const v=activePerson(s).vitality!;
   if(s.era&&learning.has(op))time=Math.max(1,time-(eraCard(s)?.learning??0));
   if(s.era&&op==='process'&&s.economy!.branches!.learned[s.household.activePersonId]?.includes('Q1'))energy=Math.max(0,energy-1);
@@ -172,7 +175,7 @@ export function lifeCost(s:GameState,id:string,oldAp:number,useLearningPoint=tru
   if(useLearningPoint&&learning.has(op)&&v.experiences?.learning)time=Math.max(1,time-1);
   return {time,energy};
 }
-export function canSucceed(s:GameState):boolean {if(s.sect)return sectSuccessors(s).length===2;const v=heir(s).vitality;return s.household.heirId!==s.household.activePersonId&&!!v?.alive&&v.ageSeasons>=s.life!.rules.adultYears*4;}
+export function canSucceed(s:GameState):boolean {if(s.sect)return sectSuccessors(s).length>=1;const v=heir(s).vitality;return s.household.heirId!==s.household.activePersonId&&!!v?.alive&&v.ageSeasons>=s.life!.rules.adultYears*4;}
 export function recordLifeGeneration(s:GameState,events:GameEvent[]):void {
   const trial=project(s);
   events.push({type:'generation-ended',final:s.status==='ended',facts:{
@@ -182,38 +185,42 @@ export function recordLifeGeneration(s:GameState,events:GameEvent[]):void {
     ...(s.production?{production:structuredClone(s.production)}:{}),
   }});
 }
-export function settleLife(s:GameState,missing:number,events:GameEvent[],foodRequired=2):void {
+export function settleLife(s:GameState,missing:number,events:GameEvent[],foodRequired=2,days?:number):void {
   const r=s.life!.rules;
+  const delta=days===undefined?1:days*4/calendarYearDays(s.life!.calendar!.rules.referenceYear,s.life!.calendar!.absoluteDay);
+  const previousAge=new Map(s.household.memberIds.map(id=>[id,s.persons[id].vitality?.ageSeasons??0]));
   for(const person of s.household.memberIds.map(id=>s.persons[id])) {
     const v=person.vitality;if(!v?.alive)continue;
-    v.ageSeasons++;
+    v.ageSeasons+=delta;
     const renewal=s.life!.renewal;
-    const deficit=Math.min(1,missing/Math.max(1,foodRequired));
+    const independent=person.id===s.economy?.farm?.neighbor.personId;
+    const personMissing=independent?0:missing;
+    const deficit=Math.min(1,personMissing/Math.max(1,foodRequired));
     const damage=renewal?Math.ceil(r.hungerDamage*deficit*Math.min(1,Math.max(0,s.household.hardship-renewal.graceSeasons)/2)):r.hungerDamage;
-    v.health=Math.max(0,Math.min(healthCeiling(v,r),v.health+(missing?-damage:(renewal?.fedHealth??1))));
+    v.health=Math.max(0,Math.min(healthCeiling(v,r),v.health+(s.life?.calendar?(personMissing?0:delta):(personMissing?-damage:(renewal?.fedHealth??1)))));
     const recovery=renewal?Math.max(1,Math.ceil(r.recovery*(1-deficit*0.75)))+(hasTalent(v,'resilient')?1:0):missing?0:Math.max(1,Math.floor(r.recovery*v.health/100))+(hasTalent(v,'resilient')?1:0);
-    v.energy=Math.min(energyCeiling(v),v.energy+recovery);
+    if(days===undefined||person.id!==s.household.activePersonId)v.energy=Math.min(energyCeiling(v),v.energy+recovery*delta);
     if(v.health===0||v.ageSeasons>=v.lifespanSeasons){v.alive=false;v.energy=0;lifeEvent(events,person.id,'death',`${person.name}因${v.health===0?'健康耗尽':'自然衰老'}离世`);}
-    else lifeEvent(events,person.id,'season',`${person.name}：${Math.floor(v.ageSeasons/4)}岁，健康${v.health}，精力${v.energy}/${energyCeiling(v)}`);
+    else if(days===undefined||Math.floor(previousAge.get(person.id)!/4)!==Math.floor(v.ageSeasons/4))lifeEvent(events,person.id,'season',`${person.name}：${Math.floor(v.ageSeasons/4)}岁，健康${v.health}，精力${v.energy}/${energyCeiling(v)}`);
   }
   // Childhood upbringing: each season fed / accompanied / taught is recorded and
   // settled once into constitution at adulthood; birth talent remains unchanged.
   for(const person of s.household.memberIds.map(id=>s.persons[id])) {
     const v=person.vitality;if(!v?.alive||!v.upbringing)continue;
     if(v.ageSeasons<r.adultYears*4){
-      if(!missing)v.upbringing.fedSeasons++;
+      if(!missing)v.upbringing.fedSeasons+=delta;
       if(person.id===s.household.heirId){
-        if(s.life!.seasonCompany)v.upbringing.companySeasons++;
-        if(s.life!.seasonTaught)v.upbringing.taughtSeasons++;
+        if(s.life!.seasonCompany)v.upbringing.companySeasons+=delta;
+        if(s.life!.seasonTaught)v.upbringing.taughtSeasons+=delta;
       }
-    }else if(v.ageSeasons===r.adultYears*4){
+    }else if(previousAge.get(person.id)!<r.adultYears*4){
       const up=v.upbringing,span=r.adultYears*4;
       const bonus=Math.round(r.growthConstitutionBonus*Math.min(1,(up.fedSeasons+up.companySeasons)/span));
       v.constitution+=bonus;v.energy=Math.min(energyCeiling(v),v.energy+bonus);
       lifeEvent(events,person.id,'adulthood',`${person.name}成年：饱食${up.fedSeasons}季、陪伴${up.companySeasons}季、受教${up.taughtSeasons}季；体质+${bonus}，保留出生天赋「${TALENTS[v.talent].name}」`);
     }
   }
-  delete s.life!.seasonCompany;delete s.life!.seasonTaught;
+  if(days===undefined){delete s.life!.seasonCompany;delete s.life!.seasonTaught;}
   // One descendant per person; born during life, never created as an adult on handover.
   // Retired ancestors do not start additional branches.
   for(const person of s.sect?[]:new Set([activePerson(s),heir(s)])) {
@@ -227,9 +234,7 @@ export function settleLife(s:GameState,missing:number,events:GameEvent[],foodReq
   }
   if(s.sect){
     if(!activePerson(s).vitality!.alive){
-      const live=s.sect.current.find(id=>s.persons[id].vitality?.alive);
-      if(live)selectSectPerson(s,live);
-      else s.status=canSucceed(s)?'handover':'ended';
+      s.status=canSucceed(s)?'handover':'ended';
     }
     return;
   }
@@ -262,7 +267,7 @@ export function sectCategory(id:string):SectCard {
   const op=id.split(':')[1];
   if(['branchlearn','study','research','tuition','inspect'].includes(op))return 'study';
   if(['branchteach','teach','sectteach','consult','company'].includes(op))return 'teach';
-  if(['farm','gather','work','build','process','finish','sysbuild','syscommission','sysrun','fertilize'].includes(op))return 'craft';
+  if(['cook','farmrare','farmstory','farmplot','farmreclaim','farmfertilize','farm','gather','work','build','process','finish','sysbuild','syscommission','sysrun','fertilize'].includes(op))return 'craft';
   return 'prepare';
 }
 export function sectCosts(s:GameState,id:string,cost:{time:number;energy:number}) {
@@ -273,7 +278,7 @@ export function sectCosts(s:GameState,id:string,cost:{time:number;energy:number}
   return {time:reduce(cost.time),energy:reduce(cost.energy)};
 }
 export function sectSuccessors(s:GameState):string[] {
-  if(!s.sect)return [];return s.sect.current.map(id=>s.sect!.members[id].discipleId).filter((id):id is string=>!!id&&!!s.persons[id]?.vitality?.alive&&s.persons[id].vitality!.ageSeasons>=s.life!.rules.adultYears*4);
+  if(!s.sect)return [];return [s.sect.current[0]].map(id=>s.sect!.members[id].discipleId).filter((id):id is string=>!!id&&!!s.persons[id]?.vitality?.alive&&s.persons[id].vitality!.ageSeasons>=s.life!.rules.adultYears*4);
 }
 export function selectSectPerson(s:GameState,id:string):void {
   const x=s.sect!,old=x.members[s.household.activePersonId];
@@ -295,7 +300,7 @@ export function sectDrawOdds(s:GameState):[number,number,number] {
 export function renewSect(s:GameState):void {
   const x=s.sect;if(!x)return;
   for(const [id,m] of Object.entries(x.members))if(m.admitted){m.time=s.life!.rules.timePerSeason;if(id===s.household.activePersonId)m.time=s.life!.timeRemaining;}
-  x.seasonChance=x.rules.eventPercent/100+x.current.reduce((sum,id)=>sum+sectStrength(s,id),0)/2*0.1;
+  x.seasonChance=x.rules.eventPercent/100+sectStrength(s)*0.1;
   x.seasonBonus=x.nextBonus;x.nextBonus=null;
 }
 export function settleSect(s:GameState,events:GameEvent[]):void {
@@ -310,7 +315,7 @@ export function settleSect(s:GameState,events:GameEvent[]):void {
 export function sectView(s:GameState){
   const x=s.sect;if(!x)return null;
   return {doctrine:x.doctrine,research:x.research,improvements:structuredClone(x.improvements),rules:{...x.rules},
-    current:[...x.current],activeId:s.household.activePersonId,ready:sectSuccessors(s).length===2,
+    current:[...x.current],activeId:s.household.activePersonId,ready:canSucceed(s),
     members:Object.entries(x.members).map(([id,m])=>({id,name:s.persons[id].name,practiceEvidence:s.persons[id].practices.filter(v=>v.startsWith('dao:')),...m,consulted:[...m.consulted],time:id===s.household.activePersonId?s.life!.timeRemaining:m.time,stage:sectStage(s,id),effect:Math.round(sectStrength(s,id)*100),relationships:Object.entries(s.persons[id].vitality?.experiences?.relationships??{}).map(([otherId,value])=>({name:s.persons[otherId]?.name??otherId,value})),life:lifeView(s.persons[id],s.life!.rules)})),
     fortune:x.fortune,odds:sectDrawOdds(s),cards:Object.entries(x.cards).map(([id,level])=>({id,name:SECT_CARDS[id as SectCard],level,effect:level*x.rules.cardPercent})),lastDraw:x.lastDraw,draws:x.draws,lastEvent:x.lastEvent,seasonBonus:x.seasonBonus};
 }
@@ -323,7 +328,7 @@ export function recordSeasonChoice(s:GameState,id:string,events:GameEvent[]):voi
   const v=activePerson(s).vitality,e=v?.experiences;if(!e)return;
   const op=id.split(':')[1];
   if(['end','erasettle','retire','sectswitch'].includes(op)||id==='handover')return;
-  if(learning.has(op)&&e.learning>0&&lifeCost(s,id,1,false).time>1){
+  if(learning.has(op)&&!s.life?.calendar?.study[s.household.activePersonId+':'+id.split(':')[2]]&&e.learning>0&&lifeCost(s,id,1,false).time>1){
     e.learning--;
     lifeEvent(events,s.household.activePersonId,'learning-point','消耗1学习点，基础学习时间减少1；剩余'+e.learning+'点');
   }
@@ -332,12 +337,12 @@ export function recordSeasonChoice(s:GameState,id:string,events:GameEvent[]):voi
 
 export function settleSeasonEncounter(s:GameState,missing:number,events:GameEvent[]):void {
   if(!s.life)return;
-  const people=(s.sect?s.sect.current:s.household.memberIds).map(id=>s.persons[id]).filter(p=>p.vitality?.alive&&p.vitality.experiences);
+  const people=(s.sect?[s.sect.current[0]]:s.household.memberIds).map(id=>s.persons[id]).filter(p=>p.vitality?.alive&&p.vitality.experiences);
   if(!people.length)return;
   const p=people[Math.floor(draw(s)*people.length)],v=p.vitality!,e=v.experiences!,r=s.life.rules;
   const has=(ops:string[])=>e.actions.some(a=>ops.includes(a));
   const studying=has(['study','research','tuition','branchlearn','sectpractice']);
-  const working=has(['farm','gather','work','process','build','sysrun','finish']);
+  const working=has(['cook','farmrare','farmstory','farmplot','farmreclaim','farmexplore','farmfertilize','farm','gather','work','process','build','sysrun','finish']);
   const caring=has(['company','consult','teach','branchteach','sectteach','bond']);
   const rested=has(['rest','care']);
   const others=Object.values(s.persons).filter(q=>q.id!==p.id&&q.vitality?.alive&&q.vitality.experiences&&(!s.sect||s.sect.members[q.id]?.admitted));
@@ -359,7 +364,7 @@ export function settleSeasonEncounter(s:GameState,missing:number,events:GameEven
     {kind:'study',eligible:(s.economy?.branches?.learned[p.id]?.length??0)>1,prepared:studying,positive:['旧学互相印证','不同课程中的知识在一件小事上互相印证，终于能举一反三。'],negative:['旧说彼此冲突','把两门学问放在一起思考，却发现适用条件并不相同，先前的理解需要修正。']},
     {kind:'study',eligible:(s.era?.index??0)>=2,prepared:studying,positive:['新刊打开眼界','读到关于新技术的公开资料，认出了其中与自己所学相通的线索。'],negative:['新术名词迷阵','新资料中的名词与旧日用法相差太远，一番比对后仍难理清脉络。']},
     {kind:'work',eligible:true,prepared:working,positive:['辛劳得到酬谢','一份零散活计顺利交付，对方按约送来了酬劳。'],negative:['临工结算折损','零散活计在结算时出了差错，为了补齐交付只能承担一笔开支。']},
-    {kind:'work',eligible:has(['farm','fertilize']),prepared:true,positive:['田间经验获谢','邻人借鉴了本季的田间经验，特意送来一份谢钱。'],negative:['田间补修支出','田间劳作暴露出一些需要补修的小问题，只好另付费用处理。']},
+    {kind:'work',eligible:has(['farmplot','farmfertilize','farm','fertilize']),prepared:true,positive:['田间经验获谢','邻人借鉴了本季的田间经验，特意送来一份谢钱。'],negative:['田间补修支出','田间劳作暴露出一些需要补修的小问题，只好另付费用处理。']},
     {kind:'work',eligible:has(['build','process','finish','sysbuild']),prepared:true,positive:['手艺赢得口碑','本季做活的细致之处被人看见，额外的酬谢随之而来。'],negative:['返工赔付','交付时发现一处疏漏，需要花钱补救，手艺上的教训也记在了心里。']},
     {kind:'work',eligible:has(['gather']),prepared:true,positive:['识材受到赏识','采集时辨识材料的经验帮上了旁人的忙，换来一笔报酬。'],negative:['采集行装损耗','采集途中随身行装受损，回程后不得不支付修补费用。']},
     {kind:'work',eligible:has(['sysrun','syscommission']),prepared:true,positive:['设备经验获酬','亲自操作设备积累的经验解决了旁人的疑问，对方付钱致谢。'],negative:['操作疏漏赔补','设备操作中的疏漏带来了额外赔补，必须从公用钱财中支付。']},
@@ -424,4 +429,27 @@ export function settleSeasonEncounter(s:GameState,missing:number,events:GameEven
   lifeEvent(events,p.id,'season-encounter',`${p.name}：${e.lastEvent}`);
   characterMemory(s,p.id,`encounter:${s.clock.absoluteTurn}`,`${title}：${story} ${effect}。`,good?'这份经历让人欣慰。':'心中仍有失落，想重新整理生活。',events);
   for(const person of Object.values(s.persons)){const x=person.vitality?.experiences;if(x){x.actions=[];x.contacts=[];}}
+}
+
+/** Calendar quotes use half-days; bodily effort remains a separate resource. */
+export function calendarCost(s:GameState,id:string,cost:{time:number;energy:number}) {
+  const c=s.life?.calendar;if(!c)return cost;
+  const op=id.split(':')[1];
+  if(['farmproject','farmexplore','farmreclaim','wait','diet','branchlearn','cook'].includes(op))return cost;
+  let days=cost.time*c.rules.actionDaysPerUnit;
+  if(['farm','farmplot','farmrare'].includes(op))days=cost.time>0?Math.min(1,days):0;
+  if(['farmfertilize','fertilize','rest'].includes(op))days=cost.time>0?0.5:0;
+  if(learning.has(op))days=cost.time*c.rules.studyDaysPerUnit;
+  return {...cost,energy:electricOnline(s,'LAMP')?Math.round(cost.energy*c.rules.lampEnergyPercent)/100:cost.energy,time:days>0?Math.max(0.5,Math.ceil(days*2)/2):0};
+}
+export {calendarView} from './calendar.js';
+export function studyQuote(s:GameState,node:string) {
+  const c=s.life?.calendar,key=s.household.activePersonId+':'+node;
+  const raw=sectCosts(s,'economy:branchlearn:'+node,lifeCost(s,'economy:branchlearn:'+node,1));
+  const total=c?.study[key]?.total??Math.max(0.5,Math.ceil(raw.time*(c?.rules.studyDaysPerUnit??1)*2)/2);
+  const done=c?.study[key]?.done??0;
+  const fields=s.economy?[s.economy.field,...Object.values(s.economy.farm?.plots??{}).flatMap(p=>p.field?[p.field]:[])]:[];
+  const harvest=Math.min(Infinity,...fields.filter(f=>f.crop&&f.growth<f.duration).map(f=>f.duration-f.growth));
+  const time=c?Math.max(0,Math.floor(Math.min(total-done,c.rules.workChunkDays,availableDays(s),harvest,dietView(s)?.days??0)*2)/2):raw.time;
+  return {key,total,done,time,energy:raw.energy};
 }

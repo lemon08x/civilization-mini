@@ -1,6 +1,7 @@
+import {lunarDateAt} from './calendar.js';
 import {ELECTRIC_KNOWLEDGE} from '../model/electric.js';
 import {eraCard} from './eras.js';
-import {branchHas,BRANCH_PRODUCTS} from './branches.js';
+import {BRANCH_PRODUCTS} from './branches.js';
 import { topicsFor,productsFor } from './economy-catalog.js';
 import type { GameState } from '../model/state.js';
 import type { Ruleset } from '../ruleset.js';
@@ -20,7 +21,7 @@ export function servicePending(s:GameState,kind:ShopOrder['kind'],id:string):boo
 export function deviceReserved(s:GameState,id:string):boolean{return deviceBusy(s,id)||servicePending(s,'device',id)||servicePending(s,'repair',id);}
 export function deviceBasePrice(r:Ruleset,id:string):number{const p=PRODUCTS.find(p=>p.id===id)!;return Object.entries(p.inputs).reduce((n,[g,q])=>n+(GOODS[g].price+1)*q,0)+r.shop!.deviceFee;}
 export function repairPrice(s:GameState,r:Ruleset,id:string):number{return Math.max(1,Math.ceil(deviceBasePrice(r,id)*r.shop!.repairPercent/100*(r.economy!.durability-(s.economy!.equipment[id]??0))/r.economy!.durability));}
-const uses:Record<string,string>={food:'即食生活补给；与市场购粮共用库存',wheat:'1份生活口粮，或磨成面粉',flour:'1份生活口粮；按与小麦相同的食用份额定价',soy:'1份口粮或榨油原料',seedWheat:'播种小麦；需农学1阶',seedSoy:'播种大豆；需农学2阶',seedFlax:'播种亚麻；需农学2阶',compost:'恢复田地肥力；施用需农学3阶',wood:'设备、部件与燃料',clay:'建窑、烧陶和烧砖',ore:'冶炼铁料；需冶炼炉与工艺',iron:'直接进入工具和机械部件配方',flax:'加工纤维的农业原料，不能食用',straw:'腐熟堆肥原料',fiber:'密封件与绳索原料',oil:'密封件原料，当前不作为食品',ceramics:'容器、磨粮及其他设备的构件',brick:'高温炉和耐热容器的材料',seal:'泵、阀门和密闭容器的部件',shaft:'动力、播种与脱粒设备的部件',valve:'活塞泵部件'};
+const uses:Record<string,string>={food:'批量干粮，按天取食；与市场购粮共用库存',wheat:'批量食材，日常做饭或磨成面粉',flour:'批量食材，做饭需柴火；按与小麦相同的食用份额定价',soy:'做饭食材或榨油原料',seedWheat:'播种小麦；需农学1阶',seedSoy:'播种大豆；需农学2阶',seedFlax:'播种亚麻；需农学2阶',compost:'恢复田地肥力；施用需农学3阶',wood:'设备、部件与燃料',clay:'建窑、烧陶和烧砖',ore:'冶炼铁料；需冶炼炉与工艺',iron:'直接进入工具和机械部件配方',flax:'加工纤维的农业原料，不能食用',straw:'腐熟堆肥原料',fiber:'密封件与绳索原料',oil:'密封件原料，当前不作为食品',ceramics:'容器、磨粮及其他设备的构件',brick:'高温炉和耐热容器的材料',seal:'泵、阀门和密闭容器的部件',shaft:'动力、播种与脱粒设备的部件',valve:'活塞泵部件'};
 export interface ShopItem {id:string;target:string;kind:ShopOrder['kind'];name:string;category:string;price:number;weight:number;local:boolean;effect:string;condition:string;owned:boolean;stock:number;}
 export function shopCatalog(s:GameState,r:Ruleset):ShopItem[]{
  const e=s.economy!,sh=e.shop!,cfg=r.shop!;
@@ -39,9 +40,9 @@ export function shopCatalog(s:GameState,r:Ruleset):ShopItem[]{
  const assets=[item({id:'asset-granary',target:'granary',kind:'asset',name:'家庭粮仓',category:'家庭资产',price:cfg.granaryPrice,weight:4,local:false,effect:`食品保护容量提高至${cfg.granaryCapacity}，与容器取较大值，永久跨代保留`,condition:'交付时建成，无学科要求，限一座',owned:sh.assets.includes('granary')||servicePending(s,'asset','granary')}),item({id:'asset-library',target:'library',kind:'asset',name:'家学书室',category:'家庭资产',price:cfg.libraryPrice,weight:4,local:false,effect:'留存新的学科记录时，同时教导后辈该学科下一课题；上限为本人水平，永久保留',condition:'交付时建成，不自动继承等级，限一间',owned:sh.assets.includes('library')||servicePending(s,'asset','library')})];
  const available=[...goods,...devices,...books,...assets];
  if(e.branches){
-   const channels=e.branches.channels,baseGoods=['food','wheat','flour','wood','clay','iron','fiber','oil','ceramics','seal','shaft','valve','seedWheat'];
+   const channels=e.branches.channels,baseGoods=[...(e.farm?.discovered??[]).map(c=>c==='soy'?'seedSoy':c==='flax'?'seedFlax':'seedWheat'),'food','wheat','flour','wood','clay','iron','fiber','oil','ceramics','seal','shaft','valve','seedWheat'];
    const electrical=['copper','polymer','wire','coil','cable',...(s.electric?['brick','feedstock','solution','fuel','battery','alumina']:[])];
-   return available.filter(x=>x.kind==='goods'?(baseGoods.includes(x.target)||(channels.includes('electric')||(s.era?.index??0)>=2)&&electrical.includes(x.target)):x.kind==='device'?(!!BRANCH_PRODUCTS[x.target]||!!s.electric&&!!ELECTRIC_KNOWLEDGE[x.target]&&(s.era?.index??0)>=2)&&(x.target!=='E01'||(channels.includes('electric')||(s.era?.index??0)>=2)&&branchHas(s,'L6')):x.kind==='asset'&&x.target==='granary').map(x=>{
+   return available.filter(x=>x.kind==='goods'?(baseGoods.includes(x.target)||(channels.includes('electric')||(s.era?.index??0)>=2)&&electrical.includes(x.target)):x.kind==='device'?(!!BRANCH_PRODUCTS[x.target]||!!s.electric&&!!ELECTRIC_KNOWLEDGE[x.target]&&(s.era?.index??0)>=2)&&(x.target!=='E01'||(s.era?.index??0)>=2):x.kind==='asset'&&x.target==='granary').map(x=>{
      if(x.kind!=='goods')return {...x,condition:'整机外购不赠送个人知识；运行和加工仍检查能力、材料与能源'};
      const metal=x.target==='iron',stable=channels.includes('metal')||(s.era?.index??0)>=2;
      return {...x,effect:x.target==='seedWheat'?'播种小麦；需基础栽培':x.effect,price:metal?(stable?GOODS.iron.price+1:GOODS.iron.price+2):x.price,
@@ -82,8 +83,8 @@ export function renewShop(s:GameState,r:Ruleset,events:GameEvent[]):void{
  sh.transport=r.shop!.transport;
  for(const x of shopCatalog(s,r))sh.stock[x.id]=s.economy?.branches&&x.target==='iron'?Math.max(1,((s.economy.branches.channels.includes('metal')||(s.era?.index??0)>=2)?r.branches!.metalStock:r.branches!.basicIronStock)+(eraCard(s)?.metal??0)):x.kind==='goods'?r.shop!.stock:1;
 }
-export function cartQuote(s:GameState,r:Ruleset){
- const sh=s.economy!.shop!,catalog=shopCatalog(s,r);const unavailable=Object.keys(sh.cart).filter(id=>!catalog.some(x=>x.id===id));const lines=Object.entries(sh.cart).filter(([id])=>!unavailable.includes(id)).map(([id,quantity])=>({item:catalog.find(x=>x.id===id)!,quantity}));
+export function cartQuote(s:GameState,r:Ruleset,cart:Record<string,number>=s.economy!.shop!.cart){
+ const sh=s.economy!.shop!,catalog=shopCatalog(s,r);const unavailable=Object.keys(cart).filter(id=>!catalog.some(x=>x.id===id));const lines=Object.entries(cart).filter(([id])=>!unavailable.includes(id)).map(([id,quantity])=>({item:catalog.find(x=>x.id===id)!,quantity}));
  const final=!r.civilization&&s.clock.generation>=r.parameters.generations&&s.clock.turn>=r.parameters.turnsPerGeneration;
  const total=lines.reduce((n,l)=>n+l.item.price*l.quantity,0),weight=lines.reduce((n,l)=>n+l.item.weight*l.quantity,0);
  const blockers:string[]=unavailable.map(id=>'清单商品已不可采购，请清空清单：'+id);if(!lines.length)blockers.push('采购清单为空');if(final&&lines.some(l=>!l.item.local))blockers.push('最后一季无法交付订货，请移除订货商品');
@@ -91,4 +92,4 @@ export function cartQuote(s:GameState,r:Ruleset){
  for(const {item,quantity}of lines){if(item.owned)blockers.push(item.name+'已拥有、在制或待交付');if(quantity>item.stock)blockers.push(item.name+'库存不足');}
  return {lines,total,weight,remainingMoney:s.household.money-total,blockers};
 }
-export function shopView(s:GameState,r:Ruleset){return {catalog:shopCatalog(s,r),quote:cartQuote(s,r),transport:s.economy!.shop!.transport,orders:structuredClone(s.economy!.shop!.orders),assets:[...s.economy!.shop!.assets],books:[...s.economy!.shop!.books],repairPrices:Object.fromEntries(productsFor(s).map(p=>[p.id,repairPrice(s,r,p.id)]))};}
+export function shopView(s:GameState,r:Ruleset){return {catalog:shopCatalog(s,r),quote:cartQuote(s,r),transport:s.economy!.shop!.transport,orders:s.economy!.shop!.orders.map(o=>{const c=s.life?.calendar,day=c?c.nextBusinessDay+Math.max(0,o.due-s.clock.absoluteTurn-1)*c.rules.businessCycleDays:0;return {...o,dueDate:c?lunarDateAt(c.rules.referenceYear,day).date:`第${o.due}季`,remainingDays:c?Math.max(0,day-c.absoluteDay):0};}),assets:[...s.economy!.shop!.assets],books:[...s.economy!.shop!.books],repairPrices:Object.fromEntries(productsFor(s).map(p=>[p.id,repairPrice(s,r,p.id)]))};}

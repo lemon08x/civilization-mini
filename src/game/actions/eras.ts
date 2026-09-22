@@ -5,14 +5,14 @@ import type {GameState} from '../model/state.js';
 import {defineAction,type ActionDefinition} from './definition.js';
 import {branchNeeds} from '../systems/branches.js';
 import {amount,foodStock,changeGoods,missingGoods} from '../systems/economy.js';
-import {ERAS,DUNGEON_TASKS,CRISES,CRISIS_LEVELS} from '../model/eras.js';
+import {stageOf,DUNGEON_TASKS,CRISES,CRISIS_LEVELS} from '../model/eras.js';
 import {eraEvent} from '../systems/eras.js';
 export function eraActions(s:GameState):ActionDefinition[]{
  const e=s.era;if(!e)return [];const out:ActionDefinition[]=[];
- out.push(defineAction(s,'economy:erasettle:stage',e.index===3?'结束现代使命并计分':'结算当前社会并进入下一段','社会阶段',{ap:0},e.closed?['社会历程已结束']:[],'结束本季，按当前产能推算剩余代际并兑现本阶段回报。跨时代延续师徒、个人修为和所学；门派资产与规程保留。不要求建成水井或泵。现代有公开准备期限，结算即结束旅程；只有危机副本最高难度计分，四项至少兜底才算使命完成。',(d)=>{d.era!.pendingSettle=true;}));
+ out.push(defineAction(s,'economy:erasettle:stage',e.index===3?'结束现代使命并计分':'结算当前社会并进入下一段','社会阶段',{ap:0},e.closed?['社会历程已结束']:[],'立即结束当前阶段，仅兑现已取得的阶段回报；剩余天数按规则比例折算并向下取整到半天，结转到下一阶段，损耗部分不补偿。师徒换代不重置阶段倒计时。跨时代延续师徒、个人修为和所学；门派资产与规程保留。不要求建成水井或泵。现代有公开准备期限，结算即结束旅程；只有危机副本最高难度计分，四项至少兜底才算使命完成。',(d)=>{d.era!.pendingSettle=true;}));
  for(const on of [true,false])out.push(defineAction(s,'economy:tap:'+(on?'on':'off'),on?'接入家庭田自来水服务':'暂停自来水服务','社会阶段',{ap:0},[...(e.index!==3?['现代社会才提供公共自来水']:[]),...(e.tap===on?['已经是此安排']:[])],'每个确实缺水的季节支付1钱，由公共服务人员为家庭田补2水分。无需求不收费，无钱时保留自家供水退路。',(d,ev)=>{d.era!.tap=on;eraEvent(d,ev,'tap',on?'已接入自来水服务':'已暂停自来水服务');}));
  out.push(defineAction(s,'economy:publicmill:grain','使用公共磨坊','社会阶段',{time:1,energy:0,money:1},[
-  ...(!ERAS[e.index].publicMill?['工业城镇以后才有公共磨坊']:[]),
+  ...(!stageOf(s).publicMill?['市镇百工以后才有公共磨坊']:[]),
   ...(amount(s,'wheat')<2?['需2小麦']:[]),
   ...(s.economy!.equipmentUsed.publicMill===s.clock.absoluteTurn?['本季已经用过公共磨坊']:[]),
  ],'社会提供的磨坊，不要求磨粮知识或设备。2小麦换1面粉，付1钱。每季一次。私人磨粮产量更高。',(d,ev)=>{changeGoods(d,{wheat:2},-1,ev,'公共磨坊');changeGoods(d,{flour:1},1,ev,'公共磨坊');d.economy!.equipmentUsed.publicMill=d.clock.absoluteTurn;eraEvent(d,ev,'public-mill','公共磨坊磨出1面粉',1,1);}));

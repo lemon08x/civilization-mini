@@ -13,12 +13,18 @@ export function shopActions(s:GameState,r:Ruleset):ActionDefinition[]{
  const quote=cartQuote(s,r),instant=electricOnline(s,'TELEGRAPH');
  const final=!r.civilization&&s.clock.generation>=r.parameters.generations&&s.clock.turn>=r.parameters.turnsPerGeneration;
  for(const item of shopCatalog(s,r)){
+  if(s.era?.index===0){
+   const one=cartQuote(s,r,{[item.id]:1});
+   add('checkout',item.id,'买入1份'+item.name,{ap:0,time:0,energy:0,money:one.total},one.blockers,`点击即购买1份${item.name}，支付${item.price}钱；不消耗时间和精力。${item.local?'现货立即入库':'订货在下次经营补货日交付'}。`,(draft,events)=>purchase(draft,one,events));
+   continue;
+  }
   const quantity=sh.cart[item.id]??0;
   add('cartadd',item.id,'加入'+item.name,{ap:0},[...(item.owned?['已拥有、在制或待交付']:[]),...(quantity>=item.stock?['已达到可购买库存']:[]),...(quote.weight+item.weight>r.shop!.transport?['整单超过单季最大运输容量']:[])],'只编辑采购清单；结账时按当时价格、库存和资金重新核验。',(draft,events)=>{draft.economy!.shop!.cart[item.id]=quantity+1;shopEvent(events,'cart',item.id,'已加入'+item.name);});
   add('cartremove',item.id,'移除一份'+item.name,{ap:0},quantity<1?['清单中没有此商品']:[],'移除一份，未付款。',(draft,events)=>{const c=draft.economy!.shop!.cart;if(quantity===1)delete c[item.id];else c[item.id]=quantity-1;shopEvent(events,'cart',item.id,'已移除'+item.name);});
  }
- add('clearcart','all','清空采购清单',{ap:0},Object.keys(sh.cart).length?[]:['清单为空'],'清单不保留价格或占用库存。',(draft,events)=>{draft.economy!.shop!.cart={};shopEvent(events,'cart','all','采购清单已清空');});
- add('checkout','cart','确认整单采购',{money:quote.total},quote.blockers,`合计${quote.total}钱、${quote.weight}运输容量，付款后剩${quote.remainingMoney}钱。${instant?'电报在线，新订货当季交付':'现货立即交付，订货下一季开始交付'}；所有材料和食品都占运输额度。`,(draft,events)=>{
+ if(s.era?.index!==0)add('clearcart','all','清空采购清单',{ap:0},Object.keys(sh.cart).length?[]:['清单为空'],'清单不保留价格或占用库存。',(draft,events)=>{draft.economy!.shop!.cart={};shopEvent(events,'cart','all','采购清单已清空');});
+ if(s.era?.index!==0)add('checkout','cart','确认整单采购',{ap:0,time:0,energy:0,money:quote.total},quote.blockers,`合计${quote.total}钱、${quote.weight}运输容量，付款后剩${quote.remainingMoney}钱。${instant?'电报在线，新订货即时交付':'现货立即交付，订货下次经营补货日交付'}；购买不耗时间和精力。`,(draft,events)=>{purchase(draft,quote,events);draft.economy!.shop!.cart={};});
+ function purchase(draft:GameState,quote:ReturnType<typeof cartQuote>,events:Parameters<ActionDefinition['execute']>[1]):void {
   const shop=draft.economy!.shop!;shop.transport-=quote.weight;
   for(const {item,quantity}of quote.lines){
    if(item.id==='good-food'){draft.production!.market.food-=quantity;if(draft.socialFood)draft.socialFood.serviceRemaining-=quantity;}else shop.stock[item.id]-=quantity;
@@ -26,8 +32,8 @@ export function shopActions(s:GameState,r:Ruleset):ActionDefinition[]{
    shopEvent(events,'purchased',item.target,item.name+(item.local?'：本地现货':instant?'：电报协调，即时交付':'：订货，下一季开始交付'),item.price*quantity,quantity);
    if(item.local||instant)deliverShop(draft,r,order,events);else shop.orders.push(order);
   }
-  shop.cart={};
- });
+ }
+
  for(const p of productsFor(s)){
   const durability=e.equipment[p.id];
   add('repair',p.id,'维修'+p.name,{money:repairPrice(s,r,p.id)},[

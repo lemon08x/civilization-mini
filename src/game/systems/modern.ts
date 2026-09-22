@@ -33,7 +33,7 @@ export const GENERATORS=['E01','E02','E03'];
 export const SERVICES=['N08','N10','S08','U08M','U09M'];
 export function generateModern(s:GameState,events:GameEvent[]):void {
  const m=s.economy?.modern;if(!m||s.economy!.operations?.paused)return;
- if(s.economy?.branches&&!branchHas(s,'L6'))return;
+ if(s.economy?.branches&&!branchHas(s,s.electric?'L7':'L6'))return;
  for(const id of GENERATORS){
   if(!m.enabled.includes(id)||m.operated[id]===s.clock.absoluteTurn||!equipped(s,id))continue;
   if(id==='E01'&&s.location.water<1||id==='E02'&&amount(s,'fuel')<1){modernEvent(events,id,'发电待命：缺水或精炼燃料');continue;}
@@ -52,7 +52,7 @@ export function generateModern(s:GameState,events:GameEvent[]):void {
 }
 export function serveModern(s:GameState,events:GameEvent[]):void {
  const m=s.economy?.modern;if(!m||s.economy!.operations?.paused)return;
- if(s.economy?.branches&&!branchHas(s,'L6'))return;
+ if(s.economy?.branches&&!branchHas(s,s.electric?'L7':'L6'))return;
  if(s.electric){
   if(!branchHas(s,'L7'))return;
   for(const id of ['LAMP','TELEGRAPH']){
@@ -60,8 +60,8 @@ export function serveModern(s:GameState,events:GameEvent[]):void {
    const cost=s.electric.rules.servicePower;
    if(m.power<cost){modernEvent(events,id,'停电：可用电不足，保留手动与次季订货退路');continue;}
    usePower(s,cost,events,id);consumeEquipment(s,id,events);s.economy!.equipmentUsed[id]=s.clock.absoluteTurn;m.services[id]=s.clock.absoluteTurn;
-   if(id==='LAMP'){s.life!.timeRemaining+=s.electric.rules.lampTime;if(s.sect)for(const peer of s.sect.current)if(peer!==s.household.activePersonId)s.sect.members[peer].time+=s.electric.rules.lampTime;}
-   modernEvent(events,id,id==='LAMP'?`夜间照明已供电，可用时间增加${s.electric.rules.lampTime}`:'电报在线，本季新订货即时交付');
+   if(id==='LAMP'&&!s.life?.calendar){s.life!.timeRemaining+=s.electric.rules.lampTime;if(s.sect)for(const peer of s.sect.current)if(peer!==s.household.activePersonId)s.sect.members[peer].time+=s.electric.rules.lampTime;}
+   modernEvent(events,id,id==='LAMP'?s.life?.calendar?'夜间照明已供电，本季工作精力成本降低':`夜间照明已供电，可用时间增加${s.electric.rules.lampTime}`:'电报在线，本季新订货即时交付');
   }
   return;
  }

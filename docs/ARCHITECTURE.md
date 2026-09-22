@@ -94,7 +94,7 @@ v27 JSON 仍带若干旧开关。`createInitialState` 会先建 `society` / `dev
 | `rulesets/v27/parameters.json` | 开局粮钱、每季口粮 | 改 JSON，受 bounds 约束 |
 | `rulesets/v27/systems.json` | 工资、人生、购粮、电气、阶段长度 | 改 JSON，受 bounds 约束 |
 | `rulesets/v27/catalogs.json` | 物价、作物产量、产品投入、配方进出 | 改 JSON；校验时写回 TypeScript 目录对象 |
-| `rulesets/v27/scenarios.json` | 地点旱涝、公共水 | 改 JSON |
+| `rulesets/v27/scenarios.json` | 固定默认环境的旱涝与公共水（开局不再选环境；发展框架定义在 src/game/model/eras.ts） | 改 JSON |
 | TypeScript 目录 | 名称、效果、学科节点结构 | 改机制时才动代码 |
 
 JSON 里的 `true` 只表示“这局启用该子系统”，不实现该系统。改“泵抽多少水”动代码；改“雇员工资是 1 还是 2”动 `systems.json`；改作物产量动 `catalogs.json`。

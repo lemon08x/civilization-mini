@@ -43,12 +43,12 @@ export const PRODUCTS:ProductSpec[]=[
   {id:'S03',name:'耐热容器',category:'储存与防护',effect:'热学、化学实验少用1木材（最低0），每次扣1耐用度。',requires:{materials:4,heat:1},inputs:{brick:1,ceramics:1},from:['S01']},
   {id:'U01',name:'翻土犁',category:'农业作业',effect:'播种时本茬潜在收成+1，扣1耐用度。',requires:{agronomy:1,mechanics:1},inputs:{wood:3,iron:1},from:[]},
   {id:'U02',name:'播种器',category:'农业作业',effect:'播种时均匀布种，本茬潜在收成+1，扣1耐用度。',requires:{agronomy:4,mechanics:2},inputs:{wood:2,shaft:1},from:['U01']},
-  {id:'U04',name:'收割工具',category:'农业作业',effect:'免除本茬最多1季延迟收获损失，每次收获扣1耐用度。',requires:{agronomy:4,materials:2},inputs:{wood:1,iron:1},from:[]},
+  {id:'U04',name:'收割工具',category:'农业作业',effect:'免除本茬最多1周延迟收获损失，每次收获扣1耐用度。',requires:{agronomy:4,materials:2},inputs:{wood:1,iron:1},from:[]},
   {id:'U05',name:'脱粒装置',category:'农业作业',effect:'2小麦加工为2面粉和1秸秆，每批扣1耐用度。',requires:{agronomy:4,mechanics:2},inputs:{wood:3,shaft:1},from:[]},
   {id:'U06',name:'磨粮装置',category:'农业作业',effect:'2小麦加工为3面粉，每批扣1耐用度，不与脱粒重复结算。',requires:{mechanics:2},inputs:{wood:2,ceramics:1},from:['U05']},
   {id:'U08',name:'排水设施',category:'农业作业',effect:'丰水季自动免除在田作物积水胁迫，每次扣1耐用度。',requires:{agronomy:2},inputs:{wood:2,clay:2},from:[]},
   {id:'U09',name:'堆肥设施',category:'农业作业',effect:'3秸秆跨季腐熟为2堆肥，施肥恢复土壤肥力，每批扣1耐用度。',requires:{agronomy:3},inputs:{wood:2,clay:1},from:[]},
-  {id:'U10',name:'育苗设施',category:'农业作业',effect:'播种时提前1季成熟（最低1季），扣1耐用度。',requires:{agronomy:5,materials:2},inputs:{wood:3,ceramics:1},from:['U02']},
+  {id:'U10',name:'育苗设施',category:'农业作业',effect:'播种时提前1周成熟（最低1天），扣1耐用度。',requires:{agronomy:5,materials:2},inputs:{wood:3,ceramics:1},from:['U02']},
 ];
 export const PLANNED_PRODUCTS=[['W02','连续提水机','持续供水'],['W04','压力供水装置','高处供水'],['W05','矿井排水装置','深层采掘'],['W06','分配供水系统','多用途供水'],['P02','脚踏传动装置','腾出双手'],['P04','风力动力装置','风力供能'],['P05','蒸汽动力装置','燃料动力'],['P06','多机动力分配装置','多机协作'],['T02','钻孔工具','孔洞加工'],['T04','车削装置','旋转部件加工'],['T05','动力锤','大型锻件'],['T06','镗削装置','深孔腔加工'],['F01','封闭炉具','稳定热源'],['F06','蒸汽发生装置','提供蒸汽'],['S04','耐腐蚀容器','保存反应物'],['S05','压力容器','承受压力'],['S06','隔热储存箱','温度保存'],['U03','除草工具','控制杂草'],['U07','灌溉管渠','多地块输水']];
 export interface ProcessSpec {id:string;name:string;inputs:Record<string,number>;outputs:Record<string,number>;requires:Partial<Record<Subject,number>>;equipment?:string;wait:number;power?:number;}
@@ -77,11 +77,12 @@ export const ALL_PRODUCTS=[...PRODUCTS,...MODERN_PRODUCTS,...ELECTRIC_PRODUCTS];
 export const ALL_PROCESSES=[...PROCESSES,...MODERN_PROCESSES,...ELECTRIC_PROCESSES];
 export const ALL_JOB_NAMES:Record<string,string>={...JOB_NAMES,...Object.fromEntries(MODERN_PROCESSES.map(p=>[p.id,p.name]))};
 export const topicsFor=(s:GameState)=>s.economy?.branches?[]:s.economy?.modern?ALL_TOPICS:TOPICS;
-export const productsFor=(s:GameState)=>s.economy?.branches?ALL_PRODUCTS.filter(p=>BRANCH_PRODUCTS[p.id]||s.electric&&ELECTRIC_KNOWLEDGE[p.id]).map(p=>({...p,requires:{},...(s.electric&&p.id==='E01'?{effect:`每季手动供能最多一次，消耗1公共水和1耐用；旱季发${s.electric.rules.dryHydroPower}电，其余季发6电。`}:{}),...(s.electric&&p.id==='E04'?{effect:'启用后季末存入最多6份余电，充电扣1耐用；次季手动供能时放电，每季最多一次。不自动发电或放电。'}:{}),...(s.electric&&p.id==='LAMP'?{effect:`手动供能时本季首次点灯耗${s.electric.rules.servicePower}电、1耐用，增加${s.electric.rules.lampTime}可用时间。可夜间学习，仍需精力。`}:{}),...(s.electric&&p.id==='TELEGRAPH'?{effect:`手动供能时每季耗${s.electric.rules.servicePower}电、1耐用，本季新订货即时交付；库存、运输、价款照常，不加速维修。`}:{})})):s.economy?.modern?[...PRODUCTS,...MODERN_PRODUCTS]:PRODUCTS;
+export const productsFor=(s:GameState)=>s.economy?.branches?ALL_PRODUCTS.filter(p=>BRANCH_PRODUCTS[p.id]||s.electric&&ELECTRIC_KNOWLEDGE[p.id]).map(p=>({...p,requires:{},...(s.electric&&p.id==='E01'?{effect:`每季手动供能最多一次，消耗1公共水和1耐用；旱季发${s.electric.rules.dryHydroPower}电，其余季发6电。`}:{}),...(s.electric&&p.id==='E04'?{effect:'启用后季末存入最多6份余电，充电扣1耐用；次季手动供能时放电，每季最多一次。不自动发电或放电。'}:{}),...(s.electric&&p.id==='LAMP'?{effect:`手动供能时本季首次点灯耗${s.electric.rules.servicePower}电、1耐用，工作精力成本降至${s.life?.calendar?.rules.lampEnergyPercent??100}%，日历不会凭空多出天数。`}:{}),...(s.electric&&p.id==='TELEGRAPH'?{effect:`手动供能时每季耗${s.electric.rules.servicePower}电、1耐用，本季新订货即时交付；库存、运输、价款照常，不加速维修。`}:{})})):s.economy?.modern?[...PRODUCTS,...MODERN_PRODUCTS]:PRODUCTS;
 export const processesFor=(s:GameState)=>s.economy?.branches?ALL_PROCESSES.filter(p=>BRANCH_PROCESSES[p.id]||s.electric&&ELECTRIC_KNOWLEDGE[p.id]).map(p=>({...p,requires:{}})):s.economy?.modern?[...PROCESSES,...MODERN_PROCESSES]:PROCESSES;
 export const goodsFor=(s:GameState)=>s.electric?ALL_GOODS:s.economy?.modern?{...GOODS,...MODERN_GOODS}:GOODS;
 
 export interface CatalogOverlay {
+  cooking: Record<string,{inputs:Record<string,number>;food:number;time:number;energy:number}>;
   goods: Record<string, { price: number; food: number }>;
   crops: Record<string, { duration: number; yield: number; straw: number; level: number }>;
   products: Record<string, { inputs: Record<string, number> }>;
@@ -96,6 +97,12 @@ function integerMap(value: Record<string, number>, allowZero = true): void {
 
 /** JSON 是数字来源；TypeScript 目录只保留名称、效果和结构。 */
 export function applyCatalogOverlay(overlay: CatalogOverlay): void {
+  if(!overlay.cooking||Object.keys(overlay.cooking).length!==COOKING.length)throw new Error('存档缺少当前烹饪目录，请新开游戏；原档不修改');
+  for(const recipe of COOKING){
+    const n=overlay.cooking[recipe.id];
+    if(!n||!n.inputs||Object.keys(n.inputs).sort().join()!==Object.keys(recipe.inputs).sort().join()||![n.food,n.energy].every(v=>Number.isInteger(v)&&v>=1&&v<=12)||!Number.isFinite(n.time)||n.time<0.5||n.time>12)throw new Error('烹饪数值无效：'+recipe.id);
+    if(Object.values(n.inputs).some(v=>!Number.isFinite(v)||v<0.001||v>99))throw new Error('烹饪投入无效');recipe.inputs={...n.inputs};recipe.food=n.food;recipe.time=n.time;recipe.energy=n.energy;
+  }
   if (Object.keys(overlay.goods).length !== Object.keys(ALL_GOODS).length) throw new Error('物资目录条目不匹配');
   for (const [id, n] of Object.entries(overlay.goods)) {
     const item = ALL_GOODS[id];
@@ -134,3 +141,9 @@ export function applyCatalogOverlay(overlay: CatalogOverlay): void {
     } else delete process.power;
   }
 }
+
+export const COOKING:import('../model/economy.js').CookingRecipe[]=[
+ {id:'porridge',name:'麦粥',inputs:{wheat:0,wood:0},food:0,time:0,energy:0},
+ {id:'beans',name:'炖豆',inputs:{soy:0,wood:0},food:0,time:0,energy:0},
+ {id:'mixed',name:'麦豆饭',inputs:{wheat:0,soy:0,wood:0},food:0,time:0,energy:0},
+];

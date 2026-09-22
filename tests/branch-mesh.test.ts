@@ -8,7 +8,7 @@ import {organizationLevel} from '../src/game/systems/economy.js';
 import {ERA_NODES} from '../src/game/model/branches.js';
 import {rules as base} from './v27.js';
 const rules=resolveRuleset(base,{'eras.seasons':8,'eras.warning':1});
-const fresh=()=>{const s=structuredClone(createInitialState(rules,17,'river'));s.household.food=100;s.household.money=100;return s;};
+const fresh=()=>{const s=structuredClone(createInitialState(rules,17,'riverine'));s.household.food=100;s.household.money=100;return s;};
 type State=ReturnType<typeof fresh>;
 const act=(s:State,id:string)=>transition(s,parseActionId(id==='handover'?id:'economy:'+id),rules);
 const offer=(s:State,id:string)=>getAvailableActions(s,rules).find(a=>a.id==='economy:'+id);

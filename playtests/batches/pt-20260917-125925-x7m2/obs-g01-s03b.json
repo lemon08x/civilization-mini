@@ -1,7 +1,0 @@
-﻿node : {"error":"精力不足：剩余3，行动需4，行动后劳动预留2；可休息或暂停系统"}
-所在位置 行:1 字符: 129
-+ ... ew($false); node scripts/player.mjs act --run pt-20260917-125925-x7m2 ...
-+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: ({"error":"精力不足：...动预留2；可休息或暂停系统"}:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 

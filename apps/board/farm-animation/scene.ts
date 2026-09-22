@@ -1,29 +1,73 @@
-/** Read-only presentation data; never writes game state. */
-export type FieldSceneView = Readonly<{
- crop: 'wheat' | 'soy' | 'flax' | null; cropName: string;
- growth: number; duration: number; weather: string; weatherName: string; moisture: number;
- season: string;
-}>;
-function esc(s:string):string{return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-function tree(x:number,y:number,size=1,delay=0):string {
- return `<g transform="translate(${x} ${y}) scale(${size})" class="farm-tree"><ellipse cy="12" rx="33" ry="12" fill="#355d38" opacity=".16"/><path d="M-6 0 L-4 -48 H5 L8 0Z" fill="#876443"/><path d="M0 -24 L-18 -46 M2 -33 L17 -54" stroke="#876443" stroke-width="5"/><g class="farm-canopy" style="--delay:-${delay}s"><path d="M-35 -46 Q-46 -72 -19 -82 Q-18 -105 9 -96 Q37 -97 37 -72 Q55 -46 26 -37 Q5 -23 -14 -36 Q-28 -30 -35 -46" fill="#477e49"/><path d="M-28 -65 Q-37 -81 -15 -87 Q-7 -104 12 -90 Q32 -90 29 -70 Q10 -56 -5 -64Z" fill="#78a44c"/><ellipse cx="-14" cy="-79" rx="9" ry="5" fill="#a7bd61" opacity=".6"/></g></g>`;
+/** Shared sprite textures; no game state. */
+export function farmArt(P:typeof import('pixi.js-legacy')){
+const textureCache=new Map<string,import('pixi.js-legacy').Texture>();
+const cropImages=new Map<string,HTMLImageElement[]>();
+const cropLoads=new Map<string,Promise<boolean>>();
+const paintedCrops=new Set(['wheat','soy','radish','waxgourd']);
+let destroyed=false;
+// Read-only artwork cache. Missing assets retain the procedural fallback.
+async function loadCrops(crops:readonly string[]):Promise<boolean>{
+ const results=await Promise.all([...new Set(crops)].map(crop=>{
+  if(!paintedCrops.has(crop)||cropImages.has(crop))return Promise.resolve(false);
+  let pending=cropLoads.get(crop);
+  if(!pending){
+   pending=Promise.all([0,1,2].map(stage=>new Promise<HTMLImageElement>((resolve,reject)=>{
+    const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('crop art unavailable'));
+    image.src=`/illustrations/farm-plant-${crop}-${stage}-v1.png`;
+   }))).then(images=>{if(destroyed)return false;cropImages.set(crop,images);return true;}).catch(()=>false);
+   cropLoads.set(crop,pending);
+  }
+  return pending;
+ }));
+ return results.some(Boolean);
 }
-/** Original vector artwork, shared by crops and seed choices. */
-export function cropDrawing(kind:string,ripe:boolean,young=false):string {
- if(young)return '<path d="M0 0 Q3 -13 0 -23" stroke="#4f7737" stroke-width="4" fill="none"/><path d="M0 -11 Q-23 -29 -22 -10 Q-12 0 0 -11 M1 -16 Q23 -37 22 -16 Q13 -7 1 -16" fill="#7fa94a" stroke="#547f39" stroke-width="1.5"/>';
- if(kind==='wheat')return [-14,0,14].map((x,i)=>`<g transform="translate(${x} ${i===1?-8:0}) rotate(${(i-1)*12})"><path d="M0 0 V-54 M0 -19 Q-22 -36 -19 -38 M0 -28 Q19 -44 19 -47" stroke="${ripe?'#b58a32':'#63873b'}" stroke-width="3" fill="none"/>${[0,1,2,3].map(j=>`<path d="M0 ${-34-j*7} Q-13 ${-42-j*7} -7 ${-47-j*7} Q0 ${-46-j*7} 0 ${-34-j*7} Q13 ${-42-j*7} 7 ${-47-j*7} Q0 ${-46-j*7} 0 ${-34-j*7}" fill="${ripe?'#efc85d':'#a3b451'}" stroke="${ripe?'#bd9033':'#718e3d'}" stroke-width="1"/>`).join('')}</g>`).join('');
- return `<path d="M0 0 Q-5 -30 0 -64 M0 -24 L-20 -41 M0 -36 L22 -55" stroke="#4e773b" stroke-width="3" fill="none"/>${[-1,1].map(side=>[0,1].map(j=>`<ellipse cx="${side*(12+j*3)}" cy="${-24-j*21}" rx="15" ry="7" transform="rotate(${side*-28} ${side*(12+j*3)} ${-24-j*21})" fill="${j?'#7da34d':'#5d913f'}" stroke="#4c7736" stroke-width="1"/>`).join('')).join('')}${kind==='soy'?ripe?[-10,7,17].map((x,i)=>`<path d="M${x} ${-42+i*8} q-9 10 0 20 q9 -8 0 -20" fill="#d8b55d" stroke="#a1843b" stroke-width="2"/>`).join(''):'' :[-16,0,18].map((x,i)=>`<g transform="translate(${x} ${-55-(i===1?14:0)})">${[0,72,144,216,288].map(r=>`<ellipse cy="-5" rx="4" ry="7" transform="rotate(${r})" fill="${ripe?'#9f9bd8':'#9eb8ec'}"/>`).join('')}<circle r="3" fill="#f5dc85"/></g>`).join('')}`;
-}
-export function seedIcon(kind:string):string{return `<svg viewBox="-40 -85 80 100" aria-hidden="true"><ellipse cy="5" rx="28" ry="7" fill="#dce5be"/>${cropDrawing(kind,true)}</svg>`;}
-export function fieldScene(v:FieldSceneView):string {
- const ripe=!!v.crop&&v.growth>=v.duration,stage=!v.crop?'空田待播':ripe?'成熟待收':'生长中',wet=v.moisture>0||v.weather==='wet';
- const ratio=v.crop&&v.duration>0?v.growth/v.duration:0,scale=!v.crop||v.growth===0||ripe?1:ratio<.5?.55:.8;
- const seasonClass=v.season==='夏'?'season-summer':v.season==='秋'?'season-autumn':v.season==='冬'?'season-winter':'season-spring';
- const cells=Array.from({length:3},(_,r)=>Array.from({length:4},(_,c)=>{
-  const x=430+(c-r)*78,y=235+(c+r)*39;
-  return `<g transform="translate(${x} ${y})"><path d="M0 -35 L71 0 L0 35 L-71 0Z" fill="${wet?'#795438':'#977049'}" stroke="#bd965b" stroke-width="3"/><path d="M-53 -1 L1 25 M-36 -10 L20 16 M-17 -20 L40 8" stroke="${wet?'#543e2e':'#735036'}" stroke-width="3" opacity=".55"/>${v.crop?'':`<path d="M-46 -12 L34 16 M-56 6 L14 28 M-26 -22 L52 6" stroke="${wet?'#543e2e':'#735036'}" stroke-width="2" stroke-dasharray="7 6" opacity=".4"/>`}${wet?'<path class="farm-wetsheen" d="M0 -35 L71 0 L0 35 L-71 0Z" fill="url(#farm-wet)"/>':''}${v.crop?`<ellipse cy="5" rx="28" ry="10" fill="#3d3b23" opacity=".17"/><g class="farm-crop" style="--delay:-${(r+c)%5*.7}s">${scale<1?`<g transform="translate(0 ${((1-scale)*10).toFixed(1)}) scale(${scale})">${cropDrawing(v.crop,false)}</g>`:cropDrawing(v.crop,ripe,v.growth===0)}</g>`:''}</g>`;
- }).join('')).join('');
- return `<section class="field-stage weather-${esc(v.weather)} ${seasonClass} ${ripe?'is-ripe':''}" aria-label="家庭农场"><div class="field-scene-toolbar"><span><i class="farm-weather-dot"></i>${esc(v.weatherName)} <span class="farm-season-note">· ${esc(v.season)}季 · 随季节生长</span></span><label><input type="checkbox" class="scene-pause">暂停动画</label></div><div class="farm-canvas"><svg class="field-scene" viewBox="0 0 1000 620" role="img" aria-label="${esc(v.cropName)}，${stage}，${esc(v.weatherName)}"><defs><linearGradient id="farm-meadow" x2="0" y2="1"><stop class="meadow-top" stop-color="#bed7a0"/><stop class="meadow-bot" offset="1" stop-color="#90b16f"/></linearGradient><linearGradient id="farm-sky" x2="0" y2="1"><stop class="sky-top" stop-color="#d6e8d9"/><stop class="sky-bot" offset="1" stop-color="#edf0cf"/></linearGradient><linearGradient id="farm-wet" x2="0" y2="1"><stop stop-color="#7fb2e5" stop-opacity=".5"/><stop offset="1" stop-color="#3f6fb8" stop-opacity=".2"/></linearGradient></defs><rect width="1000" height="620" fill="url(#farm-meadow)"/><path d="M0 0 H1000 V157 Q830 101 666 158 Q400 63 218 135 Q76 91 0 130Z" fill="url(#farm-sky)"/><circle class="farm-sun-halo" cx="806" cy="68" r="48" fill="#ffe9a3" opacity=".3"/><circle class="farm-sun" cx="806" cy="68" r="28" fill="#fff1b3"/><g class="farm-cloud cloud-a"><path d="M140 74 Q125 47 157 47 Q174 18 197 43 Q229 36 231 69Z" fill="#fffdf1" opacity=".75"/></g><g class="farm-cloud cloud-b" style="--delay:-21s"><path d="M610 87 Q601 64 630 63 Q650 39 668 62 Q697 60 700 85Z" fill="#fffdf1" opacity=".7"/></g><ellipse class="farm-cloudshadow" cx="330" cy="540" rx="200" ry="40" fill="#355d38" opacity=".08"/><path d="M-50 575 Q260 615 480 498 T1050 180" stroke="#bdd091" stroke-width="96" fill="none"/><path d="M-50 575 Q260 615 480 498 T1050 180" stroke="#e0ce96" stroke-width="70" fill="none"/><path d="M-50 575 Q260 615 480 498 T1050 180" stroke="#ead9aa" stroke-width="42" fill="none"/>${tree(82,253,1.3,0)}${tree(143,179,.9,1.1)}${tree(910,278,1.3,2.3)}${tree(945,420,.9,.7)}${tree(46,475,.8,1.8)}
- <g transform="translate(713 150)"><ellipse cx="62" cy="110" rx="91" ry="24" fill="#4d713a" opacity=".15"/><path d="M-9 13 L67 -21 L128 22 V107 L60 133 L-9 101Z" fill="#c99457"/><path d="M60 42 L128 14 V107 L60 133Z" fill="#ae7848"/><path d="M-22 22 L51 -40 L146 19 L68 53Z" fill="#ab6046" stroke="#814937" stroke-width="4"/><path d="M51 -40 L68 53 L-22 22Z" fill="#c17a51"/><path d="M13 57 L44 67 V113 L13 104Z" fill="#664a32"/><path d="M82 59 L110 49 V76 L82 87Z" fill="#f4dc91" stroke="#815a36" stroke-width="4"/><path d="M96 55 V81" stroke="#815a36" stroke-width="3"/></g>
- <g transform="translate(212 141)"><ellipse cy="49" rx="55" ry="17" fill="#66844b" opacity=".18"/><path d="M-28 4 V41 Q0 60 28 41 V4Z" fill="#ada68c" stroke="#7e8069" stroke-width="3"/><ellipse cy="4" rx="28" ry="12" fill="#697c70" stroke="#d2c7a4" stroke-width="6"/><path d="M-33 6 V-49 M33 6 V-49" stroke="#977344" stroke-width="7"/><path d="M-46 -45 L0 -68 L46 -45 L0 -28Z" fill="#b88851"/><path d="M-17 -22 H19" stroke="#725237" stroke-width="4"/><path d="M0 -22 V6" stroke="#d3bd86" stroke-width="2"/></g>${cells}<g fill="#e7ddb1" stroke="#af9a67" stroke-width="2">${Array.from({length:8},(_,i)=>{const x=195+i*57,y=434+i*13;return `<path d="M${x} ${y} v-38 l5 -8 5 8 v38Z"/>`;}).join('')}</g><path d="M197 411 L602 503 M197 424 L602 516" stroke="#e9dbab" stroke-width="6"/>${Array.from({length:16},(_,i)=>`<g transform="translate(${65+i*57} ${550+(i%3)*17})"><g class="farm-grass" style="--delay:-${((i%7)*.8).toFixed(1)}s"><path d="M0 0 l-4 -11 M0 0 l6 -15" stroke="#77944f" stroke-width="2"/>${i%3===0?'<circle cy="-13" r="4" fill="#fff0ba"/>':''}</g></g>`).join('')}${v.weather==='wet'?`<g class="farm-rain rain-a">${Array.from({length:14},(_,i)=>`<path d="M${i*76} ${90+i%4*65} l-12 30" stroke="#e3f0df" stroke-width="2" opacity=".6"/>`).join('')}</g><g class="farm-rain rain-b">${Array.from({length:14},(_,i)=>`<path d="M${38+i*76} ${118+(i+2)%4*65} l-12 30" stroke="#d7e8f2" stroke-width="2" opacity=".45"/>`).join('')}</g>`:''}</svg><button type="button" class="farm-land-hit" data-farm-open="work" aria-label="${!v.crop?'选择种子，播种家庭田':ripe?'查看收获操作':'查看田间管理'}"><span class="farm-land-label">${v.crop?esc(v.cropName):'家庭田地'}<small>${!v.crop?'点击选择种子':ripe?'成熟了 · 点击收获':'生长中 · 点击照料'}</small></span></button><button type="button" class="farm-building-link" data-page="仓库" aria-label="打开仓库">仓库 <span>↗</span></button><div class="farm-effect-layer" aria-live="polite"></div></div><div class="farm-scene-footer"><span><i></i>${stage}</span><span>一块家庭田 · 统一播种与收获</span></div></section>`;
+
+function texture(key:string,painter:(g:CanvasRenderingContext2D,w:number,h:number)=>void,w=180,h=190){if(textureCache.has(key))return textureCache.get(key)!;const c=document.createElement('canvas');c.width=w*2;c.height=h*2;const g=c.getContext('2d')!;g.scale(2,2);painter(g,w,h);const t=P.Texture.from(c);textureCache.set(key,t);return t;}
+function ellipse(g:CanvasRenderingContext2D,x:number,y:number,rx:number,ry:number,fill:string|CanvasGradient){g.fillStyle=fill;g.beginPath();g.ellipse(x,y,Math.max(.01,rx),Math.max(.01,ry),0,0,Math.PI*2);g.fill();}
+const noise=(n:number)=>{const v=Math.sin(n*127.1+311.7)*43758.5453;return v-Math.floor(v);};
+function polygon(g:CanvasRenderingContext2D,points:number[][],color:string){g.beginPath();points.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.fillStyle=color;g.fill();}
+function landscapeTexture(){return texture('landscape',(g,w,h)=>{
+ g.fillStyle='#e8ecdf';g.fillRect(0,0,w,h);
+ for(let layer=0;layer<3;layer++){
+  const points=[[0,h]];for(let x=0;x<=w;x+=20)points.push([x,95+layer*34-Math.sin(x/130+layer)*30-Math.sin(x/67+layer)*13]);points.push([w,h]);
+  polygon(g,points,['#b5c9bd48','#bccdb873','#cfdbc38a'][layer]);
+ }
+ const wash=g.createLinearGradient(0,90,0,h);wash.addColorStop(0,'#e8ecdf00');wash.addColorStop(.7,'#e8ecdfdd');wash.addColorStop(1,'#e8ecdf');g.fillStyle=wash;g.fillRect(0,90,w,h-90);
+ for(let i=0;i<4200;i++){g.fillStyle=i%2?'#59684409':'#fffdf240';g.fillRect(noise(i)*w,noise(i+4000)*h,1+noise(i+30),1);}
+ },1000,560);}
+function mistTexture(){return texture('mist',(g,w,h)=>{g.translate(w/2,h/2);g.scale(1,.55);const fog=g.createRadialGradient(0,0,3,0,0,w*.48);fog.addColorStop(0,'#faf9ecba');fog.addColorStop(.45,'#eff3e5a0');fog.addColorStop(1,'#edf1e000');ellipse(g,0,0,w*.49,w*.49,fog);},160,100);}
+function groundTexture(field:boolean){return texture(field?'soil':'grass',(g)=>{
+ const points=[[90,110],[159,145],[90,180],[21,145]];polygon(g,points,field?'#b6aa80':'#b6c59c');
+ g.save();g.beginPath();points.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.clip();
+ for(let i=0;i<200;i++){g.fillStyle=i%2?'#eef0bd36':'#65744718';ellipse(g,20+noise(i)*140,115+noise(i+2)*65,.6+noise(i+8)*2,.5,g.fillStyle as string);}
+ if(field)for(let r=0;r<6;r++){const d=(r-2.5)*12;stroke(g,[[46+d*.5,137+d*.43],[104+d*.5,162+d*.43]],'#897e575c',2);stroke(g,[[46+d*.5,135+d*.43],[104+d*.5,160+d*.43]],'#ddd0a36b',1);}
+ g.restore();stroke(g,[...points,points[0]],'#7a907c65',1);
+ });}
+function houseTexture(){return texture('home',g=>{
+ ellipse(g,91,157,36,10,'#59645020');
+ polygon(g,[[61,115],[99,104],[124,120],[124,152],[94,165],[61,148]],'#d4c9aa');
+ polygon(g,[[61,115],[94,130],[94,165],[61,148]],'#f2e9cd');
+ polygon(g,[[52,114],[84,79],[133,117],[96,136]],'#637c75');
+ for(let i=0;i<6;i++)stroke(g,[[59+i*5,113-i*5],[97+i*5,131-i*4]],'#a8b6a075',1);
+ polygon(g,[[74,133],[84,138],[84,160],[74,155]],'#83795e');polygon(g,[[107,129],[116,125],[116,136],[107,140]],'#74887c');
+ stroke(g,[[61,149],[94,166],[124,153]],'#979778',2);
+ });}
+function stroke(g:CanvasRenderingContext2D,pts:number[][],color:string,width=1){g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.strokeStyle=color;g.lineWidth=width;g.lineCap='round';g.stroke();}
+function treeTexture(){return texture('tree',(g)=>{ellipse(g,86,159,32,11,'#46643b24');stroke(g,[[86,153],[88,68]],'#7a7652',7);stroke(g,[[87,122],[67,87]],'#7a7652',4);const blobs:[number,number,number,number,string][]=[[64,96,29,28,'#58776bb5'],[106,100,27,29,'#6c8c77b8'],[82,73,34,35,'#779984c4'],[71,68,22,24,'#9db395bd'],[102,80,20,25,'#819e89bf']];for(const b of blobs)ellipse(g,...b);for(let i=0;i<26;i++){let x=57+(i*17%58),y=55+(i*13%56);ellipse(g,x,y,2+(i%3),1.5,'#b9c78c50');}});}
+function cropTexture(crop:string,growth:number){
+ const stage=Math.max(0,Math.min(2,Math.floor(growth))),image=cropImages.get(crop)?.[stage];
+ if(image)return texture('painted:'+crop+stage,g=>{
+  const trailing=crop==='waxgourd';
+  const spots=trailing?[[76,145],[106,156]]:[[80,137],[104,147],[79,157]];
+  const height=(trailing?[20,39,47]:crop==='radish'?[19,44,52]:[22,62,73])[stage];
+  for(let i=0;i<spots.length;i++){
+   const [x,y]=spots[i],scale=Math.min(height/image.naturalHeight,(trailing?67:51)/image.naturalWidth)*(1+(i-1)*.035);
+   const w=image.naturalWidth*scale,h=image.naturalHeight*scale;
+   g.drawImage(image,x-w/2,y-h,w,h);
+  }
+ });
+ return texture(crop+growth,(g)=>{for(let row=0;row<4;row++)for(let col=0;col<4;col++){let x=88+(col-row)*11,y=125+(col+row)*5,h=growth===2?28:growth===1?18:7;stroke(g,[[x,y],[x+1,y-h]],growth===2&&crop==='wheat'?'#a98c3e':'#668844',1.8);if(crop==='flax'){ellipse(g,x,y-h,3,3,growth===2?'#879bc9':'#8ea971');}else if(crop==='soy'){ellipse(g,x-4,y-h+5,5,2.8,'#779653');ellipse(g,x+5,y-h+1,5,2.8,'#95ad60');if(growth===2){ellipse(g,x+2,y-9,2.4,5,'#c6b461');}}else if(growth===2){for(let k=0;k<4;k++){ellipse(g,x-2,y-h+k*4,3,2,'#c4a35c');ellipse(g,x+3,y-h+2+k*4,3,2,'#dfc781');}}else{stroke(g,[[x,y-3],[x-5,y-h+1]],'#88a157',1.7);stroke(g,[[x,y-3],[x+6,y-h+3]],'#9fb66b',1.7);}}});}
+function sprite(tex:import('pixi.js-legacy').Texture,x:number,y:number,scale=1){const sp=new P.Sprite(tex);sp.anchor.set(.5,160/190);sp.position.set(x,y);sp.scale.set(scale/2);return sp;}
+
+return {landscapeTexture,mistTexture,groundTexture,houseTexture,treeTexture,cropTexture,loadCrops,sprite,destroy:()=>{destroyed=true;cropImages.clear();cropLoads.clear();for(const t of textureCache.values())t.destroy(true);textureCache.clear();}};
 }

@@ -1,23 +1,29 @@
+import {calendarView,availableDays} from '../systems/calendar.js';
 import {eraCard} from '../systems/eras.js';
 import { activePerson, blankPerson, heir, type GameState } from '../model/state.js';
 import { branchNodesFor } from '../model/branches.js';
 import { branchName, branchNeeds } from '../systems/branches.js';
-import { hasTalent, canSucceed, consultableNodes, energyCeiling, healthCeiling, lifeEvent, livingElders, makeVitality, namePerson, initializeCharacter, characterMemory, selectSectPerson, gainPractice, sectStage, sectStrength, sectDrawOdds, SECT_CARDS, draw } from '../systems/life.js';
+import { recordLifeGeneration, hasTalent, canSucceed, consultableNodes, energyCeiling, healthCeiling, lifeEvent, livingElders, makeVitality, namePerson, initializeCharacter, characterMemory, gainPractice, sectStage, sectStrength, sectDrawOdds, SECT_CARDS, draw } from '../systems/life.js';
 import { defineAction, type ActionDefinition } from './definition.js';
 
 export function lifeActions(s:GameState):ActionDefinition[] {
   if(!s.life)return [];
   const v=activePerson(s).vitality!,r=s.life.rules;
+  const nextDate=s.life.calendar?calendarView(s).nextTerm:undefined;
   const actions:ActionDefinition[]=[
-    defineAction(s,'economy:rest:self','休息','身体',{},v.energy>=energyCeiling(v)?['精力已满']:[],`用4时间恢复${r.restRecovery+(hasTalent(v,'resilient')?1:0)}精力，不超过健康决定的上限。`,(d,ev)=>{
+    ...(nextDate?[defineAction(s,'economy:wait:calendar','休整至'+nextDate.name,'日历',{ap:0,time:Math.min(nextDate.days,availableDays(s)),energy:0},[],`前往${nextDate.date}，最多${nextDate.days}天；按日恢复精力和消耗食物；节气会触发随机见闻，其他行动经过同一天也会触发。作物成熟、缺粮、节气或节日时会停下。`,()=>{})]:[]),
+    ...(s.life.calendar?(['simple','hearty'] as const).map(mode=>defineAction(s,'economy:diet:'+mode,mode==='simple'?'采用简单饮食':'采用丰足饮食','饮食',{ap:0,time:0,energy:0},s.life!.calendar!.diet===mode?['当前安排']:[],mode==='simple'?'每日现做现吃；有食材和柴火就做饭，否则吃库存干粮。':'每日食材消耗增加50%，饱食时额外恢复精力；不需要每天点击做饭。',(d)=>{d.life!.calendar!.diet=mode;})):[]),
+    ...(s.life.calendar?[0.5,7].map(days=>defineAction(s,'economy:wait:'+(days===0.5?'half':'week'),days===0.5?'休息半天':'休整7天','日历',{ap:0,time:Math.min(days,availableDays(s)),energy:0},[],'推进日历，按日恢复、进食、作物生长。成熟、缺粮、节气或节日时提前停下。',()=>{})):[]),
+
+    defineAction(s,'economy:rest:self','休息','身体',{},v.energy>=energyCeiling(v)?['精力已满']:[],`休息半天恢复${r.restRecovery+(hasTalent(v,'resilient')?1:0)}精力，不超过健康决定的上限。`,(d,ev)=>{
       const x=activePerson(d).vitality!,before=x.energy;x.energy=Math.min(energyCeiling(x),x.energy+r.restRecovery+(hasTalent(x,'resilient')?1:0));lifeEvent(ev,d.household.activePersonId,'rest',`休息恢复${x.energy-before}精力`);
     }),
-    defineAction(s,'economy:care:self','营养疗养','身体',{money:Math.max(0,(s.life.renewal?.careMoney??2)-(eraCard(s)?.care??0))},v.health>=healthCeiling(v,r)?['健康已达到当前年龄上限']:[],`用${s.life.renewal?.careTime??4}时间、${s.life.renewal?.careEnergy??1}精力、${Math.max(0,(s.life.renewal?.careMoney??2)-(eraCard(s)?.care??0))}钱购买营养照护，恢复${r.careRecovery}健康；不能逆转衰老。`,(d,ev)=>{
+    defineAction(s,'economy:care:self','营养疗养','身体',{money:Math.max(0,(s.life.renewal?.careMoney??2)-(eraCard(s)?.care??0))},v.health>=healthCeiling(v,r)?['健康已达到当前年龄上限']:[],`投入调养时间、${s.life.renewal?.careEnergy??1}精力、${Math.max(0,(s.life.renewal?.careMoney??2)-(eraCard(s)?.care??0))}钱购买营养照护，恢复${r.careRecovery}健康；不能逆转衰老。`,(d,ev)=>{
       const x=activePerson(d).vitality!,before=x.health;x.health=Math.min(healthCeiling(x,r),x.health+r.careRecovery);lifeEvent(ev,d.household.activePersonId,'care',`疗养恢复${x.health-before}健康`);
     }),
   ];
   for(const [index,person] of Object.values(s.persons).entries()){
-    if(person.id===s.household.activePersonId||!person.vitality?.alive||!person.vitality.experiences||(s.sect&&!s.sect.members[person.id]?.admitted))continue;
+    if(person.id===s.economy?.farm?.neighbor.personId||person.id===s.household.activePersonId||!person.vitality?.alive||!person.vitality.experiences||(s.sect&&!s.sect.members[person.id]?.admitted))continue;
     actions.push(defineAction(s,'economy:bond:'+index,'与'+person.name+'谈心','身体',{time:2,energy:1},v.experiences?.contacts.includes(person.id)?['本季已与此人谈心']:[],
       '倾听与表达：改善双方关系1点（上限5），本季双方遇到关系事件时优先涉及彼此；关系影响季末和解或争执的机会。',(d,ev)=>{
         const mine=activePerson(d).vitality!.experiences!,theirs=d.persons[person.id].vitality!.experiences!;
@@ -49,20 +55,16 @@ export function lifeActions(s:GameState):ActionDefinition[] {
       }));
     }
   }
-  actions.push(defineAction(s,'economy:retire:family','安排季末交接','身体',{ap:0},[
-    ...(!canSucceed(s)?[s.sect?'下一代两位弟子须均存活并成年':s.household.heirId===s.household.activePersonId?'尚无后辈':`后辈须存活并满${r.adultYears}岁，当前${Math.floor(heir(s).vitality!.ageSeasons/4)}岁`]:[]),
+  actions.push(defineAction(s,'economy:retire:family','准备交接','身体',{ap:0},[
+    ...(!canSucceed(s)?[s.sect?'自己的弟子须存活并成年':s.household.heirId===s.household.activePersonId?'尚无后辈':`后辈须存活并满${r.adultYears}岁，当前${Math.floor(heir(s).vitality!.ageSeasons/4)}岁`]:[]),
     ...(s.life.pendingRetirement?['已安排本季交接']:[]),
-  ],'本季正常结算后进入交接。下一代两位成年弟子接手，个人修为与所学各自独立；门派道法、规程、气运与资产延续。',(d,ev)=>{d.life!.pendingRetirement=true;lifeEvent(ev,d.household.activePersonId,'retire','已安排季末交接');}));
+  ],'现在进入交接，不额外推进日历。自己的成年弟子接手，同门不参与交接，个人修为与所学各自独立；门派道法、规程、气运与资产延续。',(d,ev)=>{if(d.life?.calendar){d.status='handover';recordLifeGeneration(d,ev);}else d.life!.pendingRetirement=true;lifeEvent(ev,d.household.activePersonId,'retire','已准备交接');}));
   return s.sect?[...actions.filter(a=>a.offer.id!=='economy:company:heir'),...sectActions(s)]:actions;
 }
 
 function sectActions(s:GameState):ActionDefinition[]{
   const x=s.sect!,r=x.rules,id=s.household.activePersonId,m=x.members[id],out:ActionDefinition[]=[];
   const say=(d:GameState,ev:import('../model/events.js').GameEvent[],detail:string)=>lifeEvent(ev,d.household.activePersonId,'sect',detail);
-  for(const [slot,pid] of x.current.entries())out.push(defineAction(s,`economy:sectswitch:${slot}`,`转由${s.persons[pid].name}行动`,'师徒',{ap:0,time:0,energy:0},[
-    ...(pid===id?['已经是当前行动者']:[]),...(!s.persons[pid].vitality?.alive?['该传人已故']:[]),
-    ...(Object.values(s.economy!.industry?.instances??{}).some(v=>v?.enabled&&v.operator==='self')?['切换前请暂停本人负责的生产系统，或改派雇员']:[]),
-  ],'切换当代传人，各自时间与精力独立，不刷新本季预算。共享物资与设备不会复制。',(d,ev)=>{selectSectPerson(d,pid);say(d,ev,`由${d.persons[pid].name}继续本季行动`);}));
   out.push(defineAction(s,'economy:sectseek:disciple','寻访弟子','师徒',{time:2,energy:1},[
     ...(m.discipleId?['每位师父只收一名正式弟子']:[]),...(m.candidateId?['已经找到候选人，资质固定']:[]),
   ],`寻访一位${r.candidateAge}岁候选人；独立于婚育。修道只小幅改善候选体质机会，资质生成后不重抽。`,(d,ev)=>{
@@ -76,7 +78,7 @@ function sectActions(s:GameState):ActionDefinition[]{
   out.push(defineAction(s,'economy:sectadmit:disciple','正式收徒','师徒',{time:2,energy:1,money:r.recruitMoney},[
     ...(m.discipleId?['已经收徒，不可替换']:[]),...(!m.candidateId?['先寻访弟子']:[]),
     ...(m.candidateId&&!s.persons[m.candidateId].vitality?.alive?['候选人已故']:[]),
-  ],'每师一徒、每代两席；徒弟从零修道，课程按前置学习，不受私人婚育影响。',(d,ev)=>{
+  ],'自己收徒与传承；徒弟从零修道，课程按前置学习，不受私人婚育影响。',(d,ev)=>{
     const master=d.sect!.members[id],pid=master.candidateId!;master.discipleId=pid;master.candidateId=null;
     d.sect!.members[pid].admitted=true;d.household.memberIds.push(pid);d.household.heirId=pid;
     characterMemory(d,pid,'admitted',`拜${d.persons[id].name}为师，从今日开始修道习术。`,'对新的师承心怀期待，也还惦念原来的生活。',ev);
