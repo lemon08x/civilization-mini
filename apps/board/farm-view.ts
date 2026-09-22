@@ -5,7 +5,7 @@ import {foodPolicyControls} from './social-food-view.js';
 import {uiIcon} from './ui-icons.js';
 import {COOKING} from '../../src/game/systems/economy-catalog.js';
 export type FarmGame=SessionObservation['game'];
-export type FarmPanel='field'|'home'|'store'|'market'|'neighbor'|'discoveries';
+export type FarmPanel='field'|'home'|'store'|'market'|'neighbor'|'discoveries'|'manufacture';
 let selected='p2q2',panel:FarmPanel='field';
 let stockSelection='food';
 export function selectFarmStock(id:string){stockSelection=id;}
@@ -13,11 +13,11 @@ export const selectedFarmPlot=()=>selected;
 export function selectFarmPlot(id:string){selected=id;panel='field';}
 export function selectFarmPanel(id:FarmPanel){panel=id;}
 const names={unknown:'未知地块',wild:'可耕荒地',field:'自家田地',tree:'古树',rock:'岩石与地标',brush:'荆棘地',story:'乡野发现'};
-const panels:Record<FarmPanel,string>={field:'田地与探索',home:'农舍',store:'仓库',market:'买卖与补给',neighbor:'同门',discoveries:'探索见闻'};
+const panels:Record<FarmPanel,string>={field:'田地与探索',home:'农舍',store:'仓库',market:'买卖与补给',neighbor:'同门',discoveries:'探索见闻',manufacture:'农具与加工'};
 const goodsArt=new Set(['wheat','soy','flax','seedWheat','seedSoy','seedFlax','wood','clay','compost','straw','flour','food']);
 const affairsArt=new Set(['talk','exchange','learn','basket','explore','reclaim','water','rare','story']);
 const homeArt=new Set(['home','porridge','beans','mixed','rest','reserves','gather']);
-export function farm(g:FarmGame,renderButton:(id:string)=>string):string {
+export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing=''):string {
  const button=(id:string)=>renderButton(id)
   .replace(/<details class="action-help"[\s\S]*?<\/details>/g,'')
   .replace(/<span>(?:时间|精力) 0<\/span>/g,'')
@@ -46,7 +46,7 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string):string {
   soy:['做饭 · 口粮','可炖豆、做麦豆饭；也可在季末补足口粮。播种需要另留豆种。'],
   flour:['口粮储备','季末可直接用于家庭口粮。'],
   wood:['烧火 · 制作','做饭时作为柴火消耗；学会相关制作后，也用于容器和农用设施。'],
-  clay:['制作材料','用于排水、堆肥等设施。需先学习对应知识，再到「学习与制造」查看材料要求。'],
+  clay:['制作材料','用于排水、堆肥等设施。需先学习对应知识，再到农场的「农具与加工」查看材料要求。'],
   compost:['田间施肥','给田地补充肥力；在田地的「田间养护与同门求助」中使用。'],
   straw:['堆肥原料','学会堆肥并备好设施后可腐熟为肥料，不能当作口粮。'],
   flax:['纤维原料','学会相关加工后可制成纤维，供后续搓绳等制作使用；不能食用。'],
@@ -55,7 +55,7 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string):string {
   seedFlax:['播种专用','在空田播种亚麻，还需掌握对应种植知识；收获的是制作原料。'],
   rare:['探索所得 · 独立留种','在空田播种异穗麦，收获后返还专属种子；集市不出售。'],
  };
- const usage=(id:string)=>{const u=uses[id];return u?`<div class="farm-good-use"><span>${u[0]}</span><p>${u[1]}</p></div>`:'<div class="farm-good-use"><span>制作物资</span><p>在「学习与制造」查看配方中的用途与解锁要求。</p></div>';};
+ const usage=(id:string)=>{const u=uses[id];return u?`<div class="farm-good-use"><span>${u[0]}</span><p>${u[1]}</p></div>`:'<div class="farm-good-use"><span>制作物资</span><p>在农场「农具与加工」或对应阶段的主场景查看配方用途与条件。</p></div>';};
  const seedBag=()=>`<div class="pixi-seed-bag"><strong>种子袋</strong>${map.discovered.map(c=>`<p>${CROPS[c].name} ${e.goods[CROPS[c].seed]??0} 份</p>`).join('')}${map.rareSeeds?`<p>异穗麦种 ${map.rareSeeds} 份 · 独立留种</p>`:''}${jump('market','购买种子')}</div>`;
  const fieldTags:string[]=[];
  const techniques=map.techniques;
@@ -93,6 +93,7 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string):string {
   }
   body=`<section class="farm-map-dock" aria-label="当前地块操作"><div class="farm-dock-main"><div class="farm-dock-heading"><span>${p.id} · ${names[p.kind]}</span><h3>${esc(title)}</h3><p>${hint}</p></div><div class="farm-dock-actions">${actions}</div></div>${extra?`<div class="farm-dock-extras">${extra}</div>`:''}</section>`;
  }
+ if(panel==='manufacture')body=manufacturing;
  if(panel==='home'){
   const cooking=g.actions.filter(a=>a.id.startsWith('economy:cook:'));
   body=`<div class="farm-room-hero">${emblem('home:home')}<div><span class="eyebrow">${esc(g.person.name)}的农舍</span><h3>生火做饭，归来歇息</h3><p>可用精力 ${g.life?.budget.freeEnergy??0} · 即食口粮 ${g.family.food} 份 · 季末需 ${g.parameters.foodPerTurn} 份</p></div></div><h4>灶台 · 用自家收成做饭</h4><div class="farm-card-grid">${cooking.map(a=>{const recipe=COOKING.find(r=>a.id==='economy:cook:'+r.id)!;return card(recipe.name,`<p>${Object.entries(recipe.inputs).map(([id,q])=>`${esc(e.goodsCatalog[id]?.name??id)} ${e.goods[id]??0}/${q}`).join(' · ')}</p><p class="farm-result">做成 ${recipe.food} 份即食口粮</p>`,button(a.id),'home:'+recipe.id);}).join('')}</div><p class="subtle">食材与木柴当次扣除，做好的饭存入口粮；种子单独留存，亚麻不能做饭。</p><h4>身体与日常</h4><div class="farm-card-grid">${card('休息与疗养','<p>恢复精力，照料身体。</p>',button('economy:rest:self')+button('economy:care:self'),'home:rest')}${card('生活储备',`<p>可食 ${e.foodTotal} 份 · 每季需 ${g.parameters.foodPerTurn} 份</p>`,jump('store','查看仓库')+jump('market','买粮补给'),'home:reserves')}${card('采集与临时帮工','<p>采集木柴与食物，或帮工换取钱财。</p>',g.actions.filter(a=>a.group==='生活'&&['gather','work'].includes(a.id.split(':')[1])).map(a=>button(a.id)).join(''),'home:gather')}</div>${g.socialFood?`<details class="farm-policy"><summary>吃饭与储粮安排 · 预计补粮 ${g.socialFood.purchase} 份</summary>${foodPolicyControls(g,button)}</details>`:''}`;
