@@ -3,7 +3,6 @@ import {beginEraLife} from './life.js';
 import {ERA_CARDS,DUNGEON_TASKS,CRISES,CRISIS_LEVELS,eraStages,stageOf,frameworkById,frameworkUnlockStage} from '../model/eras.js';
 import {branchNodesFor,nodeInEra} from '../model/branches.js';
 import {ALL_PROCESSES,CROPS} from './economy-catalog.js';
-import {activePerson,heir} from '../model/state.js';
 import type {GameState} from '../model/state.js';
 import type {Ruleset} from '../ruleset.js';
 import type {GameEvent} from '../model/events.js';
@@ -96,6 +95,7 @@ export function runnableSystems(s:GameState):Set<string>{
  }
  return run;
 }
+// Historical capacity estimate only; never credited by stage settlement.
 export function projectEraRemainder(s:GameState,rules:Ruleset,remaining:number){
  const empty={remaining:0,harvests:0,harvestUnits:0,shaftBatches:0,craftUnits:0,claims:0,waterSecured:false,notes:[] as string[]};
  if(!s.era||remaining<=0)return empty;
@@ -128,21 +128,16 @@ export function projectEraRemainder(s:GameState,rules:Ruleset,remaining:number){
  return {remaining,harvests,harvestUnits,shaftBatches,craftUnits,claims,waterSecured,notes};
 }
 function xHasShaft(s:GameState){return !!s.economy?.industry?.instances.shaft?.commissioned;}
-// 代际估计：前三个时代每代按 birthYears×4 季；当前代剩余取后辈距成年的季数，无在世后辈时按公开规则估（距生子 + 成年），不读取随机寿命。现代不推算。
-export function estimateEraRemaining(s:GameState):number{
- const e=s.era;if(!e||e.index>=eraStages(s).length-1)return 0;
- if(s.sect){
-   const next=[s.sect.current[0]].map(id=>s.sect!.members[id].discipleId);
-   const current=Math.max(...next.map(id=>id?Math.max(0,s.life!.rules.adultYears*4-s.persons[id].vitality!.ageSeasons):(s.life!.rules.adultYears-s.sect!.rules.candidateAge)*4+1));
-   return Math.max(0,e.rules.generationLimit-(s.clock.generation-e.startGeneration)-1)*((s.life!.rules.adultYears-s.sect.rules.candidateAge)*4+1)+current;
- }
- const r=s.life?.rules;if(!r)return 0;
- const lived=s.clock.generation-e.startGeneration;
- const h=s.household.heirId!==s.household.activePersonId?heir(s):null;
- let current=0;
- if(h?.vitality?.alive)current=Math.max(0,r.adultYears*4-h.vitality.ageSeasons);
- else{const v=activePerson(s)?.vitality;if(v?.alive)current=Math.max(0,r.birthYears*4-v.ageSeasons)+r.adultYears*4;}
- return Math.max(0,e.rules.generationLimit-lived-1)*r.birthYears*4+current;
+// Convert the original generation allowance into a public calendar budget.
+// Recruiting or handing over never resets this clock; elapsed seasons are settled once.
+export function eraSeasonLimit(s:GameState):number {
+ const e=s.era;if(!e)return 0;
+ const base=e.index===3?(s.sect?.rules.modernSeasons??0):e.rules.generationLimit*(s.sect?((s.life!.rules.adultYears-s.sect.rules.candidateAge)*4+1):(s.life?.rules.birthYears??0)*4);
+ return base+(e.timeBonus??0);
+}
+export function estimateEraRemaining(s:GameState):number {
+ if(!s.era||s.era.closed)return 0;
+ return Math.max(0,eraSeasonLimit(s)-s.era.elapsed);
 }
 function dungeonTaskWeight(s:GameState,id:string):number{
  const t=DUNGEON_TASKS.find(t=>t.id===id);if(!t)return 0;
@@ -152,7 +147,7 @@ function dungeonTaskWeight(s:GameState,id:string):number{
 }
 export function dungeonScore(s:GameState):number{if(s.sect)return Object.values(s.era?.crises?.entries??{}).reduce((sum,x)=>sum+s.sect!.rules.crisisScore*x.level*x.level,0);return (s.era?.dungeon.tasks??[]).reduce((sum,id)=>sum+dungeonTaskWeight(s,id),0);}
 // 共用结算：兑现凭证、记录事件并进入下一时代（重抽社会卡、开启独立人物，startGeneration 记为新人物首代）；现代为旅程终点。
-export function advanceEra(s:GameState,events:GameEvent[],how:string):void{
+export function advanceEra(s:GameState,events:GameEvent[],how:string,carriedSeasons=0):void{
  const e=s.era!;
  const percent=electricRewardPercent(s);
  if(percent<100){e.rewardEscrow=Math.floor(e.rewardEscrow*percent/100);eraEvent(s,events,'electric-discount',`现代结算缺少本季实际用电服务，回报凭证按${percent}%兑现；公共服务和已有收益仍保留。`);}
@@ -170,9 +165,9 @@ export function advanceEra(s:GameState,events:GameEvent[],how:string):void{
   eraEvent(s,events,'journey-ended',`副本任务：${names.join('、')||'无'}；总分${score}/${target}。${won?'最终副本完成，家族旅程结束':'现代阶段结束；最终副本未达标，保留已获阶段回报'}`);
   return;
  }
- e.index++;e.elapsed=0;e.card=drawCard(s);
+ e.index++;e.elapsed=0;e.timeBonus=carriedSeasons;e.card=drawCard(s);
  beginEraLife(s,events);e.startGeneration=s.clock.generation;
- if(s.sect&&e.index===3){e.dungeon.started=true;e.crises={remaining:s.sect.rules.modernSeasons,won:null,entries:Object.fromEntries(CRISES.map(c=>[c.id,{level:0,step:0,route:'',lastTurn:-1}]))};eraEvent(s,events,'summoned',`信物召集：人类存续受到威胁。飞龙在天，须在${e.crises.remaining}季内完成四项兜底任务。`);}
+ if(s.sect&&e.index===3){e.dungeon.started=true;e.crises={remaining:eraSeasonLimit(s),won:null,entries:Object.fromEntries(CRISES.map(c=>[c.id,{level:0,step:0,route:'',lastTurn:-1}]))};eraEvent(s,events,'summoned',`信物召集：人类存续受到威胁。飞龙在天，须在${e.crises.remaining}季内完成四项兜底任务。`);}
 
  eraEvent(s,events,'revealed',`进入${stageOf(s).name}。${stageOf(s).description} 社会卡「${eraCard(s)!.name}」：${eraCard(s)!.description}`);
 }
@@ -184,24 +179,20 @@ export function settleEra(s:GameState,rules:Ruleset,events:GameEvent[]):void{
    return;
  }
  if(s.status==='ended')return;e.elapsed++;
- const chosen=e.pendingSettle,timedOut=e.index<eraStages(s).length-1&&s.clock.generation-e.startGeneration>=e.rules.generationLimit;
+ const chosen=e.pendingSettle,timedOut=e.index<eraStages(s).length-1&&estimateEraRemaining(s)===0;
  if(!chosen&&!timedOut)return;
- let how=timedOut?'本时代代际预算用尽':'玩家主动结算';
- if(chosen&&!timedOut){
-  const remaining=estimateEraRemaining(s);
-  if(remaining>0){
-   const proj=projectEraRemainder(s,rules,remaining);e.rewardEscrow+=proj.claims;
-   eraEvent(s,events,'projected',`主动结算，剩余时间按代际估计约${remaining}季，按当前有效产能推算：收获${proj.harvestUnits}份、加工${proj.craftUnits}份，凭证${proj.claims/10}份。${proj.notes.join('；')}`,proj.claims);
-   how='玩家主动结算，剩余时间已推算';
-  }
- }
- advanceEra(s,events,how);
+ const remaining=estimateEraRemaining(s);
+ const carry=chosen&&!timedOut&&e.index<eraStages(s).length-1?Math.floor(remaining*rules.eras!.timeCarryPercent/100):0;
+ if(chosen&&e.index<eraStages(s).length-1)eraEvent(s,events,'time-carried',`当季已结算；剩余${remaining}季按${rules.eras!.timeCarryPercent}%折算，下一阶段增加${carry}季，损耗${remaining-carry}季。只兑现实际取得的回报，不再推算未来收益。`,carry);
+ advanceEra(s,events,timedOut?'本阶段季数预算用尽':'玩家主动结算',carry);
 }
 export function eraView(s:GameState,rules:Ruleset){
  const e=s.era!,stage=stageOf(s),lived=s.clock.generation-e.startGeneration;
  const limit=e.index<eraStages(s).length-1?e.rules.generationLimit:null;
  const remaining=estimateEraRemaining(s);
- const preview=projectEraRemainder(s,rules,remaining);
+ const preview={remaining:0,harvestUnits:0,craftUnits:0,claims:0,waterSecured:false,notes:['仅兑现实际回报；未度过的时间不产生预估收益。']};
+ const transferable=e.index<3?Math.max(0,remaining-1):0;
+ const carry=Math.floor(transferable*rules.eras!.timeCarryPercent/100);
  const percent=electricRewardPercent(s),payable=Math.floor((e.rewardEscrow+preview.claims)*percent/100);
  const goals=limit===null?undefined:(()=>{
   const courses=branchNodesFor(s).filter(n=>frameworkUnlockStage(s.era?.frameworkId,n.id)===e.index);
@@ -214,6 +205,6 @@ export function eraView(s:GameState,rules:Ruleset){
   return [{label:`掌握本时代新课程 ${mastered}/${courses.length}`,done:courses.length>0&&mastered>=courses.length},milestone,{label:'完成至少一次代际交接',done:lived>=1}];
  })();
  const dungeonOptions=DUNGEON_TASKS.filter(t=>s.electric||(t.id!=='power'&&t.id!=='appliance')).map(t=>({id:t.id,name:t.id==='power'&&s.electric?`交付${s.electric.rules.dungeonPower}电完成工程通电验收`:t.name,progress:dungeonTaskWeight(s,t.id),done:e.dungeon.tasks.includes(t.id)}));
- const crises=s.sect&&e.crises?{remaining:e.crises.remaining,won:e.crises.won,score:dungeonScore(s),limit:s.sect.rules.modernSeasons,entries:CRISES.map(c=>({...c,...e.crises!.entries[c.id],levelName:CRISIS_LEVELS[e.crises!.entries[c.id].level],score:s.sect!.rules.crisisScore*e.crises!.entries[c.id].level**2}))}:null;
- return {crises,...(s.electric?{electricRewardPercent:percent,electricRequirement:'现代完整回报需本季实际点灯、电报服务或电解；高档技术路线需真实交付电力，兜底及协调路线不统一要求通电。'}:{}),framework:{id:frameworkById(e.frameworkId).id,name:frameworkById(e.frameworkId).name},stage,index:e.index,stages:eraStages(s).map(x=>({id:x.id,name:x.name})),elapsed:e.elapsed,generationsLived:lived,generationLimit:limit,lastGeneration:limit!==null&&lived===limit-1,remaining,card:eraCard(s)!,rewardClaims:e.rewardEscrow/10,expectedReward:Math.floor(payable/(e.rules.rewardDivisor*10)),rewardDivisor:e.rules.rewardDivisor,closed:e.closed,groundwater:e.groundwater,tap:e.tap,publicWaterAvailable:e.index===3,publicWell:stage.publicWell,publicMill:stage.publicMill,services:eraServices(s),projection:{remaining:preview.remaining,harvestUnits:preview.harvestUnits,craftUnits:preview.craftUnits,claims:preview.claims/10,previewReward:Math.floor(payable/(e.rules.rewardDivisor*10)),waterSecured:preview.waterSecured,notes:preview.notes,appliesOnSettle:true},canSettle:!e.closed,...(goals?{goals}:{}),dungeon:e.index===3&&!s.sect?{...e.dungeon,score:dungeonScore(s),target:e.rules.dungeonTarget,options:dungeonOptions}:null,lockedKnowledge:branchNodesFor(s).filter(n=>!nodeInEra(s,n.id)).map(n=>({id:n.id,name:n.name}))};
+ const crises=s.sect&&e.crises?{remaining:e.crises.remaining,won:e.crises.won,score:dungeonScore(s),limit:eraSeasonLimit(s),entries:CRISES.map(c=>({...c,...e.crises!.entries[c.id],levelName:CRISIS_LEVELS[e.crises!.entries[c.id].level],score:s.sect!.rules.crisisScore*e.crises!.entries[c.id].level**2}))}:null;
+ return {timeBudget:{limit:eraSeasonLimit(s),remaining,received:e.timeBonus??0,transferable,carry,lost:transferable-carry,percent:rules.eras!.timeCarryPercent},crises,...(s.electric?{electricRewardPercent:percent,electricRequirement:'现代完整回报需本季实际点灯、电报服务或电解；高档技术路线需真实交付电力，兜底及协调路线不统一要求通电。'}:{}),framework:{id:frameworkById(e.frameworkId).id,name:frameworkById(e.frameworkId).name},stage,index:e.index,stages:eraStages(s).map(x=>({id:x.id,name:x.name})),elapsed:e.elapsed,generationsLived:lived,generationLimit:limit,lastGeneration:false,remaining,card:eraCard(s)!,rewardClaims:e.rewardEscrow/10,expectedReward:Math.floor(payable/(e.rules.rewardDivisor*10)),rewardDivisor:e.rules.rewardDivisor,closed:e.closed,groundwater:e.groundwater,tap:e.tap,publicWaterAvailable:e.index===3,publicWell:stage.publicWell,publicMill:stage.publicMill,services:eraServices(s),projection:{remaining:preview.remaining,harvestUnits:preview.harvestUnits,craftUnits:preview.craftUnits,claims:preview.claims/10,previewReward:Math.floor(payable/(e.rules.rewardDivisor*10)),waterSecured:preview.waterSecured,notes:preview.notes,appliesOnSettle:false},canSettle:!e.closed,...(goals?{goals}:{}),dungeon:e.index===3&&!s.sect?{...e.dungeon,score:dungeonScore(s),target:e.rules.dungeonTarget,options:dungeonOptions}:null,lockedKnowledge:branchNodesFor(s).filter(n=>!nodeInEra(s,n.id)).map(n=>({id:n.id,name:n.name}))};
 }

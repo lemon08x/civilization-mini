@@ -90,6 +90,7 @@
   },
   "eras": {
     "generationLimit": 5,
+    "timeCarryPercent": 50,
     "rewardDivisor": 12,
     "dungeonTarget": 6
   },

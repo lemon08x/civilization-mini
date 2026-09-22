@@ -1,9 +1,11 @@
-export interface EraRules { generationLimit:number; rewardDivisor:number; dungeonTarget:number; }
+export interface EraRules { generationLimit:number; rewardDivisor:number; dungeonTarget:number; timeCarryPercent:number; }
 export interface EraState {
  rules:EraRules; frameworkId:string; index:number; elapsed:number; card:string;
  // A payable economic claim, not a production statistic. Settled into household money when the player chooses or the time budget expires.
  rewardEscrow:number; closed:boolean; groundwater:number; tap:boolean; pendingSettle:boolean;
  startGeneration:number;
+ // Additional calendar seasons received from the previous civilization stage.
+ timeBonus?:number;
  crises?:{remaining:number; won:boolean|null; entries:Record<string,{level:number;step:number;route:string;lastTurn:number}>};
  dungeon:{started:boolean;tasks:string[];powered?:boolean};
 }

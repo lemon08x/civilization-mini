@@ -7,7 +7,7 @@ export function erasPage(o:SessionObservation,button:(id:string)=>string):string
  const modern=e.generationLimit===null;
  const clock=modern
    ?`<p>现代使命剩余 ${e.crises?.remaining??0} 季；到期或主动结算即结束旅程。四项至少兜底才算使命完成。</p>`
-   :`<p>本时代第 ${e.generationsLived+1}/${e.generationLimit} 代。住满 ${e.generationLimit} 代后，交接时强制结算；越早结算，剩余产能推算越长。</p>${e.lastGeneration?'<p class="status-pill status-warning">这是本时代最后一代，交接时将强制结算，只兑现已经发生的实际生产。</p>':''}`;
+   :`<p>本阶段剩余 ${e.timeBudget.remaining}/${e.timeBudget.limit} 季，包含上阶段结转 ${e.timeBudget.received} 季。到期自动结算；师徒交接不重置倒计时。</p>`;
  const goals=!modern&&(e.goals?.length)?`<section class="panel"><div class="panel-head"><h2>本时代结业清单</h2></div><div class="panel-body"><ul class="check-list">${e.goals.map(x=>`<li>${x.done?'✓':'○'} ${esc(x.label)}</li>`).join('')}</ul></div></section>`:'';
  const reading=`<p>回看这一阶段的积累，选择何时进入下一社会。跨时代保留师徒谱系、个人修为和所学。现代阶段结算后，旅程结束。</p>
    ${clock}
@@ -18,16 +18,16 @@ export function erasPage(o:SessionObservation,button:(id:string)=>string):string
    <section class="panel"><div class="panel-head"><h2>本阶段社会卡</h2></div><div class="panel-body"><h3>${esc(e.card.name)}</h3><p>${esc(e.card.description)}</p><p>效果持续整个阶段，不因人物换代重抽；未来抽牌结果不提前展示。</p></div></section>
    <section class="panel"><div class="panel-head"><h2>知识开放</h2></div><div class="panel-body"><p>部分课程要社会发展到相应阶段才出现在学堂。个人知识属于实际人物，跨时代不会丢失；新弟子仍须从基础学习。</p><p>尚未开放：${(e.lockedKnowledge??[]).map(n=>esc(n.name)).join('、')||'当前社会课程均已开放'}</p></div></section>`;
  const settle=`<h3>结算当前社会</h3>
-   <p>${modern?'提交后会结束本季、结束这次旅程，并按副本任务计分。':`提交后会结束本季并进入下一社会，由原有师徒继续生活；剩余约 ${e.remaining} 季（按代际估计）将推算兑现。`}预估会受当季实际结果影响，最终金额以真实结算事件为准。</p>
+   <p>${modern?'提交后会结束本季、结束这次旅程，并按副本任务计分。':`提交后会结束本季并进入下一社会，由原有师徒继续生活；当季结算后剩余 ${e.timeBudget.transferable} 季，按 ${e.timeBudget.percent}% 结转到下一阶段，增加 ${e.timeBudget.carry} 季、损耗 ${e.timeBudget.lost} 季。`}预估会受当季实际结果影响，最终金额以真实结算事件为准。</p>
    <ul class="check-list">
      <li>已取得回报凭证 ${e.rewardClaims} 份</li>
-     ${modern?`<li>现在结算预计兑现 ${e.expectedReward} 钱</li>`:`<li>现在结算预计兑现 ${e.expectedReward} 钱（含剩余约 ${p.remaining} 季推算 ${p.claims} 份）</li>`}
+     ${modern?`<li>现在结算预计兑现 ${e.expectedReward} 钱</li>`:`<li>现在结算预计兑现 ${e.expectedReward} 钱（仅含已取得的回报，本季新增实际收益另计）</li>`}
      <li>每 ${e.rewardDivisor} 凭证兑换 1 钱，向下取整。每份真实收获计 ${e.stage.foodWeight} 份基础凭证，每份加工产出计 ${e.stage.craftWeight} 份。</li>
      ${modern?'':(p.notes.map(n=>`<li>${esc(n)}</li>`).join('')||'<li>尚未形成可推算的产能。</li>')}
      ${e.electricRewardPercent!==undefined?`<li>${esc(e.electricRequirement??'')} 当前回报比例 ${e.electricRewardPercent}%。预览已计入该比例；结算以本季实际用电为准，不能用“有设备 / 已启用 / 已发电”代替。</li>`:''}
    </ul>
    <div class="inspector-action">${button('economy:erasettle:stage')}</div>
-   <h3>已结束的社会</h3>${o.eraSettlements?.map(x=>`<p>${esc(x.detail)}</p>`).join('')||'<p>尚无已结束的社会阶段。住满代数后的强制结算也会出现在记事里。</p>'}
+   <h3>已结束的社会</h3>${o.eraSettlements?.map(x=>`<p>${esc(x.detail)}</p>`).join('')||'<p>尚无已结束的社会阶段。季数耗尽后的自动结算也会出现在记事里。</p>'}
    ${e.crises?`<h3>飞龙在天 · 现代使命</h3><p>剩余${e.crises.remaining}/${e.crises.limit}季 · 总分${e.crises.score} · ${e.crises.won===null?'任务进行中':e.crises.won?'使命完成':'使命未完成'}</p>${e.crises.entries.map(c=>`<section class="panel"><div class="panel-body"><h3>${esc(c.name)}</h3><p>${esc(c.purpose)}</p><p>最高：${c.levelName} · ${c.score}分；当前步骤${c.step}/3。每档分数：${[1,2,3].map(n=>o.game.sect!.rules.crisisScore*n*n).join(' / ')}。</p>${o.game.actions.filter(a=>a.id.startsWith('economy:crisis:'+c.id+'-')).map(a=>button(a.id)).join('')}</div></section>`).join('')}`:''}
    ${dungeon?`<h3>最终副本：跨代家业试炼</h3>
      <p>总分 ${dungeon.score}/${dungeon.target}。达到 ${dungeon.target} 分即满足胜利条件，超出记为高分。这不是离开现代的条件。完成副本并结算后才算旅程胜利。</p>

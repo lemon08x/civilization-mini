@@ -48,7 +48,7 @@ export interface CompactObservation {
     seasonCompany: boolean;
     elderConsults: number;
   };
-  stage?: { era?: string; generationsLived?: number; generationLimit?: number | null; lastGeneration?: boolean; farm?: string; tasks: string[] };
+  stage?: { timeBudget?: NonNullable<SessionObservation['game']['era']>['timeBudget']; era?: string; generationsLived?: number; generationLimit?: number | null; lastGeneration?: boolean; farm?: string; tasks: string[] };
   events: unknown[];
   actions: CompactActionQuote[];
   urgentBlockers: { id: string; reason: string }[];
@@ -171,6 +171,7 @@ export function compactObservation(
       },
     } : {}),
     stage: {
+      ...(observation.game.era?{timeBudget:observation.game.era.timeBudget}:{}),
       ...(str(eraStage?.name) ? { era: str(eraStage?.name) } : {}),
       ...(typeof era?.generationsLived === 'number' ? { generationsLived: era.generationsLived } : {}),
       ...(era && (typeof era.generationLimit === 'number' || era.generationLimit === null) ? { generationLimit: era.generationLimit as number | null } : {}),
@@ -237,9 +238,9 @@ export function formatCompactObservation(compact: CompactObservation): string {
     const stageGeneration = compact.stage?.generationsLived !== undefined
       ? (compact.stage.generationLimit == null
         ? '不限代'
-        : `第${compact.stage.generationsLived + 1}/${compact.stage.generationLimit}代${compact.stage.lastGeneration ? '（最后一代）' : ''}`)
+        : `第${compact.stage.generationsLived + 1}代`)
       : '';
-    lines.push(`阶段: ${[compact.stage?.era, stageGeneration, compact.stage?.farm ? `持续耕作 ${compact.stage.farm}` : '', ...(compact.stage?.tasks ?? [])].filter(Boolean).join('；')}`);
+    lines.push(`阶段: ${[compact.stage?.era, stageGeneration, compact.stage?.timeBudget?`剩余${compact.stage.timeBudget.remaining}/${compact.stage.timeBudget.limit}季；提前结转${compact.stage.timeBudget.carry}季，损耗${compact.stage.timeBudget.lost}季`:'', compact.stage?.farm ? `持续耕作 ${compact.stage.farm}` : '', ...(compact.stage?.tasks ?? [])].filter(Boolean).join('；')}`);
   }
   if (compact.receipt) lines.push(`回执: revision ${compact.receipt.revision}${compact.receipt.duplicate ? '（重复命令）' : ''}`);
   lines.push('', '成功行动后直接用本摘要决策，不必再 observe。冲突、失败或文件更新警告时重新观察。', '', '## 可用行动');
