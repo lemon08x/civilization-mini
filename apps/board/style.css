@@ -1373,3 +1373,24 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 
 /* Harvests and recipes keep materials distinct and make the food chain browsable. */
 .atlas-toolbar{flex-wrap:wrap;gap:12px}.atlas-toolbar>div{flex-basis:100%;flex-wrap:wrap}.atlas-toolbar>label:first-of-type{margin-left:auto}.food-atlas-guide{padding:14px 18px;margin:10px 0 18px;background:#eee9d8;border-left:3px solid #9da981;color:#58634e}.food-atlas-guide strong{font-size:15px}.food-atlas-guide p{margin:7px 0 0;font-size:12px;line-height:1.7;color:#817965}.food-card-kind{display:block;margin-top:8px;font-size:11px;color:#597655}.food-card-kind.nonfood{color:#966f48}.food-relationship{border-top:1px solid #ddd3bc;margin-top:15px;padding-top:2px}.food-relationship h4{margin-top:14px}.food-relationship>div{display:flex;gap:6px;flex-wrap:wrap}.food-relationship button{border:1px solid #c8cdb4;border-radius:5px;background:#eef0e2;padding:6px 8px;font-size:12px;color:#4f684b;text-align:left;cursor:pointer}.food-relationship button:hover{border-color:#577253;background:#e3ebd5}.food-relationship small{font-size:10px;color:#939077;margin-left:5px}.food-inedible-note{color:#966f48;background:#f4ead7;padding:8px 10px;border-radius:5px}.food-method{padding-left:22px;font-size:13px;line-height:1.9}.food-method li{padding-left:3px;margin-bottom:5px}.seed-filters [data-seed-only][hidden],.food-atlas-guide[hidden]{display:none}
+
+/* Encyclopedia sheets: equal cells, shared by cards and enlarged detail figures. */
+.atlas-picture{width:86px;height:96px;overflow:hidden;border-radius:6px;background:#faf6eb}
+.atlas-picture img{mix-blend-mode:normal}
+.atlas-art{display:block;flex-shrink:0;width:100%;aspect-ratio:1;background-repeat:no-repeat;background-position:var(--art-x) var(--art-y)}
+.atlas-art-botanical{background-image:url('/illustrations/atlas-botanical-v1.png');background-size:600% 600%}
+.atlas-art-ingredients{background-image:url('/illustrations/atlas-ingredients-v1.png');background-size:500% 400%;aspect-ratio:4/5}
+.atlas-art-meals{background-image:url('/illustrations/atlas-meals-v1.png');background-size:500% 500%}
+.atlas-picture .atlas-art-ingredients{width:76px}
+.atlas-card>span:last-child{min-width:0}
+.atlas-figure{margin:16px 0 0;padding:12px;background:#faf6eb;border:1px solid #ded5c0;border-radius:8px}
+.atlas-detail-picture{display:grid;place-items:center;max-width:238px;min-height:190px;margin:auto}
+.atlas-detail-picture .atlas-art-ingredients{width:80%}
+.atlas-detail-picture img{display:block;width:100%;height:210px;object-fit:contain}
+.atlas-figure figcaption{text-align:center;border-top:1px solid #e2d8c2;padding-top:10px;margin-top:8px;line-height:1.6}
+.atlas-figure figcaption span{display:block;font-family:serif;font-size:14px;color:#53664f}
+.atlas-figure figcaption small{display:block;font-size:10px;color:#877c66;margin-top:3px}
+.atlas-art-equipment{background-image:url('/illustrations/atlas-equipment-v1.png');background-size:300% 200%}
+.atlas-grid{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.atlas-art-meals{background-size:500% var(--art-height);aspect-ratio:var(--art-ratio)}
+.atlas-picture .atlas-art-meals{max-height:96px}
