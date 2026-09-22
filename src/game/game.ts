@@ -1,5 +1,5 @@
 import {initializeFarm} from './systems/agriculture.js';
-import {initializeEras,recordEraProduction} from './systems/eras.js';
+import {initializeEras,recordEraProduction,settleEra} from './systems/eras.js';
 import {recordProducts} from './systems/industry-products.js';
 import { recordBranchWork } from './systems/branches.js';
 import { initializeLife, initializeSect, recordCharacterGrowth, recordSeasonChoice } from './systems/life.js';
@@ -54,7 +54,7 @@ export function createInitialState(rules: Ruleset, seed: number, frameworkId: st
   if(rules.branches){state.economy!.branches={learned:{[state.household.activePersonId]:['A0'],[state.household.heirId]:['A0']},archives:[],protocols:[],channels:[],delivered:[]};state.economy!.knowledge={};state.economy!.notes={};delete state.economy!.expeditions;delete state.economy!.workshops;}
   if(rules.industry)state.economy!.industry={rules:structuredClone(rules.industry),products:{},commissioned:[],instances:{},workers:{}};
   if(rules.life)initializeLife(state,rules.life);
-  if(rules.calendar&&state.life)state.life.calendar={rules:structuredClone(rules.calendar),absoluteDay:0,seasonStarted:0,seasonLength:0,day:0,diet:'simple',mealDays:0,consumed:0,missing:0,purchaseSpent:0,systemsSettled:false,study:{},weatherNextDay:0,lastTermDay:-1,termEvents:[],lastNotice:'正月初一，岁首启程：探索荒野，安排这一年的田地。'};
+  if(rules.calendar&&state.life)state.life.calendar={rules:structuredClone(rules.calendar),continuousVersion:1,nextBusinessDay:rules.calendar.businessCycleDays,absoluteDay:0,seasonStarted:0,seasonLength:0,day:0,diet:'simple',mealDays:0,consumed:0,missing:0,purchaseSpent:0,systemsSettled:false,study:{},weatherNextDay:0,lastTermDay:-1,termEvents:[],lastNotice:'正月初一，岁首启程：探索荒野，安排这一年的田地。'};
   if(rules.renewal){state.life!.renewal=structuredClone(rules.renewal);for(const p of Object.values(state.persons))if(p.vitality)p.vitality.minimumEnergy=rules.renewal.minimumEnergy;}
   if(rules.socialFood){state.socialFood={rules:structuredClone(rules.socialFood),foodPerSeason:p.foodPerTurn,price:p.foodPrice,policy:'off',budget:rules.socialFood.defaultBudget,reserve:rules.socialFood.defaultReserve,delivery:false,serviceRemaining:rules.socialFood.serviceCapacity};state.production!.market.food=Math.min(state.production!.market.food,rules.socialFood.storage);}
   if(rules.electric)state.electric={rules:structuredClone(rules.electric)};
@@ -93,8 +93,9 @@ export function transition(state: GameState, action: GameAction, rules: Ruleset)
   recordBranchWork(next,events);
   if(next.life?.calendar&&action.type!=='handover'){
     const op=action.type==='economy'?action.operation:'';
-    const days=op==='end'||op==='erasettle'?next.life.calendar.seasonLength-next.life.calendar.day:(time??0);
+    const days=op==='end'?next.life.calendar.rules.daysPerWeek:(time??0);
     if(days>0)advanceCalendar(next,rules,days,events,op==='wait'||op==='end');
+    if(op==='erasettle'){settleEra(next,rules,events);next.life.timeRemaining=next.era?.dayBudget?Math.max(0,next.era.dayBudget.started+next.era.dayBudget.limit-next.life.calendar.absoluteDay):next.life.timeRemaining;}
   }else if (action.type !== 'handover' && (action.type === 'end-turn' || action.type==='economy'&&(action.operation==='end'||action.operation==='erasettle') || (!next.sect&&(next.life?next.life.timeRemaining===0:next.ap === 0)))) finishSeason(next, rules, events);
   if(deferredFarmProject)definition.execute(next,events);
   recordCharacterGrowth(next,events);

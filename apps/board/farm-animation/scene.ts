@@ -1,6 +1,27 @@
 /** Shared sprite textures; no game state. */
 export function farmArt(P:typeof import('pixi.js-legacy')){
 const textureCache=new Map<string,import('pixi.js-legacy').Texture>();
+const cropImages=new Map<string,HTMLImageElement[]>();
+const cropLoads=new Map<string,Promise<boolean>>();
+const paintedCrops=new Set(['wheat','soy','radish','waxgourd']);
+let destroyed=false;
+// Read-only artwork cache. Missing assets retain the procedural fallback.
+async function loadCrops(crops:readonly string[]):Promise<boolean>{
+ const results=await Promise.all([...new Set(crops)].map(crop=>{
+  if(!paintedCrops.has(crop)||cropImages.has(crop))return Promise.resolve(false);
+  let pending=cropLoads.get(crop);
+  if(!pending){
+   pending=Promise.all([0,1,2].map(stage=>new Promise<HTMLImageElement>((resolve,reject)=>{
+    const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('crop art unavailable'));
+    image.src=`/illustrations/farm-plant-${crop}-${stage}-v1.png`;
+   }))).then(images=>{if(destroyed)return false;cropImages.set(crop,images);return true;}).catch(()=>false);
+   cropLoads.set(crop,pending);
+  }
+  return pending;
+ }));
+ return results.some(Boolean);
+}
+
 function texture(key:string,painter:(g:CanvasRenderingContext2D,w:number,h:number)=>void,w=180,h=190){if(textureCache.has(key))return textureCache.get(key)!;const c=document.createElement('canvas');c.width=w*2;c.height=h*2;const g=c.getContext('2d')!;g.scale(2,2);painter(g,w,h);const t=P.Texture.from(c);textureCache.set(key,t);return t;}
 function ellipse(g:CanvasRenderingContext2D,x:number,y:number,rx:number,ry:number,fill:string|CanvasGradient){g.fillStyle=fill;g.beginPath();g.ellipse(x,y,Math.max(.01,rx),Math.max(.01,ry),0,0,Math.PI*2);g.fill();}
 const noise=(n:number)=>{const v=Math.sin(n*127.1+311.7)*43758.5453;return v-Math.floor(v);};
@@ -33,8 +54,20 @@ function houseTexture(){return texture('home',g=>{
  });}
 function stroke(g:CanvasRenderingContext2D,pts:number[][],color:string,width=1){g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.strokeStyle=color;g.lineWidth=width;g.lineCap='round';g.stroke();}
 function treeTexture(){return texture('tree',(g)=>{ellipse(g,86,159,32,11,'#46643b24');stroke(g,[[86,153],[88,68]],'#7a7652',7);stroke(g,[[87,122],[67,87]],'#7a7652',4);const blobs:[number,number,number,number,string][]=[[64,96,29,28,'#58776bb5'],[106,100,27,29,'#6c8c77b8'],[82,73,34,35,'#779984c4'],[71,68,22,24,'#9db395bd'],[102,80,20,25,'#819e89bf']];for(const b of blobs)ellipse(g,...b);for(let i=0;i<26;i++){let x=57+(i*17%58),y=55+(i*13%56);ellipse(g,x,y,2+(i%3),1.5,'#b9c78c50');}});}
-function cropTexture(crop:string,growth:number){return texture(crop+growth,(g)=>{for(let row=0;row<4;row++)for(let col=0;col<4;col++){let x=88+(col-row)*11,y=125+(col+row)*5,h=growth===2?28:growth===1?18:7;stroke(g,[[x,y],[x+1,y-h]],growth===2&&crop==='wheat'?'#a98c3e':'#668844',1.8);if(crop==='flax'){ellipse(g,x,y-h,3,3,growth===2?'#879bc9':'#8ea971');}else if(crop==='soy'){ellipse(g,x-4,y-h+5,5,2.8,'#779653');ellipse(g,x+5,y-h+1,5,2.8,'#95ad60');if(growth===2){ellipse(g,x+2,y-9,2.4,5,'#c6b461');}}else if(growth===2){for(let k=0;k<4;k++){ellipse(g,x-2,y-h+k*4,3,2,'#c4a35c');ellipse(g,x+3,y-h+2+k*4,3,2,'#dfc781');}}else{stroke(g,[[x,y-3],[x-5,y-h+1]],'#88a157',1.7);stroke(g,[[x,y-3],[x+6,y-h+3]],'#9fb66b',1.7);}}});}
+function cropTexture(crop:string,growth:number){
+ const stage=Math.max(0,Math.min(2,Math.floor(growth))),image=cropImages.get(crop)?.[stage];
+ if(image)return texture('painted:'+crop+stage,g=>{
+  const trailing=crop==='waxgourd';
+  const spots=trailing?[[76,145],[106,156]]:[[80,137],[104,147],[79,157]];
+  const height=(trailing?[20,39,47]:crop==='radish'?[19,44,52]:[22,62,73])[stage];
+  for(let i=0;i<spots.length;i++){
+   const [x,y]=spots[i],scale=Math.min(height/image.naturalHeight,(trailing?67:51)/image.naturalWidth)*(1+(i-1)*.035);
+   const w=image.naturalWidth*scale,h=image.naturalHeight*scale;
+   g.drawImage(image,x-w/2,y-h,w,h);
+  }
+ });
+ return texture(crop+growth,(g)=>{for(let row=0;row<4;row++)for(let col=0;col<4;col++){let x=88+(col-row)*11,y=125+(col+row)*5,h=growth===2?28:growth===1?18:7;stroke(g,[[x,y],[x+1,y-h]],growth===2&&crop==='wheat'?'#a98c3e':'#668844',1.8);if(crop==='flax'){ellipse(g,x,y-h,3,3,growth===2?'#879bc9':'#8ea971');}else if(crop==='soy'){ellipse(g,x-4,y-h+5,5,2.8,'#779653');ellipse(g,x+5,y-h+1,5,2.8,'#95ad60');if(growth===2){ellipse(g,x+2,y-9,2.4,5,'#c6b461');}}else if(growth===2){for(let k=0;k<4;k++){ellipse(g,x-2,y-h+k*4,3,2,'#c4a35c');ellipse(g,x+3,y-h+2+k*4,3,2,'#dfc781');}}else{stroke(g,[[x,y-3],[x-5,y-h+1]],'#88a157',1.7);stroke(g,[[x,y-3],[x+6,y-h+3]],'#9fb66b',1.7);}}});}
 function sprite(tex:import('pixi.js-legacy').Texture,x:number,y:number,scale=1){const sp=new P.Sprite(tex);sp.anchor.set(.5,160/190);sp.position.set(x,y);sp.scale.set(scale/2);return sp;}
 
-return {landscapeTexture,mistTexture,groundTexture,houseTexture,treeTexture,cropTexture,sprite,destroy:()=>{for(const t of textureCache.values())t.destroy(true);textureCache.clear();}};
+return {landscapeTexture,mistTexture,groundTexture,houseTexture,treeTexture,cropTexture,loadCrops,sprite,destroy:()=>{destroyed=true;cropImages.clear();cropLoads.clear();for(const t of textureCache.values())t.destroy(true);textureCache.clear();}};
 }

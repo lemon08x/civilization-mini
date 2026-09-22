@@ -41,7 +41,7 @@ const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 function tick(dt:number):void {
  elapsed+=dt;
  for(const m of mistDrift){m.sp.x=m.baseX+Math.sin(elapsed*.012+m.seed)*5;m.sp.alpha=.82+Math.sin(elapsed*.017+m.seed*1.7)*.14;}
- for(const c of cropSway)c.rotation=Math.sin(elapsed*.045+c.position.x)*.04;
+ for(const c of cropSway)c.skew.x=Math.sin(elapsed*.025+c.position.x)*.012;
  if(selectedRing)selectedRing.alpha=.72+Math.sin(elapsed*.07)*.28;
  for(let i=tweens.length-1;i>=0;i--){const tw=tweens[i];tw.t+=dt/60;const k=Math.min(1,tw.t/tw.dur);tw.update(tw.ease(k));if(k>=1){tweens.splice(i,1);tw.done?.();}}
  for(let i=particles.length-1;i>=0;i--){const pt=particles[i];pt.life-=dt/60;pt.g.x+=pt.vx*dt;pt.g.y+=pt.vy*dt;pt.vy+=.06*dt;pt.g.alpha=Math.max(0,pt.life/pt.max);if(pt.life<=0){pt.g.destroy();particles.splice(i,1);}}
@@ -174,6 +174,11 @@ export function bindFarmScene(root:Document,g:FarmGame,rerender:()=>void):void {
  observer=new ResizeObserver(()=>{if(host.clientWidth){const oldHeight=viewH;sizeMap();viewW=host.clientWidth;app!.renderer.resize(viewW,viewH);background!.width=viewW;background!.height=viewH;distantHouse!.x=viewW*.77;app!.stage.hitArea=new P!.Rectangle(0,0,viewW,viewH);if(oldHeight!==viewH)focus();fit();}});
  observer.observe(host);
  if(!reduced())app.ticker.start();else app.render();
+ // Complete the artwork swap only for the still-mounted, current observation.
+ // Switching panels or acting while an image loads must never restore stale state.
+ void art!.loadCrops(['wheat','soy',...map.plots.flatMap(p=>p.field?.crop?[p.field.crop]:[])]).then(changed=>{
+  if(changed&&host.isConnected&&currentMap===map)rerender();
+ });
 }
 
 // Tile-anchored feedback: effects are looked up by plot id in the freshly

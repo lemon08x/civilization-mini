@@ -1,3 +1,4 @@
+import {availableDays} from '../systems/calendar.js';
 import {dietView} from '../systems/social-food.js';
 import {lunarDateAt} from '../systems/calendar.js';
 import {FARM_PROJECT_NAMES,workFarmProject,fieldWaterSupport,startFarmProject} from '../systems/agriculture.js';
@@ -119,7 +120,7 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
     add('pause',kind,'暂停／恢复'+WORKER_NAMES[kind],'雇佣',{},!worker||worker.job==='rest'?['先招募并安排任务']:[], '保留合同、经验与在制品；暂停期间不工作、不扣工资。',(draft,events)=>{const w=draft.economy!.workers[kind]!;w.active=!w.active;events.push({type:'economy-worker',worker:kind,operation:'pause',money:0,detail:w.active?'恢复':'暂停'});});
     add('train',kind,'培训'+WORKER_NAMES[kind],'雇佣',{food:1},[...(!worker?['尚未招募']:[]),...(org<4?['需培训与知识传授']:[]),...(worker&&worker.experience>=8?['已完成此岗位培训']:[]),...(servicePending(s,'training',kind)?['正在委托培训']:[])],'花1行动与1口粮，使雇员经验+2，上限8；经验8后：普通雇工可播种，农工整地增益+1，工匠可按双份原料批量加工；工资也+1。',(draft,events)=>{draft.economy!.workers[kind]!.experience=Math.min(8,draft.economy!.workers[kind]!.experience+2);events.push({type:'economy-worker',worker:kind,operation:'train',money:0,detail:'经验+2（上限8）'});});
   }
-  add('end','season','等到下一季','回合',{ap:0},[],`推进到下一季，按日进食与生长；任何田成熟、缺粮、节气、节日或换季会停下。季末只结算生产、保存损耗和人物时代，不重复进食。现有可食库存${foodStock(s)}批`,()=>{});
+  if(!s.life?.calendar)add('end','season','等到下一季','回合',{ap:0},[],`推进到下一季，按日进食与生长；任何田成熟、缺粮、节气、节日或换季会停下。季末只结算生产、保存损耗和人物时代，不重复进食。现有可食库存${foodStock(s)}批`,()=>{});
   if(e.operations)out.push(...operationsActions(s,rules));
   if(e.shop)out.push(...shopActions(s,rules));
   return [...out,...expeditionActions(s,rules),...workshopActions(s,rules),...towerActions(s,rules)];
@@ -141,13 +142,13 @@ function farmMapActions(s:GameState):ActionDefinition[]{
     const total=p.project?.total??(kind==='canal'?r.canalDays:kind==='restore'?r.restoreDays:r.woodlandDays),done=p.project?.done??0;
     const stageEnd=done<total/2?total/2:total;
     const harvest=Math.min(Infinity,...Object.values(farm.plots).map(t=>plotField(s,t.id)).filter(f=>f?.crop).map(f=>Math.max(0,f!.duration-f!.growth)));
-    const maximum=Math.max(0,Math.floor(Math.min(stageEnd-done,s.life!.timeRemaining,dietView(s)?.days??0,harvest)*2)/2);
+    const maximum=Math.max(0,Math.floor(Math.min(stageEnd-done,availableDays(s),dietView(s)?.days??0,harvest)*2)/2);
     const options=[...new Set([Math.min(3,maximum),Math.min(7,maximum),maximum])];
     for(const days of options){
      const materials=kind==='canal'&&!p.project?missingGoods(s,{wood:r.projectWood}):[];
      const effect=kind==='canal'?`首段耗${r.projectWood}木材；完成后相邻四格获得2点供水，渠格不再种植`:kind==='restore'?'完成后直接建成肥力3的田':kind==='timber'?`完成后获得${r.timberYield}木材，留下普通荒地`:kind==='clearwood'?'完成后直接建成肥力2的田，不额外获得木材':'完成后相邻四格获得1点保水，林格不再种植';
      const date=s.life?.calendar?lunarDateAt(s.life.calendar.rules.referenceYear,s.life.calendar.absoluteDay+days).date:'';
-     const definition=defineAction(s,`economy:farmproject:${p.id}-${kind}-${days*2}`,`${FARM_PROJECT_NAMES[kind]} · ${days?`投入${days}天`:'暂缓'}`,'地块工程',{time:days,energy:days?Math.min(6,Math.ceil(days/3)):0},[...materials,...(days<=0?['先收获成熟作物、补给或换季，再继续工程']:[])],`总工期${total}天，已完成${done}天；${done<total/2?'整备':'施工'}阶段。本次至${date}，按当前饮食约需${Number((days*(dietView(s)?.dailyGrain??0)).toFixed(3))}批食材。${effect}。${kind==='canal'||kind==='shelter'?`影响相邻格：${farmNeighbors(p).map(n=>n.id).join('、')}`:'仅改造本格'}。开工后固定用途；进度跨季、换代保留。`,(d,ev)=>workFarmProject(d,p.id,kind,days,total,ev));
+     const definition=defineAction(s,`economy:farmproject:${p.id}-${kind}-${days*2}`,`${FARM_PROJECT_NAMES[kind]} · ${days?`投入${days}天`:'暂缓'}`,'地块工程',{time:days,energy:days?Math.min(6,Math.ceil(days/3)):0},[...materials,...(days<=0?['先收获成熟作物或补给，再继续工程']:[])],`总工期${total}天，已完成${done}天；${done<total/2?'整备':'施工'}阶段。本次至${date}，按当前饮食约需${Number((days*(dietView(s)?.dailyGrain??0)).toFixed(3))}批食材。${effect}。${kind==='canal'||kind==='shelter'?`影响相邻格：${farmNeighbors(p).map(n=>n.id).join('、')}`:'仅改造本格'}。开工后固定用途；进度跨季、换代保留。`,(d,ev)=>workFarmProject(d,p.id,kind,days,total,ev));
      definition.prepare=(d,ev)=>startFarmProject(d,p.id,kind,total,ev);out.push(definition);
     }
    }
@@ -162,7 +163,7 @@ function farmMapActions(s:GameState):ActionDefinition[]{
    if(p.kind==='story'&&!p.project&&key!=='woodland')choice('leave',key==='traveler'?'指路告别':'整理为普通荒地',r.interactionTime,0,[],'结束这次事件，放弃奖励，此格可按普通荒地开垦。');
   }
   if(p.kind!=='field')continue;const field=plotField(s,p.id)!;
-  if(s.life?.calendar&&field.crop&&field.growth<field.duration)out.push(defineAction(s,'economy:wait:'+p.id,'等到 '+p.id+' 收获','日历',{ap:0,time:Math.min(field.duration-field.growth,s.life.calendar.seasonLength-s.life.calendar.day),energy:0},[],'最多等到此田成熟；其他田成熟、缺粮、节气、节日或换季也会提前停下。',()=>{}));
+  if(s.life?.calendar&&field.crop&&field.growth<field.duration)out.push(defineAction(s,'economy:wait:'+p.id,'等到 '+p.id+' 收获','日历',{ap:0,time:Math.min(field.duration-field.growth,availableDays(s)),energy:0},[],'最多等到此田成熟；其他田成熟、缺粮、节气或节日也会提前停下。',()=>{}));
   for(const crop of Object.keys(CROPS) as Crop[]){
    out.push(defineAction(s,`economy:farmplot:${p.id}-${crop}`,`${p.id} ${!field.crop?'播种':field.growth>=field.duration?'收获':'灌溉'}${CROPS[crop].name}`,'农业',{ap:s.economy!.shop&&!field.crop&&equipped(s,'U02')&&s.economy!.shop.seededTurn!==s.clock.absoluteTurn?0:1},[...(field.crop&&field.crop!==crop?['田里是另一种作物']:[]),...(!farm.discovered.includes(crop)?['尚未发现此种子']:[]),...farmBlocker(s,crop,undefined,field)],'只处理指定田块，实际扣种子、水、时间、精力和工具耐用；生长、肥力与留种沿用农业规则。',(d,ev)=>{const start=ev.length;farmWork(d,crop,ev,undefined,plotField(d,p.id)!);for(const e of ev.slice(start))if(e.type==='economy-farm'){e.plotId=p.id;} }));
   }

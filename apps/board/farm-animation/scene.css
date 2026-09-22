@@ -140,3 +140,19 @@
 .farm-diet-plan .farm-status-tags{margin:12px 0}
 .study-progress{color:#746244;font-size:13px}
 .course-inspector>progress{width:100%;accent-color:#77815a}
+
+/* All plot actions remain visible as the same illustrated cards. */
+.farm-dock-main{display:grid;grid-template-columns:minmax(200px,.8fr) minmax(0,2fr);align-items:start;gap:24px}
+.farm-dock-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;align-items:stretch}
+.farm-dock-actions>.action-option{min-width:0;max-width:none;display:flex;flex-direction:column}
+.farm-dock-actions .game-action{min-height:94px;height:100%;text-align:left;border-radius:8px;transition:background .15s ease,border-color .15s ease}
+.farm-dock-actions .game-action:not(:disabled):hover{background:#e0ead4;border-color:#809b70}
+.farm-dock-actions .game-action:focus-visible{outline:2px solid #557647;outline-offset:3px}
+.farm-dock-actions .game-action:disabled{background:#f0f0e7;border-color:#d6dacb}
+.farm-dock-actions .blocked-reason{padding:0 3px;color:#7c7969}
+.farm-plot-seeds{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.farm-plot-seeds>span{font-size:12px;background:#eff0e5;border:1px solid #dce1d1;border-radius:5px;padding:5px 8px;color:#68765e}
+.farm-plot-seeds b{color:#405c4a;margin-left:5px;font-variant-numeric:tabular-nums}
+
+.farm-room-split.farm-market-direct{grid-template-columns:minmax(0,1fr)}
+.farm-market-direct .farm-card-grid{grid-template-columns:repeat(3,minmax(0,1fr))}

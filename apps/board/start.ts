@@ -40,7 +40,7 @@ function renderSaves(): void {
     ? saves.map(save => {
       const place = FRAMEWORKS.find(f => f.id === save.frameworkId)?.name ?? (save.frameworkId || '旧规则存档，请新开游戏');
       const when = save.savedAt.slice(0, 16).replace('T', ' ');
-      return `<article class="save-row"><div><strong>${save.name}</strong><p class="subtle">${place} · 第${save.turn}季 · ${save.status} · ${when}</p></div><div class="save-actions"><a class="start-continue" href="/play?save=${encodeURIComponent(save.id)}">打开</a><button type="button" data-delete="${save.id}">删除</button></div></article>`;
+      return `<article class="save-row"><div><strong>${save.name}</strong><p class="subtle">${place} · ${save.status} · ${when}</p></div><div class="save-actions"><a class="start-continue" href="/play?save=${encodeURIComponent(save.id)}">打开</a><button type="button" data-delete="${save.id}">删除</button></div></article>`;
     }).join('')
     : '<p class="subtle">还没有本机旅程。可以从下面开启新的一章，或导入一份存档。</p>';
   saveList.querySelectorAll<HTMLButtonElement>('[data-delete]').forEach(item => {

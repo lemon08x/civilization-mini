@@ -1,3 +1,4 @@
+import {availableDays,calendarYearDays} from './calendar.js';
 import {dietView} from './social-food.js';
 import {electricOnline} from '../model/electric.js';
 import {eraCard} from './eras.js';
@@ -12,7 +13,7 @@ export const TALENTS: Record<Talent, {name:string;effect:string}> = {
   scholar:{name:'善学',effect:'学习、实验与付费授课少用1时间'},
   mentor:{name:'善教',effect:'教导后辈少用1时间、1精力'},
   organizer:{name:'善组织',effect:'招聘、采购与建立经营安排少用1时间'},
-  resilient:{name:'善恢复',effect:'主动休息与季末基本恢复额外恢复1精力'},
+  resilient:{name:'善恢复',effect:'主动休息额外恢复1精力'},
 };
 export function draw(s:GameState):number {
   let x=s.randomState;x^=x<<13;x^=x>>>17;x^=x<<5;s.randomState=x>>>0;return s.randomState/4294967296;
@@ -124,7 +125,7 @@ export function healthCeiling(v:Vitality,r:LifeRules):number {return Math.max(30
 export function energyCeiling(v:Vitality):number {return Math.max(v.minimumEnergy??2,Math.floor(v.constitution*(0.4+v.health*0.006)));}
 export function lifeView(p:Person,r?:LifeRules) {
   const v=p.vitality;
-  return v?{sex:v.sex,portrait:v.portrait,portraitEra:v.portraitEra,ageYears:Math.floor(v.ageSeasons/4),ageQuarter:v.ageSeasons%4,health:v.health,...(r?{maxHealth:healthCeiling(v,r)}:{}),energy:v.energy,maxEnergy:energyCeiling(v),alive:v.alive,character:v.character?structuredClone(v.character):null,talent:TALENTS[v.talent],experiences:v.experiences?structuredClone(v.experiences):null,earnedTalents:(v.experiences?.talents??[]).map(t=>TALENTS[t]),upbringing:v.upbringing?{...v.upbringing}:null}:undefined;
+  return v?{sex:v.sex,portrait:v.portrait,portraitEra:v.portraitEra,ageYears:Math.floor(v.ageSeasons/4),ageQuarter:Math.floor(v.ageSeasons%4),health:Math.round(v.health*100)/100,...(r?{maxHealth:healthCeiling(v,r)}:{}),energy:Math.round(v.energy*100)/100,maxEnergy:energyCeiling(v),alive:v.alive,character:v.character?structuredClone(v.character):null,talent:TALENTS[v.talent],experiences:v.experiences?structuredClone(v.experiences):null,earnedTalents:(v.experiences?.talents??[]).map(t=>TALENTS[t]),upbringing:v.upbringing?{...v.upbringing}:null}:undefined;
 }
 // Living direct ancestors of the active person; retired elders stay consultable while alive.
 export function livingElders(s:GameState):Person[] {
@@ -184,40 +185,42 @@ export function recordLifeGeneration(s:GameState,events:GameEvent[]):void {
     ...(s.production?{production:structuredClone(s.production)}:{}),
   }});
 }
-export function settleLife(s:GameState,missing:number,events:GameEvent[],foodRequired=2):void {
+export function settleLife(s:GameState,missing:number,events:GameEvent[],foodRequired=2,days?:number):void {
   const r=s.life!.rules;
+  const delta=days===undefined?1:days*4/calendarYearDays(s.life!.calendar!.rules.referenceYear,s.life!.calendar!.absoluteDay);
+  const previousAge=new Map(s.household.memberIds.map(id=>[id,s.persons[id].vitality?.ageSeasons??0]));
   for(const person of s.household.memberIds.map(id=>s.persons[id])) {
     const v=person.vitality;if(!v?.alive)continue;
-    v.ageSeasons++;
+    v.ageSeasons+=delta;
     const renewal=s.life!.renewal;
     const independent=person.id===s.economy?.farm?.neighbor.personId;
     const personMissing=independent?0:missing;
     const deficit=Math.min(1,personMissing/Math.max(1,foodRequired));
     const damage=renewal?Math.ceil(r.hungerDamage*deficit*Math.min(1,Math.max(0,s.household.hardship-renewal.graceSeasons)/2)):r.hungerDamage;
-    v.health=Math.max(0,Math.min(healthCeiling(v,r),v.health+(s.life?.calendar?(personMissing?0:1):(personMissing?-damage:(renewal?.fedHealth??1)))));
+    v.health=Math.max(0,Math.min(healthCeiling(v,r),v.health+(s.life?.calendar?(personMissing?0:delta):(personMissing?-damage:(renewal?.fedHealth??1)))));
     const recovery=renewal?Math.max(1,Math.ceil(r.recovery*(1-deficit*0.75)))+(hasTalent(v,'resilient')?1:0):missing?0:Math.max(1,Math.floor(r.recovery*v.health/100))+(hasTalent(v,'resilient')?1:0);
-    v.energy=Math.min(energyCeiling(v),v.energy+recovery);
+    if(days===undefined||person.id!==s.household.activePersonId)v.energy=Math.min(energyCeiling(v),v.energy+recovery*delta);
     if(v.health===0||v.ageSeasons>=v.lifespanSeasons){v.alive=false;v.energy=0;lifeEvent(events,person.id,'death',`${person.name}因${v.health===0?'健康耗尽':'自然衰老'}离世`);}
-    else lifeEvent(events,person.id,'season',`${person.name}：${Math.floor(v.ageSeasons/4)}岁，健康${v.health}，精力${v.energy}/${energyCeiling(v)}`);
+    else if(days===undefined||Math.floor(previousAge.get(person.id)!/4)!==Math.floor(v.ageSeasons/4))lifeEvent(events,person.id,'season',`${person.name}：${Math.floor(v.ageSeasons/4)}岁，健康${v.health}，精力${v.energy}/${energyCeiling(v)}`);
   }
   // Childhood upbringing: each season fed / accompanied / taught is recorded and
   // settled once into constitution at adulthood; birth talent remains unchanged.
   for(const person of s.household.memberIds.map(id=>s.persons[id])) {
     const v=person.vitality;if(!v?.alive||!v.upbringing)continue;
     if(v.ageSeasons<r.adultYears*4){
-      if(!missing)v.upbringing.fedSeasons++;
+      if(!missing)v.upbringing.fedSeasons+=delta;
       if(person.id===s.household.heirId){
-        if(s.life!.seasonCompany)v.upbringing.companySeasons++;
-        if(s.life!.seasonTaught)v.upbringing.taughtSeasons++;
+        if(s.life!.seasonCompany)v.upbringing.companySeasons+=delta;
+        if(s.life!.seasonTaught)v.upbringing.taughtSeasons+=delta;
       }
-    }else if(v.ageSeasons===r.adultYears*4){
+    }else if(previousAge.get(person.id)!<r.adultYears*4){
       const up=v.upbringing,span=r.adultYears*4;
       const bonus=Math.round(r.growthConstitutionBonus*Math.min(1,(up.fedSeasons+up.companySeasons)/span));
       v.constitution+=bonus;v.energy=Math.min(energyCeiling(v),v.energy+bonus);
       lifeEvent(events,person.id,'adulthood',`${person.name}成年：饱食${up.fedSeasons}季、陪伴${up.companySeasons}季、受教${up.taughtSeasons}季；体质+${bonus}，保留出生天赋「${TALENTS[v.talent].name}」`);
     }
   }
-  delete s.life!.seasonCompany;delete s.life!.seasonTaught;
+  if(days===undefined){delete s.life!.seasonCompany;delete s.life!.seasonTaught;}
   // One descendant per person; born during life, never created as an adult on handover.
   // Retired ancestors do not start additional branches.
   for(const person of s.sect?[]:new Set([activePerson(s),heir(s)])) {
@@ -447,6 +450,6 @@ export function studyQuote(s:GameState,node:string) {
   const done=c?.study[key]?.done??0;
   const fields=s.economy?[s.economy.field,...Object.values(s.economy.farm?.plots??{}).flatMap(p=>p.field?[p.field]:[])]:[];
   const harvest=Math.min(Infinity,...fields.filter(f=>f.crop&&f.growth<f.duration).map(f=>f.duration-f.growth));
-  const time=c?Math.max(0,Math.floor(Math.min(total-done,c.rules.workChunkDays,s.life!.timeRemaining,harvest,dietView(s)?.days??0)*2)/2):raw.time;
+  const time=c?Math.max(0,Math.floor(Math.min(total-done,c.rules.workChunkDays,availableDays(s),harvest,dietView(s)?.days??0)*2)/2):raw.time;
   return {key,total,done,time,energy:raw.energy};
 }

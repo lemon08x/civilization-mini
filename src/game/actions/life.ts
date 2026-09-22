@@ -1,9 +1,9 @@
-import {calendarView} from '../systems/calendar.js';
+import {calendarView,availableDays} from '../systems/calendar.js';
 import {eraCard} from '../systems/eras.js';
 import { activePerson, blankPerson, heir, type GameState } from '../model/state.js';
 import { branchNodesFor } from '../model/branches.js';
 import { branchName, branchNeeds } from '../systems/branches.js';
-import { hasTalent, canSucceed, consultableNodes, energyCeiling, healthCeiling, lifeEvent, livingElders, makeVitality, namePerson, initializeCharacter, characterMemory, gainPractice, sectStage, sectStrength, sectDrawOdds, SECT_CARDS, draw } from '../systems/life.js';
+import { recordLifeGeneration, hasTalent, canSucceed, consultableNodes, energyCeiling, healthCeiling, lifeEvent, livingElders, makeVitality, namePerson, initializeCharacter, characterMemory, gainPractice, sectStage, sectStrength, sectDrawOdds, SECT_CARDS, draw } from '../systems/life.js';
 import { defineAction, type ActionDefinition } from './definition.js';
 
 export function lifeActions(s:GameState):ActionDefinition[] {
@@ -11,9 +11,9 @@ export function lifeActions(s:GameState):ActionDefinition[] {
   const v=activePerson(s).vitality!,r=s.life.rules;
   const nextDate=s.life.calendar?calendarView(s).nextTerm:undefined;
   const actions:ActionDefinition[]=[
-    ...(nextDate?[defineAction(s,'economy:wait:calendar','休整至'+nextDate.name,'日历',{ap:0,time:Math.min(nextDate.days,s.life.timeRemaining),energy:0},[],`前往${nextDate.date}，最多${nextDate.days}天；按日恢复精力和消耗食物；节气会触发随机见闻，其他行动经过同一天也会触发。作物成熟、缺粮、节气、节日或换季时会停下。`,()=>{})]:[]),
+    ...(nextDate?[defineAction(s,'economy:wait:calendar','休整至'+nextDate.name,'日历',{ap:0,time:Math.min(nextDate.days,availableDays(s)),energy:0},[],`前往${nextDate.date}，最多${nextDate.days}天；按日恢复精力和消耗食物；节气会触发随机见闻，其他行动经过同一天也会触发。作物成熟、缺粮、节气或节日时会停下。`,()=>{})]:[]),
     ...(s.life.calendar?(['simple','hearty'] as const).map(mode=>defineAction(s,'economy:diet:'+mode,mode==='simple'?'采用简单饮食':'采用丰足饮食','饮食',{ap:0,time:0,energy:0},s.life!.calendar!.diet===mode?['当前安排']:[],mode==='simple'?'每日现做现吃；有食材和柴火就做饭，否则吃库存干粮。':'每日食材消耗增加50%，饱食时额外恢复精力；不需要每天点击做饭。',(d)=>{d.life!.calendar!.diet=mode;})):[]),
-    ...(s.life.calendar?[0.5,7].map(days=>defineAction(s,'economy:wait:'+(days===0.5?'half':'week'),days===0.5?'休息半天':'休整7天','日历',{ap:0,time:Math.min(days,s.life!.timeRemaining),energy:0},[],'推进日历，按日恢复、进食、作物生长。成熟、缺粮、节气、节日或换季时提前停下。',()=>{})):[]),
+    ...(s.life.calendar?[0.5,7].map(days=>defineAction(s,'economy:wait:'+(days===0.5?'half':'week'),days===0.5?'休息半天':'休整7天','日历',{ap:0,time:Math.min(days,availableDays(s)),energy:0},[],'推进日历，按日恢复、进食、作物生长。成熟、缺粮、节气或节日时提前停下。',()=>{})):[]),
 
     defineAction(s,'economy:rest:self','休息','身体',{},v.energy>=energyCeiling(v)?['精力已满']:[],`休息半天恢复${r.restRecovery+(hasTalent(v,'resilient')?1:0)}精力，不超过健康决定的上限。`,(d,ev)=>{
       const x=activePerson(d).vitality!,before=x.energy;x.energy=Math.min(energyCeiling(x),x.energy+r.restRecovery+(hasTalent(x,'resilient')?1:0));lifeEvent(ev,d.household.activePersonId,'rest',`休息恢复${x.energy-before}精力`);
@@ -55,10 +55,10 @@ export function lifeActions(s:GameState):ActionDefinition[] {
       }));
     }
   }
-  actions.push(defineAction(s,'economy:retire:family','安排季末交接','身体',{ap:0},[
+  actions.push(defineAction(s,'economy:retire:family','准备交接','身体',{ap:0},[
     ...(!canSucceed(s)?[s.sect?'自己的弟子须存活并成年':s.household.heirId===s.household.activePersonId?'尚无后辈':`后辈须存活并满${r.adultYears}岁，当前${Math.floor(heir(s).vitality!.ageSeasons/4)}岁`]:[]),
     ...(s.life.pendingRetirement?['已安排本季交接']:[]),
-  ],'本季正常结算后进入交接。自己的成年弟子接手，同门不参与交接，个人修为与所学各自独立；门派道法、规程、气运与资产延续。',(d,ev)=>{d.life!.pendingRetirement=true;lifeEvent(ev,d.household.activePersonId,'retire','已安排季末交接');}));
+  ],'现在进入交接，不额外推进日历。自己的成年弟子接手，同门不参与交接，个人修为与所学各自独立；门派道法、规程、气运与资产延续。',(d,ev)=>{if(d.life?.calendar){d.status='handover';recordLifeGeneration(d,ev);}else d.life!.pendingRetirement=true;lifeEvent(ev,d.household.activePersonId,'retire','已准备交接');}));
   return s.sect?[...actions.filter(a=>a.offer.id!=='economy:company:heir'),...sectActions(s)]:actions;
 }
 

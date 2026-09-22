@@ -19,6 +19,17 @@ function solarAt(referenceYear: number, absoluteDay: number): Solar {
   const date = new Date((epoch(referenceYear) + Math.floor(absoluteDay)) * 86400000);
   return Solar.fromYmd(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
 }
+/** Convert the former allowance once, using actual calendar months. */
+export function calendarMonthDays(referenceYear:number,day:number,months:number):number {
+ const start=solarAt(referenceYear,day);return serial(start.nextMonth(months))-serial(start);
+}
+export function calendarYearDays(referenceYear:number,day:number):number {
+ const start=solarAt(referenceYear,day);return serial(start.nextYear(1))-serial(start);
+}
+export function availableDays(s:GameState):number {
+ const c=s.life?.calendar,b=s.era?.dayBudget;
+ return c&&b?Math.max(0,b.started+b.limit-c.absoluteDay):s.life?.timeRemaining??0;
+}
 function terms(year: number) {
   if (!termCache.has(year)) {
     const entries = new Map<number, string>();
@@ -112,6 +123,7 @@ export function calendarView(s: GameState) {
   const period = c.absoluteDay % 1 ? '下午' : '上午';
   return { ...now, date: now.date + ' · ' + period, period, absoluteDay: c.absoluteDay,
     season: ['春', '夏', '秋', '冬'][season.index], daysPerSeason: season.days,
+    businessCycle:{days:c.rules.businessCycleDays,nextDate:lunarDateAt(c.rules.referenceYear,c.nextBusinessDay).date,remaining:c.nextBusinessDay-c.absoluteDay,description:'后续生产、运输与补货暂按独立经营周期运行，与自然换季无关。'},
     month,nextTerm,weather:{name:{dry:'干燥',normal:'晴和',wet:'连雨'}[s.location.weather],rain:s.location.rain,days:Math.max(0,c.weatherNextDay-c.absoluteDay),effect:s.location.weather==='dry'?'降雨供水0，需灌溉或渠林保水，缺水天数累积减产。':s.location.weather==='wet'?'降雨供水3；无排涝设施的田会累积涝害。':'降雨供水2，满足作物基本水分需要。'},termEvents:c.termEvents.map(e=>({...e})),
     upcoming: upcoming.slice(0, 3), lastNotice: c.lastNotice };
 }
@@ -160,6 +172,7 @@ export function changeCalendarWeather(s:GameState,rules:Ruleset,events:GameEvent
  const c=s.life!.calendar!,scenario=rules.scenarios[s.location.id],roll=draw(s)*100;
  s.location.weather=roll<scenario.drought?'dry':roll<scenario.drought+scenario.wet?'wet':'normal';
  s.location.rain={dry:0,normal:2,wet:3}[s.location.weather];
+ s.location.water=s.location.weather==='dry'?Math.min(s.location.water,scenario.water):Math.max(s.location.water,2);
  c.weatherNextDay=Math.floor(c.absoluteDay)+c.rules.weatherDays;
  events.push({type:'life',personId:s.household.activePersonId,operation:'weather',detail:`天气转为${{dry:'干燥',normal:'晴和',wet:'连雨'}[s.location.weather]}，降雨供水${s.location.rain}；${c.rules.weatherDays}天后再次变化。`});
 }

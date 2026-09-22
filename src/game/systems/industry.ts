@@ -1,3 +1,4 @@
+import {availableDays} from './calendar.js';
 import {manufacturingStage} from '../model/industry.js';
 import {sectCosts,calendarCost} from './life.js';
 import {seasonTime} from '../model/electric.js';
@@ -117,7 +118,7 @@ export function renewIndustry(s:GameState):void{
 }
 export function personalBudget(s:GameState){
  const reserved=s.economy?.industry?reservedLabor(s):{time:0,energy:0};
- return {spentTime:seasonTime(s)-s.life!.timeRemaining,reservedTime:reserved.time,reservedEnergy:reserved.energy,freeTime:Math.max(0,s.life!.timeRemaining-reserved.time),freeEnergy:Math.max(0,activePerson(s).vitality!.energy-reserved.energy),tasks:systemDefinitions(s).filter(def=>{const i=s.economy?.industry?.instances[def.id];return i?.enabled&&i.commissioned&&i.operator==='self'&&systemDemand(s,def);}).map(def=>({id:String(def.id),name:def.name,...calendarCost(s,'economy:sysrun:'+def.id,sectCosts(s,'economy:sysrun:'+def.id,def))})).concat(foodLabor(s).time?[{id:'food-shopping',name:'生活食品赶集',...foodLabor(s)}]:[])};
+ return {spentTime:s.life?.calendar?Math.round((s.life.calendar.absoluteDay-(s.era?.dayBudget?.started??0))*100)/100:seasonTime(s)-s.life!.timeRemaining,reservedTime:reserved.time,reservedEnergy:reserved.energy,freeTime:Math.max(0,availableDays(s)-reserved.time),freeEnergy:Math.max(0,Math.round((activePerson(s).vitality!.energy-reserved.energy)*100)/100),tasks:systemDefinitions(s).filter(def=>{const i=s.economy?.industry?.instances[def.id];return i?.enabled&&i.commissioned&&i.operator==='self'&&systemDemand(s,def);}).map(def=>({id:String(def.id),name:def.name,...calendarCost(s,'economy:sysrun:'+def.id,sectCosts(s,'economy:sysrun:'+def.id,def))})).concat(foodLabor(s).time?[{id:'food-shopping',name:'生活食品赶集',...foodLabor(s)}]:[])};
 }
 export function industryView(s:GameState){
  const x=s.economy!.industry!;

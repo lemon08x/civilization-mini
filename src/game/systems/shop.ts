@@ -1,3 +1,4 @@
+import {lunarDateAt} from './calendar.js';
 import {ELECTRIC_KNOWLEDGE} from '../model/electric.js';
 import {eraCard} from './eras.js';
 import {BRANCH_PRODUCTS} from './branches.js';
@@ -82,8 +83,8 @@ export function renewShop(s:GameState,r:Ruleset,events:GameEvent[]):void{
  sh.transport=r.shop!.transport;
  for(const x of shopCatalog(s,r))sh.stock[x.id]=s.economy?.branches&&x.target==='iron'?Math.max(1,((s.economy.branches.channels.includes('metal')||(s.era?.index??0)>=2)?r.branches!.metalStock:r.branches!.basicIronStock)+(eraCard(s)?.metal??0)):x.kind==='goods'?r.shop!.stock:1;
 }
-export function cartQuote(s:GameState,r:Ruleset){
- const sh=s.economy!.shop!,catalog=shopCatalog(s,r);const unavailable=Object.keys(sh.cart).filter(id=>!catalog.some(x=>x.id===id));const lines=Object.entries(sh.cart).filter(([id])=>!unavailable.includes(id)).map(([id,quantity])=>({item:catalog.find(x=>x.id===id)!,quantity}));
+export function cartQuote(s:GameState,r:Ruleset,cart:Record<string,number>=s.economy!.shop!.cart){
+ const sh=s.economy!.shop!,catalog=shopCatalog(s,r);const unavailable=Object.keys(cart).filter(id=>!catalog.some(x=>x.id===id));const lines=Object.entries(cart).filter(([id])=>!unavailable.includes(id)).map(([id,quantity])=>({item:catalog.find(x=>x.id===id)!,quantity}));
  const final=!r.civilization&&s.clock.generation>=r.parameters.generations&&s.clock.turn>=r.parameters.turnsPerGeneration;
  const total=lines.reduce((n,l)=>n+l.item.price*l.quantity,0),weight=lines.reduce((n,l)=>n+l.item.weight*l.quantity,0);
  const blockers:string[]=unavailable.map(id=>'清单商品已不可采购，请清空清单：'+id);if(!lines.length)blockers.push('采购清单为空');if(final&&lines.some(l=>!l.item.local))blockers.push('最后一季无法交付订货，请移除订货商品');
@@ -91,4 +92,4 @@ export function cartQuote(s:GameState,r:Ruleset){
  for(const {item,quantity}of lines){if(item.owned)blockers.push(item.name+'已拥有、在制或待交付');if(quantity>item.stock)blockers.push(item.name+'库存不足');}
  return {lines,total,weight,remainingMoney:s.household.money-total,blockers};
 }
-export function shopView(s:GameState,r:Ruleset){return {catalog:shopCatalog(s,r),quote:cartQuote(s,r),transport:s.economy!.shop!.transport,orders:structuredClone(s.economy!.shop!.orders),assets:[...s.economy!.shop!.assets],books:[...s.economy!.shop!.books],repairPrices:Object.fromEntries(productsFor(s).map(p=>[p.id,repairPrice(s,r,p.id)]))};}
+export function shopView(s:GameState,r:Ruleset){return {catalog:shopCatalog(s,r),quote:cartQuote(s,r),transport:s.economy!.shop!.transport,orders:s.economy!.shop!.orders.map(o=>{const c=s.life?.calendar,day=c?c.nextBusinessDay+Math.max(0,o.due-s.clock.absoluteTurn-1)*c.rules.businessCycleDays:0;return {...o,dueDate:c?lunarDateAt(c.rules.referenceYear,day).date:`第${o.due}季`,remainingDays:c?Math.max(0,day-c.absoluteDay):0};}),assets:[...s.economy!.shop!.assets],books:[...s.economy!.shop!.books],repairPrices:Object.fromEntries(productsFor(s).map(p=>[p.id,repairPrice(s,r,p.id)]))};}

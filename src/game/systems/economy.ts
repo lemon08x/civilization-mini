@@ -68,7 +68,7 @@ export function settleEconomy(s:GameState,rules:Ruleset,events:GameEvent[]):void
     events.push({type:'economy-crop-growth',crop:f.crop,growth:f.growth,stress:f.stress});
   }else if(f.crop)f.growth++;
   for(const p of Object.values(e.farm?.plots??{}))if(p.field)growField(s,p.field,events,p.id);
-  }else for(const p of Object.values(e.farm?.plots??{})){const field=p.id==='p2q2'?e.field:p.field;if(field)field.moisture=0;}
+  }
   settleNeighbor(s);
   for(const [id,batches,key]of [['iron',e.ironBatches,'iron'],['fiber',e.fiberBatches,'fiber']] as const){
     const d=id==='iron'?'chemistry':'materials';
@@ -78,10 +78,10 @@ export function settleEconomy(s:GameState,rules:Ruleset,events:GameEvent[]):void
   let need=Math.max(0,rules.parameters.foodPerTurn-s.household.food);
   for(const id of ['flour','wheat','soy']){const n=Math.min(need,amount(s,id));if(n){changeGoods(s,{[id]:n},-1,events,'家庭生活取粮');s.household.food+=n;need-=n;}}
 }
-export function spoilEconomy(s:GameState,events:GameEvent[]):void{
+export function spoilEconomy(s:GameState,events:GameEvent[],days?:number):void{
   const protectedFood=modernOnline(s,'S08')?Math.max(30,storage(s)):storage(s);
   let excess=Math.max(0,foodStock(s)-protectedFood);if(!excess)return;
-  let loss=Math.ceil(excess/3);const loose=Math.min(loss,s.household.food);s.household.food-=loose;loss-=loose;
+  let loss=days===undefined?Math.ceil(excess/3):Math.round(excess*(1-Math.pow(2/3,days/s.life!.calendar!.rules.businessCycleDays))*1000000)/1000000;const loose=Math.min(loss,s.household.food);s.household.food=Math.round((s.household.food-loose)*1000000)/1000000;loss-=loose;
   const changes:Record<string,number>={};for(const id of ['flour','soy','wheat']){const n=Math.min(loss,amount(s,id));if(n){changes[id]=n;loss-=n;}}
   if(Object.keys(changes).length)changeGoods(s,changes,-1,events,'食品保存损耗');
   events.push({type:'food-spoiled',amount:loose+Object.values(changes).reduce((a,b)=>a+b,0),protected:protectedFood});

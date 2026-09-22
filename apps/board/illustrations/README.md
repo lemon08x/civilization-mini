@@ -554,3 +554,32 @@ dry: Premium Chinese pastoral chronicle UI spot illustration, delicate hand pain
 
 wet: Premium Chinese pastoral chronicle UI spot illustration, delicate hand painted watercolor with graphite detail, warm ivory paper and soft natural fading edges, muted sage green and honey ochre, one coherent miniature countryside weather vignette, gentle elevated view, clear silhouette at small size, no text, numbers, people, border, buildings or UI. Soft slate-blue rain clouds with thin visible rain strokes above a shallow puddle, ripples and lush reeds. Cool blue-green continuous rain, gentle elegant watercolor, no thunder.
 ```
+
+
+## 田间植物样板（2026-09-22）
+
+- 入口：`/crop-preview`，独立 PixiJS 美术预览，不读写存档。
+- 原稿：`farm-plants-study-v1.jpg`；校正稿：`farm-plants-corrections-v1.jpg`。由现有 Grok Build ACP image_gen 流程生成。
+- 使用素材：`farm-plant-{wheat,soy,radish,waxgourd}-{0,1,2}-v1.png`，12张透明底精灵。原稿没有原生透明通道，采用颜色分离、连通区域清理、根部裁切得到alpha。
+- 校正稿替换小麦幼苗、大豆适收株与冬瓜适收株；其它保留首版样板。幼苗、成株、适收是美术对照，不是新增规则。
+- 细茎边缘与部分叶形仍需后续精修；这是用于确认风格、比例和排列方式的首版样板。
+- 微风使用固定底部锚点的小幅形变，藤蔓幅度更低；未声称逐叶骨骼动画。
+
+### 生成提示词（原样记录）
+
+共同风格前缀：
+
+A single centered isolated item or small coherent arrangement, watercolor and gouache with fine pencil detail, warm ivory paper background, muted sage and umber, restrained Chinese family chronicle game inventory art, bold silhouette readable at 64 pixels, ample margins, no text, labels, symbols, numerals, watermark, border or UI. Aspect 1:1.
+
+farm-plants-study-v1：
+
+OVERRIDE composition and background: production sprite sheet, exact 3 columns by 4 rows, 12 equal square cells, NO drawn grid, pure solid white #FFFFFF background, no paper texture, no shadows, no text. All plant subjects fully isolated with wide blank margins. Camera: fixed isometric farming game view looking down 30 degrees, consistent light upper left. Delicate botanical watercolor-gouache, muted sage leaves, ochre wheat, clear painted silhouettes; same visual language as a warm antique botanical atlas. Each cell contains ONLY a living rooted plant or small coherent clump, rooted at same bottom-center baseline, NO pots, seed bowls, baskets, cut produce, landscape, soil base, visible root systems, diagrams or detached harvested items. Row 1 wheat: left tiny 3-leaf seedling; middle green tillering clump with unripe upright ears; right ripe golden clump with wheat ears, narrow leaves and fine awns. Row 2 soybean: left two-cotyledon seedling with small true leaves; middle compact upright branching bush with trifoliate broad leaves; right bush with visible hanging mature tan bean pods and some yellow leaves. Row 3 white daikon radish: left small two-leaf seedling; middle low lush rosette of deeply lobed leaves; right larger green rosette with ONLY a tiny white root shoulder visible at ground level, underground white root MUST NOT be shown. Row 4 winter melon: left two-cotyledon small seedling; middle low sprawling leafy vine with tendrils, NO fruit; right sprawling vine with one attached whole dark green oblong wax gourd lying at ground level, correct botanical scale, NO cut fruit. Young plants smaller than mature plants; all rooted plants visible in full. 1536x2048 or nearest portrait sheet, equal cell layout.
+
+farm-plants-corrections-v1：
+
+OVERRIDE COMPOSITION: Exactly THREE separate isolated botanical game sprites side by side in equal-width columns, one horizontal row on PURE WHITE background. Do not draw grid borders or shadows or ground. Upper-left light, isometric farming game camera looking down 30 degrees, warm botanical watercolor-gouache matching a sage-green antique illustrated atlas, crisp legible shapes. LEFT column: a tiny young WHEAT GRASS seedling: exactly three NARROW LINEAR GRASS BLADES arising from the basal crown, long thin pointed blade tips, monocot grass, NO broad oval leaves, NO visible cotyledons, NO branched stem, NO roots. MIDDLE column: ONE ripe SOYBEAN plant Glycine max, bushy branching upright stem, correctly TRIFOLIATE leaves with three OVAL ENTIRE-MARGIN UNLOBED leaflets each, green and yellow foliage, attached clusters of small dry tan soybean pods, NO palmate leaves, NO lobed leaves, NO maple or cotton leaves, no visible roots. RIGHT column: a mature WINTER MELON vine Benincasa hispida with a single whole elongated cylindrical dark green wax gourd laying on ground under green lobed leaves and attached curling tendrils; gourd has light waxy bloom and absolutely NO watermelon stripes, no cut face, no basket. All three subjects fully shown with 12% margins, each isolated no overlap across columns, no bowls or loose produce. Background uniform white with NO drop shadow, NO soil and NO paper grain.
+
+
+### 正式农场接入
+
+小麦与大豆已使用 `farm-plant-*-v1.png` 三阶段精灵，按现有生长进度切换。场景缓存并合成三簇植株，加载失败保留原程序绘图，亚麻继续使用原绘图。萝卜和冬瓜已保留素材映射，但未新增种植规则。画面使用底部锚点的小幅倾斜微风，沿用原地块点击、选择和收获反馈接口。

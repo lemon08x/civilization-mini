@@ -1,4 +1,4 @@
-import {settleTermEvent,changeCalendarWeather,seasonAt,lunarDateAt} from './calendar.js';
+import {settleTermEvent,changeCalendarWeather,seasonAt,lunarDateAt,availableDays} from './calendar.js';
 import {advanceFields} from './agriculture.js';
 import {feedCalendar} from './social-food.js';
 import {settleIndustry} from './industry.js';
@@ -39,7 +39,7 @@ function rollWeather(state: GameState, rules: Ruleset, events: GameEvent[]): voi
   state.ap = state.life?0:rules.parameters.actionsPerTurn;
   if(state.life){
     const c=state.life.calendar;
-    if(c){c.weatherNextDay=Math.floor(c.absoluteDay)+c.rules.weatherDays;const span=seasonAt(c.rules.referenceYear,c.absoluteDay);Object.assign(c,{seasonStarted:span.start,seasonLength:span.days,day:c.absoluteDay-span.start,consumed:0,missing:0,purchaseSpent:0,systemsSettled:false});state.life.timeRemaining=span.end-c.absoluteDay;}
+    if(c){c.weatherNextDay=Math.floor(c.absoluteDay)+c.rules.weatherDays;const span=seasonAt(c.rules.referenceYear,c.absoluteDay);Object.assign(c,{seasonStarted:span.start,seasonLength:span.days,day:c.absoluteDay-span.start,consumed:0,missing:0,purchaseSpent:0,systemsSettled:false});state.life.timeRemaining=availableDays(state);}
     else state.life.timeRemaining=state.life.rules.timePerSeason;
   }
   if(state.economy){state.economy.market=4;state.economy.industrySupply=4;state.economy.recruitment=1;}
@@ -141,36 +141,67 @@ export function finishSeason(state: GameState, rules: Ruleset, events: GameEvent
   newSeason(state, rules, events);
 }
 
-/** All date movement runs inside game.transition, including waits and season boundaries. */
+/** Transitional business cadence, independent of the four natural seasons.
+ * Production/stock/transport keep their old throughput until their own schedules land.
+ * Food, health, fields and stage budgets must never be settled here a second time. */
+function finishBusinessCycle(s:GameState,rules:Ruleset,events:GameEvent[]):void {
+ const c=s.life!.calendar!;
+ // Personal system labour is reserved and paid before an action, never free at a boundary.
+ c.systemsSettled=true;
+ const start=settleProduction(s,rules,events);
+ recordBranchWork(s,events.slice(start));
+ operatePassive(s,rules,events);settleSociety(s,rules,events);
+ settleDistantWork(s,rules,events,start);
+ s.household.hardship=c.missing>0?s.household.hardship+1:0;
+ settleSeasonEncounter(s,c.missing,events);settleSect(s,events);
+ if(settleVictoryAndGeneration(s,rules,events))return;
+ s.clock.turn++;s.clock.absoluteTurn++;
+ c.nextBusinessDay+=c.rules.businessCycleDays;
+ c.consumed=0;c.missing=0;c.purchaseSpent=0;c.systemsSettled=false;
+ delete s.life!.seasonCompany;delete s.life!.seasonTaught;
+ if(s.economy){s.economy.market=4;s.economy.industrySupply=4;s.economy.recruitment=1;}
+ s.location.season={cultivated:false,usedChannel:false,trialSample:false};
+ renewArrivals(s,rules,events);renewSect(s);
+}
+
+/** All date movement runs inside game.transition. Natural seasons have no settlement. */
 export function advanceCalendar(s:GameState,rules:Ruleset,days:number,events:GameEvent[],interruptible=false):void {
  const c=s.life?.calendar;if(!c)return;
- let remaining=days,elapsed=0,ate=0,missing=0,notice='';
- // Reserved systems are real work, performed once before calendar time moves.
+ const stage=s.era?.index;
+ let remaining=days,elapsed=0,ate=0,missing=0,notice='',spoiled=0,protectedFood=0;
  const before=s.life!.timeRemaining;settleIndustry(s,events);
  remaining+=Math.max(0,before-s.life!.timeRemaining);
  while(remaining>0&&s.status==='active'){
+  if(c.absoluteDay>=c.nextBusinessDay){finishBusinessCycle(s,rules,events);if(s.status!=='active')break;}
   const previousDay=Math.floor(c.absoluteDay);
-  const step=Math.min(0.5,remaining,c.seasonLength-c.day);
+  const step=Math.min(0.5,remaining,availableDays(s),c.nextBusinessDay-c.absoluteDay);
+  if(step<=0){settleEra(s,rules,events);break;}
   const foodBefore=c.consumed,missingBefore=c.missing;
   const fed=feedCalendar(s,step,events);ate+=c.consumed-foodBefore;missing+=c.missing-missingBefore;
   const ripe=advanceFields(s,step);
+  const storageEvents:GameEvent[]=[];spoilEconomy(s,storageEvents,step);
+  for(const event of storageEvents)if(event.type==='food-spoiled'){spoiled+=event.amount;protectedFood=event.protected;}
   c.absoluteDay=Math.round((c.absoluteDay+step)*100)/100;
-  c.day=Math.round((c.day+step)*100)/100;elapsed+=step;remaining=Math.max(0,remaining-step);
-  s.life!.timeRemaining=Math.max(0,c.seasonLength-c.day);
+  elapsed+=step;remaining=Math.max(0,remaining-step);
+  const span=seasonAt(c.rules.referenceYear,c.absoluteDay);
+  Object.assign(c,{seasonStarted:span.start,seasonLength:span.days,day:c.absoluteDay-span.start});
+  s.life!.timeRemaining=availableDays(s);
+  settleLife(s,c.missing-missingBefore,events,Math.max(0.001,c.consumed-foodBefore+c.missing-missingBefore),step);
   if(!fed)notice='饮食不足，先补充干粮，或准备食材与柴火。';
   else if(ripe.length)notice=ripe.join('、')+'已经成熟，可以收获。';
-  if(c.day>=c.seasonLength&&s.status==='active'){
-   finishSeason(s,rules,events);notice=notice||'季节已变，天气与市场供应已更新。';
-  }
-  if(Math.floor(c.absoluteDay)>previousDay){
+  if(Math.floor(c.absoluteDay)>previousDay&&s.status==='active'){
     if(c.absoluteDay>=c.weatherNextDay)changeCalendarWeather(s,rules,events);
     settleTermEvent(s,events);
     const today=lunarDateAt(c.rules.referenceYear,c.absoluteDay);
     const names=[today.solarTerm,...today.festivals.map(f=>f.name)].filter(Boolean);
     if(names.length){const text=`${today.lunarDate} · ${names.join('、')}。${today.solarTerm?today.termDescription:''}${today.festivals.map(f=>f.description).join('')}`;events.push({type:'life',personId:s.household.activePersonId,operation:'almanac',detail:text});notice=[notice,text].filter(Boolean).join(' ');}
   }
+  if(c.absoluteDay>=c.nextBusinessDay&&s.status==='active')finishBusinessCycle(s,rules,events);
+  settleEra(s,rules,events);
+  if(stage!==s.era?.index){s.life!.timeRemaining=availableDays(s);notice='当前文明阶段已结束，剩余安排已停下。';break;}
   if(interruptible&&notice)break;
  }
- c.lastNotice=notice||`日历推进${Math.round(elapsed*100)/100}天；作物继续生长，饮食按日结算。`;
+ if(spoiled>0)events.push({type:'food-spoiled',amount:Math.round(spoiled*1000000)/1000000,protected:protectedFood});
+ c.lastNotice=notice||`日历推进${Math.round(elapsed*100)/100}天；作物继续生长，饮食与保存损耗随时间结算。`;
  events.push({type:'life',personId:s.household.activePersonId,operation:'calendar',detail:`经过${Math.round(elapsed*100)/100}天，饮食消耗${Math.round(ate*1000)/1000}批${missing>0?'，饮食不足':''}。${c.lastNotice}`});
 }

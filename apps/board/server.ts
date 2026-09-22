@@ -16,6 +16,7 @@ const server = http.createServer(async (req, res) => {
     else if (path === '/vendor/lunar-typescript.mjs') absolute = join(projectRoot, 'node_modules/lunar-typescript/dist/index.mjs');
     else if (path === '/vendor/pixi.js') absolute = join(projectRoot, 'node_modules/pixi.js-legacy/dist/pixi-legacy.min.js');
     else if (path === '/start') absolute = join(projectRoot, 'apps/board/start.html');
+    else if (path === '/crop-preview') absolute = join(projectRoot, 'apps/board/crop-preview.html');
     else if (path === '/play') absolute = join(projectRoot, 'apps/board/index.html');
     else if (path === '/ai') absolute = join(projectRoot, 'apps/board/ai.html');
     else if (path === '/ai-guide.md') absolute = join(projectRoot, 'docs/AI_PLAYER.md');

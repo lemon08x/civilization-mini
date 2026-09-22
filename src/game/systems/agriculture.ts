@@ -27,8 +27,8 @@ export function farmBlocker(s: GameState, crop: Crop, worker?: Worker,f:Field=s.
     return [...(worker ? [] : requirements(s, { agronomy: CROPS[crop].level })), ...missingGoods(s, { [CROPS[crop].seed]: 1 })];
   }
   if (f.growth >= f.duration) return [];
-  if (f.tended === s.clock.absoluteTurn) return ['本季已管理田间'];
-  if (s.location.rain + f.moisture + fieldWaterSupport(s,f) >= 2) return ['本季水分充足，等待作物生长'];
+  if (!s.life?.calendar&&f.tended === s.clock.absoluteTurn) return ['本季已管理田间'];
+  if (s.location.rain + f.moisture + fieldWaterSupport(s,f) >= 2) return ['当前水分充足，等待作物生长'];
   if (s.location.water < 1) return ['公共水不足'];
   return [];
 }
@@ -123,7 +123,7 @@ export function settleNeighbor(s:GameState):void{
   if(f.crop&&f.growth>=f.duration){const crop=f.crop;n.goods[crop]=(n.goods[crop]??0)+Math.max(1,CROPS[crop].yield-f.stress);n.goods[CROPS[crop].seed]=(n.goods[CROPS[crop].seed]??0)+2;f.crop=crop==='soy'?'flax':'soy';f.growth=0;f.stress=0;f.duration=CROPS[f.crop].duration;}
   else {f.moisture=2;}
  }
- if(f.crop){if(s.location.rain+f.moisture<2)f.stress++;if(!s.life?.calendar)f.growth++;f.moisture=0;}
+ if(f.crop&&!s.life?.calendar){if(s.location.rain+f.moisture<2)f.stress++;f.growth++;f.moisture=0;}
 }
 
 /** Fictional vignettes inspired by traditional farming and rural literature. */
@@ -176,9 +176,12 @@ export function advanceFields(s:GameState,days:number):string[]{
   const f=plotField(s,p.id);if(!f?.crop)continue;
   const before=f.growth;f.growth=Math.round((f.growth+days)*100)/100;
   if(before<f.duration){
-   const exposure=Math.min(days,f.duration-before)/(s.life!.calendar!.seasonLength);
-   if(s.location.rain+f.moisture+farmWaterSupport(s,p)<2)f.stress+=exposure;
+   const exposure=Math.min(days,f.duration-before)/s.life!.calendar!.rules.businessCycleDays;
+   const supply=s.location.rain+f.moisture+farmWaterSupport(s,p);
+   if(supply<2)f.stress+=exposure*(2-supply)/2;
    if(s.location.rain>=3&&!equipped(s,'U08'))f.stress+=exposure;
+   const drying=s.location.weather==='dry'?2:s.location.weather==='wet'?0:1;
+   f.moisture=Math.max(0,Math.round((f.moisture-days*drying/s.life!.calendar!.rules.waterRetentionDays)*1000000)/1000000);
    if(f.growth>=f.duration)ripe.push(p.id+' '+CROPS[f.crop].name);
   }
  }

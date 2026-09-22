@@ -155,6 +155,8 @@
     "crisisScore": 10
   },
   "calendar": {
+    "businessCycleDays": 90,
+    "waterRetentionDays": 90,
     "weatherDays": 7,
     "termGoodPercent": 65,
     "termGoods": 1,

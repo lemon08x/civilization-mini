@@ -115,6 +115,9 @@ export function parseSession(value: unknown): Session {
   if (value.state.life) {
     const life=value.state.life;
     const c=isRecord(life)?life.calendar:undefined;
+    if(!isRecord(c)||c.continuousVersion!==1||!finite(c.nextBusinessDay)||Number(c.nextBusinessDay)<=Number(c.absoluteDay)&&value.state.status==='active')throw new Error('此存档使用旧季度结算，请新开连续日历游戏；原存档保留，不自动迁移。');
+    const era=value.state.era;
+    if(isRecord(era)&&(!isRecord(era.dayBudget)||!['started','limit','received'].every(k=>finite((era.dayBudget as Record<string,unknown>)[k]))||Number(era.dayBudget.started)>Number(c.absoluteDay)))throw new Error('存档缺少按天计算的阶段期限，请新开游戏；原存档保留。');
     if(!isRecord(c)||!isRecord(c.rules)||!finite(c.weatherNextDay)||!Number.isInteger(c.lastTermDay)||Number(c.lastTermDay)<-1||Number(c.lastTermDay)>Math.floor(Number(c.absoluteDay))||!Array.isArray(c.termEvents)||c.termEvents.length>6||c.termEvents.some((e:unknown)=>!isRecord(e)||!finite(e.day)||!['date','term','title','text','effect'].every(k=>typeof e[k]==='string')||typeof e.positive!=='boolean')||!isRecord(c.study)||!['simple','hearty'].includes(String(c.diet))||typeof c.systemsSettled!=='boolean'||typeof c.lastNotice!=='string'||!['absoluteDay','seasonLength','day','mealDays','consumed','missing','purchaseSpent'].every(k=>finite(c[k]))||Number(c.day)>Number(c.seasonLength)||!Number.isInteger(c.seasonStarted)||!Number.isInteger(c.seasonLength)||Number(c.seasonLength)<=0||Number(c.absoluteDay)!==Number(c.seasonStarted)+Number(c.day)||Number(c.absoluteDay)*2%1!==0||Object.entries(record.manifest.ruleset.calendar!).some(([k,v])=>(c.rules as Record<string,unknown>)[k]!==v)||Object.values(c.study).some(p=>!isRecord(p)||!finite(p.done)||!finite(p.total)||Number(p.done)>Number(p.total)))throw new Error('存档缺少有效农历日历或研习进度，请新开游戏；原存档不修改。');
 
     const span=seasonAt(record.manifest.ruleset.calendar!.referenceYear,Math.max(0,Number(c.absoluteDay)-(Number(c.day)===Number(c.seasonLength)?0.5:0)));

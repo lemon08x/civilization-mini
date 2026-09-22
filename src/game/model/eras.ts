@@ -6,6 +6,7 @@ export interface EraState {
  startGeneration:number;
  // Additional calendar seasons received from the previous civilization stage.
  timeBonus?:number;
+ dayBudget?:{started:number;limit:number;received:number};
  crises?:{remaining:number; won:boolean|null; entries:Record<string,{level:number;step:number;route:string;lastTurn:number}>};
  dungeon:{started:boolean;tasks:string[];powered?:boolean};
 }

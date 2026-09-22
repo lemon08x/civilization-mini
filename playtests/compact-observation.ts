@@ -214,12 +214,12 @@ export function formatCompactObservation(compact: CompactObservation): string {
     lines.push(`预算: 天数 ${budget.timeRemaining}（预留 ${budget.reservedTime}，可用 ${budget.availableTime}） / 精力 ${budget.energy}（预留 ${budget.reservedEnergy}，可用 ${budget.availableEnergy}） / 困境 ${budget.hardship}`
       + (budget.health !== undefined ? ` / 健康 ${budget.health}` : ''));
   }
-  if(compact.calendar)lines.push(`日历：${compact.calendar.date}；${compact.calendar.lastNotice}`);
+  if(compact.calendar){lines.push(`日历：${compact.calendar.date}；${compact.calendar.lastNotice}`);lines.push(`经营周期兼容：${compact.calendar.businessCycle.nextDate}到期，剩余${compact.calendar.businessCycle.remaining}天；${compact.calendar.businessCycle.description}`);}
   if(compact.calendar){const c=compact.calendar;lines.push(`天气：${c.weather.name}；${c.weather.effect}；约${c.weather.days}天后变化`);lines.push(`节气见闻：${c.termEvents.map(e=>e.date+' '+e.term+' '+e.title+'：'+e.text+' '+e.effect).join('；')||'尚未触发'}；任何推进时间的行动均可触发，同日不重复。`);}
   if(compact.calendar)lines.push(`节令：${compact.calendar.currentTerm}${compact.calendar.solarTerm?'（今日交节）':''}；今日节日：${compact.calendar.festivals.map(f=>f.name).join('、')||'无'}；将至：${compact.calendar.upcoming.map(d=>d.name+' ' +d.days+'天后').join('、')}`);
   if(compact.diet)lines.push(`饮食：${compact.diet.name}；可支持${compact.diet.days}天，每天${compact.diet.dailyGrain}批食材、做饭需${compact.diet.dailyWood}批柴火；餐食调养剩${compact.diet.mealDays}天`);
   if(compact.farm)lines.push(`地块与同门：${JSON.stringify(compact.farm)}`);
-  lines.push(`季末经历：${JSON.stringify(compact.seasonalEvents)}`);
+  lines.push(`近期生活经历：${JSON.stringify(compact.seasonalEvents)}`);
   if(compact.sect)lines.push(`师徒与道：${JSON.stringify(compact.sect)}`);
   if(compact.crises)lines.push(`现代使命：${JSON.stringify(compact.crises)}`);
   if (compact.family&&!compact.sect) {
@@ -240,7 +240,7 @@ export function formatCompactObservation(compact: CompactObservation): string {
         ? '不限代'
         : `第${compact.stage.generationsLived + 1}代`)
       : '';
-    lines.push(`阶段: ${[compact.stage?.era, stageGeneration, compact.stage?.timeBudget?`剩余${compact.stage.timeBudget.remaining}/${compact.stage.timeBudget.limit}季；提前结转${compact.stage.timeBudget.carry}季，损耗${compact.stage.timeBudget.lost}季`:'', ...(compact.stage?.tasks ?? [])].filter(Boolean).join('；')}`);
+    lines.push(`阶段: ${[compact.stage?.era, stageGeneration, compact.stage?.timeBudget?`剩余${compact.stage.timeBudget.remaining}/${compact.stage.timeBudget.limit}${compact.stage.timeBudget.unit}；提前结转${compact.stage.timeBudget.carry}${compact.stage.timeBudget.unit}，损耗${compact.stage.timeBudget.lost}${compact.stage.timeBudget.unit}`:'', ...(compact.stage?.tasks ?? [])].filter(Boolean).join('；')}`);
   }
   if (compact.receipt) lines.push(`回执: revision ${compact.receipt.revision}${compact.receipt.duplicate ? '（重复命令）' : ''}`);
   lines.push('', '成功行动后直接用本摘要决策，不必再 observe。冲突、失败或文件更新警告时重新观察。', '', '## 可用行动');

@@ -1,3 +1,4 @@
+import {availableDays} from './calendar.js';
 import {activePerson} from '../model/state.js';
 import {energyCeiling,canSucceed} from './life.js';
 import type {GameState} from '../model/state.js';
@@ -16,7 +17,7 @@ export function renewSocialFood(s:GameState,events:GameEvent[]):void{
 }
 export function socialFoodQuote(s:GameState,afterProduction=false,_productionTime=0){
  const f=s.socialFood!,delivery=f.delivery||s.era?.index===3,stock=s.life?.calendar?(dietView(s)?.days??0)*dailyFoodNeed(s):foodStock(s),available=s.production!.market.food;
- const demand=s.life?.calendar?dailyFoodNeed(s)*Math.min(7,s.life.calendar.seasonLength-s.life.calendar.day):f.foodPerSeason;
+ const demand=s.life?.calendar?dailyFoodNeed(s)*Math.min(7,availableDays(s)):f.foodPerSeason;
  const target=demand+(f.policy==='reserve'?f.reserve:0);
  // Market living buys ready meals first, preserving grain for production when possible.
  const need=f.policy==='off'?0:Math.max(0,target-(f.policy==='market'?s.household.food:stock));
