@@ -20,6 +20,7 @@ export interface CompactActionQuote {
 }
 
 export interface CompactObservation {
+  // Shared farm observation includes land bands, coverage, storage and remaining service quotas.
   farm?:NonNullable<SessionObservation['game']['economy']>['farm'];
   calendar?:NonNullable<SessionObservation['game']['life']>['calendar'];
   diet?:NonNullable<SessionObservation['game']['life']>['diet'];

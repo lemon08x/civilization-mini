@@ -41,7 +41,7 @@ export const CROPS:Record<Crop,CropSpec>={
 };
 export interface ProductSpec {id:string;name:string;category:string;effect:string;requires:Partial<Record<Subject,number>>;inputs:Record<string,number>;from:string[];}
 export const PRODUCTS:ProductSpec[]=[
-  {id:'W01',name:'提水辘轳',category:'供水与排水',effect:'田间管理从1公共水取得2点供水；每次扣1耐用度。',requires:{mechanics:1},inputs:{wood:3},from:[]},
+  {id:'W01',name:'提水辘轳',category:'供水与排水',effect:'地块灌溉消耗1公共水恢复作物所需水分，提水辘轳使基础精力成本减半；每次扣1耐用度。',requires:{mechanics:1},inputs:{wood:3},from:[]},
   {id:'W03',name:'活塞泵',category:'供水与排水',effect:'有作物且缺水时每季自动抽取1公共水灌溉，消耗1木材和1耐用度。',requires:{mechanics:5,materials:3},inputs:{iron:2,valve:1,seal:1},from:['W01']},
   {id:'P01',name:'手摇传动装置',category:'生产动力',effect:'纤维和绳索加工一次处理双份，原料产出均翻倍，每批扣1耐用度。',requires:{mechanics:2},inputs:{wood:3,shaft:1},from:[]},
   {id:'P03',name:'水轮动力装置',category:'生产动力',effect:'有公共水时，磨粮、脱粒、榨油可免个人行动；每季限一批，仍扣原料与耐用度。',requires:{mechanics:3},inputs:{wood:4,iron:1,shaft:1},from:['P01']},

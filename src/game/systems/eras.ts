@@ -1,3 +1,4 @@
+import {fieldNeedsWater,irrigateField} from './agriculture.js';
 import {calendarMonthDays,availableDays} from './calendar.js';
 import {electricRewardPercent} from '../model/electric.js';
 import {beginEraLife} from './life.js';
@@ -24,20 +25,20 @@ export function renewEraServices(s:GameState,r:Ruleset):void{
 }
 export function publicWaterFee(s:GameState):number{
  const e=s.era,f=s.economy?.field;
- return e?.index===3&&e.tap&&f?.crop&&f.growth<f.duration&&s.location.rain+f.moisture<2&&s.household.money>=1?1:0;
+ return e?.index===3&&e.tap&&f&&fieldNeedsWater(s,f)&&s.household.money>=1?1:0;
 }
 export function operateEraServices(s:GameState,events:GameEvent[]):void{
  const e=s.era;if(!e)return;
  const f=s.economy!.field;
- if(!f.crop||f.growth>=f.duration||s.location.rain+f.moisture>=2)return;
+ if(!fieldNeedsWater(s,f))return;
  if(e.index===3&&e.tap){
   if(s.household.money<1){eraEvent(s,events,'service-waiting','自来水服务等待：需1钱；自家井和供水设备仍可使用');return;}
-  s.household.money--;f.moisture+=2;f.tended=s.clock.absoluteTurn;
-  eraEvent(s,events,'water-service','公共自来水人员供水2份，支付1钱；本人不承担提水劳动',2,1);return;
+  s.household.money--;irrigateField(s,f);f.tended=s.clock.absoluteTurn;
+  eraEvent(s,events,'water-service','公共自来水人员恢复作物所需水分，支付1钱；本人不承担提水劳动',2,1);return;
  }
  if(stageOf(s).publicWell){
-  f.moisture+=2;f.tended=s.clock.absoluteTurn;
-  eraEvent(s,events,'water-service','公井供水2份，不消耗科技和个人提水',2,0);
+  irrigateField(s,f);f.tended=s.clock.absoluteTurn;
+  eraEvent(s,events,'water-service','公井恢复作物所需水分，不消耗科技和个人提水',2,0);
  }
 }
 export function eraProductionClaim(s:GameState,units:number,kind:'food'|'craft'):number{

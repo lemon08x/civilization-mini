@@ -1402,3 +1402,5 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .overview-term>div{min-width:0}
 .overview-notice{align-items:center;min-height:34px;padding:3px 10px}
 .overview-notice-art{width:30px;height:30px;object-fit:contain;flex:none}
+
+.farm-route-symbol { display:grid; place-items:center; width:64px; height:64px; margin:auto; font-size:28px; color:#405c54; background:#e4ebdc; border-radius:50%; }

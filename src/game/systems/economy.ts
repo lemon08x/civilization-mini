@@ -16,7 +16,7 @@ import type { GameEvent } from '../model/events.js';
 import { ALL_PROCESSES as PROCESSES, CROPS, EDIBLE, SUBJECT_NAMES, WORKER_NAMES, ALL_JOB_NAMES as JOB_NAMES } from './economy-catalog.js';
 import { amount, changeGoods, consumeEquipment, equipped, foodStock, storage } from './inventory.js';
 import { level, organizationLevel, recordEvidence, wage } from './knowledge.js';
-import { farmBlocker, farmWork, fieldYield, growField, farmView, settleNeighbor } from './agriculture.js';
+import { farmBlocker, farmWork, fieldYield, growField, farmView, settleNeighbor,fieldNeedsWater,irrigateField } from './agriculture.js';
 import { finishProcess, processBlockers, runProcess } from './processing.js';
 
 export { amount, changeGoods, consumeEquipment, equipped, foodStock, missingGoods, storage } from './inventory.js';
@@ -40,8 +40,8 @@ export function workerBlocker(s:GameState,w:Worker):string[]{
 
 export function settleEconomy(s:GameState,rules:Ruleset,events:GameEvent[]):void{
   const e=s.economy!,f=e.field;
-  if(!e.industry&&f.crop&&(!e.branches||branchHas(s,'A1'))&&s.location.rain+f.moisture<2&&equipped(s,'W03')&&s.location.water>0&&amount(s,'wood')>0){
-    changeGoods(s,{wood:1},-1,events,'活塞泵自动灌溉');s.location.water--;f.moisture+=2;consumeEquipment(s,'W03',events);if(e.operations)e.equipmentUsed.W03=s.clock.absoluteTurn;
+  if(!e.industry&&f.crop&&(!e.branches||branchHas(s,'A1'))&&fieldNeedsWater(s,f)&&equipped(s,'W03')&&s.location.water>0&&amount(s,'wood')>0){
+    changeGoods(s,{wood:1},-1,events,'活塞泵自动灌溉');s.location.water--;irrigateField(s,f);consumeEquipment(s,'W03',events);if(e.operations)e.equipmentUsed.W03=s.clock.absoluteTurn;
     events.push({type:'economy-farm',operation:'pump',crop:f.crop,actor:'活塞泵',amount:1});
   }
   // 固定结算次序可观察。同一设备、地块不能因多人或自动化重复获得产出。

@@ -1,3 +1,4 @@
+import {IMPROVEMENT_NAMES} from '../../../src/game/systems/agriculture.js';
 import {farmArt} from './scene.js';
 import {farmEventArt,type FarmArt} from '../illustration.js';
 import {type FarmGame,selectedFarmPlot,selectFarmPlot,selectFarmPanel,selectFarmStock,selectFarmProject,selectFarmProjectDuration,type FarmPanel} from '../farm-view.js';
@@ -77,8 +78,8 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
  hint.anchor.set(.5,1);hint.visible=false;hint.eventMode='none';hint.zIndex=10000;hint.scale.set(.9/Math.max(.8,zoom));
  const hintFor=(p:FarmMap['plots'][number]):string=>{
   const id=p.kind==='unknown'?'economy:farmexplore:'+p.id:p.kind==='wild'?'economy:farmreclaim:'+p.id:'';
-  if(p.improvement)return `${p.id} · ${p.improvement==='canal'?'旧渠 · 相邻供水+2':'护田林 · 相邻保水+1'}`;
-  if(p.project&&!p.discovery?.resolved)return `${p.id} · ${p.project.name} ${p.project.done}/${p.project.total}天 · 点击续建`;
+  if(p.improvement)return `${p.id} · ${IMPROVEMENT_NAMES[p.improvement]} · 覆盖${p.improvement==='pond'?8:4}格`;
+  if(p.project&&p.project.done<p.project.total)return `${p.id} · ${p.project.name} ${p.project.done}/${p.project.total}天 · 点击续建`;
   if(!id)return `${p.id} · ${p.kind==='field'?'田地':p.kind==='tree'?'古树 · 不可开垦':p.kind==='rock'?'岩石 · 不可开垦':'查看地块'}`;
   const a=g.actions.find(a=>a.id===id);
   if(!a||!a.enabled)return `${p.id} · ${a?.reason??'先探索相邻地块'}`;
@@ -114,10 +115,15 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
    else for(let k=0;k<5;k++)obstacle.lineStyle(2,0x707c4c).moveTo(-15+k*7,10).lineTo(-20+k*7,-9).moveTo(-15+k*7,10).lineTo(-10+k*7,-14);
    obstacle.position.set(pos.x,pos.y+17);obstacle.zIndex=(p.x+p.y)*100+20;obstacle.eventMode='none';items.addChild(obstacle);
   }
-  if(p.improvement==='canal'){
-   const channel=new P.Graphics().lineStyle(9,0x9d9270).moveTo(-24,29).lineTo(24,6).lineStyle(5,0x6ca2ad).moveTo(-24,29).lineTo(24,6).lineStyle(1,0xcce6df).moveTo(-20,27).lineTo(20,8);
+  if(p.improvement==='canal'||p.improvement==='drain'){
+   const channel=new P.Graphics().lineStyle(9,0x9d9270).moveTo(-24,29).lineTo(24,6).lineStyle(5,p.improvement==='drain'?0x70694e:0x6ca2ad).moveTo(-24,29).lineTo(24,6).lineStyle(1,0xcce6df).moveTo(-20,27).lineTo(20,8);
    channel.position.set(pos.x,pos.y);channel.zIndex=(p.x+p.y)*100+20;channel.eventMode='none';items.addChild(channel);
   }
+  if(p.improvement==='pond'){
+   const pond=new P.Graphics().lineStyle(3,0x9d9270).beginFill(0x6ca2ad).drawEllipse(0,18,25,12).endFill();
+   pond.position.set(pos.x,pos.y);pond.zIndex=(p.x+p.y)*100+20;pond.eventMode='none';items.addChild(pond);
+  }
+  if(p.improvement){const label=new P.Text(IMPROVEMENT_NAMES[p.improvement],{fontFamily:'Microsoft YaHei',fontSize:10,fill:0x31483d,stroke:0xf7f3e8,strokeThickness:3});label.anchor.set(.5);label.position.set(pos.x,pos.y+34);label.eventMode='none';label.zIndex=(p.x+p.y)*100+30;items.addChild(label);}
   if(p.kind==='story'){
    const marker=new P.Text('◇',{fontFamily:'Microsoft YaHei',fontSize:24,fill:0x967245});marker.anchor.set(.5);marker.position.set(pos.x,pos.y+17);marker.zIndex=(p.x+p.y)*100+25;marker.eventMode='none';items.addChild(marker);
   }

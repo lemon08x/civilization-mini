@@ -1,3 +1,4 @@
+import {fieldNeedsWater,irrigateField} from './agriculture.js';
 import {availableDays} from './calendar.js';
 import {manufacturingStage} from '../model/industry.js';
 import {sectCosts,calendarCost} from './life.js';
@@ -13,7 +14,7 @@ import {servicePending} from './shop.js';
 
 export function systemDefinitions(s:GameState):SystemDefinition[]{
  const definitions:SystemDefinition[]=s.era?[{id:'well',name:'家庭水井',knowledge:['A2'],products:[],systems:[],time:2,energy:1,qualification:'field',description:'每季恢复1份可提取地下水；缺水时耗2时间/1精力提水灌溉，不依赖公共水。已建井跨社会保留。'},...SYSTEMS]:SYSTEMS;
- return definitions.map(def=>def.id==='hand'&&s.life?.renewal?{...def,time:s.life.renewal.farmTime,energy:s.life.renewal.farmEnergy,description:`按需人工提水；${s.life.renewal.farmTime}时间/${s.life.renewal.farmEnergy}精力，1公共水补2水分。`}:def);
+ return definitions.map(def=>def.id==='hand'&&s.life?.renewal?{...def,time:s.life.renewal.farmTime,energy:s.life.renewal.farmEnergy,description:`按需人工提水；${s.life.renewal.farmTime}时间/${s.life.renewal.farmEnergy}精力，1公共水恢复作物所需水分。`}:def);
 }
 export function industryEvent(events:GameEvent[],operation:string,target:string,actor:string,detail:string,time=0,energy=0,money=0):void{events.push({type:'industry',operation,target,actor,detail,time,energy,money});}
 export function installedIn(s:GameState,equipment:string):string|undefined{
@@ -28,7 +29,7 @@ export function systemDemand(s:GameState,def:SystemDefinition):boolean{
  if(s.life?.calendar?.systemsSettled)return false;
  if(def.id==='shaft')return true;
  if(publicWaterFee(s))return false;
- const f=s.economy!.field;return !!f.crop&&f.growth<f.duration&&s.location.rain+f.moisture<2;
+ const f=s.economy!.field;return fieldNeedsWater(s,f);
 }
 export function operatorNeeds(s:GameState,def:SystemDefinition,operator:OperatorId|null):string[]{
  if(!operator)return ['未安排人员'];
@@ -103,7 +104,7 @@ export function settleIndustry(s:GameState,events:GameEvent[]):void{
    changeGoods(s,{shaft:2},1,events,'系统加工产出');
    events.push({type:'economy-process',recipe:'shaft',actor:'系统：'+operator,stage:'complete',factor:1});
   }else{
-   if(def.id==='well')s.era!.groundwater--;else s.location.water--;s.economy!.field.moisture+=2;s.economy!.field.tended=s.clock.absoluteTurn;
+   if(def.id==='well')s.era!.groundwater--;else s.location.water--;irrigateField(s,s.economy!.field);s.economy!.field.tended=s.clock.absoluteTurn;
    events.push({type:'economy-farm',operation:def.id==='pump'?'pump':'tend',crop:s.economy!.field.crop!,actor:'系统：'+operator,amount:1});
   }
   industryEvent(events,'worked',def.id,operator,def.name+'完成；实际扣费',operator==='self'?calendarCost(s,'economy:sysrun:'+def.id,sectCosts(s,'economy:sysrun:'+def.id,def)).time:def.time,operator==='self'?calendarCost(s,'economy:sysrun:'+def.id,sectCosts(s,'economy:sysrun:'+def.id,def)).energy:def.energy,pay);
