@@ -1267,3 +1267,40 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .manufacture-recipe strong { font-size:14px; line-height:1.7; }
 .manufacture-dependencies { margin-top:24px; }
 .manufacture-dependencies > p { color:var(--muted); font-size:13px; }
+
+/* Compact desktop inventories retain full explanations in the inspector/disclosure. */
+.farm-room .farm-card-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.farm-room .farm-item-card { display:grid; grid-template-columns:48px minmax(0,1fr); align-content:start; gap:6px 10px; padding:12px; border-radius:8px; }
+.farm-room .farm-item-card > .farm-item-art { grid-column:1; grid-row:1 / span 2; width:48px; height:48px; }
+.farm-room .farm-item-card .farm-painted-art img { width:48px; height:48px; }
+.farm-room .farm-item-card h4 { grid-column:2; margin:2px 0; font-size:15px; line-height:1.5; }
+.farm-room .farm-item-card > p,.farm-room .farm-item-card > .farm-good-use,.farm-room .farm-card-actions { grid-column:1 / -1; margin:0; font-size:12px; line-height:1.55; }
+.farm-room .farm-item-card > .farm-result { grid-column:2; font-size:14px; }
+.farm-room .farm-stock-quantity { position:static; grid-column:2; font-size:21px; line-height:1.2; }
+.farm-room .farm-card-actions .game-action { padding:7px 9px; font-size:12px; }
+.farm-room .farm-card-actions .action-option { margin:3px 0 0; }
+.farm-room .farm-card-actions .text-btn { padding:4px 0; font-size:12px; }
+.farm-room .farm-good-use { padding:7px 9px; border-radius:4px; }
+.farm-room-store .farm-item-card .farm-good-use p { display:none; }
+.farm-room .farm-use-details { border:0; background:#eef0e3; }
+.farm-room .farm-use-details summary { font-size:12px; color:#52684b; cursor:pointer; }
+.farm-room .farm-use-details p { font-size:12px; margin:7px 0 0; }
+.farm-room .farm-room-hero { gap:12px; padding:12px 16px; margin-bottom:16px; }
+.farm-room .farm-room-hero > .farm-painted-art,.farm-room .farm-room-hero > .farm-painted-art img { width:64px; height:64px; }
+.farm-room .farm-room-hero h3 { font-size:18px; }
+.farm-room .farm-room-hero p { font-size:12px; }
+.farm-room .farm-room-split { grid-template-columns:minmax(0,1fr) 250px; gap:16px; }
+.farm-room .farm-ledger { padding:16px; }
+.farm-room .farm-ledger > .farm-painted-art,.farm-room .farm-ledger > .farm-painted-art img { width:64px; height:64px; }
+.shop-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.shop-grid .family-item { padding:12px; font-size:12px; }
+.shop-grid .shop-item-head { gap:8px; }
+.shop-grid .shop-item-head .shop-item-image { width:42px; height:42px; }
+.shop-grid h3 { font-size:15px; }
+.shop-grid p { line-height:1.6; margin:7px 0; }
+.manufacture-items { grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.manufacture-item { min-height:92px; padding:10px; gap:8px; }
+.manufacture-item-art { flex-basis:44px; width:44px; height:54px; }
+.manufacture-item strong { font-size:14px; }
+.course-skill-art { display:block; width:144px; height:112px; object-fit:contain; margin:0 auto 14px; mix-blend-mode:multiply; }
+.course-list-art { width:36px; height:36px; object-fit:contain; vertical-align:middle; margin-right:8px; mix-blend-mode:multiply; }
