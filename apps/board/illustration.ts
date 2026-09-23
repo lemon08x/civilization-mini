@@ -23,7 +23,8 @@ export function productArt(id:string):string {
   if(['S01','S02','mill','U06'].includes(id))return 'chronicle-pantry';
   if(['T01','T03','U01','U04'].includes(id))return 'product-tools';
   if(['U09','compost','U10'].includes(id))return 'chronicle-farming';
-  if(['fiber','rope','oil'].includes(id))return 'tech-materials';
+  // 沤麻暂无独立绘件，复用纤维类材料绘件。
+  if(['fiber','rope','oil','retting'].includes(id))return 'tech-materials';
   if(['seal','fuel','aluminium','battery'].includes(id))return 'tech-materials';
   if(['P01','P03','shaft'].includes(id))return 'tech-mechanics';
   return 'chronicle-power';
@@ -106,7 +107,9 @@ export function encounterCard(text:string,compact=false):string {
 
 // Shared painted land atlas for the farm inspector and player guide.
 // water/paddy 暂无独立绘件：water 复用原蓄水塘格（同为水面），paddy 复用过湿格。
-const landFrames:Record<string,number>={sand:0,loam:1,clay:2,low:3,flat:4,high:5,dry:6,parched:7,moist:8,wet:9,flood:10,water:11,drain:12,canal:13,shelter:14,fertility:15,paddy:9};
+// 加工设施暂无独立绘件：晒场复用干旱龟裂地表帧（压平的收获晾晒硬地），种子窖复用低地草坑帧（掘入地下的储粮窖），
+// 堆肥坑复用适宜湿土帧（腐熟中的堆肥土），窝棚复用护田林帧（依树搭棚的农舍类歇脚处），沤麻塘复用蓄水塘帧（水色系静水沤麻）。
+const landFrames:Record<string,number>={sand:0,loam:1,clay:2,low:3,flat:4,high:5,dry:6,parched:7,moist:8,wet:9,flood:10,water:11,drain:12,canal:13,shelter:14,fertility:15,paddy:9,yard:6,cellar:3,pit:8,shed:14,retting:11};
 export function landArt(key:string,extra=''):string {
  const i=landFrames[key]??1;
  return `<span class="farm-land-art ${extra}" style="background-position:${i%4*100/3}% ${Math.floor(i/4)*100/3}%" aria-hidden="true"></span>`;

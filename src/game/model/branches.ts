@@ -18,6 +18,9 @@ export const BRANCH_NODES:BranchNode[]=[
   {id:'A14',name:'杂粮接茬',subject:'agronomy',unlockEra:0,parents:['A5'],sample:{seedAdzuki:1},benefit:'探索辨种后，在空田试种小豆并掌握种植；也可向同门请教。小豆与大豆同科，收获后田地肥力回升，但迟收损失更快。种植仍须持有小豆种子。'},
   {id:'A15',name:'园圃菜蔬',subject:'agronomy',unlockEra:0,parents:['A0'],sample:{seedMallow:1},benefit:'探索辨种或与同门换种后，在空田试种葵菜或芥菜并掌握种植；也可向同门请教。菜蔬秋冬播种，不收秸秆。种植仍须持有已发现的种子。'},
   {id:'A16',name:'菹藏腌渍',subject:'agronomy',unlockEra:0,parents:['A15'],sample:{},benefit:'开放腌渍工序：以芥菜与食盐腌成腌菜，跨季保存。'},
+  {id:'A17',name:'场院管理',subject:'agronomy',unlockEra:0,parents:['A0'],sample:{},benefit:'在荒地分段建晒场，永久占格、跨代保留；晒场护住相邻田的收成，迟收不再减收。'},
+  {id:'A18',name:'窖藏保种',subject:'agronomy',unlockEra:0,parents:['A6'],sample:{},benefit:'在荒地分段建种子窖，永久占格、跨代保留；种子窖护住相邻田的留种，收获时种子额外返还一份。'},
+  {id:'A19',name:'沤麻脱胶',subject:'agronomy',unlockEra:0,parents:['A4','M0'],sample:{flax:1},benefit:'在荒地分段建沤麻塘，永久占格、跨代保留；开放沤麻工序：2亚麻茎跨季沤为1亚麻纤维。'},
   {id:'M0',name:'材料识别',subject:'materials',unlockEra:0,parents:[],sample:{wood:1},benefit:'认识木材、黏土等材料，为储粮容器与后续工具制作打基础。'},
   {id:'M1',name:'成形与连接',subject:'materials',unlockEra:1,parents:['M0'],sample:{wood:1},benefit:'锻打工具与部件连接；市镇百工以后开放'},
   {id:'M2',name:'密封工艺',subject:'materials',unlockEra:1,parents:['M1'],sample:{fiber:1,oil:1},benefit:'制作密封件，配合阀门与泵'},
@@ -40,9 +43,9 @@ export const BRANCH_PRODUCTS:Record<string,string[]>={
   W01:['L0'],S01:['M3'],T03:['M1'],W03:['L3','M2'],P01:['L1','M1'],P03:['L4','M1'],
   U06:['L1','M1'],E01:['L6','L4','M1','M5'],U08:['A8'],U09:['A7'],U04:['A9'],U10:['A10'],S02:['M2','M3'],T01:['M1'],U01:['A0','L0','M1'],
 };
-export const BRANCH_PROCESSES:Record<string,string[]>={compost:['A7'],fiber:['M1'],rope:['M1'],oil:['M1'],seal:['M2'],shaft:['L1','M1'],valve:['L2','M1','M2'],wire:['M5'],coil:['M5','M1'],cable:['M5'],mill:['L1','M1'],hull:['L1','M1'],pickles:['A16']};
+export const BRANCH_PROCESSES:Record<string,string[]>={compost:['A7'],fiber:['M1'],rope:['M1'],oil:['M1'],seal:['M2'],shaft:['L1','M1'],valve:['L2','M1','M2'],wire:['M5'],coil:['M5','M1'],cable:['M5'],mill:['L1','M1'],hull:['L1','M1'],pickles:['A16'],retting:['A19']};
 export const BRANCH_PATHS=[
-  {id:'farm',name:'农场 · 栽培与水土',nodes:['A0','A1','A2','A3','A4','A5','A6','A7','A8','A9','A10','A11','A12','A13','A14','A15','A16'],products:['W01','U08','U09','U04','U10'],description:'种植、肥力、井渠与新种子；探索和留种在田地进行。'},
+  {id:'farm',name:'农场 · 栽培与水土',nodes:['A0','A1','A2','A3','A4','A5','A6','A7','A8','A9','A10','A11','A12','A13','A14','A15','A16','A17','A18','A19'],products:['W01','U08','U09','U04','U10'],description:'种植、肥力、井渠与新种子；探索和留种在田地进行。'},
   {id:'storage',name:'农场 · 提水与储粮',nodes:['M0','M3','L0'],products:['S01','W01'],description:'基础材料用于储粮与提水，不要求先完成工业知识。'},
   {id:'workshop',name:'工坊 · 工具与农产加工',nodes:['M1','L1','L4','O1','Q0','Q1','Q2'],products:['T03','U06','P03'],description:'先制作工具，再磨粮、组织工序；水力为可选升级。'},
   {id:'waterworks',name:'工坊 · 泵与供水工具',nodes:['L2','L3','M2'],products:['W03'],description:'压力、密封与泵组成机械供水支线。'},
@@ -51,11 +54,11 @@ export const BRANCH_PATHS=[
   {id:'electric',name:'工业 · 设备制造专业支线',nodes:['M5','L6'],products:['E01'],description:'导线、绕组与发电机制造，不是所有经营者的必经路线。'},
 ];
 export const COURSE_TRACKS:Record<string,{name:string;nodes:string[];use:string}>={
- cultivation:{name:'栽培与留种',nodes:['A0','A4','A6','A10','A13','A15'],use:'农场 · 播种、收获与留种'},
+ cultivation:{name:'栽培与留种',nodes:['A0','A4','A6','A10','A13','A15','A19'],use:'农场 · 播种、收获与留种'},
  water:{name:'水分与排涝',nodes:['A1','A2','A8','A12'],use:'农场 · 灌溉、井渠与排水设施'},
  soil:{name:'土壤与轮作',nodes:['A3','A5','A7','A14'],use:'农场与制造 · 肥力、轮作及秸秆堆肥'},
  exploration:{name:'探索与辨种',nodes:['A11'],use:'农场 · 未知地块探索与种囊辨认'},
- supplies:{name:'提水与储粮',nodes:['M0','M3','L0','A9','A16'],use:'农场 · 储粮与简单提水工具'},
+ supplies:{name:'提水与储粮',nodes:['M0','M3','L0','A9','A16','A17','A18'],use:'农场 · 储粮与简单提水工具'},
  processing:{name:'工具与加工',nodes:['M1','L1','L4','O1','Q0','Q1','Q2'],use:'制造 · 工具、磨粮与工序安排'},
  waterworks:{name:'机械供水',nodes:['M2','L2','L3'],use:'制造与系统 · 密封件、泵与供水'},
  business:{name:'分工与经营',nodes:['O0','O2'],use:'人员与经营安排 · 招聘后的组织与配送'},

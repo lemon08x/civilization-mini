@@ -81,6 +81,7 @@ export const PROCESSES:ProcessSpec[]=[
   {id:'mill',name:'磨粮',inputs:{wheat:2},outputs:{flour:3},requires:{mechanics:2},equipment:'U06',wait:0},
   {id:'hull',name:'碾米',inputs:{rice:2},outputs:{milledRice:3},requires:{mechanics:2},equipment:'U06',wait:0},
   {id:'pickles',name:'腌渍',inputs:{mustard:3,salt:1},outputs:{pickles:2},requires:{},wait:1},
+  {id:'retting',name:'沤麻',inputs:{flax:2},outputs:{fiber:1},requires:{},wait:1},
   {id:'compost',name:'腐熟堆肥',inputs:{straw:3},outputs:{compost:2},requires:{agronomy:3},equipment:'U09',wait:1},
 ];
 export const WORKER_NAMES:Record<WorkerKind,string>={laborer:'普通雇工',farmer:'熟练农工',artisan:'熟练工匠',manager:'生产负责人'};

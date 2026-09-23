@@ -100,7 +100,7 @@ export function economyActions(s:GameState,rules:Ruleset):ActionDefinition[]{
     const steam=steamReady(s,rules)&&['mill','thresh','oil'].includes(recipe.id)&&((e.goods.wood??0)>=(recipe.inputs.wood??0)+rules.operations!.steamFuel);
     const electric=(!e.branches||branchHas(s,'L7'))&&!!e.modern&&e.modern.power>=1&&['mill','thresh','oil'].includes(recipe.id);
     const powered=electric||['mill','thresh','oil'].includes(recipe.id)&&(steam||equipped(s,'P03')&&s.location.water>0&&e.poweredTurn!==s.clock.absoluteTurn);
-    add('process',recipe.id,recipe.name,'生产',{ap:powered?0:1},processBlockers(s,recipe),`${recipe.wait?'开工后跨季完成':'当次加工完成'}。${electric?'电力提供免行动加工，消耗1电。':steam?'蒸汽提供本季一次免行动加工，消耗燃料。':powered?'水轮提供本季一次免行动加工，扣1公共水与1耐用度。':''}投入产出见配方。`,(draft,events)=>{
+    add('process',recipe.id,recipe.name,'生产',{ap:powered?0:1},[...processBlockers(s,recipe),...(recipe.id==='retting'&&!Object.values(e.farm?.plots??{}).some(q=>q.improvement==='retting')?['需建成沤麻塘']:[])],`${recipe.wait?'开工后跨季完成':'当次加工完成'}。${electric?'电力提供免行动加工，消耗1电。':steam?'蒸汽提供本季一次免行动加工，消耗燃料。':powered?'水轮提供本季一次免行动加工，扣1公共水与1耐用度。':''}投入产出见配方。`,(draft,events)=>{
       if(electric)usePower(draft,1,events,'电动食品加工');else if(steam)useSteam(draft,rules,events);else if(powered){draft.location.water--;draft.economy!.poweredTurn=draft.clock.absoluteTurn;consumeEquipment(draft,'P03',events);}runProcess(draft,recipe,events,undefined,rules);
     });
   }
@@ -144,22 +144,31 @@ function farmMapActions(s:GameState):ActionDefinition[]{
    for(const id of targets){const f=plotField(d,id);if(f)irrigateField(d,f);}
    event(d,ev,`${p.id} 开闸放水：渠链正交相邻${targets.size}块田灌到所需水分，未耗公共水`);
   }));
+  if(p.improvement==='pit'&&s.life?.calendar)out.push(defineAction(s,'economy:pit:'+p.id,'给 '+p.id+' 堆肥坑投料','农业',{time:r.interactionTime,energy:1},[...missingGoods(s,{straw:3}),...(p.pit?['堆肥坑正在转化中']:[])],`投入3秸秆，${r.pitConvertDays}天后自动转成2堆肥；转化期间不能再投料，到期按日历自动结算。`,(d,ev)=>{
+   const plot=d.economy!.farm!.plots[p.id];if(plot.pit)return;
+   changeGoods(d,{straw:3},-1,ev,'堆肥坑投料');
+   const ready=Math.floor(d.life!.calendar!.absoluteDay)+d.economy!.farm!.rules.pitConvertDays;
+   plot.pit={readyDay:ready};
+   event(d,ev,`${p.id} 堆肥坑投料3秸秆，预计${lunarDateAt(d.life!.calendar!.rules.referenceYear,ready).date}腐熟为2堆肥`);
+  }));
   if(p.kind==='wild'||p.kind==='field'||p.discovery&&!p.discovery.resolved){
-   const kinds:import('../model/economy.js').FarmProjectKind[]=p.kind==='field'?['paddy']:p.kind==='wild'?['canal','drain']:p.discovery?.id==='fallow'?['restore']:p.discovery?.id==='woodland'?['timber','clearwood','shelter']:[];
+   const kinds:import('../model/economy.js').FarmProjectKind[]=p.kind==='field'?['paddy']:p.kind==='wild'?['canal','drain','yard','cellar','pit','shed','retting']:p.discovery?.id==='fallow'?['restore']:p.discovery?.id==='woodland'?['timber','clearwood','shelter']:[];
    for(const kind of kinds){
     if(p.project&&p.project.kind!==kind)continue;
-    const total=p.project?.total??(kind==='canal'?r.canalDays:kind==='restore'?r.restoreDays:kind==='paddy'?r.paddyDays:kind==='drain'?r.drainDays:r.woodlandDays),done=p.project?.done??0;
+    const total=p.project?.total??(kind==='canal'?r.canalDays:kind==='restore'?r.restoreDays:kind==='paddy'?r.paddyDays:kind==='drain'?r.drainDays:kind==='yard'?r.yardDays:kind==='cellar'?r.cellarDays:kind==='pit'?r.pitDays:kind==='shed'?r.shedDays:kind==='retting'?r.rettingDays:r.woodlandDays),done=p.project?.done??0;
     const stageEnd=done<total/2?total/2:total;
     const harvest=Math.min(Infinity,...Object.values(farm.plots).map(t=>plotField(s,t.id)).filter(f=>f?.crop).map(f=>Math.max(0,f!.duration-f!.growth)));
     const maximum=Math.max(0,Math.floor(Math.min(stageEnd-done,availableDays(s),dietView(s)?.days??0,harvest)*2)/2);
     const options=[...new Set([Math.min(3,maximum),Math.min(7,maximum),maximum])];
     for(const days of options){
-     const materials=['canal','paddy','drain'].includes(kind)&&!p.project?missingGoods(s,{wood:r.projectWood}):[];
-     const effect=kind==='canal'?`首段耗${r.projectWood}木材；引水链：与水源或通水渠相邻才能开工；完工后可用开闸放水`:kind==='paddy'?`首段耗${r.projectWood}木材；完工后此田变为水田，水分恒为过湿，可种水稻`:kind==='drain'?`首段耗${r.projectWood}木材；有低位出口时，正交相邻田过湿／积水自然退档所需天数-1（下限1天）`:kind==='restore'?'完成后直接建成肥力3的田':kind==='timber'?`完成后获得${r.timberYield}木材，留下普通荒地`:kind==='clearwood'?'完成后直接建成肥力2的田，不额外获得木材':`完成后正交四格失水间隔延长${r.shelterDays}天，不叠加`;
+     const woodNeed=['canal','paddy','drain','yard','cellar','retting'].includes(kind)?r.projectWood:kind==='shed'?1:0;
+     const materials=woodNeed>0&&!p.project?missingGoods(s,{wood:woodNeed}):[];
+     const effect=kind==='canal'?`首段耗${r.projectWood}木材；引水链：与水源或通水渠相邻才能开工；完工后可用开闸放水`:kind==='paddy'?`首段耗${r.projectWood}木材；完工后此田变为水田，水分恒为过湿，可种水稻`:kind==='drain'?`首段耗${r.projectWood}木材；有低位出口时，正交相邻田过湿／积水自然退档所需天数-1（下限1天）`:kind==='restore'?'完成后直接建成肥力3的田':kind==='timber'?`完成后获得${r.timberYield}木材，留下普通荒地`:kind==='clearwood'?'完成后直接建成肥力2的田，不额外获得木材':kind==='yard'?`首段耗${r.projectWood}木材；完工后相邻田迟收不减收`:kind==='cellar'?`首段耗${r.projectWood}木材；完工后相邻田留种+1`:kind==='pit'?`不耗木材；完工后投3秸秆，${r.pitConvertDays}天后自转2堆肥`:kind==='shed'?`首段耗1木材；完工后附近田的农活时间减半`:kind==='retting'?`首段耗${r.projectWood}木材；完工后可在农场沤麻：2亚麻茎→1纤维，跨季`:`完成后正交四格失水间隔延长${r.shelterDays}天，不叠加`;
+     const facility=kind==='yard'?branchNeeds(s,['A17']):kind==='cellar'?branchNeeds(s,['A18']):kind==='pit'?branchNeeds(s,['A7']):kind==='shed'?branchNeeds(s,['M0']):kind==='retting'?branchNeeds(s,['A19']):[];
      const source=kind==='canal'&&!waterAccess(s,p)?['新渠需与水源格或通水渠正交相邻']:kind==='paddy'?[...branchNeeds(s,['A12']),...(!waterAccess(s,p)?['需与水源格或通水渠正交相邻']:[]),...(p.land?.paddy?['此田已是水田']:[])]:[];
      const outlet=kind==='drain'&&!drainOutlet(s,p)?['需正交相邻低地、连通有出口的沟，或位于北/西地图边界']:[];
      const date=s.life?.calendar?lunarDateAt(s.life.calendar.rules.referenceYear,s.life.calendar.absoluteDay+days).date:'';
-     const definition=defineAction(s,`economy:farmproject:${p.id}-${kind}-${days*2}`,`${FARM_PROJECT_NAMES[kind]} · ${days?`投入${days}天`:'暂缓'}`,'地块工程',{time:days,energy:days?Math.min(6,Math.ceil(days/3)):0},[...materials,...source,...outlet,...(days<=0?['先收获成熟作物或补给，再继续工程']:[])],`总工期${total}天，已完成${done}天；${done<total/2?'整备':'施工'}阶段。本次至${date}，按当前饮食约需${Number((days*(dietView(s)?.dailyGrain??0)).toFixed(3))}批食材。${effect}。${['canal','shelter','drain'].includes(kind)?`覆盖格：${farmCoverage(p,4).map(n=>n.id).join('、')}`:'仅改造本格'}。开工后固定用途；进度跨季、换代保留。`,(d,ev)=>workFarmProject(d,p.id,kind,days,total,ev));
+     const definition=defineAction(s,`economy:farmproject:${p.id}-${kind}-${days*2}`,`${FARM_PROJECT_NAMES[kind]} · ${days?`投入${days}天`:'暂缓'}`,'地块工程',{time:days,energy:days?Math.min(6,Math.ceil(days/3)):0},[...materials,...source,...outlet,...facility,...(days<=0?['先收获成熟作物或补给，再继续工程']:[])],`总工期${total}天，已完成${done}天；${done<total/2?'整备':'施工'}阶段。本次至${date}，按当前饮食约需${Number((days*(dietView(s)?.dailyGrain??0)).toFixed(3))}批食材。${effect}。${['canal','shelter','drain'].includes(kind)?`覆盖格：${farmCoverage(p,4).map(n=>n.id).join('、')}`:'仅改造本格'}。开工后固定用途；进度跨季、换代保留。`,(d,ev)=>workFarmProject(d,p.id,kind,days,total,ev));
      definition.prepare=(d,ev)=>startFarmProject(d,p.id,kind,total,ev);out.push(definition);
     }
    }

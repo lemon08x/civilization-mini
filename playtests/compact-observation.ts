@@ -207,6 +207,26 @@ function farmWaterSummary(farm: unknown): string | undefined {
   return parts.join('；');
 }
 
+const FACILITY_NAMES: Record<string, string> = { yard: '晒场', cellar: '种子窖', pit: '堆肥坑', shed: '窝棚', retting: '沤麻塘' };
+
+function farmFacilitySummary(farm: unknown): string | undefined {
+  const f = record(farm);
+  const plots = f && Array.isArray(f.plots) ? f.plots : [];
+  const entries: string[] = [];
+  for (const raw of plots) {
+    const p = record(raw);
+    const id = p && str(p.id);
+    const name = p && str(p.improvement) && FACILITY_NAMES[str(p.improvement)!];
+    if (!p || !id || !name) continue;
+    const pit = record(p.pit);
+    const state = name === '堆肥坑'
+      ? (pit ? `转化剩${num(pit.remainingDays)}天` : '可投料')
+      : '';
+    entries.push(`${name} ${id}${state ? `（${state}）` : ''}`);
+  }
+  return entries.length ? entries.join('、') : undefined;
+}
+
 function eventLine(event: unknown): string {
   const item = record(event);
   if (!item) return String(event);
@@ -239,7 +259,7 @@ export function formatCompactObservation(compact: CompactObservation): string {
   if(compact.calendar){const c=compact.calendar;lines.push(`天气：${c.weather.name}；${c.weather.effect}；约${c.weather.days}天后变化`);lines.push(`节气见闻：${c.termEvents.map(e=>e.date+' '+e.term+' '+e.title+'：'+e.text+' '+e.effect).join('；')||'尚未触发'}；任何推进时间的行动均可触发，同日不重复。`);}
   if(compact.calendar)lines.push(`节令：${compact.calendar.currentTerm}${compact.calendar.solarTerm?'（今日交节）':''}；今日节日：${compact.calendar.festivals.map(f=>f.name).join('、')||'无'}；将至：${compact.calendar.upcoming.map(d=>d.name+' ' +d.days+'天后').join('、')}`);
   if(compact.diet)lines.push(`饮食：${compact.diet.name}；可支持${compact.diet.days}天，每天${compact.diet.dailyGrain}批食材、做饭需${compact.diet.dailyWood}批柴火；餐食调养剩${compact.diet.mealDays}天`);
-  if(compact.farm){lines.push(`地块与同门：${JSON.stringify(compact.farm)}`);const water=farmWaterSummary(compact.farm);if(water)lines.push(`水利：${water}`);}
+  if(compact.farm){lines.push(`地块与同门：${JSON.stringify(compact.farm)}`);const water=farmWaterSummary(compact.farm);if(water)lines.push(`水利：${water}`);const facilities=farmFacilitySummary(compact.farm);if(facilities)lines.push(`加工设施：${facilities}`);}
   lines.push(`近期生活经历：${JSON.stringify(compact.seasonalEvents)}`);
   if(compact.sect)lines.push(`师徒与道：${JSON.stringify(compact.sect)}`);
   if(compact.crises)lines.push(`现代使命：${JSON.stringify(compact.crises)}`);

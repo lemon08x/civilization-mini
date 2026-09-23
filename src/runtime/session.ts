@@ -80,16 +80,17 @@ export function parseSession(value: unknown): Session {
     if(p.kind==='story'&&(p.discovery.resolved||!['fallow','woodland','seedbag','heritage','spring','traveler','shrine'].includes(p.discovery.id)))farmInvalid();
     if(p.kind==='brush'&&(p.discovery.id!=='brambles'||p.discovery.resolved))farmInvalid();
     if(p.kind!=='unknown'&&(!isRecord(p.land)||!['sand','loam','clay'].includes(String(p.land.soil))||!Number.isInteger(p.land.elevation)||![0,1,2].includes(Number(p.land.elevation))||!Number.isInteger(p.land.water)||![0,1,2,3,4].includes(Number(p.land.water))||!['dryDays','wetDays','drainDays'].every(k=>Number.isSafeInteger(p.land[k])&&p.land[k]>=0)||p.land.paddy!==undefined&&typeof p.land.paddy!=='boolean'))farmInvalid();
-    if(p.project!==undefined&&(!isRecord(p.project)||!['canal','restore','timber','clearwood','shelter','paddy','drain'].includes(String(p.project.kind))||!finite(p.project.done)||!finite(p.project.total)||Number(p.project.total)<=0||Number(p.project.done)>Number(p.project.total)||!Number.isInteger(Number(p.project.done)*2)))farmInvalid();
+    if(p.project!==undefined&&(!isRecord(p.project)||!['canal','restore','timber','clearwood','shelter','paddy','drain','yard','cellar','pit','shed','retting'].includes(String(p.project.kind))||!finite(p.project.done)||!finite(p.project.total)||Number(p.project.total)<=0||Number(p.project.done)>Number(p.project.total)||!Number.isInteger(Number(p.project.done)*2)))farmInvalid();
     if(p.project){
-      const expected=p.project.kind==='canal'?farm.rules.canalDays:p.project.kind==='paddy'?farm.rules.paddyDays:p.project.kind==='drain'?farm.rules.drainDays:p.project.kind==='restore'?farm.rules.restoreDays:farm.rules.woodlandDays;
+      const expected=p.project.kind==='canal'?farm.rules.canalDays:p.project.kind==='paddy'?farm.rules.paddyDays:p.project.kind==='drain'?farm.rules.drainDays:p.project.kind==='restore'?farm.rules.restoreDays:p.project.kind==='yard'?farm.rules.yardDays:p.project.kind==='cellar'?farm.rules.cellarDays:p.project.kind==='pit'?farm.rules.pitDays:p.project.kind==='shed'?farm.rules.shedDays:p.project.kind==='retting'?farm.rules.rettingDays:farm.rules.woodlandDays;
       if(p.project.total!==expected)farmInvalid();
       if(p.project.done<p.project.total){
         const story=p.kind==='story'&&p.discovery&&!p.discovery.resolved&&({fallow:['restore'],woodland:['timber','clearwood','shelter']} as Record<string,string[]>)[p.discovery.id]?.includes(p.project.kind);
-        if(!story&&!(p.kind==='wild'&&['canal','drain'].includes(p.project.kind))&&!(p.kind==='field'&&p.project.kind==='paddy'))farmInvalid();
+        if(!story&&!(p.kind==='wild'&&['canal','drain','yard','cellar','pit','shed','retting'].includes(p.project.kind))&&!(p.kind==='field'&&p.project.kind==='paddy'))farmInvalid();
       }else if(!p.improvement&&!(p.kind==='field'&&['restore','clearwood','paddy'].includes(p.project.kind)))farmInvalid();
     }
-    if(p.improvement!==undefined&&(!['canal','shelter','drain'].includes(p.improvement)||p.kind!=='rock'||p.project?.kind!==p.improvement||p.project.done!==p.project.total))farmInvalid();
+    if(p.improvement!==undefined&&(!['canal','shelter','drain','yard','cellar','pit','shed','retting'].includes(p.improvement)||p.kind!=='rock'||p.project?.kind!==p.improvement||p.project.done!==p.project.total))farmInvalid();
+    if(p.pit!==undefined&&(!isRecord(p.pit)||!Number.isInteger(Number(p.pit.readyDay))||Number(p.pit.readyDay)<0||p.improvement!=='pit'))farmInvalid();
     if(p.kind==='unknown'&&Object.keys(p).some(k=>!['id','x','y','kind'].includes(k)))farmInvalid();
   }
   const neighbor=farm.neighbor;

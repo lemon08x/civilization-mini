@@ -178,7 +178,7 @@ export function advanceCalendar(s:GameState,rules:Ruleset,days:number,events:Gam
   if(step<=0){settleEra(s,rules,events);break;}
   const foodBefore=c.consumed,missingBefore=c.missing;
   const fed=feedCalendar(s,step,events);ate+=c.consumed-foodBefore;missing+=c.missing-missingBefore;
-  const ripe=advanceFields(s,step);
+  const ripe=advanceFields(s,step,events);
   const storageEvents:GameEvent[]=[];spoilEconomy(s,storageEvents,step);
   for(const event of storageEvents)if(event.type==='food-spoiled'){spoiled+=event.amount;protectedFood=event.protected;}
   c.absoluteDay=Math.round((c.absoluteDay+step)*100)/100;

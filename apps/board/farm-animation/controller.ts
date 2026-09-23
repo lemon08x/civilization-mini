@@ -82,7 +82,7 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
  hint.anchor.set(.5,1);hint.visible=false;hint.eventMode='none';hint.zIndex=10000;hint.scale.set(.9/Math.max(.8,zoom));
  const hintFor=(p:FarmMap['plots'][number]):string=>{
   const id=p.kind==='unknown'?'economy:farmexplore:'+p.id:p.kind==='wild'?'economy:farmreclaim:'+p.id:'';
-  if(p.improvement)return `${p.id} · ${IMPROVEMENT_NAMES[p.improvement]} · ${p.improvement==='canal'?(p.waterConnected?'已通水':'未通水'):'覆盖正交四格'}`;
+  if(p.improvement)return `${p.id} · ${IMPROVEMENT_NAMES[p.improvement]} · ${p.improvement==='canal'?(p.waterConnected?'已通水':'未通水'):p.improvement==='pit'?(p.pit?`转化中 · 剩 ${p.pit.remainingDays} 天`:'待投料 · 需3秸秆'):p.improvement==='shed'?'覆盖两格内的田':p.improvement==='retting'?'开放沤麻工序':p.improvement==='yard'?'相邻田迟收不减收':p.improvement==='cellar'?'相邻田留种+1':'覆盖正交四格'}`;
   if(p.project&&p.project.done<p.project.total)return `${p.id} · ${p.project.name} ${p.project.done}/${p.project.total}天 · 点击续建`;
   if(!id)return `${p.id} · ${p.kind==='field'?(p.land?.paddy?'水田':'田地'):p.kind==='tree'?'古树 · 不可开垦':p.kind==='rock'?'岩石 · 不可开垦':p.kind==='water'?'水源 · 不可开垦':'查看地块'}`;
   const a=g.actions.find(a=>a.id===id);
@@ -122,6 +122,31 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
    const waterColor=p.improvement==='drain'?0x70694e:p.waterConnected?0x6ca2ad:0x9aa48c;
    const channel=new P.Graphics().lineStyle(9,0x9d9270).moveTo(-24,29).lineTo(24,6).lineStyle(5,waterColor).moveTo(-24,29).lineTo(24,6).lineStyle(1,0xcce6df).moveTo(-20,27).lineTo(20,8);
    channel.position.set(pos.x,pos.y);channel.zIndex=(p.x+p.y)*100+20;channel.eventMode='none';items.addChild(channel);
+  }
+  if(p.improvement==='yard'){
+   // 晒场暂无独立绘件：复用水田浅水色块的绘制方式，改为压平晒场干土色。
+   const floor=new P.Graphics().lineStyle(1,0xc9b47e,.9).beginFill(0xdcc790,.6).drawPolygon([0,10,22,21,0,32,-22,21]).endFill();
+   floor.position.set(pos.x,pos.y);floor.zIndex=(p.x+p.y)*100+15;floor.eventMode='none';items.addChild(floor);
+  }
+  if(p.improvement==='cellar'){
+   // 种子窖暂无独立绘件：复用水源格椭圆绘制，改为窖口土色（储粮类）。
+   const cellar=new P.Graphics().lineStyle(2,0x9d9270).beginFill(0x5a452c).drawEllipse(0,18,15,8).endFill().beginFill(0x3e2f1e).drawEllipse(0,18,9,4.5).endFill().lineStyle(1,0xdcc790).moveTo(-9,14).lineTo(9,14);
+   cellar.position.set(pos.x,pos.y);cellar.zIndex=(p.x+p.y)*100+20;cellar.eventMode='none';items.addChild(cellar);
+  }
+  if(p.improvement==='pit'){
+   // 堆肥坑暂无独立绘件：复用水源格椭圆水面绘制，改为腐熟堆肥色。
+   const pit=new P.Graphics().lineStyle(2,0x9d9270).beginFill(0x6d5636).drawEllipse(0,18,20,10).endFill().beginFill(0x8a744a).drawEllipse(-5,16,6,3).endFill().beginFill(0x8a744a).drawEllipse(6,20,4.5,2.5).endFill();
+   pit.position.set(pos.x,pos.y);pit.zIndex=(p.x+p.y)*100+20;pit.eventMode='none';items.addChild(pit);
+  }
+  if(p.improvement==='retting'){
+   // 沤麻塘暂无独立绘件：复用水源格水面绘制，水色系表示静水沤麻。
+   const pond=new P.Graphics().lineStyle(2,0x9d9270).beginFill(0x7fa8a0).drawEllipse(0,18,22,10).endFill().beginFill(0xcce6df).drawEllipse(-5,16,7,3).endFill().beginFill(0xcce6df).drawEllipse(6,20,5,2.5).endFill();
+   pond.position.set(pos.x,pos.y);pond.zIndex=(p.x+p.y)*100+20;pond.eventMode='none';items.addChild(pond);
+  }
+  if(p.improvement==='shed'){
+   // 窝棚暂无独立绘件：复用农舍绘件（农舍类），缩小置于格上。
+   const hut=art!.sprite(art!.houseTexture(),pos.x,pos.y+22,.22);
+   hut.zIndex=(p.x+p.y)*100+20;hut.eventMode='none';items.addChild(hut);
   }
   if(p.kind==='water'){
    // 程序绘制水源格：复用渠水色系的椭圆水面与泉眼亮点，无独立美术素材。

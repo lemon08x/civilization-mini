@@ -31,7 +31,13 @@
     "clearEnergy": 2,
     "identifyTime": 2,
     "storyFood": 1,
-    "rareBonus": 1
+    "rareBonus": 1,
+    "yardDays": 24,
+    "cellarDays": 24,
+    "pitDays": 16,
+    "pitConvertDays": 90,
+    "shedDays": 16,
+    "rettingDays": 24
   },
   "economy": {
     "wage": 1,

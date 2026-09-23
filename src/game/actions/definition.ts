@@ -3,6 +3,7 @@ import { quoteReservedLabor } from '../systems/labor.js';
 import { branchActionNeeds } from '../systems/branches.js';
 import { activePerson } from '../model/state.js';
 import { lifeCost, sectCosts, calendarCost } from '../systems/life.js';
+import { HOME_PLOT, shedCovers } from '../systems/agriculture.js';
 import { parseActionId } from '../model/action.js';
 import type { ActionCost, ActionOffer } from '../model/action.js';
 import type { GameState } from '../model/state.js';
@@ -10,12 +11,20 @@ import type { GameEvent } from '../model/events.js';
 import { MATERIAL_NAMES } from '../model/production.js';
 import type { Material } from '../model/production.js';
 
-export interface ActionDefinition { prepare?: (draft:GameState, events:GameEvent[])=>void; offer: ActionOffer; execute: (draft: GameState, events: GameEvent[]) => void }
+export interface ActionDefinition { prepare?: (draft:GameState, events:GameEvent[])=>void; offer: ActionOffer; execute: (draft: GameState, events:GameEvent[]) => void }
+// Sheds halve the base time of sow/tend/harvest work on fields within Chebyshev distance 2.
+function shedCoversPlot(state:GameState,id:string):boolean {
+  const op=id.split(':')[1];if(op!=='farm'&&op!=='farmplot')return false;
+  const plots=state.economy?.farm?.plots;if(!plots)return false;
+  const plot=plots[op==='farm'?HOME_PLOT:id.split(':')[2]?.split('-')[0]??''];
+  return !!plot&&shedCovers(state,plot);
+}
 export function defineAction(state: GameState, id: string, label: string, group: string, costs: Partial<ActionCost>, blockers: string[], description: string, execute: ActionDefinition['execute']): ActionDefinition {
   const { ap: requestedAp = 1, money = 0, food = 0 } = costs;
   const ap=state.life?0:requestedAp;
   const baseLife=state.life?lifeCost(state,id,requestedAp):undefined;
-  const quoted=baseLife?{time:costs.time??baseLife.time,energy:costs.energy??baseLife.energy}:undefined;
+  let quoted=baseLife?{time:costs.time??baseLife.time,energy:costs.energy??baseLife.energy}:undefined;
+  if(quoted&&costs.time===undefined&&quoted.time>0&&shedCoversPlot(state,id)){quoted={...quoted,time:Math.max(0.5,Math.round(quoted.time/2*100)/100)};description+=' 窝棚覆盖：基础农活时间减半。';}
   const life=quoted?calendarCost(state,id,state.life?.calendar&&['branchlearn','farmproject','farmexplore','farmreclaim','wait','diet','cook'].includes(id.split(':')[1])?quoted:sectCosts(state,id,quoted)):undefined;
   const reasons = [...new Set([...blockers.map(reason=>state.economy?.branches?reason.replace(/需生产组织第?1阶或家族记录/g,'需掌握劳动分工').replace(/需生产组织第?2阶或家族记录/g,'需掌握生产工序').replace(/需生产组织第?3阶或家族记录/g,'需掌握采购与交付'):reason),...branchActionNeeds(state,id)])];
   // Quote on an isolated draft: farming changes water demand; income, purchases and

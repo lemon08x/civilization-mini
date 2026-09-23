@@ -11,7 +11,7 @@ export interface ProductDefinition {id:string;knowledge:string[];parents:string[
 const parents:Record<string,string[]>={W03:['valve','seal'],P01:['shaft'],P03:['shaft'],S02:['S01','seal'],E01:['coil','shaft'],shaft:['T03'],valve:['seal'],coil:['wire'],cable:['wire','seal'],mill:['U06'],compost:['U09'],U10:['S01'],rope:['fiber']};
 export const INDUSTRY_PRODUCTS:ProductDefinition[]=[
   ...Object.entries(BRANCH_PRODUCTS).map(([id,knowledge])=>({id,knowledge,parents:parents[id]??[],kind:'device' as const})),
-  ...Object.entries(BRANCH_PROCESSES).map(([id,knowledge])=>({id,knowledge,parents:parents[id]??[],kind:'goods' as const,good:id==='mill'?'flour':id})),
+  ...Object.entries(BRANCH_PROCESSES).map(([id,knowledge])=>({id,knowledge,parents:parents[id]??[],kind:'goods' as const,good:id==='mill'?'flour':id==='retting'?'fiber':id})),
 ];
 export type SystemId='hand'|'pump'|'shaft'|'well';
 export type OperatorId='self'|'laborer'|'farmer'|'artisan';

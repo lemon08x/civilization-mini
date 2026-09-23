@@ -732,6 +732,15 @@
       },
       "wait": 1
     },
+    "retting": {
+      "inputs": {
+        "flax": 2
+      },
+      "outputs": {
+        "fiber": 1
+      },
+      "wait": 1
+    },
     "compost": {
       "inputs": {
         "straw": 3
