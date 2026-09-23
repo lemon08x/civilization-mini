@@ -2,7 +2,6 @@ import type { SessionObservation } from '../../src/runtime/session.js';
 import {esc} from './economy-view.js';
 import {landArt} from './illustration.js';
 import {CROPS} from '../../src/game/systems/economy-catalog.js';
-import {sowingSeasons} from '../../src/game/systems/agriculture.js';
 import type {Crop} from '../../src/game/model/economy.js';
 
 export const pageNames:Record<string,string>={
@@ -88,13 +87,13 @@ function landGuide(g:SessionObservation['game']):string {
   {id:'canal',name:'水渠',role:'把水源引进田里',range:4 as const,days:r.canalDays,cost:`${r.projectWood}木材`,effect:'与水源格或通水渠正交相邻才能开工，沿渠链高程不升。通水后在渠格开闸放水，一次把渠链相邻的田灌到各自作物所需水分，不耗公共水。',site:'从水源格旁边起步，逐段向外延伸；水不能自行送到更高的田。',choice:'适合集中照料一片田，也是改造水田的前提。未接通水源的渠不会通水。'},
   {id:'drain',name:'排水沟',role:'把多余的水排走',range:4 as const,days:r.drainDays,cost:`${r.projectWood}木材`,effect:'被动生效：有低位出口时，正交相邻田过湿／积水自然退档所需天数-1（下限1天）。',site:'沟不能高于受益田。须有正交相邻低地、通过等高排水沟接到出口，或位于地图北／西边界。施工按钮会说明缺少的条件。',choice:'适合保护容易积水的田。被动生效，无需操作；适宜或更干的田不受影响。'},
   {id:'shelter',name:'护田林',role:'让土里的水留得久一些',range:4 as const,days:r.woodlandDays,cost:'占用林地',effect:`正交相邻田的干燥失水间隔延长${r.shelterDays}天，晴和时再翻倍；多处护田林不叠加。`,site:'从探索到的林地选择营造护田林。保留林格，就放弃这格采木或清林建田的用途。',choice:'不消耗补水次数，也不直接加水。已经干旱的田仍要灌溉，连雨积水仍要排水。'},
-  {id:'yard',name:'晒场',role:'给赶不及收的田托底',range:4 as const,days:r.yardDays,cost:`${r.projectWood}木材`,effect:'被动生效：正交相邻田迟收不再落粒减产；已累计的受灾不受影响。',site:'建在紧挨重点田的荒地上；只护上下左右四格，不含斜角。',choice:'需先掌握场院管理。适合给成熟窗口紧的田兜底。永久占格，建成后不能再种。'},
+  {id:'yard',name:'晒场',role:'给赶不及收的田托底',range:4 as const,days:r.yardDays,cost:`${r.projectWood}木材`,effect:'被动生效：正交相邻田正常收获期延长7天，宽限后仍绝收；已累计的受灾不受影响。',site:'建在紧挨重点田的荒地上；只护上下左右四格，不含斜角。',choice:'需先掌握场院管理。适合给成熟窗口紧的田兜底。永久占格，建成后不能再种。'},
   {id:'cellar',name:'种子窖',role:'把种子留在田边',range:4 as const,days:r.cellarDays,cost:`${r.projectWood}木材`,effect:'被动生效：正交相邻田收获时额外留种1份；异穗麦也额外留1份异穗麦种。',site:'建在常种主粮的田旁；只护上下左右四格。留种直接进入种子库存，不当口粮。',choice:'需先掌握窖藏保种。适合长期自留种的布局。永久占格，建成后不能再种。'},
   {id:'pit',name:'堆肥坑',role:'把秸秆沤成肥料',range:0 as const,days:r.pitDays,cost:'不耗木材',effect:`在坑格投3份秸秆，${r.pitConvertDays}天后自动转成2份堆肥；转化期间不能再投料，到期按日历自动结算。`,site:'任意荒地即可，建在秸秆来源的田旁更顺手；永久占格。',choice:'需先掌握秸秆堆肥。秸秆不再只是副产品；施肥仍在田块操作里进行。'},
-  {id:'shed',name:'窝棚',role:'少跑几趟田',range:8 as const,days:r.shedDays,cost:'1木材',effect:'以窝棚为中心两格以内（比图示再远一圈，含斜角）的田，播种、浇水、收获基础时间减半，下限0.5天；报价自动按减半显示。',site:'建在几块田的中间，尽量让更多田落在两格以内。',choice:'需先掌握材料识别。适合田多路远的布局。永久占格，建成后不能再种。'},
+  {id:'shed',name:'窝棚',role:'少跑几趟田',range:8 as const,days:r.shedDays,cost:'1木材',effect:'以窝棚为中心两格以内（比图示再远一圈，含斜角）的田，播种、浇水、收获日历行动时间减半，下限0.5天；报价自动按减半显示。',site:'建在几块田的中间，尽量让更多田落在两格以内。',choice:'需先掌握材料识别。适合田多路远的布局。永久占格，建成后不能再种。'},
   {id:'retting',name:'沤麻塘',role:'把亚麻茎沤成纤维',range:0 as const,days:r.rettingDays,cost:`${r.projectWood}木材`,effect:'建成后农场「农具与加工」开放沤麻工序：2份亚麻茎跨季沤为1份亚麻纤维。',site:'任意荒地即可；永久占格。',choice:'需先掌握沤麻脱胶，是亚麻纤维的前置条件；工序报价会提示需建成沤麻塘。'},
  ];
- const crops=(Object.keys(CROPS) as Crop[]).map(id=>{const c=CROPS[id];const note=id==='rice'?'需改造为水田；免涝':id==='millet'?'需水低，仍怕过湿和积水':id==='adzuki'?'养地；迟收损失比其他作物快':id==='soy'?'收获后恢复肥力':id==='flax'?'纤维原料，不能作为口粮':id==='mallow'?'短周期菜蔬，不产秸秆':id==='mustard'?'可接腌渍加工，不产秸秆':'主粮，兼得秸秆';return `<tr><th scope="row">${c.name}</th><td>${sowingSeasons(id).map(n=>['春','夏','秋','冬'][n]).join('、')}</td><td>${c.duration}天</td><td>${id==='rice'?'水田恒过湿':id==='millet'?'至少偏干':'至少适宜'}</td><td>${note}</td></tr>`;}).join('');
+ const crops=(Object.keys(CROPS) as Crop[]).map(id=>{const c=CROPS[id];const note=id==='rice'?'需改造为水田；免涝':id==='millet'?'需水低，仍怕过湿和积水':id==='adzuki'?'养地；宽限期结束后绝收':id==='soy'?'收获后恢复肥力':id==='flax'?'纤维原料，不能作为口粮':id==='mallow'?'短周期菜蔬，不产秸秆':id==='mustard'?'可接腌渍加工，不产秸秆':'主粮，兼得秸秆';return `<tr><th scope="row">${c.name}</th><td>${(c.seasons??[]).map(v=>v.sowTerm+'起14天').join('、')}</td><td>${(c.seasons??[]).map(v=>(v.yearOffset?'次年':'')+v.harvestTerm).join('、')}</td><td>${id==='rice'?'水田恒过湿':id==='millet'?'至少偏干':'至少适宜'}</td><td>${note}</td></tr>`;}).join('');
  return `<article class="rules-page land-guide" aria-labelledby="land-guide-title">
  <div class="land-guide-top"><button type="button" class="text-btn" data-page="农业">← 返回农场</button><span>随时查阅 · 阅读不消耗游戏时间</span></div>
  <header class="land-guide-hero"><div><span class="eyebrow">田间手册 · 土地与水利</span><h2 id="land-guide-title">一块地种粮，一块地护田</h2><p>田越多，越要考虑水从哪里来、雨后往哪里去。找到水源、沿链修渠，或护林保墒，让周围的田更容易照料。</p></div><div class="land-guide-hero-art" aria-hidden="true">${landArt('loam')}${landArt('canal')}${landArt('water')}</div></header>
@@ -113,9 +112,9 @@ function landGuide(g:SessionObservation['game']):string {
  <div class="land-guide-facilities">${facilities.map(f=>`<article><header>${landArt(f.id)}<div><h4>${f.name}</h4><p>${f.role}</p><small>${f.days}天工程 · ${f.cost}</small></div></header><div class="land-guide-facility-body">${f.range?reach(f.id,f.range):''}<div><p><strong>怎样生效</strong> ${f.effect}</p><p><strong>建在哪里</strong> ${f.site}</p></div></div><p class="land-guide-choice">${f.choice}</p></article>`).join('')}</div>
  <p class="land-guide-note"><strong>再进一步：水田。</strong> 掌握水田稻作后，与水源格或通水渠相邻的田可做水田改造（${r.paddyDays}天工程，首次开工需${r.projectWood}木材）；完工后田块水分恒为过湿，水稻免浇水，非耐涝作物不能种。</p></section>
  <section>${heading('04','land-crops','按季节、水分和用途选下一茬','下面列出适播季节；实际播种还需要已发现的种子与对应栽培知识。')}
- <table class="land-guide-crops"><caption>当前可种作物的农时与照料差异</caption><thead><tr><th scope="col">作物</th><th scope="col">播种季</th><th scope="col">生长期</th><th scope="col">水分门槛</th><th scope="col">选择理由与限制</th></tr></thead><tbody>${crops}</tbody></table>
+ <table class="land-guide-crops"><caption>当前可种作物的农时与照料差异</caption><thead><tr><th scope="col">作物</th><th scope="col">播种窗口</th><th scope="col">成熟节气</th><th scope="col">水分门槛</th><th scope="col">选择理由与限制</th></tr></thead><tbody>${crops}</tbody></table>
  <p>起始田的井泵和社会供水不自动覆盖所有新田；扩展田要依靠手动照料或地图设施。亲自灌溉消耗1公共水，恢复到该作物所需水分；已有受灾不会消失，也不会提前成熟。</p>
- <p>成熟后需要手动收获，收完留空，由你决定下一茬。掌握轮作后，更换作物有收成收益。播种前看预计成熟日期，避免多块田同时成熟时又开长工程；尤其留意小豆迟收损失更快。</p>
+ <p>成熟后需要手动收获，收完留空，由你决定下一茬。掌握轮作后，更换作物有收成收益。播种前看预计成熟日期，避免多块田同时成熟时又开长工程；留意正常收获期与绝收日期。</p>
  <div class="land-guide-example"><strong>一个选址思路</strong><p>水源旁的田可为稻作留位置；从水源格向外逐段修渠，开闸一次浇一片。外围缺少供水的田可考虑需水较低的粟。若普通作物田连雨后常积水，找不高于田地且有出口的位置开沟。</p></div></section>
  <section>${heading('05','land-trouble','设施不生效，先看这些','选中设施，看通水状态；选中田地，看当前水分与作物需求。')}
  <div class="land-guide-faq">${[

@@ -1,3 +1,4 @@
+import {farmTasks} from '../systems/farm-calendar.js';
 import {availableDays} from '../systems/calendar.js';
 import { quoteReservedLabor } from '../systems/labor.js';
 import { branchActionNeeds } from '../systems/branches.js';
@@ -11,10 +12,10 @@ import type { GameEvent } from '../model/events.js';
 import { MATERIAL_NAMES } from '../model/production.js';
 import type { Material } from '../model/production.js';
 
-export interface ActionDefinition { prepare?: (draft:GameState, events:GameEvent[])=>void; offer: ActionOffer; execute: (draft: GameState, events:GameEvent[]) => void }
+export interface ActionDefinition { deferred?:boolean; prepare?: (draft:GameState, events:GameEvent[])=>void; offer: ActionOffer; execute: (draft: GameState, events:GameEvent[]) => void }
 // Sheds halve the base time of sow/tend/harvest work on fields within Chebyshev distance 2.
 function shedCoversPlot(state:GameState,id:string):boolean {
-  const op=id.split(':')[1];if(op!=='farm'&&op!=='farmplot')return false;
+  const op=id.split(':')[1];if(op!=='farm'&&op!=='farmplot'&&op!=='farmrare')return false;
   const plots=state.economy?.farm?.plots;if(!plots)return false;
   const plot=plots[op==='farm'?HOME_PLOT:id.split(':')[2]?.split('-')[0]??''];
   return !!plot&&shedCovers(state,plot);
@@ -24,8 +25,10 @@ export function defineAction(state: GameState, id: string, label: string, group:
   const ap=state.life?0:requestedAp;
   const baseLife=state.life?lifeCost(state,id,requestedAp):undefined;
   let quoted=baseLife?{time:costs.time??baseLife.time,energy:costs.energy??baseLife.energy}:undefined;
-  if(quoted&&costs.time===undefined&&quoted.time>0&&shedCoversPlot(state,id)){quoted={...quoted,time:Math.max(0.5,Math.round(quoted.time/2*100)/100)};description+=' 窝棚覆盖：基础农活时间减半。';}
-  const life=quoted?calendarCost(state,id,state.life?.calendar&&['branchlearn','farmproject','farmexplore','farmreclaim','wait','diet','cook'].includes(id.split(':')[1])?quoted:sectCosts(state,id,quoted)):undefined;
+  let life=quoted?calendarCost(state,id,state.life?.calendar&&['branchlearn','farmproject','farmexplore','farmreclaim','wait','diet','cook','wildharvest'].includes(id.split(':')[1])?quoted:sectCosts(state,id,quoted)):undefined;
+  if(life&&life.time>0&&shedCoversPlot(state,id)){life={...life,time:Math.max(0.5,Math.ceil(life.time)/2)};description+=' 窝棚覆盖：农活时间减半，最低半天。';}
+
+  if(life&&life.time>0&&state.economy?.farm&&state.life?.calendar){const now=state.life.calendar.absoluteDay;const crossed=farmTasks(state).filter(t=>t.deadline>now&&t.deadline<=now+life!.time);if(crossed.length)description+=' 此行动将跨过农时截止：'+crossed.map(t=>t.name).join('、')+'。';}
   const reasons = [...new Set([...blockers.map(reason=>state.economy?.branches?reason.replace(/需生产组织第?1阶或家族记录/g,'需掌握劳动分工').replace(/需生产组织第?2阶或家族记录/g,'需掌握生产工序').replace(/需生产组织第?3阶或家族记录/g,'需掌握采购与交付'):reason),...branchActionNeeds(state,id)])];
   // Quote on an isolated draft: farming changes water demand; income, purchases and
   // household policies change shopping demand. Never mutate the real state or advance a season.

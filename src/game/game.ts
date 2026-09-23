@@ -73,13 +73,15 @@ export function transition(state: GameState, action: GameAction, rules: Ruleset)
   const definition = actionDefinitions(state, rules).find(def => def.offer.id === id);
   if (!definition?.offer.enabled) throw new Error(definition?.offer.reason || '此状态下不存在该行动');
   const next = structuredClone(state), events: GameEvent[] = [];
+  if(action.type==='economy'&&action.operation==='plotplan'){definition.execute(next,events);return {state:deepFreeze(next),events:deepFreeze(events)};}
   const { ap, time, energy, money, food, materials } = definition.offer;
   if(next.life){if(!next.life.calendar)next.life.timeRemaining=Math.round((next.life.timeRemaining-(time??0))*100)/100;activePerson(next).vitality!.energy=Math.round((activePerson(next).vitality!.energy-(energy??0))*100)/100;}
   next.ap -= ap; next.household.money -= money; next.household.food -= food;
   if (materials) for (const [material, amount] of Object.entries(materials)) next.production!.inventory[material as Material] -= amount;
   events.push({ type: 'action-paid', action: structuredClone(definition.offer.action), cost: { ap, ...(next.life?{time,energy}:{}), money, food, ...(materials ? { materials: { ...materials } } : {}) } });
   recordSeasonChoice(next,id,events);
-  const deferredFarmProject=action.type==='economy'&&action.operation==='farmproject'&&!!next.life?.calendar;
+  const startedDay=next.life?.calendar?.absoluteDay??0,startedPerson=next.household.activePersonId;
+  const deferredFarmProject=!!next.life?.calendar&&(action.type==='economy'&&action.operation==='farmproject'||!!definition.deferred);
   if(deferredFarmProject)definition.prepare?.(next,events);
   else definition.execute(next, events);
   recordProducts(next,events);
@@ -97,7 +99,7 @@ export function transition(state: GameState, action: GameAction, rules: Ruleset)
     if(days>0)advanceCalendar(next,rules,days,events,op==='wait'||op==='end');
     if(op==='erasettle'){settleEra(next,rules,events);next.life.timeRemaining=next.era?.dayBudget?Math.max(0,next.era.dayBudget.started+next.era.dayBudget.limit-next.life.calendar.absoluteDay):next.life.timeRemaining;}
   }else if (action.type !== 'handover' && (action.type === 'end-turn' || action.type==='economy'&&(action.operation==='end'||action.operation==='erasettle') || (!next.sect&&(next.life?next.life.timeRemaining===0:next.ap === 0)))) finishSeason(next, rules, events);
-  if(deferredFarmProject)definition.execute(next,events);
+  if(deferredFarmProject&&next.status==='active'&&next.household.activePersonId===startedPerson&&(next.life?.calendar?.absoluteDay??0)>=startedDay+(time??0)){const start=events.length;definition.execute(next,events);recordBranchWork(next,events.slice(start));}
   recordCharacterGrowth(next,events);
   return { state: deepFreeze(next), events: deepFreeze(events) };
 }

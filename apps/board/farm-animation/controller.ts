@@ -1,7 +1,7 @@
 import {IMPROVEMENT_NAMES} from '../../../src/game/systems/agriculture.js';
 import {farmArt} from './scene.js';
 import {farmEventArt,type FarmArt} from '../illustration.js';
-import {type FarmGame,selectedFarmPlot,selectFarmPlot,selectFarmPanel,selectFarmStock,selectFarmProject,selectFarmProjectDuration,type FarmPanel} from '../farm-view.js';
+import {type FarmGame,selectedFarmPlot,selectFarmPlot,selectFarmPanel,selectFarmStock,selectFarmProject,selectFarmProjectDuration,selectPlannedBatch,type FarmPanel} from '../farm-view.js';
 
 type Pixi=typeof import('pixi.js-legacy');
 type Sprite=import('pixi.js-legacy').Sprite;
@@ -82,7 +82,7 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
  hint.anchor.set(.5,1);hint.visible=false;hint.eventMode='none';hint.zIndex=10000;hint.scale.set(.9/Math.max(.8,zoom));
  const hintFor=(p:FarmMap['plots'][number]):string=>{
   const id=p.kind==='unknown'?'economy:farmexplore:'+p.id:p.kind==='wild'?'economy:farmreclaim:'+p.id:'';
-  if(p.improvement)return `${p.id} · ${IMPROVEMENT_NAMES[p.improvement]} · ${p.improvement==='canal'?(p.waterConnected?'已通水':'未通水'):p.improvement==='pit'?(p.pit?`转化中 · 剩 ${p.pit.remainingDays} 天`:'待投料 · 需3秸秆'):p.improvement==='shed'?'覆盖两格内的田':p.improvement==='retting'?'开放沤麻工序':p.improvement==='yard'?'相邻田迟收不减收':p.improvement==='cellar'?'相邻田留种+1':'覆盖正交四格'}`;
+  if(p.improvement)return `${p.id} · ${IMPROVEMENT_NAMES[p.improvement]} · ${p.improvement==='canal'?(p.waterConnected?'已通水':'未通水'):p.improvement==='pit'?(p.pit?`转化中 · 剩 ${p.pit.remainingDays} 天`:'待投料 · 需3秸秆'):p.improvement==='shed'?'覆盖两格内的田':p.improvement==='retting'?'开放沤麻工序':p.improvement==='yard'?'相邻田正常收获期延长7天':p.improvement==='cellar'?'相邻田留种+1':'覆盖正交四格'}`;
   if(p.project&&p.project.done<p.project.total)return `${p.id} · ${p.project.name} ${p.project.done}/${p.project.total}天 · 点击续建`;
   if(!id)return `${p.id} · ${p.kind==='field'?(p.land?.paddy?'水田':'田地'):p.kind==='tree'?'古树 · 不可开垦':p.kind==='rock'?'岩石 · 不可开垦':p.kind==='water'?'水源 · 不可开垦':'查看地块'}`;
   const a=g.actions.find(a=>a.id===id);
@@ -177,6 +177,8 @@ export function bindFarmScene(root:Document,g:FarmGame,rerender:()=>void):void {
  root.querySelectorAll<HTMLButtonElement>('[data-farm-jump]').forEach(b=>b.onclick=()=>select(b.dataset.farmJump!));
  root.querySelectorAll<HTMLButtonElement>('[data-farm-project]').forEach(b=>b.onclick=()=>{selectFarmProject(b.dataset.farmProject!);rerender();});
  root.querySelectorAll<HTMLButtonElement>('[data-farm-duration]').forEach(b=>b.onclick=()=>{selectFarmProjectDuration(b.dataset.farmDuration!);rerender();});
+ const planPicker=root.getElementById('farm-plan-plot') as HTMLSelectElement|null;if(planPicker)planPicker.onchange=()=>{selectFarmPlot(planPicker.value);selectFarmPanel('calendar');rerender();};
+ const batchPicker=root.getElementById('farm-plan-batch') as HTMLSelectElement|null;if(batchPicker)batchPicker.onchange=()=>{selectPlannedBatch(batchPicker.value);rerender();};
  const picker=root.getElementById('farm-plot-select') as HTMLSelectElement|null;if(picker)picker.onchange=()=>select(picker.value);
  quickEl=root.querySelector<HTMLElement>('.farm-map-quick');
  const host=root.getElementById('farm-map'),map=g.economy?.farm;

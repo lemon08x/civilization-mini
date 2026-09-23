@@ -158,12 +158,12 @@ export function lifeCost(s:GameState,id:string,oldAp:number,useLearningPoint=tru
   if(op==='rest')return {time:4,energy:0};
   if(op==='care')return {time:s.life?.renewal?.careTime??4,energy:s.life?.renewal?.careEnergy??1};
   if(op==='company')return {time:s.life?.renewal?.companyTime??2,energy:s.life?.renewal?.companyEnergy??1};
-  if(op==='pause'||op==='assign'||target==='off'||oldAp===0&&op!=='farm'&&op!=='farmplot'&&op!=='process')return {time:0,energy:0};
+  if(op==='pause'||op==='assign'||target==='off'||oldAp===0&&op!=='farm'&&op!=='farmplot'&&op!=='farmrare'&&op!=='process')return {time:0,energy:0};
   // Powered tools still require a brief personal instruction, but remove bodily labour.
   if(oldAp===0)return {time:1,energy:0};
   let time=physical.has(op)||learning.has(op)||op==='teach'||op==='branchteach'?4:2;
   let energy=physical.has(op)?4:learning.has(op)||op==='teach'||op==='branchteach'?2:1;
-  if(s.life?.renewal&&['farm','farmplot'].includes(op)){time=s.life.renewal.farmTime;energy=s.life.renewal.farmEnergy;}
+  if(s.life?.renewal&&['farm','farmplot','farmrare'].includes(op)){time=s.life.renewal.farmTime;energy=s.life.renewal.farmEnergy;}
   if(s.economy?.farm&&['farm','farmplot'].includes(op)&&equipped(s,'W01')){const f=op==='farm'?s.economy.field:plotField(s,target.split('-')[0]);if(f?.crop&&f.growth<f.duration)energy/=2;}
   const v=activePerson(s).vitality!;
   if(s.era&&learning.has(op))time=Math.max(1,time-(eraCard(s)?.learning??0));
@@ -438,7 +438,7 @@ export function settleSeasonEncounter(s:GameState,missing:number,events:GameEven
 export function calendarCost(s:GameState,id:string,cost:{time:number;energy:number}) {
   const c=s.life?.calendar;if(!c)return cost;
   const op=id.split(':')[1];
-  if(['farmproject','farmexplore','farmreclaim','wait','diet','branchlearn','cook'].includes(op))return cost;
+  if(['farmproject','farmexplore','farmreclaim','wait','diet','branchlearn','cook','wildharvest'].includes(op))return cost;
   let days=cost.time*c.rules.actionDaysPerUnit;
   if(['farm','farmplot','farmrare'].includes(op))days=cost.time>0?Math.min(1,days):0;
   if(['farmfertilize','fertilize','rest'].includes(op))days=cost.time>0?0.5:0;

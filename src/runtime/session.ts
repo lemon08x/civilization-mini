@@ -1,3 +1,5 @@
+import type {GameState} from '../game/model/state.js';
+import {cropBatches} from '../game/systems/farm-calendar.js';
 import {seasonAt} from '../game/systems/calendar.js';
 import {FARM_DISCOVERIES} from '../game/model/economy.js';
 import {CROPS} from '../game/systems/economy-catalog.js';
@@ -63,11 +65,12 @@ export function parseSession(value: unknown): Session {
   if(!isRecord(sect)||!isRecord(persons)||!isRecord(sect.members)||!Array.isArray(sect.current)||sect.current.length!==2||new Set(sect.current).size!==2||!isRecord(sect.rules)||canonical(sect.rules)!==canonical(record.manifest.ruleset.sect))invalid();
   const q=sect as Record<string,any>,people=persons as Record<string,any>;
   const economy=value.state.economy;
-  const farmInvalid=()=>{throw new Error('存档缺少有效地块或独立同门数据，请新开游戏；原存档不修改。');};
+  const recordShape=(v:unknown):boolean=>isRecord(v);
+  const farmInvalid=()=>{throw new Error('存档缺少有效农时、地块或独立同门数据，请新开游戏；原存档不修改。');};
   if(!isRecord(economy)||!isRecord(economy.farm))farmInvalid();
   const farm=(economy as Record<string,any>).farm;
   const validField=(f:unknown)=>isRecord(f)&&[null,...Object.keys(CROPS)].includes(f.crop as null|string)&&[null,...Object.keys(CROPS)].includes(f.lastCrop as null|string)&&['planted','moisture','growth','stress','fertility','tended','bonus','duration'].every(k=>finite(f[k]))&&Number(f.fertility)<=3&&Number(f.duration)>=1&&typeof f.composted==='boolean'&&(f.variety===undefined||f.variety==='heritage'&&f.crop==='wheat');
-  if(farm.landVersion!==2||farm.explorationVersion!==3||!Number.isSafeInteger(farm.rareSeeds)||farm.rareSeeds<0)farmInvalid();
+  if(farm.calendarVersion!==1||farm.landVersion!==2||farm.explorationVersion!==3||!Number.isSafeInteger(farm.rareSeeds)||farm.rareSeeds<0)farmInvalid();
   if(!isRecord(farm.rules)||canonical(farm.rules)!==canonical(record.manifest.ruleset.farm)||!isRecord(farm.plots)||!Array.isArray(farm.discovered)||!farm.discovered.includes('wheat')||new Set(farm.discovered).size!==farm.discovered.length||farm.discovered.some((c:unknown)=>!Object.keys(CROPS).includes(String(c)))||!Number.isSafeInteger(farm.explored)||farm.explored<0)farmInvalid();
   if(!validField((economy as Record<string,any>).field)||farm.plots.p2q2?.kind!=='field')farmInvalid();
   for(const [id,raw] of Object.entries(farm.plots)){
@@ -91,6 +94,22 @@ export function parseSession(value: unknown): Session {
     }
     if(p.improvement!==undefined&&(!['canal','shelter','drain','yard','cellar','pit','shed','retting'].includes(p.improvement)||p.kind!=='rock'||p.project?.kind!==p.improvement||p.project.done!==p.project.total))farmInvalid();
     if(p.pit!==undefined&&(!isRecord(p.pit)||!Number.isInteger(Number(p.pit.readyDay))||Number(p.pit.readyDay)<0||p.improvement!=='pit'))farmInvalid();
+    if(p.wild!==undefined&&(!recordShape(p.wild)||p.kind!=='wild'||p.project!==undefined||!['mushroom','yam'].includes(p.wild.kind)||!['stock','year','bursts','wetDays','expires'].every(k=>Number.isSafeInteger(p.wild[k])&&p.wild[k]>=0)||!Number.isSafeInteger(p.wild.lastSpawn)||p.wild.stock>(p.wild.kind==='yam'?farm.rules.yamYield:farm.rules.mushroomYield)||p.wild.bursts>farm.rules.mushroomMaxBursts))farmInvalid();
+    if(p.plans!==undefined){
+      if(p.kind!=='field'||!Array.isArray(p.plans)||new Set(p.plans.map((v:any)=>v.id)).size!==p.plans.length)farmInvalid();
+      for(const plan of p.plans){
+        if(!recordShape(plan)||typeof plan.id!=='string'||typeof plan.batchId!=='string'||!Number.isSafeInteger(plan.year)||plan.year<1900||plan.year>2500||plan.id!==`${id}-${plan.year}-${plan.batchId}`||!['sowDay','harvestDay'].every(k=>finite(plan[k])&&Number.isInteger(plan[k]*2))||plan.harvestDay<=plan.sowDay||!['sown','fertilized','harvested','failed'].every(k=>typeof plan[k]==='boolean')||plan.fertilizeDay!==undefined&&(!finite(plan.fertilizeDay)||plan.fertilizeDay<plan.sowDay||plan.fertilizeDay>=plan.harvestDay))farmInvalid();
+        const batch=cropBatches(value.state as unknown as GameState,plan.year).find(v=>v.id===plan.batchId);
+        if(!batch||plan.sowDay<batch.start||plan.sowDay>=batch.end||plan.harvested&&!plan.sown)farmInvalid();
+      }
+    }
+    const field=id==='p2q2'?(economy as Record<string,any>).field:p.field;
+    if(field?.crop){
+      const b=field.batch;
+      if(!recordShape(b)||!Number.isSafeInteger(b.year)||b.year<1900||b.year>2500||typeof b.id!=='string'||!['sownDay','matureDay','lateFactor'].every(k=>finite(b[k]))||b.lateFactor>1||b.matureDay<=b.sownDay)farmInvalid();
+      const batch=cropBatches(value.state as unknown as GameState,b.year).find(v=>v.id===b.id);
+      if(!batch||batch.crop!==field.crop||b.sownDay<batch.start||b.sownDay>=batch.end||![batch.mature,batch.mature-farm.rules.nurseryDays].includes(b.matureDay)||b.lateFactor!==Math.max(0,1-Math.max(0,Math.floor(b.sownDay)-batch.bestEnd+1)*farm.rules.lateSowPercent/100)||field.duration!==b.matureDay-b.sownDay)farmInvalid();
+    }else if(field?.batch!==undefined)farmInvalid();
     if(p.kind==='unknown'&&Object.keys(p).some(k=>!['id','x','y','kind'].includes(k)))farmInvalid();
   }
   const neighbor=farm.neighbor;

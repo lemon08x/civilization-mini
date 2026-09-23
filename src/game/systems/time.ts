@@ -1,3 +1,4 @@
+import {farmTasks} from './farm-calendar.js';
 import {settleTermEvent,changeCalendarWeather,seasonAt,lunarDateAt,availableDays} from './calendar.js';
 import {advanceFields} from './agriculture.js';
 import {feedCalendar} from './social-food.js';
@@ -178,6 +179,7 @@ export function advanceCalendar(s:GameState,rules:Ruleset,days:number,events:Gam
   if(step<=0){settleEra(s,rules,events);break;}
   const foodBefore=c.consumed,missingBefore=c.missing;
   const fed=feedCalendar(s,step,events);ate+=c.consumed-foodBefore;missing+=c.missing-missingBefore;
+  const due=s.economy?.farm?farmTasks(s).filter(t=>t.day>c.absoluteDay&&t.day<=c.absoluteDay+step):[];
   const ripe=advanceFields(s,step,events);
   const storageEvents:GameEvent[]=[];spoilEconomy(s,storageEvents,step);
   for(const event of storageEvents)if(event.type==='food-spoiled'){spoiled+=event.amount;protectedFood=event.protected;}
@@ -187,6 +189,7 @@ export function advanceCalendar(s:GameState,rules:Ruleset,days:number,events:Gam
   Object.assign(c,{seasonStarted:span.start,seasonLength:span.days,day:c.absoluteDay-span.start});
   s.life!.timeRemaining=availableDays(s);
   settleLife(s,c.missing-missingBefore,events,Math.max(0.001,c.consumed-foodBefore+c.missing-missingBefore),step);
+  if(due.length)notice='农事计划到期：'+due.map(t=>t.name).join('、');
   if(!fed)notice='饮食不足，先补充干粮，或准备食材与柴火。';
   else if(ripe.length)notice=ripe.join('、')+'已经成熟，可以收获。';
   if(Math.floor(c.absoluteDay)>previousDay&&s.status==='active'){

@@ -124,7 +124,7 @@ export function calendarView(s: GameState) {
   return { ...now, date: now.date + ' · ' + period, period, absoluteDay: c.absoluteDay,
     season: ['春', '夏', '秋', '冬'][season.index], daysPerSeason: season.days,
     businessCycle:{days:c.rules.businessCycleDays,nextDate:lunarDateAt(c.rules.referenceYear,c.nextBusinessDay).date,remaining:c.nextBusinessDay-c.absoluteDay,description:'后续生产、运输与补货暂按独立经营周期运行，与自然换季无关。'},
-    month,nextTerm,weather:{name:{dry:'干燥',normal:'晴和',wet:'连雨'}[s.location.weather],rain:s.location.rain,days:Math.max(0,c.weatherNextDay-c.absoluteDay),effect:s.location.weather==='dry'?'土壤按保水能力逐步变干；渠塘按额度补水，护田林减缓失水。':s.location.weather==='wet'?'持续连雨使水分逐档上升，水塘蓄水；过湿和积水可能造成涝害。':'土壤缓慢失水；过湿田按排水能力恢复，需查看每块田的水分。'},termEvents:c.termEvents.map(e=>({...e})),
+    month,nextTerm,weather:{name:{dry:'干燥',normal:'晴和',wet:'连雨'}[s.location.weather],rain:s.location.rain,days:Math.max(0,c.weatherNextDay-c.absoluteDay),effect:s.location.weather==='dry'?'土壤按保水能力逐步变干；通水渠向同高或更低的邻田供水，护田林减缓失水。':s.location.weather==='wet'?'持续连雨使水分逐档上升，低洼地可能积水；过湿和积水可能造成涝害。':'土壤缓慢失水；过湿田按排水能力恢复，需查看每块田的水分。'},termEvents:c.termEvents.map(e=>({...e})),
     upcoming: upcoming.slice(0, 3), lastNotice: c.lastNotice };
 }
 
@@ -175,4 +175,12 @@ export function changeCalendarWeather(s:GameState,rules:Ruleset,events:GameEvent
  s.location.water=s.location.weather==='dry'?Math.min(s.location.water,scenario.water):Math.max(s.location.water,2);
  c.weatherNextDay=Math.floor(c.absoluteDay)+c.rules.weatherDays;
  events.push({type:'life',personId:s.household.activePersonId,operation:'weather',detail:`天气转为${{dry:'干燥',normal:'晴和',wet:'连雨'}[s.location.weather]}，降雨供水${s.location.rain}；${c.rules.weatherDays}天后再次变化。`});
+}
+
+/** Public astronomical dates; no weather or random state is involved. */
+export function solarYearAt(referenceYear:number,day:number):number{return solarAt(referenceYear,day).getYear();}
+export function solarTermDay(referenceYear:number,year:number,name:string):number {
+ const entry=terms(year).find(t=>t.name===name&&Solar.fromDate(new Date(t.serial*86400000)).getYear()===year);
+ if(!entry)throw new Error('节气不存在：'+name);
+ return entry.serial-epoch(referenceYear);
 }

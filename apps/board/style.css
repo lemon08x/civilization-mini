@@ -1465,3 +1465,8 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .land-guide-faq p { margin:12px 0 0; }
 .land-guide-bottom { display:flex; justify-content:space-between; align-items:center; gap:24px; padding-top:24px; }
 .land-guide-bottom p { max-width:520px; }
+
+.farm-calendar-head,.farm-calendar-planning{padding:20px;background:#f5f4e9;border:1px solid #d9dfcf;border-radius:12px;margin-bottom:20px}
+.farm-calendar-planning select{padding:8px;min-width:200px;margin:8px;color:#365543;background:#fffdf5;border:1px solid #becab2;border-radius:5px}
+.farm-plan-entry{border-top:1px solid #d9dfcf;margin-top:16px;padding-top:12px}.farm-plan-actions{display:flex;gap:8px;flex-wrap:wrap}
+.farm-calendar-table{width:100%;border-collapse:collapse;margin:16px 0 24px;text-align:left;font-size:13px}.farm-calendar-table td,.farm-calendar-table th{padding:12px;border-bottom:1px solid #d9dfcf;vertical-align:top}.farm-calendar-table small{display:block;margin-top:6px;color:#72816a}.farm-task-due{background:#edf1df}.farm-season-note{position:relative;padding:14px;margin-top:12px}.farm-room-calendar{overflow:auto}

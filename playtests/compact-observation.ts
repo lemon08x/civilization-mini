@@ -20,7 +20,7 @@ export interface CompactActionQuote {
 }
 
 export interface CompactObservation {
-  // Shared farm observation includes land bands, coverage, water connectivity and paddy marks.
+  // Shared farm observation includes annual tasks, labor conflicts, fixed crop dates and wild resources.
   farm?:NonNullable<SessionObservation['game']['economy']>['farm'];
   calendar?:NonNullable<SessionObservation['game']['life']>['calendar'];
   diet?:NonNullable<SessionObservation['game']['life']>['diet'];

@@ -16,6 +16,7 @@ const topics:Record<Subject,string[]>={
 const prefixes:Record<Subject,string>={mechanics:'L',heat:'H',chemistry:'C',materials:'M',agronomy:'A',organization:'O'};
 export const TOPICS=Object.entries(topics).flatMap(([s,names])=>names.map((name,i)=>({id:prefixes[s as Subject]+String(i+1).padStart(2,'0'),subject:s as Subject,level:i+1,name})));
 export const GOODS:Record<string,{name:string;price:number;food:number}>={
+  mushroom:{name:'野蘑菇',price:1,food:1},yam:{name:'山药',price:1,food:1},
   wood:{name:'木材',price:1,food:0},clay:{name:'黏土',price:1,food:0},ore:{name:'矿料',price:2,food:0},iron:{name:'铁料',price:5,food:0},
   wheat:{name:'小麦',price:1,food:1},soy:{name:'大豆',price:2,food:1},flax:{name:'亚麻茎',price:2,food:0},straw:{name:'秸秆',price:1,food:0},
   flour:{name:'面粉',price:2,food:1},oil:{name:'植物油',price:4,food:0},fiber:{name:'亚麻纤维',price:4,food:0},rope:{name:'绳索',price:6,food:0},
@@ -29,8 +30,9 @@ export const GOODS:Record<string,{name:string;price:number;food:number}>={
   seedMustard:{name:'芥菜种子',price:2,food:0},mustard:{name:'芥菜',price:1,food:1},
   salt:{name:'食盐',price:2,food:0},pickles:{name:'腌菜',price:3,food:1},
 };
-export const EDIBLE=['flour','wheat','soy','millet','rice','milledRice','adzuki','mallow','mustard','pickles'];
-export interface CropSpec {name:string;seed:string;duration:number;yield:number;straw:number;level:number;waterNeed?:number;floodTolerant?:boolean;lateRate?:number;legume?:boolean;}
+export const EDIBLE=['flour','wheat','soy','millet','rice','milledRice','adzuki','mallow','mustard','pickles','mushroom','yam'];
+export interface CropSeason {sowTerm:string;harvestTerm:string;yearOffset:number;}
+export interface CropSpec {seasons?:CropSeason[];name:string;seed:string;duration:number;yield:number;straw:number;level:number;waterNeed?:number;floodTolerant?:boolean;lateRate?:number;legume?:boolean;}
 export const CROPS:Record<Crop,CropSpec>={
   wheat:{name:'小麦',seed:'seedWheat',duration:2,yield:6,straw:2,level:1},soy:{name:'大豆',seed:'seedSoy',duration:2,yield:4,straw:1,level:2,legume:true},flax:{name:'亚麻',seed:'seedFlax',duration:3,yield:5,straw:1,level:2},
   rice:{name:'水稻',seed:'seedRice',duration:140,yield:7,straw:2,level:2,waterNeed:3,floodTolerant:true},
@@ -100,7 +102,7 @@ export const goodsFor=(s:GameState)=>s.electric?ALL_GOODS:s.economy?.modern?{...
 export interface CatalogOverlay {
   cooking: Record<string,{inputs:Record<string,number>;food:number;time:number;energy:number}>;
   goods: Record<string, { price: number; food: number }>;
-  crops: Record<string, { duration: number; yield: number; straw: number; level: number; waterNeed?: number; floodTolerant?: boolean; lateRate?: number; legume?: boolean }>;
+  crops: Record<string, { seasons:CropSeason[]; duration: number; yield: number; straw: number; level: number; waterNeed?: number; floodTolerant?: boolean; lateRate?: number; legume?: boolean }>;
   products: Record<string, { inputs: Record<string, number> }>;
   processes: Record<string, { inputs: Record<string, number>; outputs: Record<string, number>; wait: number; power?: number }>;
 }
@@ -134,6 +136,9 @@ export function applyCatalogOverlay(overlay: CatalogOverlay): void {
     if (n.floodTolerant !== undefined && typeof n.floodTolerant !== 'boolean') throw new Error('作物耐涝标记无效：' + id);
     if (n.lateRate !== undefined && (!Number.isFinite(n.lateRate) || n.lateRate < 1 || n.lateRate > 9)) throw new Error('作物迟收倍率无效：' + id);
     if (n.legume !== undefined && typeof n.legume !== 'boolean') throw new Error('作物豆科标记无效：' + id);
+    const terms=['立春','雨水','惊蛰','春分','清明','谷雨','立夏','小满','芒种','夏至','小暑','大暑','立秋','处暑','白露','秋分','寒露','霜降','立冬','小雪','大雪','冬至','小寒','大寒'];
+    if(!Array.isArray(n.seasons)||!n.seasons.length||n.seasons.length>2||n.seasons.some(v=>!terms.includes(v.sowTerm)||!terms.includes(v.harvestTerm)||![0,1].includes(v.yearOffset)))throw new Error('缺少有效固定农时，请新开游戏：'+id);
+    crop.seasons=structuredClone(n.seasons);
     crop.duration = n.duration;
     crop.yield = n.yield;
     crop.straw = n.straw;
