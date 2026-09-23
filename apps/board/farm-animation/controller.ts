@@ -31,6 +31,7 @@ let elapsed=0;
 const plotViews=new Map<string,{x:number;y:number;crop?:Sprite;cropScale?:number}>();
 let mistDrift:{sp:Sprite;baseX:number;seed:number}[]=[];
 let cropSway:Sprite[]=[];
+let treeSway:Sprite[]=[];
 let selectedRing:Graphics|null=null;
 let tweens:Tween[]=[];
 let particles:Particle[]=[];
@@ -41,8 +42,11 @@ const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function tick(dt:number):void {
  elapsed+=dt;
- for(const m of mistDrift){m.sp.x=m.baseX+Math.sin(elapsed*.012+m.seed)*5;m.sp.alpha=.82+Math.sin(elapsed*.017+m.seed*1.7)*.14;}
+ for(const m of mistDrift){m.sp.x=m.baseX+Math.sin(elapsed*.012+m.seed)*5;m.sp.alpha=.38+Math.sin(elapsed*.017+m.seed*1.7)*.08;}
  for(const c of cropSway)c.skew.x=Math.sin(elapsed*.025+c.position.x)*.012;
+ for(const t of treeSway)t.skew.x=Math.sin(elapsed*.012+t.position.x)*.004;
+ if(background)background.x=-12+Math.sin(elapsed*.002)*4+Math.max(-6,Math.min(6,pan.x*.012));
+ if(distantHouse)distantHouse.x=viewW*.77+Math.max(-10,Math.min(10,pan.x*.025));
  if(selectedRing)selectedRing.alpha=.72+Math.sin(elapsed*.07)*.28;
  for(let i=tweens.length-1;i>=0;i--){const tw=tweens[i];tw.t+=dt/60;const k=Math.min(1,tw.t/tw.dur);tw.update(tw.ease(k));if(k>=1){tweens.splice(i,1);tw.done?.();}}
  for(let i=particles.length-1;i>=0;i--){const pt=particles[i];pt.life-=dt/60;pt.g.x+=pt.vx*dt;pt.g.y+=pt.vy*dt;pt.vy+=.06*dt;pt.g.alpha=Math.max(0,pt.life/pt.max);if(pt.life<=0){pt.g.destroy();particles.splice(i,1);}}
@@ -70,7 +74,7 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
  floor.removeChildren().forEach(c=>c.destroy());
  mistLayer.removeChildren().forEach(c=>c.destroy());
  items.removeChildren().forEach(c=>c.destroy());
- tweens=[];particles=[];mistDrift=[];cropSway=[];plotViews.clear();selectedRing=null;
+ tweens=[];particles=[];mistDrift=[];cropSway=[];treeSway=[];plotViews.clear();selectedRing=null;
  const xy=(x:number,y:number)=>({x:(x-y)*36,y:(x+y)*18});
  const selected=selectedFarmPlot();
  const targets=new P.Container();
@@ -90,7 +94,7 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
  for(const p of [...map.plots].sort((a,b)=>a.x+a.y-b.x-b.y)){
   const pos=xy(p.x,p.y),fog=p.kind==='unknown',field=p.kind==='field';
   plotViews.set(p.id,{x:pos.x,y:pos.y});
-  if(!fog)floor.addChild(art!.sprite(art!.groundTexture(field),pos.x,pos.y+26,.52));
+  floor.addChild(art!.sprite(fog?art!.unknownTexture():art!.groundTexture(field,p.land),pos.x,pos.y+26,.52));
   const tile=new P.Graphics();tile.position.set(pos.x,pos.y);tile.lineStyle(fog?1.1:.7,fog&&p.reachable?0x708668:0x91a080,fog&&!p.reachable?.28:.65).beginFill(0xd6e0cf,fog?.12:.01).drawPolygon([0,0,36,18,0,36,-36,18]).endFill();
   if(p.kind==='wild')for(let k=0;k<3;k++){const x=(p.x*13+k*19)%30-15,y=14+(p.y*7+k*9)%9;tile.lineStyle(.7,0x879b6f,.55).moveTo(x-2,y-3).lineTo(x,y).lineTo(x+2,y-4);}
   tile.eventMode='static';tile.cursor='pointer';tile.hitArea=new P.Polygon([0,0,36,18,0,36,-36,18]);tile.on('pointertap',()=>tap(p.id));targets.addChild(tile);
@@ -102,18 +106,16 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
   const hintText=hintFor(p);
   tile.on('pointerover',()=>{hover.visible=true;if(hintText){hint.text=hintText;hint.position.set(pos.x,pos.y-8);hint.visible=true;}if(app&&!app.ticker.started)app.render();});
   tile.on('pointerout',()=>{hover.visible=false;hint.visible=false;if(app&&!app.ticker.started)app.render();});
-  if(fog){const cloud=new P.Sprite(art!.mistTexture());cloud.anchor.set(.5);cloud.position.set(pos.x,pos.y+18);cloud.width=110;cloud.height=68;cloud.eventMode='none';mistLayer.addChild(cloud);mistDrift.push({sp:cloud,baseX:pos.x,seed:p.x*3.1+p.y*1.7});
-   if(p.id===selected||p.reachable){const label=new P.Text(p.reachable?'?':'·',{fontFamily:'SimSun',fontSize:p.id===selected?10:16,fill:0x73836e});label.anchor.set(.5);label.position.set(pos.x,pos.y+18);label.eventMode='none';items.addChild(label);}
+  if(fog){const cloud=new P.Sprite(art!.mistTexture());cloud.anchor.set(.5);cloud.position.set(pos.x,pos.y+18);cloud.width=84;cloud.height=40;cloud.alpha=.42;cloud.eventMode='none';mistLayer.addChild(cloud);mistDrift.push({sp:cloud,baseX:pos.x,seed:p.x*3.1+p.y*1.7});
+   if(p.id===selected||p.reachable){const label=new P.Text(p.reachable?'?':'·',{fontFamily:'SimSun',fontSize:p.reachable?18:14,fontWeight:'bold',fill:0x36594b,stroke:0xfffbeb,strokeThickness:2});label.anchor.set(.5);label.position.set(pos.x,pos.y+18);label.eventMode='none';items.addChild(label);}
   }
   let sp:Sprite|undefined;
-  if(p.kind==='tree'||p.improvement==='shelter'||p.discovery?.id==='woodland'&&!p.discovery.resolved)sp=art!.sprite(art!.treeTexture(),pos.x,pos.y+25,.65);
+  if(p.kind==='tree'||p.improvement==='shelter'||p.discovery?.id==='woodland'&&!p.discovery.resolved){sp=art!.sprite(art!.treeTexture(),pos.x,pos.y+25,p.kind==='tree'?.42:.34);treeSway.push(sp);}
   if(field&&p.field?.crop){sp=art!.sprite(art!.cropTexture(p.field.crop,p.field.growth>=p.field.duration?2:p.field.growth>=p.field.duration/3?1:0),pos.x,pos.y+30,.85);plotViews.get(p.id)!.crop=sp;plotViews.get(p.id)!.cropScale=.85/2;cropSway.push(sp);}
   if(sp){sp.zIndex=(p.x+p.y)*100+20;sp.eventMode='none';items.addChild(sp);}
   if((p.kind==='rock'||p.kind==='brush')&&!p.improvement){
-   const obstacle=new P.Graphics();
-   if(p.kind==='rock')obstacle.beginFill(0x8a9184).drawPolygon([-22,5,-15,-10,4,-17,22,-3,17,10,-4,16]).endFill().beginFill(0xa7aa96).drawPolygon([-15,-10,4,-17,8,-2,-8,2]).endFill();
-   else for(let k=0;k<5;k++)obstacle.lineStyle(2,0x707c4c).moveTo(-15+k*7,10).lineTo(-20+k*7,-9).moveTo(-15+k*7,10).lineTo(-10+k*7,-14);
-   obstacle.position.set(pos.x,pos.y+17);obstacle.zIndex=(p.x+p.y)*100+20;obstacle.eventMode='none';items.addChild(obstacle);
+   const obstacle=art!.sprite(p.kind==='rock'?art!.rockTexture():art!.brushTexture(),pos.x,pos.y+25,.85);
+   obstacle.zIndex=(p.x+p.y)*100+20;obstacle.eventMode='none';items.addChild(obstacle);
   }
   if(p.improvement==='canal'||p.improvement==='drain'){
    const channel=new P.Graphics().lineStyle(9,0x9d9270).moveTo(-24,29).lineTo(24,6).lineStyle(5,p.improvement==='drain'?0x70694e:0x6ca2ad).moveTo(-24,29).lineTo(24,6).lineStyle(1,0xcce6df).moveTo(-20,27).lineTo(20,8);
@@ -155,8 +157,8 @@ export function bindFarmScene(root:Document,g:FarmGame,rerender:()=>void):void {
   app=new P.Application({width:W,height:viewH,backgroundAlpha:0,antialias:true,resolution:Math.min(devicePixelRatio,2),autoDensity:true,autoStart:false});
   canvas=app.view as HTMLCanvasElement;canvas.setAttribute('aria-label','田地与探索地图；也可用右上角选择器操作');
   art=farmArt(P);
-  background=new P.Sprite(art.landscapeTexture());background.height=viewH;
-  distantHouse=art.sprite(art.houseTexture(),W*.77,105,.7);distantHouse.alpha=.7;distantHouse.eventMode='none';
+  background=new P.Sprite(art.landscapeTexture());background.height=viewH+12;
+  distantHouse=art.sprite(art.houseTexture(),W*.77,105,.85);distantHouse.alpha=.82;distantHouse.eventMode='none';
   floor=new P.Container();mistLayer=new P.Container();items=new P.Container();items.sortableChildren=true;
   world=new P.Container();world.addChild(floor,mistLayer,items);
   app.stage.addChild(background,distantHouse,world);
@@ -167,8 +169,8 @@ export function bindFarmScene(root:Document,g:FarmGame,rerender:()=>void):void {
   app.ticker.add(tick);
  }
  host.replaceChildren(canvas!);
- app.renderer.resize(W,viewH);background!.height=viewH;
- background!.width=W;distantHouse!.x=W*.77;
+ app.renderer.resize(W,viewH);background!.texture=art!.landscapeTexture();background!.height=viewH+12;
+ background!.width=W+24;distantHouse!.texture=art!.houseTexture();distantHouse!.x=W*.77;
  app.stage.hitArea=new P.Rectangle(0,0,W,viewH);
  buildWorld(map,g,select);
  const focus=()=>{const selected=map.plots.find(p=>p.id===selectedFarmPlot())!;pan={x:-(selected.x-selected.y)*36*zoom,y:viewH*.53-85-((selected.x+selected.y)*18+18)*zoom};};
@@ -177,13 +179,13 @@ export function bindFarmScene(root:Document,g:FarmGame,rerender:()=>void):void {
  root.querySelectorAll<HTMLButtonElement>('[data-farm-zoom]').forEach(b=>b.onclick=()=>{zoom=Math.min(2.6,Math.max(.4,zoom+Number(b.dataset.farmZoom)*.15));fit();});
  const center=root.querySelector<HTMLButtonElement>('[data-farm-center]');
  if(center)center.onclick=()=>{focus();fit();};
- observer=new ResizeObserver(()=>{if(host.clientWidth){const oldHeight=viewH;sizeMap();viewW=host.clientWidth;app!.renderer.resize(viewW,viewH);background!.width=viewW;background!.height=viewH;distantHouse!.x=viewW*.77;app!.stage.hitArea=new P!.Rectangle(0,0,viewW,viewH);if(oldHeight!==viewH)focus();fit();}});
+ observer=new ResizeObserver(()=>{if(host.clientWidth){const oldHeight=viewH;sizeMap();viewW=host.clientWidth;app!.renderer.resize(viewW,viewH);background!.width=viewW+24;background!.height=viewH+12;distantHouse!.x=viewW*.77;app!.stage.hitArea=new P!.Rectangle(0,0,viewW,viewH);if(oldHeight!==viewH)focus();fit();}});
  observer.observe(host);
  if(!reduced())app.ticker.start();else app.render();
  // Complete the artwork swap only for the still-mounted, current observation.
  // Switching panels or acting while an image loads must never restore stale state.
- void art!.loadCrops(['wheat','soy',...map.plots.flatMap(p=>p.field?.crop?[p.field.crop]:[])]).then(changed=>{
-  if(changed&&host.isConnected&&currentMap===map)rerender();
+ void Promise.all([art!.loadEnvironment(),art!.loadLand(),art!.loadCrops(['wheat','soy',...map.plots.flatMap(p=>p.field?.crop?[p.field.crop]:[])])]).then(changed=>{
+  if(changed.some(Boolean)&&host.isConnected&&currentMap===map)rerender();
  });
 }
 
