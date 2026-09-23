@@ -105,12 +105,12 @@ export function encounterCard(text:string,compact=false):string {
   return `<figure class="encounter-card${compact?' encounter-compact':''}"><span class="encounter-picture" aria-hidden="true" style="background-image:url('/illustrations/atlases/events-${group}.png');background-position:${column*25}% ${row*100}%"></span><figcaption><span class="encounter-heading">${esc(title)}${text.includes(title+'（重大）')?' · 重大':''}</span><p>${esc(text)}</p></figcaption></figure>`;
 }
 
-// Shared painted land atlas for the farm inspector and player guide.
-// water/paddy 暂无独立绘件：water 复用原蓄水塘格（同为水面），paddy 复用过湿格。
-// 加工设施暂无独立绘件：晒场复用干旱龟裂地表帧（压平的收获晾晒硬地），种子窖复用低地草坑帧（掘入地下的储粮窖），
-// 堆肥坑复用适宜湿土帧（腐熟中的堆肥土），窝棚复用护田林帧（依树搭棚的农舍类歇脚处），沤麻塘复用蓄水塘帧（水色系静水沤麻）。
-const landFrames:Record<string,number>={sand:0,loam:1,clay:2,low:3,flat:4,high:5,dry:6,parched:7,moist:8,wet:9,flood:10,water:11,drain:12,canal:13,shelter:14,fertility:15,paddy:9,yard:6,cellar:3,pit:8,shed:14,retting:11};
+// Land and facilities share the same Qinglü tile silhouette on the map and in cards.
+const landFrames:Record<string,number>={sand:1,loam:2,clay:3,dry:4,parched:4,moist:5,wet:6,flood:7,grass:0};
+const landTiles:Record<string,string>={water:'water',paddy:'paddy',drain:'drain',canal:'canal-connected','canal-dry':'canal-dry',shelter:'shelter',yard:'yard',cellar:'cellar',pit:'pit','pit-active':'pit-active',shed:'shed',retting:'retting',low:'low',flat:'flat',high:'high',fertility:'fertility',unknown:'unknown',timber:'timber',clearwood:'clearwood'};
 export function landArt(key:string,extra=''):string {
- const i=landFrames[key]??1;
- return `<span class="farm-land-art ${extra}" style="background-position:${i%4*100/3}% ${Math.floor(i/4)*100/3}%" aria-hidden="true"></span>`;
+ const tile=landTiles[key];
+ const style=tile?`background-image:url('/illustrations/farm/animation/painted/terrain/farm-tile-${tile}-qinglu-v1.png');background-size:contain;background-position:center`
+  :`background-image:url('/illustrations/farm/animation/painted/terrain/farm-land-qinglu-v1.png');background-size:400% 200%;background-position:${(landFrames[key]??2)%4*100/3}% ${Math.floor((landFrames[key]??2)/4)*100}%`;
+ return `<span class="farm-land-art ${extra}" style="${style};background-repeat:no-repeat" aria-hidden="true"></span>`;
 }

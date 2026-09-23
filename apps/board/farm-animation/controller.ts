@@ -22,7 +22,7 @@ let canvas:HTMLCanvasElement|null=null;
 let world:Container|null=null,floor:Container|null=null,mistLayer:Container|null=null,items:Container|null=null;
 let background:Sprite|null=null,distantHouse:Sprite|null=null;
 let observer:ResizeObserver|null=null;
-let zoom=1.45,pan={x:0,y:0},viewW=1,viewH=360;
+let zoom=1.85,pan={x:0,y:0},viewW=1,viewH=360;
 let lastSelection='';
 let drag:null|{x:number;y:number;px:number;py:number;moved:boolean}=null;
 let currentMap:FarmMap|null=null;
@@ -94,7 +94,9 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
  for(const p of [...map.plots].sort((a,b)=>a.x+a.y-b.x-b.y)){
   const pos=xy(p.x,p.y),fog=p.kind==='unknown',field=p.kind==='field';
   plotViews.set(p.id,{x:pos.x,y:pos.y});
-  floor.addChild(art!.sprite(fog?art!.unknownTexture():art!.groundTexture(field,p.land),pos.x,pos.y+26,.52));
+  const tileKey=fog?'unknown':p.kind==='water'?'water':p.improvement==='canal'?(p.waterConnected?'canal-connected':'canal-dry'):p.improvement==='pit'&&p.pit?'pit-active':p.improvement??(field&&p.land?.paddy?'paddy':'');
+  const ground=tileKey?art!.tileTexture(tileKey):null;
+  floor.addChild(art!.sprite(ground??(fog?art!.unknownTexture():art!.groundTexture(field,p.land)),pos.x,pos.y+26,.52));
   const tile=new P.Graphics();tile.position.set(pos.x,pos.y);tile.lineStyle(fog?1.1:.7,fog&&p.reachable?0x708668:0x91a080,fog&&!p.reachable?.28:.65).beginFill(0xd6e0cf,fog?.12:.01).drawPolygon([0,0,36,18,0,36,-36,18]).endFill();
   if(p.kind==='wild')for(let k=0;k<3;k++){const x=(p.x*13+k*19)%30-15,y=14+(p.y*7+k*9)%9;tile.lineStyle(.7,0x879b6f,.55).moveTo(x-2,y-3).lineTo(x,y).lineTo(x+2,y-4);}
   tile.eventMode='static';tile.cursor='pointer';tile.hitArea=new P.Polygon([0,0,36,18,0,36,-36,18]);tile.on('pointertap',()=>tap(p.id));targets.addChild(tile);
@@ -107,59 +109,17 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
   tile.on('pointerover',()=>{hover.visible=true;if(hintText){hint.text=hintText;hint.position.set(pos.x,pos.y-8);hint.visible=true;}if(app&&!app.ticker.started)app.render();});
   tile.on('pointerout',()=>{hover.visible=false;hint.visible=false;if(app&&!app.ticker.started)app.render();});
   if(fog){const cloud=new P.Sprite(art!.mistTexture());cloud.anchor.set(.5);cloud.position.set(pos.x,pos.y+18);cloud.width=84;cloud.height=40;cloud.alpha=.42;cloud.eventMode='none';mistLayer.addChild(cloud);mistDrift.push({sp:cloud,baseX:pos.x,seed:p.x*3.1+p.y*1.7});
-   if(p.id===selected||p.reachable){const label=new P.Text(p.reachable?'?':'·',{fontFamily:'SimSun',fontSize:p.reachable?18:14,fontWeight:'bold',fill:0x36594b,stroke:0xfffbeb,strokeThickness:2});label.anchor.set(.5);label.position.set(pos.x,pos.y+18);label.eventMode='none';items.addChild(label);}
   }
   let sp:Sprite|undefined;
-  if(p.kind==='tree'||p.improvement==='shelter'||p.discovery?.id==='woodland'&&!p.discovery.resolved){sp=art!.sprite(art!.treeTexture(),pos.x,pos.y+25,p.kind==='tree'?.42:.34);treeSway.push(sp);}
+  if(p.kind==='tree'||p.discovery?.id==='woodland'&&!p.discovery.resolved){sp=art!.sprite(art!.treeTexture(),pos.x,pos.y+25,p.kind==='tree'?.4:.32);treeSway.push(sp);}
   if(field&&p.field?.crop){sp=art!.sprite(art!.cropTexture(p.field.crop,p.field.growth>=p.field.duration?2:p.field.growth>=p.field.duration/3?1:0),pos.x,pos.y+30,.85);plotViews.get(p.id)!.crop=sp;plotViews.get(p.id)!.cropScale=.85/2;cropSway.push(sp);}
   if(sp){sp.zIndex=(p.x+p.y)*100+20;sp.eventMode='none';items.addChild(sp);}
   if((p.kind==='rock'||p.kind==='brush')&&!p.improvement){
-   const obstacle=art!.sprite(p.kind==='rock'?art!.rockTexture():art!.brushTexture(),pos.x,pos.y+25,.85);
+   const obstacle=art!.sprite(p.kind==='rock'?art!.rockTexture():art!.brushTexture(),pos.x,pos.y+25,.62);
    obstacle.zIndex=(p.x+p.y)*100+20;obstacle.eventMode='none';items.addChild(obstacle);
   }
-  if(p.improvement==='canal'||p.improvement==='drain'){
-   // 通水渠用活水色，未通水的渠用干沟色；排水沟保持原色。
-   const waterColor=p.improvement==='drain'?0x70694e:p.waterConnected?0x6ca2ad:0x9aa48c;
-   const channel=new P.Graphics().lineStyle(9,0x9d9270).moveTo(-24,29).lineTo(24,6).lineStyle(5,waterColor).moveTo(-24,29).lineTo(24,6).lineStyle(1,0xcce6df).moveTo(-20,27).lineTo(20,8);
-   channel.position.set(pos.x,pos.y);channel.zIndex=(p.x+p.y)*100+20;channel.eventMode='none';items.addChild(channel);
-  }
-  if(p.improvement==='yard'){
-   // 晒场暂无独立绘件：复用水田浅水色块的绘制方式，改为压平晒场干土色。
-   const floor=new P.Graphics().lineStyle(1,0xc9b47e,.9).beginFill(0xdcc790,.6).drawPolygon([0,10,22,21,0,32,-22,21]).endFill();
-   floor.position.set(pos.x,pos.y);floor.zIndex=(p.x+p.y)*100+15;floor.eventMode='none';items.addChild(floor);
-  }
-  if(p.improvement==='cellar'){
-   // 种子窖暂无独立绘件：复用水源格椭圆绘制，改为窖口土色（储粮类）。
-   const cellar=new P.Graphics().lineStyle(2,0x9d9270).beginFill(0x5a452c).drawEllipse(0,18,15,8).endFill().beginFill(0x3e2f1e).drawEllipse(0,18,9,4.5).endFill().lineStyle(1,0xdcc790).moveTo(-9,14).lineTo(9,14);
-   cellar.position.set(pos.x,pos.y);cellar.zIndex=(p.x+p.y)*100+20;cellar.eventMode='none';items.addChild(cellar);
-  }
-  if(p.improvement==='pit'){
-   // 堆肥坑暂无独立绘件：复用水源格椭圆水面绘制，改为腐熟堆肥色。
-   const pit=new P.Graphics().lineStyle(2,0x9d9270).beginFill(0x6d5636).drawEllipse(0,18,20,10).endFill().beginFill(0x8a744a).drawEllipse(-5,16,6,3).endFill().beginFill(0x8a744a).drawEllipse(6,20,4.5,2.5).endFill();
-   pit.position.set(pos.x,pos.y);pit.zIndex=(p.x+p.y)*100+20;pit.eventMode='none';items.addChild(pit);
-  }
-  if(p.improvement==='retting'){
-   // 沤麻塘暂无独立绘件：复用水源格水面绘制，水色系表示静水沤麻。
-   const pond=new P.Graphics().lineStyle(2,0x9d9270).beginFill(0x7fa8a0).drawEllipse(0,18,22,10).endFill().beginFill(0xcce6df).drawEllipse(-5,16,7,3).endFill().beginFill(0xcce6df).drawEllipse(6,20,5,2.5).endFill();
-   pond.position.set(pos.x,pos.y);pond.zIndex=(p.x+p.y)*100+20;pond.eventMode='none';items.addChild(pond);
-  }
-  if(p.improvement==='shed'){
-   // 窝棚暂无独立绘件：复用农舍绘件（农舍类），缩小置于格上。
-   const hut=art!.sprite(art!.houseTexture(),pos.x,pos.y+22,.22);
-   hut.zIndex=(p.x+p.y)*100+20;hut.eventMode='none';items.addChild(hut);
-  }
-  if(p.kind==='water'){
-   // 程序绘制水源格：复用渠水色系的椭圆水面与泉眼亮点，无独立美术素材。
-   const spring=new P.Graphics().lineStyle(2,0x9d9270).beginFill(0x6ca2ad).drawEllipse(0,18,22,10).endFill().beginFill(0xcce6df).drawEllipse(-5,16,7,3).endFill().beginFill(0xcce6df).drawEllipse(6,20,5,2.5).endFill();
-   spring.position.set(pos.x,pos.y);spring.zIndex=(p.x+p.y)*100+20;spring.eventMode='none';items.addChild(spring);
-   const label=new P.Text('水源',{fontFamily:'Microsoft YaHei',fontSize:10,fill:0x31483d,stroke:0xf7f3e8,strokeThickness:3});label.anchor.set(.5);label.position.set(pos.x,pos.y+34);label.eventMode='none';label.zIndex=(p.x+p.y)*100+30;items.addChild(label);
-  }
-  if(field&&p.land?.paddy){
-   // 程序绘制水田：在田面上叠一层浅水色块，表示每日保持蓄水。
-   const paddyWater=new P.Graphics().lineStyle(1,0xcce6df,.8).beginFill(0x6ca2ad,.5).drawPolygon([0,10,22,21,0,32,-22,21]).endFill();
-   paddyWater.position.set(pos.x,pos.y);paddyWater.zIndex=(p.x+p.y)*100+15;paddyWater.eventMode='none';items.addChild(paddyWater);
-  }
-  if(p.improvement){const label=new P.Text(IMPROVEMENT_NAMES[p.improvement],{fontFamily:'Microsoft YaHei',fontSize:10,fill:0x31483d,stroke:0xf7f3e8,strokeThickness:3});label.anchor.set(.5);label.position.set(pos.x,pos.y+34);label.eventMode='none';label.zIndex=(p.x+p.y)*100+30;items.addChild(label);}
+  const tileLabel=p.improvement?IMPROVEMENT_NAMES[p.improvement]:p.kind==='water'?'水源':'';
+  if(tileLabel){const label=new P.Text(tileLabel,{fontFamily:'Microsoft YaHei',fontSize:10,fill:0x31483d,stroke:0xf7f3e8,strokeThickness:3});label.anchor.set(.5);label.position.set(pos.x,pos.y+34);label.eventMode='none';label.zIndex=(p.x+p.y)*100+30;items.addChild(label);}
   if(p.kind==='story'){
    const marker=new P.Text('◇',{fontFamily:'Microsoft YaHei',fontSize:24,fill:0x967245});marker.anchor.set(.5);marker.position.set(pos.x,pos.y+17);marker.zIndex=(p.x+p.y)*100+25;marker.eventMode='none';items.addChild(marker);
   }
@@ -194,7 +154,7 @@ export function bindFarmScene(root:Document,g:FarmGame,rerender:()=>void):void {
   canvas=app.view as HTMLCanvasElement;canvas.setAttribute('aria-label','田地与探索地图；也可用右上角选择器操作');
   art=farmArt(P);
   background=new P.Sprite(art.landscapeTexture());background.height=viewH+12;
-  distantHouse=art.sprite(art.houseTexture(),W*.77,105,.85);distantHouse.alpha=.82;distantHouse.eventMode='none';
+  distantHouse=art.sprite(art.houseTexture(),W*.77,290,.85);distantHouse.alpha=.82;distantHouse.eventMode='none';
   floor=new P.Container();mistLayer=new P.Container();items=new P.Container();items.sortableChildren=true;
   world=new P.Container();world.addChild(floor,mistLayer,items);
   app.stage.addChild(background,distantHouse,world);
@@ -220,7 +180,7 @@ export function bindFarmScene(root:Document,g:FarmGame,rerender:()=>void):void {
  if(!reduced())app.ticker.start();else app.render();
  // Complete the artwork swap only for the still-mounted, current observation.
  // Switching panels or acting while an image loads must never restore stale state.
- void Promise.all([art!.loadEnvironment(),art!.loadLand(),art!.loadCrops(['wheat','soy',...map.plots.flatMap(p=>p.field?.crop?[p.field.crop]:[])])]).then(changed=>{
+ void Promise.all([art!.loadEnvironment(),art!.loadLand(),art!.loadTiles(),art!.loadCrops(['wheat','soy',...map.plots.flatMap(p=>p.field?.crop?[p.field.crop]:[])])]).then(changed=>{
   if(changed.some(Boolean)&&host.isConnected&&currentMap===map)rerender();
  });
 }

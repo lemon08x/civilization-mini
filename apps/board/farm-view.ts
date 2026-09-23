@@ -16,15 +16,8 @@ export function selectPlannedBatch(id:string){plannedBatch=id;}
 const projectChoices:Record<string,string>={},projectDurations:Record<string,string>={};
 export function selectFarmProject(kind:string){projectChoices[selected]=kind;delete projectDurations[selected];}
 export function selectFarmProjectDuration(id:string){projectDurations[selected]=id;}
-// 加工设施暂无独立绘件：晒场复用收获类（麦）、种子窖复用储粮类（生活储备）、
-// 堆肥坑复用堆肥、窝棚复用农舍类、沤麻塘复用水色系绘件。
-const projectArtAlias:Record<string,string>={yard:'farm-goods-wheat.webp',cellar:'farm-home-reserves.webp',pit:'farm-goods-compost.webp',shed:'farm-home-home.webp',retting:'farm-affairs-water.webp'};
 function projectSketch(kind:string):string {
- if(kind==='drain')return landArt('drain','farm-route-sketch');
- // 水田暂无独立绘件，复用土地图鉴里的过湿格。
- if(kind==='paddy')return landArt('paddy','farm-route-sketch');
- if(projectArtAlias[kind])return `<img class="farm-route-sketch" src="${assetUrl(projectArtAlias[kind])}" alt="" width="320" height="320">`;
- return `<img class="farm-route-sketch" src="/illustrations/farm/farm-project-${kind}-v2-ui.webp" alt="" width="320" height="320">`;
+ return landArt(({restore:'fertility',leave:'grass'} as Record<string,string>)[kind]??kind,'farm-route-sketch');
 }
 function landProfile(p:NonNullable<NonNullable<FarmGame['economy']>['farm']>['plots'][number]):string {
  if(p.kind==='unknown'||!p.land)return '';
@@ -33,7 +26,7 @@ function landProfile(p:NonNullable<NonNullable<FarmGame['economy']>['farm']>['pl
  const water=['dry','parched','moist','wet','flood'][l.water]??'moist';
  const fertility=p.field?.fertility??p.fertility;
  const facilityNote=p.improvement==='canal'?(p.waterConnected?'已通水 · 可开闸放水':'未通水 · 需与水源或通水渠相邻'):p.improvement==='drain'?'相邻田过湿／积水自然退档快1天':p.improvement==='yard'?'正交相邻田正常收获期延长7天':p.improvement==='cellar'?'相邻田收获留种+1 · 异穗麦也+1':p.improvement==='pit'?(p.pit?`秸秆转化中 · 剩 ${p.pit.remainingDays} 天`:'未投料 · 投3秸秆开始腐熟转化'):p.improvement==='shed'?'两格内农活日历行动时间减半':p.improvement==='retting'?'开放沤麻工序 · 2亚麻茎→1纤维':'减缓相邻田块失水';
- return `<section class="farm-land-profile" aria-label="${p.id}土地属性"><div class="farm-land-properties">${property({'沙质':'sand','壤质':'loam','黏质':'clay'}[l.soil]??'loam','土质',l.soil+'土',`保水${l.retention} · 排水${l.drainage}`)}${property({'低':'low','平':'flat','高':'high'}[l.elevation]??'flat','地势',l.elevation+'地',`${l.areaM2} 平方米`)}${property(water,'当前水分',l.waterName,`第 ${l.water+1} / 5 档`)}${fertility!==undefined?property('fertility','土地肥力',`${fertility} / 3`,'随田间管理变化'):''}</div>${p.improvement?`<div class="farm-land-facility">${landArt(p.improvement)}<div><strong>${IMPROVEMENT_NAMES[p.improvement]}</strong><span>${facilityNote}</span></div></div>`:''}</section>`;
+ return `<section class="farm-land-profile" aria-label="${p.id}土地属性"><div class="farm-land-properties">${property({'沙质':'sand','壤质':'loam','黏质':'clay'}[l.soil]??'loam','土质',l.soil+'土',`保水${l.retention} · 排水${l.drainage}`)}${property({'低':'low','平':'flat','高':'high'}[l.elevation]??'flat','地势',l.elevation+'地',`${l.areaM2} 平方米`)}${property(water,'当前水分',l.waterName,`第 ${l.water+1} / 5 档`)}${fertility!==undefined?property('fertility','土地肥力',`${fertility} / 3`,'随田间管理变化'):''}</div>${p.improvement?`<div class="farm-land-facility">${landArt(p.improvement==='canal'&&!p.waterConnected?'canal-dry':p.improvement==='pit'&&p.pit?'pit-active':p.improvement)}<div><strong>${IMPROVEMENT_NAMES[p.improvement]}</strong><span>${facilityNote}</span></div></div>`:''}</section>`;
 }
 export function selectFarmStock(id:string){stockSelection=id;}
 export const selectedFarmPlot=()=>selected;

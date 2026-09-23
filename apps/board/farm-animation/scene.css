@@ -65,7 +65,7 @@
 .pixi-farm-inspector{height:560px;overflow-y:auto}.pixi-farm-actions .action-option{margin:0}.pixi-farm-actions .game-action{width:100%;margin:0;padding:10px 12px;min-height:0}.pixi-farm-actions .blocked-reason{font-size:12px;margin:5px 0;line-height:1.5}.pixi-farm-actions .action-help{margin:4px 0}.pixi-season-end{display:flex;justify-content:flex-end}.pixi-season-end .action-option{margin:6px 0}.pixi-farm-inspector .eyebrow{text-transform:none}
 .farm-local-nav{display:flex;gap:6px;padding:0 22px 14px;flex-wrap:wrap}.farm-local-nav button[aria-pressed=true]{background:#42634b;color:#fff9e9}.farm-stock{width:100%;border-collapse:collapse}.farm-stock td{padding:8px 0;border-bottom:1px solid #dcdccb}.farm-stock td:last-child{text-align:right;font-variant-numeric:tabular-nums}.farm-discovery{padding:12px 0;border-bottom:1px solid #dcdccb}.farm-discovery h4{font-size:17px;margin:4px 0}.farm-discovery .notice{border-left:3px solid #9d844e;padding-left:10px}.farm-market-row{padding:12px 0;border-bottom:1px solid #dcdccb}.pixi-farm-inspector .action-grid{display:block}.pixi-farm-inspector .game-action{width:100%;min-height:0;padding:10px}.pixi-farm-inspector .action-option{margin-bottom:10px}.pixi-farm-inspector details{margin:12px 0}.pixi-farm-inspector h3{margin-top:0}
 /* One decorative scene per observed farm activity. */
-.farm-event-art{display:block;flex:none;width:100%;aspect-ratio:1;background-image:url('/illustrations/atlases/farm-events-atlas.png');background-size:300% 200%;background-repeat:no-repeat;background-color:#eee9d7;border-radius:8px}
+.farm-event-art{display:block;flex:none;width:100%;aspect-ratio:1;background-image:url('/illustrations/atlases/farm-events-qinglu-v1.png');background-size:300% 200%;background-repeat:no-repeat;background-color:#eee9d7;border-radius:8px}
 .pixi-farm-inspector>.farm-event-art{width:112px;margin:0 0 12px}
 .pixi-farm .farm-effect-layer:not(:empty){display:flex;align-items:center;gap:12px;max-width:580px;padding:10px;background:#fffbf0f5;border:1px solid #c3cba8;border-radius:10px;box-shadow:0 4px 16px #334b2620;text-shadow:none}
 .pixi-farm .farm-effect-layer>.farm-event-art{width:96px}
@@ -159,7 +159,7 @@
 .farm-market-direct .farm-card-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 
 /* Observed land properties share a compact painted atlas. */
-.farm-land-art{display:block;flex-shrink:0;width:68px;height:68px;background-image:url('/illustrations/atlases/farm-land-atlas-v1.png');background-size:400% 400%;background-repeat:no-repeat;border-radius:8px}
+.farm-land-art{display:block;flex-shrink:0;width:68px;height:68px;background-image:url('/illustrations/farm/animation/painted/terrain/farm-land-qinglu-v1.png');background-size:400% 200%;background-repeat:no-repeat;border-radius:8px}
 .farm-land-profile{margin:16px 24px 0;border:1px solid #d9dfce;border-radius:10px;background:#faf7ed;overflow:hidden}
 .farm-land-properties{display:flex;align-items:stretch;flex-wrap:wrap;padding:8px}
 .farm-land-property{display:flex;align-items:center;gap:10px;flex:1;min-width:190px;padding:2px 12px}
@@ -168,5 +168,5 @@
 .farm-land-property strong{font-size:16px;font-weight:600;color:#405c4a}
 .farm-land-property span:not(.farm-land-art),.farm-land-facility span:not(.farm-land-art){font-size:12px;color:#69775f}
 .farm-land-facility{display:flex;align-items:center;gap:14px;padding:8px 20px;border-top:1px solid #dfe3d2;background:#eff1e4}
-.farm-land-art.farm-route-sketch{width:100%;height:auto;aspect-ratio:1;max-width:120px;margin:auto;mix-blend-mode:normal}
-.farm-benefit-grid .farm-land-art.farm-route-sketch{width:100%;height:100%;border:0;border-radius:0;background-image:url('/illustrations/atlases/farm-land-atlas-v1.png');background-size:400% 400%}
+.farm-land-art.farm-route-sketch{width:100%;height:auto;aspect-ratio:1;max-width:120px;margin:auto;mix-blend-mode:normal;mask-image:none}
+.farm-benefit-grid .farm-land-art.farm-route-sketch{width:100%;height:100%;border:0;border-radius:0;background-color:transparent;mask-image:none}
