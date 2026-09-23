@@ -461,7 +461,7 @@ summary { cursor: pointer; color: var(--ink); padding: 4px 0; }
 /* Illustrated chronicle: artwork is decorative; values and actions remain live HTML. */
 :root { --page:#f0eadc; --paper:#fffaf0; --line:#d9ceba; --accent:#805037; --ok:#56764c; }
 body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 45%),radial-gradient(ellipse at 100% 30%,#ceb88b20,transparent 50%); }
-.painted-art { background-image:url('/illustrations/chronicle-art.png'); background-size:300% 200%; aspect-ratio:1; flex-shrink:0; mix-blend-mode:multiply; pointer-events:none; }
+.painted-art { background-image:url('/illustrations/scenes/chronicle-art.png'); background-size:300% 200%; aspect-ratio:1; flex-shrink:0; mix-blend-mode:multiply; pointer-events:none; }
 .art-home { background-position:0 0; }
 .art-food { background-position:50% 0; }
 .art-family { background-position:100% 0; }
@@ -608,15 +608,15 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 @media(max-width:600px) { .chronicle-masthead h1 { font-size:26px; } .is-dashboard .estate-board .painted-art { max-height:none; } }
 /* Standalone illustrations: contain the complete artwork instead of cropping the old atlas. */
 .painted-art { background-size:contain; background-position:center; background-repeat:no-repeat; }
-.art-home { background-image:url('/illustrations/chronicle-homestead-ui.webp'); }
-.art-food { background-image:url('/illustrations/chronicle-pantry-ui.webp'); }
-.art-family { background-image:url('/illustrations/chronicle-inheritance-ui.webp'); }
-.art-study { background-image:url('/illustrations/chronicle-study-ui.webp'); }
-.art-workshop { background-image:url('/illustrations/chronicle-workbench-ui.webp'); }
-.art-power { background-image:url('/illustrations/chronicle-power-ui.webp'); }
-.art-farming { background-image:url('/illustrations/chronicle-farming-ui.webp'); }
-.art-market { background-image:url('/illustrations/market-stall-ui.webp'); }
-.art-journal { background-image:url('/illustrations/chronicle-journal-ui.webp'); }
+.art-home { background-image:url('/illustrations/scenes/chronicle-homestead-ui.webp'); }
+.art-food { background-image:url('/illustrations/scenes/chronicle-pantry-ui.webp'); }
+.art-family { background-image:url('/illustrations/scenes/chronicle-inheritance-ui.webp'); }
+.art-study { background-image:url('/illustrations/scenes/chronicle-study-ui.webp'); }
+.art-workshop { background-image:url('/illustrations/scenes/chronicle-workbench-ui.webp'); }
+.art-power { background-image:url('/illustrations/scenes/chronicle-power-ui.webp'); }
+.art-farming { background-image:url('/illustrations/scenes/chronicle-farming-ui.webp'); }
+.art-market { background-image:url('/illustrations/scenes/market-stall-ui.webp'); }
+.art-journal { background-image:url('/illustrations/scenes/chronicle-journal-ui.webp'); }
 .illustrated-heading { display:flex; align-items:center; gap:20px; min-height:110px; }
 .illustrated-heading > .painted-art { position:static; order:2; width:120px; height:110px; margin-left:auto; opacity:1; mask-image:none; }
 .illustrated-heading > .section-heading { flex:1; min-width:0; }
@@ -655,7 +655,7 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
  .library-heading { flex-wrap:wrap; }
 }
 /* Field and storehouse: scene illustration beside the live ledger. */
-.art-warehouse { background-image:url('/illustrations/warehouse-ui.webp'); }
+.art-warehouse { background-image:url('/illustrations/scenes/warehouse-ui.webp'); }
 .place-overview { display:grid; grid-template-columns:minmax(150px,1fr) minmax(180px,1fr); align-items:center; gap:24px; padding:4px 0 20px; margin-bottom:18px; border-bottom:1px solid var(--line); }
 .place-illustration { display:block; width:100%; height:auto; aspect-ratio:3/2; object-fit:contain; mix-blend-mode:multiply; }
 .place-overview h3 { font-family:var(--title); font-size:24px; margin:8px 0 12px; }
@@ -891,14 +891,14 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .cultivation-footer { display:flex; justify-content:space-between; border-top:1px solid var(--line); margin-top:25px; padding-top:16px; }
 
 /* Sect artwork is decorative; all progress and costs remain observation-driven HTML. */
-.sect-art { background-image:url('/illustrations/sect-atlas.png'); background-size:300% 100%; background-repeat:no-repeat; aspect-ratio:1; flex-shrink:0; mix-blend-mode:multiply; }
+.sect-art { background-image:url('/illustrations/characters/sect-atlas.png'); background-size:300% 100%; background-repeat:no-repeat; aspect-ratio:1; flex-shrink:0; mix-blend-mode:multiply; }
 .sect-art-gate { background-position:0 50%; }
 .sect-art-practice { background-position:50% 50%; }
 .sect-art-teaching { background-position:100% 50%; }
 .sect-start-art { width:300px; }
 .sect-cover-art { width:min(72vh,680px); margin:auto; }
 .sect-theme { --accent:#365e56; --accent-soft:#e4ece4; --line:#d6d8c8; }
-.sect-theme .art-family { background-image:url('/illustrations/sect-atlas.png'); background-size:300% 100%; background-position:100% 50%; }
+.sect-theme .art-family { background-image:url('/illustrations/characters/sect-atlas.png'); background-size:300% 100%; background-position:100% 50%; }
 .sect-banner { display:flex; align-items:center; gap:26px; padding:4px 28px 4px 8px; margin-bottom:24px; border:1px solid var(--line); border-radius:12px; background:linear-gradient(110deg,#f2f0df,#f7f8f0); overflow:hidden; }
 .sect-banner .sect-art { width:178px; }
 .sect-banner h3 { font-size:28px; letter-spacing:.08em; margin:6px 0 12px; }
@@ -945,7 +945,7 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .action-name .ui-icon { display:inline-block; }
 
 /* One watercolor object language for navigation, actions, and progression. */
-.sect-picture { display:inline-block; width:72px; height:72px; flex-shrink:0; background-image:url('/illustrations/sect-elements-v2.png'); background-size:400% 400%; background-repeat:no-repeat; vertical-align:middle; pointer-events:none; }
+.sect-picture { display:inline-block; width:72px; height:72px; flex-shrink:0; background-image:url('/illustrations/characters/sect-elements-v2.png'); background-size:400% 400%; background-repeat:no-repeat; vertical-align:middle; pointer-events:none; }
 .chapter-tab .sect-navigation-picture { width:64px; height:64px; }
 .sect-button-picture { width:32px; height:32px; margin-right:8px; }
 .sect-person-picture { float:right; width:100px; height:100px; margin:-8px -4px 4px 12px; }
@@ -1193,7 +1193,7 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .self-visual-home { gap:20px; }
 .self-visual-opening { display:block; }
 .self-visual-home .self-hero { position:relative; overflow:hidden; isolation:isolate; display:grid; grid-template-columns:210px minmax(280px,1fr) minmax(250px,.75fr); gap:32px; align-items:center; min-height:350px; padding:20px 34px 20px 12px; border:0; border-radius:0; background:transparent; }
-.self-visual-home .self-hero::before { content:''; position:absolute; inset:0; z-index:-1; opacity:.16; background:url('/illustrations/self-garden.png') center 58%/cover; mask-image:linear-gradient(transparent,#000 25%,#000 70%,transparent); }
+.self-visual-home .self-hero::before { content:''; position:absolute; inset:0; z-index:-1; opacity:.16; background:url('/illustrations/scenes/self-garden.png') center 58%/cover; mask-image:linear-gradient(transparent,#000 25%,#000 70%,transparent); }
 .self-visual-home .self-identity { grid-column:2; grid-row:1; z-index:1; }
 .self-visual-home .self-identity h3 { font-size:38px; letter-spacing:5px; margin:14px 0; }
 .self-visual-home .self-identity p { font-size:13px; }
@@ -1378,9 +1378,9 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .atlas-picture{width:86px;height:96px;overflow:hidden;border-radius:6px;background:#faf6eb}
 .atlas-picture img{mix-blend-mode:normal}
 .atlas-art{display:block;flex-shrink:0;width:100%;aspect-ratio:1;background-repeat:no-repeat;background-position:var(--art-x) var(--art-y)}
-.atlas-art-botanical{background-image:url('/illustrations/atlas-botanical-v1.png');background-size:600% 600%}
-.atlas-art-ingredients{background-image:url('/illustrations/atlas-ingredients-v1.png');background-size:500% 400%;aspect-ratio:4/5}
-.atlas-art-meals{background-image:url('/illustrations/atlas-meals-v1.png');background-size:500% 500%}
+.atlas-art-botanical{background-image:url('/illustrations/atlases/atlas-botanical-v1.png');background-size:600% 600%}
+.atlas-art-ingredients{background-image:url('/illustrations/atlases/atlas-ingredients-v1.png');background-size:500% 400%;aspect-ratio:4/5}
+.atlas-art-meals{background-image:url('/illustrations/atlases/atlas-meals-v1.png');background-size:500% 500%}
 .atlas-picture .atlas-art-ingredients{width:76px}
 .atlas-card>span:last-child{min-width:0}
 .atlas-figure{margin:16px 0 0;padding:12px;background:#faf6eb;border:1px solid #ded5c0;border-radius:8px}
@@ -1390,7 +1390,7 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .atlas-figure figcaption{text-align:center;border-top:1px solid #e2d8c2;padding-top:10px;margin-top:8px;line-height:1.6}
 .atlas-figure figcaption span{display:block;font-family:serif;font-size:14px;color:#53664f}
 .atlas-figure figcaption small{display:block;font-size:10px;color:#877c66;margin-top:3px}
-.atlas-art-equipment{background-image:url('/illustrations/atlas-equipment-v1.png');background-size:300% 200%}
+.atlas-art-equipment{background-image:url('/illustrations/atlases/atlas-equipment-v1.png');background-size:300% 200%}
 .atlas-grid{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
 .atlas-art-meals{background-size:500% var(--art-height);aspect-ratio:var(--art-ratio)}
 .atlas-picture .atlas-art-meals{max-height:96px}

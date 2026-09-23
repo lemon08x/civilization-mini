@@ -31,7 +31,7 @@ function loadLand():Promise<boolean>{
    }
    landImage=image;resolve(true);
   };
-  image.src='/illustrations/farm-land-cartoon-v1.png';
+  image.src='/illustrations/farm/animation/painted/terrain/farm-land-cartoon-v1.png';
  });
  return landLoad;
 }
@@ -43,7 +43,7 @@ async function loadCrops(crops:readonly string[]):Promise<boolean>{
   if(!pending){
    pending=Promise.all([0,1,2].map(stage=>new Promise<HTMLImageElement>((resolve,reject)=>{
     const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>reject(new Error('crop art unavailable'));
-    image.src=modeledCrops.has(crop)?`/illustrations/farm-plant-${crop}-${stage}-v2.webp`:`/illustrations/farm-plant-${crop}-${stage}-v1.png`;
+    image.src=modeledCrops.has(crop)?`/illustrations/farm/animation/painted/crops/farm-plant-${crop}-${stage}-v2.webp`:`/illustrations/farm/animation/watercolor/crops/farm-plant-${crop}-${stage}-v1.png`;
    }))).then(images=>{if(destroyed)return false;cropImages.set(crop,images);return true;}).catch(()=>false);
    cropLoads.set(crop,pending);
   }
@@ -58,7 +58,7 @@ function loadEnvironment():Promise<boolean>{
   const image=new Image();
   image.onload=()=>{if(destroyed){resolve(false);return;}environmentImages.set(name,image);resolve(true);};
   image.onerror=()=>resolve(false);
-  image.src=`/illustrations/farm-${name}-v1.webp`;
+  image.src=`/illustrations/farm/animation/painted/environment/farm-${name}-v1.webp`;
  }))).then(results=>{environmentReady=true;return results.some(Boolean);});
  return environmentLoad;
 }

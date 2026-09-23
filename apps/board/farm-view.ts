@@ -3,7 +3,7 @@ import {CROPS} from '../../src/game/systems/economy-catalog.js';
 import {esc} from './economy-view.js';
 import {foodPolicyControls} from './social-food-view.js';
 import {uiIcon} from './ui-icons.js';
-import {farmEventArt,landArt} from './illustration.js';
+import {assetUrl,farmEventArt,landArt} from './illustration.js';
 import {COOKING,EDIBLE} from '../../src/game/systems/economy-catalog.js';
 import {sowingSeasons,IMPROVEMENT_NAMES,WATER_NAMES} from '../../src/game/systems/agriculture.js';
 import type {Crop} from '../../src/game/model/economy.js';
@@ -16,7 +16,7 @@ export function selectFarmProject(kind:string){projectChoices[selected]=kind;del
 export function selectFarmProjectDuration(id:string){projectDurations[selected]=id;}
 function projectSketch(kind:string):string {
  if(kind==='pond'||kind==='drain')return landArt(kind,'farm-route-sketch');
- return `<img class="farm-route-sketch" src="/illustrations/farm-project-${kind}-v2-ui.webp" alt="" width="320" height="320">`;
+ return `<img class="farm-route-sketch" src="/illustrations/farm/farm-project-${kind}-v2-ui.webp" alt="" width="320" height="320">`;
 }
 function landProfile(p:NonNullable<NonNullable<FarmGame['economy']>['farm']>['plots'][number]):string {
  if(p.kind==='unknown'||!p.land)return '';
@@ -65,9 +65,9 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing='
  };
  const goodArt=(id:string)=>id==='rare'?'affairs:rare':goodsArt.has(id)?'goods:'+id:seedArtAlias[id]?'goods:'+seedArtAlias[id]:'home:reserves';
  const emblem=(id:string)=>artSource(id)
-  ?`<div class="farm-item-art farm-painted-art" aria-hidden="true"><img src="/illustrations/${artSource(id)}" alt="" width="300" height="300"></div>`
+  ?`<div class="farm-item-art farm-painted-art" aria-hidden="true"><img src="${assetUrl(artSource(id)??'farm-affairs-story.webp')}" alt="" width="300" height="300"></div>`
   :`<div class="farm-item-art">${uiIcon(id)}</div>`;
- const illustratedAction=(id:string,art:string)=>button(id).replace('<span class="action-name">',`<span class="action-name"><img class="farm-choice-art" src="/illustrations/${artSource(art)}" alt="" width="64" height="64">`);
+ const illustratedAction=(id:string,art:string)=>button(id).replace('<span class="action-name">',`<span class="action-name"><img class="farm-choice-art" src="${assetUrl(artSource(art)??'farm-affairs-story.webp')}" alt="" width="64" height="64">`);
  const storyArt=(id:string)=>id.endsWith('-identify')?'affairs:rare':id.endsWith('-clear')?'affairs:reclaim':id.endsWith('-repair')?'affairs:water':id.endsWith('-share')?'goods:food':id.endsWith('-leave')?'affairs:explore':'affairs:story';
  const card=(name:string,detail:string,actions:string,icon='box')=>`<article class="farm-item-card">${emblem(icon)}<h4>${esc(name)}</h4>${detail}<div class="farm-card-actions">${actions}</div></article>`;
  const uses:Record<string,[string,string]>={
@@ -129,7 +129,7 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing='
   const explore=map.plots.find(t=>t.kind==='unknown'&&g.actions.some(a=>a.id==='economy:farmexplore:'+t.id&&a.enabled));
   if(p.kind==='unknown'){hint='走近以后，才能知道这里有什么。';fieldTags.push('尚未探索','抵达后揭晓');actions=illustratedAction('economy:farmexplore:'+p.id,'affairs:explore')||'<p>先探索相邻的未知地块。</p>';}
   if(p.kind==='wild'&&!p.project){hint='开垦后可以播种，独立照料这一方田。';fieldTags.push('可开垦',`初始肥力 ${p.fertility??2}`);actions=illustratedAction('economy:farmreclaim:'+p.id,'affairs:reclaim');}
-  if((p.kind==='tree'||p.kind==='rock')&&!p.improvement){hint='保留这处地貌，沿周边继续探索。';fieldTags.push('不可开垦','地貌保留');actions=explore?`<div class="action-option"><button type="button" class="game-action" data-farm-jump="${explore.id}"><span class="action-name"><img class="farm-choice-art" src="/illustrations/${artSource('affairs:explore')}" alt="" width="64" height="64">寻找未知地块</span><span class="action-cost"><span>前往可探索地块 →</span></span></button></div>`:'';}
+  if((p.kind==='tree'||p.kind==='rock')&&!p.improvement){hint='保留这处地貌，沿周边继续探索。';fieldTags.push('不可开垦','地貌保留');actions=explore?`<div class="action-option"><button type="button" class="game-action" data-farm-jump="${explore.id}"><span class="action-name"><img class="farm-choice-art" src="${assetUrl(artSource('affairs:explore')??'farm-affairs-story.webp')}" alt="" width="64" height="64">寻找未知地块</span><span class="action-cost"><span>前往可探索地块 →</span></span></button></div>`:'';}
   if(p.discovery){
    fieldTags.push(p.discovery.resolved?'见闻已收录':'见闻待处理');
    if(!p.discovery.resolved)actions+=g.actions.filter(a=>a.id.startsWith(`economy:farmstory:${p.id}-`)).map(a=>illustratedAction(a.id,storyArt(a.id))).join('');
@@ -161,7 +161,7 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing='
    actions+=illustratedAction('economy:farmfertilize:'+p.id,'goods:compost')+illustratedAction('economy:neighbor:help-'+p.id,'affairs:talk');
    if(f.crop&&f.growth<f.duration)actions+=illustratedAction('economy:wait:'+p.id,'home:rest');
    seedInfo=`<div class="farm-plot-seeds" aria-label="当前种子储备">${map.discovered.map(c=>`<span>${CROPS[c].name}种 <b>${e.goods[CROPS[c].seed]??0}</b></span>`).join('')}${map.rareSeeds?`<span>异穗麦种 <b>${map.rareSeeds}</b></span>`:''}</div>`;
-   actions+=`<div class="action-option"><button type="button" class="game-action farm-plot-link" data-farm-panel="market"><span class="action-name"><img class="farm-choice-art" src="/illustrations/${artSource('affairs:basket')}" alt="" width="64" height="64">购买种子</span><span class="action-cost"><span>前往买卖与补给 →</span></span></button></div>`;
+   actions+=`<div class="action-option"><button type="button" class="game-action farm-plot-link" data-farm-panel="market"><span class="action-name"><img class="farm-choice-art" src="${assetUrl(artSource('affairs:basket')??'farm-affairs-story.webp')}" alt="" width="64" height="64">购买种子</span><span class="action-cost"><span>前往买卖与补给 →</span></span></button></div>`;
   }
   body=`<section class="farm-map-dock" aria-label="当前地块操作" data-primary-action="${quickId}"><div class="farm-dock-main"><div class="farm-dock-heading"><span>${p.id} · ${p.improvement?IMPROVEMENT_NAMES[p.improvement]:names[p.kind]}</span><h3>${esc(title)}</h3><p>${hint}</p>${seedInfo}</div><div class="farm-dock-actions" aria-label="地块行动">${actions}</div></div>${careInfo}</section>`;
   if(p.discovery){
