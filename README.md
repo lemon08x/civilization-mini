@@ -49,7 +49,11 @@
 
 ## 开始试玩
 
-需要 Node.js 24+。
+朋友试玩可从 [Releases](https://github.com/lemon08x/civilization-mini/releases) 下载 `CivilizationMini-v0.27.0-windows-x64.zip`，完整解压后双击 **启动游戏.cmd**。便携包自带运行环境，无需安装 Node.js、npm 或联网安装依赖；请保留启动窗口，关闭它即停止服务。浏览器中从“农场 → 土地指南”了解土地玩法。
+
+存档保存在当前浏览器的本机数据中。请使用同一浏览器和地址（默认 `http://127.0.0.1:4321`），不要清理网站数据；换电脑或升级前，在游戏“选项”中导出存档。旧结构存档不迁移，导入不兼容时保留原文件并新开旅程。便携包面向 Windows 10/11 x64。
+
+从源码运行需要 Node.js 24+。
 
 ```powershell
 npm ci

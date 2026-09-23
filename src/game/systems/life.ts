@@ -1,3 +1,5 @@
+import {equipped} from './inventory.js';
+import {plotField} from './agriculture.js';
 import {availableDays,calendarYearDays} from './calendar.js';
 import {dietView} from './social-food.js';
 import {electricOnline} from '../model/electric.js';
@@ -162,6 +164,7 @@ export function lifeCost(s:GameState,id:string,oldAp:number,useLearningPoint=tru
   let time=physical.has(op)||learning.has(op)||op==='teach'||op==='branchteach'?4:2;
   let energy=physical.has(op)?4:learning.has(op)||op==='teach'||op==='branchteach'?2:1;
   if(s.life?.renewal&&['farm','farmplot'].includes(op)){time=s.life.renewal.farmTime;energy=s.life.renewal.farmEnergy;}
+  if(s.economy?.farm&&['farm','farmplot'].includes(op)&&equipped(s,'W01')){const f=op==='farm'?s.economy.field:plotField(s,target.split('-')[0]);if(f?.crop&&f.growth<f.duration)energy/=2;}
   const v=activePerson(s).vitality!;
   if(s.era&&learning.has(op))time=Math.max(1,time-(eraCard(s)?.learning??0));
   if(s.era&&op==='process'&&s.economy!.branches!.learned[s.household.activePersonId]?.includes('Q1'))energy=Math.max(0,energy-1);

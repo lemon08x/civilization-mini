@@ -1,5 +1,19 @@
 {
   "farm": {
+    "pondDays": 32,
+    "drainDays": 24,
+    "waterCycleDays": 10,
+    "canalDoses": 4,
+    "pondDoses": 4,
+    "pondCapacity": 8,
+    "pondRainGain": 2,
+    "rainRiseDays": 3,
+    "sandDryDays": 3,
+    "loamDryDays": 5,
+    "clayDryDays": 7,
+    "shelterDays": 2,
+    "drainDoses": 4,
+
     "surveyDays": 5,
     "reclaimDays": 10,
     "canalDays": 48,

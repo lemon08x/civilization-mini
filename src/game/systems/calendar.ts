@@ -124,7 +124,7 @@ export function calendarView(s: GameState) {
   return { ...now, date: now.date + ' · ' + period, period, absoluteDay: c.absoluteDay,
     season: ['春', '夏', '秋', '冬'][season.index], daysPerSeason: season.days,
     businessCycle:{days:c.rules.businessCycleDays,nextDate:lunarDateAt(c.rules.referenceYear,c.nextBusinessDay).date,remaining:c.nextBusinessDay-c.absoluteDay,description:'后续生产、运输与补货暂按独立经营周期运行，与自然换季无关。'},
-    month,nextTerm,weather:{name:{dry:'干燥',normal:'晴和',wet:'连雨'}[s.location.weather],rain:s.location.rain,days:Math.max(0,c.weatherNextDay-c.absoluteDay),effect:s.location.weather==='dry'?'降雨供水0，需灌溉或渠林保水，缺水天数累积减产。':s.location.weather==='wet'?'降雨供水3；无排涝设施的田会累积涝害。':'降雨供水2，满足作物基本水分需要。'},termEvents:c.termEvents.map(e=>({...e})),
+    month,nextTerm,weather:{name:{dry:'干燥',normal:'晴和',wet:'连雨'}[s.location.weather],rain:s.location.rain,days:Math.max(0,c.weatherNextDay-c.absoluteDay),effect:s.location.weather==='dry'?'土壤按保水能力逐步变干；渠塘按额度补水，护田林减缓失水。':s.location.weather==='wet'?'持续连雨使水分逐档上升，水塘蓄水；过湿和积水可能造成涝害。':'土壤缓慢失水；过湿田按排水能力恢复，需查看每块田的水分。'},termEvents:c.termEvents.map(e=>({...e})),
     upcoming: upcoming.slice(0, 3), lastNotice: c.lastNotice };
 }
 

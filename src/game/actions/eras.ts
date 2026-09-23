@@ -7,6 +7,7 @@ import {branchNeeds} from '../systems/branches.js';
 import {amount,foodStock,changeGoods,missingGoods} from '../systems/economy.js';
 import {stageOf,DUNGEON_TASKS,CRISES,CRISIS_LEVELS} from '../model/eras.js';
 import {eraEvent} from '../systems/eras.js';
+import {EDIBLE} from '../systems/economy-catalog.js';
 export function eraActions(s:GameState):ActionDefinition[]{
  const e=s.era;if(!e)return [];const out:ActionDefinition[]=[];
  out.push(defineAction(s,'economy:erasettle:stage',e.index===3?'结束现代使命并计分':'结算当前社会并进入下一段','社会阶段',{ap:0},e.closed?['社会历程已结束']:[],'立即结束当前阶段，仅兑现已取得的阶段回报；剩余天数按规则比例折算并向下取整到半天，结转到下一阶段，损耗部分不补偿。师徒换代不重置阶段倒计时。跨时代延续师徒、个人修为和所学；门派资产与规程保留。不要求建成水井或泵。现代有公开准备期限，结算即结束旅程；只有危机副本最高难度计分，四项至少兜底才算使命完成。',(d)=>{d.era!.pendingSettle=true;}));
@@ -37,7 +38,7 @@ export function eraActions(s:GameState):ActionDefinition[]{
  });
  const scoreOf=(ids:string[]):number=>ids.reduce((a,id)=>a+(tasks.find(t=>t.id===id)?.progress??0),0);
  for(const o of tasks)out.push(defineAction(s,'economy:dungeonwork:'+o.id,o.name,'最终副本',{time:o.time,energy:o.energy,money:o.money},[...(!e.dungeon.started?['先进入最终副本']:[]),...(e.dungeon.tasks.includes(o.id)?['该任务已完成']:[]),...o.needs],`一次性任务，完成后不可重复交付${s.electric?'；通电验收是胜利门槛':''}。本次记${o.progress}分，副本总分达到${e.rules.dungeonTarget}分即达标，超出为高分。交付的商品真实移出家庭，专业施工由外部人员承担，数学验算是本人的工程劳动。`,(d,ev)=>{
-  if(o.id==='food'){let need=4;const n=Math.min(need,d.household.food);d.household.food-=n;need-=n;for(const id of ['flour','wheat','soy']){const n=Math.min(need,amount(d,id));if(n)changeGoods(d,{[id]:n},-1,ev,'最终副本粮食交付');need-=n;}}
+  if(o.id==='food'){let need=4;const n=Math.min(need,d.household.food);d.household.food-=n;need-=n;for(const id of EDIBLE){const n=Math.min(need,amount(d,id));if(n)changeGoods(d,{[id]:n},-1,ev,'最终副本粮食交付');need-=n;}}
   if(o.id==='craft')changeGoods(d,{shaft:2},-1,ev,'最终副本部件交付');
   if(o.id==='power'){usePower(d,d.electric!.rules.dungeonPower,ev,'最终副本通电验收');d.era!.dungeon.powered=true;}
   if(o.id==='appliance'){const id=APPLIANCES.find(id=>equipped(d,id)&&d.economy!.equipmentUsed[id]!==d.clock.absoluteTurn)!;delete d.economy!.equipment[id];d.economy!.modern!.enabled=d.economy!.modern!.enabled.filter(x=>x!==id);eraEvent(d,ev,'appliance-delivered',`交付${id}，家庭不再持有该设备`);}
@@ -71,7 +72,7 @@ function crisisActions(s:GameState):ActionDefinition[]{
        `${c.purpose}。${route==='technical'?'亲自技术保障':'委托与组织保障'}；第${p.step+1}/3步。本步投入${Object.entries(goods).map(([k,v])=>`${v}${k}`).join('、')||'无部件'}${food?`、${food}份粮`:''}${power?`、${power}电`:''}。完成本档后该副本记${r.crisisScore*level*level}分，替换原${r.crisisScore*p.level*p.level}分；投入不返还。`,(d,ev)=>{
          if(Object.keys(goods).length)changeGoods(d,goods,-1,ev,c.name);
          let need=food;const direct=Math.min(need,d.household.food);d.household.food-=direct;need-=direct;
-         for(const id of ['flour','wheat','soy']){const n=Math.min(need,amount(d,id));if(n)changeGoods(d,{[id]:n},-1,ev,c.name);need-=n;}
+         for(const id of EDIBLE){const n=Math.min(need,amount(d,id));if(n)changeGoods(d,{[id]:n},-1,ev,c.name);need-=n;}
          if(power)usePower(d,power,ev,c.name);
          const v=d.era!.crises!.entries[c.id];v.route=route;v.step++;v.lastTurn=d.clock.absoluteTurn;
          if(v.step===3){v.level=level;v.step=0;v.route='';eraEvent(d,ev,'crisis-complete',`${c.name}完成${CRISIS_LEVELS[level]}，本副本最高成绩${r.crisisScore*level*level}分`);}else eraEvent(d,ev,'crisis-progress',`${c.name}：${label}完成，进度${v.step}/3；已交付资源保留为任务进度`);

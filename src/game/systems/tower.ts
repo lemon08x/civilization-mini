@@ -4,7 +4,7 @@ import type { Ruleset } from '../ruleset.js';
 import type { GameEvent } from '../model/events.js';
 import type { TowerState } from '../model/tower.js';
 import { amount,changeGoods,foodStock,equipped,consumeEquipment } from './inventory.js';
-import { ALL_GOODS as GOODS } from './economy-catalog.js';
+import { ALL_GOODS as GOODS, EDIBLE } from './economy-catalog.js';
 
 export const TOWER_FLOORS=[
   {id:'camp',name:'施工营地',subtitle:'先让建设者吃上饭',kit:{food:1,wood:1},proof:[] as string[],pump:false,continuous:false,effect:'营地完成，开放栈道施工；工地运输增加1份／季。'},
@@ -62,7 +62,7 @@ export function dispatchTower(s:GameState,r:Ruleset,events:GameEvent[]):void{
   if(!id)break;
   if(id==='food'){
    if(s.household.food>r.parameters.foodPerTurn)s.household.food--;
-   else {const grain=['flour','wheat','soy'].find(g=>amount(s,g)>0);if(grain)changeGoods(s,{[grain]:1},-1,events,'施工口粮装运');else s.household.food--;}
+   else {const grain=EDIBLE.find(g=>amount(s,g)>0);if(grain)changeGoods(s,{[grain]:1},-1,events,'施工口粮装运');else s.household.food--;}
   }else changeGoods(s,{[id]:1},-1,events,'大运河施工装运');
   const shipment=t.shipments.find(x=>x.good===id&&x.due===s.clock.absoluteTurn+1);
   if(shipment)shipment.amount++;else t.shipments.push({good:id,amount:1,due:s.clock.absoluteTurn+1});

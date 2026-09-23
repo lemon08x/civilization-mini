@@ -8,8 +8,8 @@ import {treeGraph,type TreeNodeSpec} from './tree-view.js';
 const panel=(title:string,body:string)=>`<section class="panel"><div class="panel-head"><h2>${title}</h2></div><div class="panel-body">${body}</div></section>`;
 const MANUFACTURE_LANES=[
  {id:'field',name:'水土照料',ids:['W01','U08','U09','compost']},
- {id:'harvest',name:'收获、育苗与储粮',ids:['S01','U04','U10']},
- {id:'food',name:'粮食与油料加工',ids:['U06','mill','oil']},
+ {id:'harvest',name:'收获、育苗与储粮',ids:['S01','U04','U10','pickles']},
+ {id:'food',name:'粮食与油料加工',ids:['U06','mill','oil','hull']},
  {id:'fiber',name:'纤维与绳索加工',ids:['fiber','rope']},
  {id:'parts',name:'工具、部件与动力',ids:['T01','T03','U01','S02','seal','shaft','valve','W03','P01','P03']},
  {id:'power',name:'电气设备与材料',ids:['wire','coil','cable','F07','fuel','battery','E01','E02','E04','LAMP','TELEGRAPH','ELECTROLYZER','aluminium','aluminiumwire']},

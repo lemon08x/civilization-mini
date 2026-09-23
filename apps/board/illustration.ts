@@ -17,7 +17,7 @@ const COURSE_ART:Record<string,string>={
  O3:'chronicle-market-ui.webp',O4:'device-T07-ui.webp',O5:'era-nav-trade.webp',
  Q0:'item-book-ui.webp',Q1:'tech-mechanics-ui.webp',Q2:'chronicle-journal-ui.webp',
 };
-export const courseArtUrl=(id:string):string=>'/illustrations/'+(COURSE_ART[id]??'chronicle-study-ui.webp');
+export const courseArtUrl=(id:string):string=>assetUrl(COURSE_ART[id]??'chronicle-study-ui.webp');
 export function productArt(id:string):string {
   if(['W01','W03','U08','valve'].includes(id))return 'product-water';
   if(['S01','S02','mill','U06'].includes(id))return 'chronicle-pantry';
@@ -28,7 +28,18 @@ export function productArt(id:string):string {
   if(['P01','P03','shaft'].includes(id))return 'tech-mechanics';
   return 'chronicle-power';
 }
-export const artUrl=(name:string)=>`/illustrations/${name}-ui.webp`;
+// Runtime artwork names stay stable when their category directory changes.
+export function assetUrl(filename:string):string {
+ const folder=/^(ui-|era-nav-)/.test(filename)?'ui'
+  :filename.startsWith('item-')?'items'
+  :filename.startsWith('device-')?'devices'
+  :/^(person-|sect-)/.test(filename)?'characters'
+  :/^(atlas-|events-)/.test(filename)||['farm-events-atlas.png','farm-land-atlas-v1.png','self-scenes.png'].includes(filename)?'atlases'
+  :filename.startsWith('farm-plant-')?(filename.endsWith('-v2.webp')?'farm/animation/painted/crops':'farm/animation/watercolor/crops')
+  :/^(farm-|field-)/.test(filename)?'farm':'scenes';
+ return '/illustrations/'+folder+'/'+filename;
+}
+export const artUrl=(name:string)=>assetUrl(name+'-ui.webp');
 export type FarmArt='explore'|'reclaim'|'sow'|'tend'|'harvest'|'discovery';
 export function farmEventArt(topic:FarmArt):string {
   const cell={explore:0,reclaim:1,sow:2,tend:3,harvest:4,discovery:5}[topic];
@@ -36,11 +47,14 @@ export function farmEventArt(topic:FarmArt):string {
 }
 export const illustration=(name:string,className='detail-illustration')=>`<img class="${esc(className)}" src="${artUrl(name)}" alt="" aria-hidden="true" width="384" height="384" loading="lazy" decoding="async">`;
 
-export const itemImage=(id:string)=>`<img class="item-illustration" src="/illustrations/item-${esc(id)}-ui.webp" alt="" aria-hidden="true" width="128" height="128" loading="lazy" decoding="async">`;
+// 新物资暂无独立绘件，复用相近物品绘件：谷物种用麦种袋、豆与菜种用豆种袋，谷物收成用麦，
+// 小豆用大豆，稻米用面粉（碾制加工粮），食盐用矿石，葵菜/芥菜与腌菜用口粮。
+const itemArtAlias:Record<string,string>={seedRice:'seedWheat',seedFoxtail:'seedWheat',seedAdzuki:'seedSoy',seedMallow:'seedSoy',seedMustard:'seedSoy',rice:'wheat',millet:'wheat',adzuki:'soy',milledRice:'flour',salt:'ore',mallow:'food',mustard:'food',pickles:'food'};
+export const itemImage=(id:string)=>`<img class="item-illustration" src="/illustrations/items/item-${esc(itemArtAlias[id]??id)}-ui.webp" alt="" aria-hidden="true" width="128" height="128" loading="lazy" decoding="async">`;
 
 export function shopImage(item:{kind:string;target:string}):string {
-  const src=item.kind==='goods'?`/illustrations/item-${esc(item.target)}-ui.webp`
-    :item.kind==='device'?`/illustrations/device-${esc(item.target)}-ui.webp`
+  const src=item.kind==='goods'?`/illustrations/items/item-${esc(itemArtAlias[item.target]??item.target)}-ui.webp`
+    :item.kind==='device'?`/illustrations/devices/device-${esc(item.target)}-ui.webp`
     :item.kind==='book'?artUrl('item-book')
     :artUrl('item-'+item.target);
   const fallback=artUrl(item.kind==='goods'?'item-food':productArt(item.target));
@@ -87,5 +101,12 @@ export function encounterCard(text:string,compact=false):string {
   const entry=encounterPictures.find(([title])=>text.includes(title+'：')||text.includes(title+'（重大）：'));
   if(!entry)return `<p>${esc(text)}</p>`;
   const [title,group,column,row]=entry;
-  return `<figure class="encounter-card${compact?' encounter-compact':''}"><span class="encounter-picture" aria-hidden="true" style="background-image:url('/illustrations/events-${group}.png');background-position:${column*25}% ${row*100}%"></span><figcaption><span class="encounter-heading">${esc(title)}${text.includes(title+'（重大）')?' · 重大':''}</span><p>${esc(text)}</p></figcaption></figure>`;
+  return `<figure class="encounter-card${compact?' encounter-compact':''}"><span class="encounter-picture" aria-hidden="true" style="background-image:url('/illustrations/atlases/events-${group}.png');background-position:${column*25}% ${row*100}%"></span><figcaption><span class="encounter-heading">${esc(title)}${text.includes(title+'（重大）')?' · 重大':''}</span><p>${esc(text)}</p></figcaption></figure>`;
+}
+
+// Shared painted land atlas for the farm inspector and player guide.
+const landFrames:Record<string,number>={sand:0,loam:1,clay:2,low:3,flat:4,high:5,dry:6,parched:7,moist:8,wet:9,flood:10,pond:11,drain:12,canal:13,shelter:14,fertility:15};
+export function landArt(key:string,extra=''):string {
+ const i=landFrames[key]??1;
+ return `<span class="farm-land-art ${extra}" style="background-position:${i%4*100/3}% ${Math.floor(i/4)*100/3}%" aria-hidden="true"></span>`;
 }

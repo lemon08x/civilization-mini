@@ -35,7 +35,7 @@ function render(){
 }
 app.ticker.add(delta=>{time+=delta;for(const p of plants){const wave=windy?Math.sin(time*.025+p.phase)*p.strength:0;p.sprite.skew.x=wave;p.sprite.scale.y=p.base*(1+Math.abs(wave)*.14);}});
 async function init(){
- for(let c=0;c<4;c++){textures[c]=[];for(let s=0;s<3;s++)textures[c][s]=await P.Assets.load(`/illustrations/farm-plant-${ids[c]}-${s}-v1.png`);}
+ for(let c=0;c<4;c++){textures[c]=[];for(let s=0;s<3;s++)textures[c][s]=await P.Assets.load(`/illustrations/farm/animation/watercolor/crops/farm-plant-${ids[c]}-${s}-v1.png`);}
  document.querySelectorAll<HTMLButtonElement|HTMLSelectElement>('nav button,nav select').forEach(el=>el.disabled=false);
  render();
  (document.getElementById('phase') as HTMLSelectElement).onchange=e=>{phase=(e.target as HTMLSelectElement).value;render();};

@@ -1,3 +1,31 @@
+# 素材目录约定
+
+素材统一保存在本目录，页面 URL 仍以 `/illustrations/` 开头，后接分类目录与文件名。以下历史生成记录保留原文件名；查找时按本表定位，不能把历史文件名当作根目录 URL。
+
+| 目录 | 内容 |
+| --- | --- |
+| `ui/` | 导航、状态及时代入口图标 |
+| `farm/` | 农舍、农事、物资、地块状态和土地用途插画 |
+| `farm/animation/watercolor/crops/` | 现用水彩作物精灵，四种作物各三个生长阶段 |
+| `farm/animation/painted/` | 远端新接入的作物（`crops/`）、土地（`terrain/`）与场景（`environment/`）素材 |
+| `farm/animation/next/` | 下一套农场动画风格预留位置，尚未接入运行时 |
+| `items/`、`devices/` | 物品与设备界面成品 |
+| `characters/` | 人物、门派图集，包含直接使用的 JPG / PNG |
+| `scenes/` | 主题、故事、季节天气及个人记录插画 |
+| `atlases/` | 页面直接裁切使用的图鉴、事件、土地等图集 |
+| `sources/` | 有对应界面成品的原稿、裁切母图及植物校正稿 |
+| `previews/` | 历史预览样张 |
+
+## 农场动画换风格
+
+当前动画代码仍在 `apps/board/farm-animation/`。作物图片加载入口为 `scene.ts`，独立预览入口为 `apps/board/crop-preview.ts`；主场景使用 `painted/` 下的新作物、土地与环境图片，部分作物回退到 `watercolor/crops/`；独立预览仍使用水彩 v1。程序绘制继续承担缺图回退和雾等效果。远端提交附带的 `modeling-assets/` 是建模参考原稿，保留原位置。
+
+下一套素材先放入 `farm/animation/next/`，风格确定后改成具体风格名；可按实际需要在该风格下分 `crops/`、`terrain/`、`buildings/`、`vegetation/`、`effects/`。不要覆盖现用水彩素材或把新风格混入农场界面图标。接入时同步更新动画加载、预览和 `illustration.ts` 中的作物路径，并核对生长阶段、底部锚点、透明边缘与显示尺寸。此次仅预留目录，不实现风格切换或改变游戏状态。
+
+动态通用图片地址集中由 `apps/board/illustration.ts` 的 `assetUrl()` / `artUrl()` 生成；CSS、HTML 和动画加载中的直接地址也必须包含分类目录。图集移动不改变格位、裁切坐标或文件内容。
+
+---
+
 # 插画素材使用说明
 
 ## 2026-09-22 图鉴物产插画

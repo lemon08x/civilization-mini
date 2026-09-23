@@ -20,6 +20,7 @@ export interface CompactActionQuote {
 }
 
 export interface CompactObservation {
+  // Shared farm observation includes land bands, coverage, storage and remaining service quotas.
   farm?:NonNullable<SessionObservation['game']['economy']>['farm'];
   calendar?:NonNullable<SessionObservation['game']['life']>['calendar'];
   diet?:NonNullable<SessionObservation['game']['life']>['diet'];
@@ -283,6 +284,7 @@ function sectionPayload(observation: SessionObservation, section: CompactSection
       disciplines: economy.disciplines ?? null,
       products: economy.products ?? null,
       processes: economy.processes ?? null,
+      crops: economy.crops ?? null,
       goods: economy.goodsCatalog ?? null,
     };
     case 'actions-disabled': return actions.filter(action => !action.enabled).map(action => ({

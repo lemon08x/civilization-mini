@@ -17,7 +17,7 @@ export function defineAction(state: GameState, id: string, label: string, group:
   const baseLife=state.life?lifeCost(state,id,requestedAp):undefined;
   const quoted=baseLife?{time:costs.time??baseLife.time,energy:costs.energy??baseLife.energy}:undefined;
   const life=quoted?calendarCost(state,id,state.life?.calendar&&['branchlearn','farmproject','farmexplore','farmreclaim','wait','diet','cook'].includes(id.split(':')[1])?quoted:sectCosts(state,id,quoted)):undefined;
-  const reasons = [...blockers.map(reason=>state.economy?.branches?reason.replace(/需生产组织第?1阶或家族记录/g,'需掌握劳动分工').replace(/需生产组织第?2阶或家族记录/g,'需掌握生产工序').replace(/需生产组织第?3阶或家族记录/g,'需掌握采购与交付'):reason),...branchActionNeeds(state,id)];
+  const reasons = [...new Set([...blockers.map(reason=>state.economy?.branches?reason.replace(/需生产组织第?1阶或家族记录/g,'需掌握劳动分工').replace(/需生产组织第?2阶或家族记录/g,'需掌握生产工序').replace(/需生产组织第?3阶或家族记录/g,'需掌握采购与交付'):reason),...branchActionNeeds(state,id)])];
   // Quote on an isolated draft: farming changes water demand; income, purchases and
   // household policies change shopping demand. Never mutate the real state or advance a season.
   const reserved=quoteReservedLabor(state,id,{money,food},reasons,execute);

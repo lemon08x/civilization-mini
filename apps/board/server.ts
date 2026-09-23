@@ -1,4 +1,5 @@
 import http from 'node:http';
+import {spawn} from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { extname, join, resolve, sep } from 'node:path';
 import { loadCurrentContext, projectRoot } from '../host/context.js';
@@ -56,4 +57,12 @@ const server = http.createServer(async (req, res) => {
   } catch { res.writeHead(404); res.end('Not found'); }
 });
 server.on('error', error => { console.error(error.message); process.exitCode = 1; });
-server.listen(port, '127.0.0.1', () => console.log(`规则桌面：http://127.0.0.1:${port}（仅本机）`));
+server.listen(port, '127.0.0.1', () => {
+  const url=`http://127.0.0.1:${port}/start`;
+  console.log(`规则桌面：${url}（仅本机）`);
+  if(process.env.OPEN_BROWSER==='1'&&process.platform==='win32'){
+    const browser=spawn('explorer.exe',[url],{windowsHide:true,stdio:'ignore'});
+    browser.on('error',()=>console.log(`请手动在浏览器打开：${url}`));
+    browser.unref();
+  }
+});

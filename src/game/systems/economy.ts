@@ -13,10 +13,10 @@ import type { EconomyState, Crop, WorkerKind, Worker } from '../model/economy.js
 import { SUBJECTS } from '../model/economy.js';
 import type { Ruleset } from '../ruleset.js';
 import type { GameEvent } from '../model/events.js';
-import { ALL_PROCESSES as PROCESSES, CROPS, SUBJECT_NAMES, WORKER_NAMES, ALL_JOB_NAMES as JOB_NAMES } from './economy-catalog.js';
+import { ALL_PROCESSES as PROCESSES, CROPS, EDIBLE, SUBJECT_NAMES, WORKER_NAMES, ALL_JOB_NAMES as JOB_NAMES } from './economy-catalog.js';
 import { amount, changeGoods, consumeEquipment, equipped, foodStock, storage } from './inventory.js';
 import { level, organizationLevel, recordEvidence, wage } from './knowledge.js';
-import { farmBlocker, farmWork, fieldYield, growField, farmView, settleNeighbor } from './agriculture.js';
+import { farmBlocker, farmWork, fieldYield, growField, farmView, settleNeighbor,fieldNeedsWater,irrigateField } from './agriculture.js';
 import { finishProcess, processBlockers, runProcess } from './processing.js';
 
 export { amount, changeGoods, consumeEquipment, equipped, foodStock, missingGoods, storage } from './inventory.js';
@@ -40,8 +40,8 @@ export function workerBlocker(s:GameState,w:Worker):string[]{
 
 export function settleEconomy(s:GameState,rules:Ruleset,events:GameEvent[]):void{
   const e=s.economy!,f=e.field;
-  if(!e.industry&&f.crop&&(!e.branches||branchHas(s,'A1'))&&s.location.rain+f.moisture<2&&equipped(s,'W03')&&s.location.water>0&&amount(s,'wood')>0){
-    changeGoods(s,{wood:1},-1,events,'活塞泵自动灌溉');s.location.water--;f.moisture+=2;consumeEquipment(s,'W03',events);if(e.operations)e.equipmentUsed.W03=s.clock.absoluteTurn;
+  if(!e.industry&&f.crop&&(!e.branches||branchHas(s,'A1'))&&fieldNeedsWater(s,f)&&equipped(s,'W03')&&s.location.water>0&&amount(s,'wood')>0){
+    changeGoods(s,{wood:1},-1,events,'活塞泵自动灌溉');s.location.water--;irrigateField(s,f);consumeEquipment(s,'W03',events);if(e.operations)e.equipmentUsed.W03=s.clock.absoluteTurn;
     events.push({type:'economy-farm',operation:'pump',crop:f.crop,actor:'活塞泵',amount:1});
   }
   // 固定结算次序可观察。同一设备、地块不能因多人或自动化重复获得产出。
@@ -76,13 +76,13 @@ export function settleEconomy(s:GameState,rules:Ruleset,events:GameEvent[]):void
   }
   if(s.socialFood)return; // v21 converts food once, after social purchases and production.
   let need=Math.max(0,rules.parameters.foodPerTurn-s.household.food);
-  for(const id of ['flour','wheat','soy']){const n=Math.min(need,amount(s,id));if(n){changeGoods(s,{[id]:n},-1,events,'家庭生活取粮');s.household.food+=n;need-=n;}}
+  for(const id of EDIBLE){const n=Math.min(need,amount(s,id));if(n){changeGoods(s,{[id]:n},-1,events,'家庭生活取粮');s.household.food+=n;need-=n;}}
 }
 export function spoilEconomy(s:GameState,events:GameEvent[],days?:number):void{
   const protectedFood=modernOnline(s,'S08')?Math.max(30,storage(s)):storage(s);
   let excess=Math.max(0,foodStock(s)-protectedFood);if(!excess)return;
   let loss=days===undefined?Math.ceil(excess/3):Math.round(excess*(1-Math.pow(2/3,days/s.life!.calendar!.rules.businessCycleDays))*1000000)/1000000;const loose=Math.min(loss,s.household.food);s.household.food=Math.round((s.household.food-loose)*1000000)/1000000;loss-=loose;
-  const changes:Record<string,number>={};for(const id of ['flour','soy','wheat']){const n=Math.min(loss,amount(s,id));if(n){changes[id]=n;loss-=n;}}
+  const changes:Record<string,number>={};for(const id of EDIBLE){const n=Math.min(loss,amount(s,id));if(n){changes[id]=n;loss-=n;}}
   if(Object.keys(changes).length)changeGoods(s,changes,-1,events,'食品保存损耗');
   events.push({type:'food-spoiled',amount:loose+Object.values(changes).reduce((a,b)=>a+b,0),protected:protectedFood});
 }
