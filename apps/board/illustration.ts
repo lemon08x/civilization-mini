@@ -105,7 +105,8 @@ export function encounterCard(text:string,compact=false):string {
 }
 
 // Shared painted land atlas for the farm inspector and player guide.
-const landFrames:Record<string,number>={sand:0,loam:1,clay:2,low:3,flat:4,high:5,dry:6,parched:7,moist:8,wet:9,flood:10,pond:11,drain:12,canal:13,shelter:14,fertility:15};
+// water/paddy 暂无独立绘件：water 复用原蓄水塘格（同为水面），paddy 复用过湿格。
+const landFrames:Record<string,number>={sand:0,loam:1,clay:2,low:3,flat:4,high:5,dry:6,parched:7,moist:8,wet:9,flood:10,water:11,drain:12,canal:13,shelter:14,fertility:15,paddy:9};
 export function landArt(key:string,extra=''):string {
  const i=landFrames[key]??1;
  return `<span class="farm-land-art ${extra}" style="background-position:${i%4*100/3}% ${Math.floor(i/4)*100/3}%" aria-hidden="true"></span>`;

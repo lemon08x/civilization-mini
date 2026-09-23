@@ -82,9 +82,9 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
  hint.anchor.set(.5,1);hint.visible=false;hint.eventMode='none';hint.zIndex=10000;hint.scale.set(.9/Math.max(.8,zoom));
  const hintFor=(p:FarmMap['plots'][number]):string=>{
   const id=p.kind==='unknown'?'economy:farmexplore:'+p.id:p.kind==='wild'?'economy:farmreclaim:'+p.id:'';
-  if(p.improvement)return `${p.id} · ${IMPROVEMENT_NAMES[p.improvement]} · 覆盖${p.improvement==='pond'?8:4}格`;
+  if(p.improvement)return `${p.id} · ${IMPROVEMENT_NAMES[p.improvement]} · ${p.improvement==='canal'?(p.waterConnected?'已通水':'未通水'):'覆盖正交四格'}`;
   if(p.project&&p.project.done<p.project.total)return `${p.id} · ${p.project.name} ${p.project.done}/${p.project.total}天 · 点击续建`;
-  if(!id)return `${p.id} · ${p.kind==='field'?'田地':p.kind==='tree'?'古树 · 不可开垦':p.kind==='rock'?'岩石 · 不可开垦':'查看地块'}`;
+  if(!id)return `${p.id} · ${p.kind==='field'?(p.land?.paddy?'水田':'田地'):p.kind==='tree'?'古树 · 不可开垦':p.kind==='rock'?'岩石 · 不可开垦':p.kind==='water'?'水源 · 不可开垦':'查看地块'}`;
   const a=g.actions.find(a=>a.id===id);
   if(!a||!a.enabled)return `${p.id} · ${a?.reason??'先探索相邻地块'}`;
   const name=a.label.replace(/\s*p\d+q\d+$/,'');
@@ -118,12 +118,21 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
    obstacle.zIndex=(p.x+p.y)*100+20;obstacle.eventMode='none';items.addChild(obstacle);
   }
   if(p.improvement==='canal'||p.improvement==='drain'){
-   const channel=new P.Graphics().lineStyle(9,0x9d9270).moveTo(-24,29).lineTo(24,6).lineStyle(5,p.improvement==='drain'?0x70694e:0x6ca2ad).moveTo(-24,29).lineTo(24,6).lineStyle(1,0xcce6df).moveTo(-20,27).lineTo(20,8);
+   // 通水渠用活水色，未通水的渠用干沟色；排水沟保持原色。
+   const waterColor=p.improvement==='drain'?0x70694e:p.waterConnected?0x6ca2ad:0x9aa48c;
+   const channel=new P.Graphics().lineStyle(9,0x9d9270).moveTo(-24,29).lineTo(24,6).lineStyle(5,waterColor).moveTo(-24,29).lineTo(24,6).lineStyle(1,0xcce6df).moveTo(-20,27).lineTo(20,8);
    channel.position.set(pos.x,pos.y);channel.zIndex=(p.x+p.y)*100+20;channel.eventMode='none';items.addChild(channel);
   }
-  if(p.improvement==='pond'){
-   const pond=new P.Graphics().lineStyle(3,0x9d9270).beginFill(0x6ca2ad).drawEllipse(0,18,25,12).endFill();
-   pond.position.set(pos.x,pos.y);pond.zIndex=(p.x+p.y)*100+20;pond.eventMode='none';items.addChild(pond);
+  if(p.kind==='water'){
+   // 程序绘制水源格：复用渠水色系的椭圆水面与泉眼亮点，无独立美术素材。
+   const spring=new P.Graphics().lineStyle(2,0x9d9270).beginFill(0x6ca2ad).drawEllipse(0,18,22,10).endFill().beginFill(0xcce6df).drawEllipse(-5,16,7,3).endFill().beginFill(0xcce6df).drawEllipse(6,20,5,2.5).endFill();
+   spring.position.set(pos.x,pos.y);spring.zIndex=(p.x+p.y)*100+20;spring.eventMode='none';items.addChild(spring);
+   const label=new P.Text('水源',{fontFamily:'Microsoft YaHei',fontSize:10,fill:0x31483d,stroke:0xf7f3e8,strokeThickness:3});label.anchor.set(.5);label.position.set(pos.x,pos.y+34);label.eventMode='none';label.zIndex=(p.x+p.y)*100+30;items.addChild(label);
+  }
+  if(field&&p.land?.paddy){
+   // 程序绘制水田：在田面上叠一层浅水色块，表示每日保持蓄水。
+   const paddyWater=new P.Graphics().lineStyle(1,0xcce6df,.8).beginFill(0x6ca2ad,.5).drawPolygon([0,10,22,21,0,32,-22,21]).endFill();
+   paddyWater.position.set(pos.x,pos.y);paddyWater.zIndex=(p.x+p.y)*100+15;paddyWater.eventMode='none';items.addChild(paddyWater);
   }
   if(p.improvement){const label=new P.Text(IMPROVEMENT_NAMES[p.improvement],{fontFamily:'Microsoft YaHei',fontSize:10,fill:0x31483d,stroke:0xf7f3e8,strokeThickness:3});label.anchor.set(.5);label.position.set(pos.x,pos.y+34);label.eventMode='none';label.zIndex=(p.x+p.y)*100+30;items.addChild(label);}
   if(p.kind==='story'){

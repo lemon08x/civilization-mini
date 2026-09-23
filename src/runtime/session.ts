@@ -67,33 +67,29 @@ export function parseSession(value: unknown): Session {
   if(!isRecord(economy)||!isRecord(economy.farm))farmInvalid();
   const farm=(economy as Record<string,any>).farm;
   const validField=(f:unknown)=>isRecord(f)&&[null,...Object.keys(CROPS)].includes(f.crop as null|string)&&[null,...Object.keys(CROPS)].includes(f.lastCrop as null|string)&&['planted','moisture','growth','stress','fertility','tended','bonus','duration'].every(k=>finite(f[k]))&&Number(f.fertility)<=3&&Number(f.duration)>=1&&typeof f.composted==='boolean'&&(f.variety===undefined||f.variety==='heritage'&&f.crop==='wheat');
-  if(farm.landVersion!==1||farm.explorationVersion!==3||!Number.isSafeInteger(farm.rareSeeds)||farm.rareSeeds<0)farmInvalid();
+  if(farm.landVersion!==2||farm.explorationVersion!==3||!Number.isSafeInteger(farm.rareSeeds)||farm.rareSeeds<0)farmInvalid();
   if(!isRecord(farm.rules)||canonical(farm.rules)!==canonical(record.manifest.ruleset.farm)||!isRecord(farm.plots)||!Array.isArray(farm.discovered)||!farm.discovered.includes('wheat')||new Set(farm.discovered).size!==farm.discovered.length||farm.discovered.some((c:unknown)=>!Object.keys(CROPS).includes(String(c)))||!Number.isSafeInteger(farm.explored)||farm.explored<0)farmInvalid();
   if(!validField((economy as Record<string,any>).field)||farm.plots.p2q2?.kind!=='field')farmInvalid();
   for(const [id,raw] of Object.entries(farm.plots)){
-    if(!isRecord(raw)||raw.id!==id||!Number.isSafeInteger(raw.x)||!Number.isSafeInteger(raw.y)||Number(raw.x)<0||Number(raw.y)<0||id!==`p${raw.x}q${raw.y}`||!['unknown','wild','field','tree','rock','brush','story'].includes(String(raw.kind)))farmInvalid();
+    if(!isRecord(raw)||raw.id!==id||!Number.isSafeInteger(raw.x)||!Number.isSafeInteger(raw.y)||Number(raw.x)<0||Number(raw.y)<0||id!==`p${raw.x}q${raw.y}`||!['unknown','wild','field','tree','rock','brush','story','water'].includes(String(raw.kind)))farmInvalid();
     const p=raw as Record<string,any>;
     if(p.kind==='field'&&id!=='p2q2'?!validField(p.field):p.field!==undefined)farmInvalid();
     if(p.fertility!==undefined&&(!Number.isInteger(p.fertility)||p.fertility<0||p.fertility>3))farmInvalid();
     if(p.discovery!==undefined&&(!isRecord(p.discovery)||!(FARM_DISCOVERIES as readonly unknown[]).includes(p.discovery.id)||typeof p.discovery.resolved!=='boolean'||typeof p.discovery.outcome!=='string'))farmInvalid();
-    if(['tree','rock','brush','story'].includes(p.kind)&&!p.discovery&&!p.improvement)farmInvalid();
-    if(p.kind==='story'&&(p.discovery.resolved||!['fallow','woodland','seedbag','heritage','canal','traveler','shrine'].includes(p.discovery.id)))farmInvalid();
+    if(['tree','rock','brush','story','water'].includes(p.kind)&&!p.discovery&&!p.improvement)farmInvalid();
+    if(p.kind==='story'&&(p.discovery.resolved||!['fallow','woodland','seedbag','heritage','spring','traveler','shrine'].includes(p.discovery.id)))farmInvalid();
     if(p.kind==='brush'&&(p.discovery.id!=='brambles'||p.discovery.resolved))farmInvalid();
-    if(p.kind!=='unknown'&&(!isRecord(p.land)||!['sand','loam','clay'].includes(String(p.land.soil))||!Number.isInteger(p.land.elevation)||![0,1,2].includes(Number(p.land.elevation))||!Number.isInteger(p.land.water)||![0,1,2,3,4].includes(Number(p.land.water))||!['dryDays','wetDays','drainDays'].every(k=>Number.isSafeInteger(p.land[k])&&p.land[k]>=0)))farmInvalid();
-    if(p.project!==undefined&&(!isRecord(p.project)||!['canal','restore','timber','clearwood','shelter','pond','drain'].includes(String(p.project.kind))||!finite(p.project.done)||!finite(p.project.total)||Number(p.project.total)<=0||Number(p.project.done)>Number(p.project.total)||!Number.isInteger(Number(p.project.done)*2)))farmInvalid();
+    if(p.kind!=='unknown'&&(!isRecord(p.land)||!['sand','loam','clay'].includes(String(p.land.soil))||!Number.isInteger(p.land.elevation)||![0,1,2].includes(Number(p.land.elevation))||!Number.isInteger(p.land.water)||![0,1,2,3,4].includes(Number(p.land.water))||!['dryDays','wetDays','drainDays'].every(k=>Number.isSafeInteger(p.land[k])&&p.land[k]>=0)||p.land.paddy!==undefined&&typeof p.land.paddy!=='boolean'))farmInvalid();
+    if(p.project!==undefined&&(!isRecord(p.project)||!['canal','restore','timber','clearwood','shelter','paddy','drain'].includes(String(p.project.kind))||!finite(p.project.done)||!finite(p.project.total)||Number(p.project.total)<=0||Number(p.project.done)>Number(p.project.total)||!Number.isInteger(Number(p.project.done)*2)))farmInvalid();
     if(p.project){
-      const expected=p.project.kind==='canal'?farm.rules.canalDays:p.project.kind==='pond'?farm.rules.pondDays:p.project.kind==='drain'?farm.rules.drainDays:p.project.kind==='restore'?farm.rules.restoreDays:farm.rules.woodlandDays;
+      const expected=p.project.kind==='canal'?farm.rules.canalDays:p.project.kind==='paddy'?farm.rules.paddyDays:p.project.kind==='drain'?farm.rules.drainDays:p.project.kind==='restore'?farm.rules.restoreDays:farm.rules.woodlandDays;
       if(p.project.total!==expected)farmInvalid();
       if(p.project.done<p.project.total){
-        const story=p.kind==='story'&&p.discovery&&!p.discovery.resolved&&({canal:['canal'],fallow:['restore'],woodland:['timber','clearwood','shelter']} as Record<string,string[]>)[p.discovery.id]?.includes(p.project.kind);
-        if(!story&&!(p.kind==='wild'&&['canal','pond','drain'].includes(p.project.kind)))farmInvalid();
-      }else if(!p.improvement&&!(p.kind==='field'&&['restore','clearwood'].includes(p.project.kind)))farmInvalid();
+        const story=p.kind==='story'&&p.discovery&&!p.discovery.resolved&&({fallow:['restore'],woodland:['timber','clearwood','shelter']} as Record<string,string[]>)[p.discovery.id]?.includes(p.project.kind);
+        if(!story&&!(p.kind==='wild'&&['canal','drain'].includes(p.project.kind))&&!(p.kind==='field'&&p.project.kind==='paddy'))farmInvalid();
+      }else if(!p.improvement&&!(p.kind==='field'&&['restore','clearwood','paddy'].includes(p.project.kind)))farmInvalid();
     }
-    if(p.improvement!==undefined&&(!['canal','shelter','pond','drain'].includes(p.improvement)||p.kind!=='rock'||p.project?.kind!==p.improvement||p.project.done!==p.project.total))farmInvalid();
-    if(p.improvement&&p.improvement!=='shelter'){
-      const limit=p.improvement==='canal'?farm.rules.canalDoses:p.improvement==='drain'?farm.rules.drainDoses:farm.rules.pondDoses;
-      if(!isRecord(p.service)||!['cycle','remaining','stored'].every(k=>Number.isSafeInteger(p.service[k])&&p.service[k]>=0)||Number(p.service.remaining)>limit||Number(p.service.stored)>farm.rules.pondCapacity||p.improvement!=='pond'&&p.service.stored!==0)farmInvalid();
-    }else if(p.service!==undefined)farmInvalid();
+    if(p.improvement!==undefined&&(!['canal','shelter','drain'].includes(p.improvement)||p.kind!=='rock'||p.project?.kind!==p.improvement||p.project.done!==p.project.total))farmInvalid();
     if(p.kind==='unknown'&&Object.keys(p).some(k=>!['id','x','y','kind'].includes(k)))farmInvalid();
   }
   const neighbor=farm.neighbor;

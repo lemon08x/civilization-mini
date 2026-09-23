@@ -85,37 +85,38 @@ function landGuide(g:SessionObservation['game']):string {
  const heading=(n:string,id:string,title:string,lead:string)=>`<header class="land-guide-heading"><span>${n}</span><div><h3 id="${id}">${title}</h3><p>${lead}</p></div></header>`;
  const reach=(kind:string,range:4|8)=>`<figure class="land-guide-reach"><div class="land-guide-grid" role="img" aria-label="${range===8?'设施覆盖周围八格，含斜角':'设施只覆盖上下左右四格，不含斜角'}">${Array.from({length:9},(_,i)=>{const center=i===4,active=!center&&(range===8||[1,3,5,7].includes(i));return `<span class="${center?'origin':active?'covered':''}">${center?landArt(kind):active?'覆盖':'—'}</span>`;}).join('')}</div><figcaption>${range===8?'周围八格 · 包含斜角':'正交四格 · 不含斜角'}</figcaption></figure>`;
  const facilities=[
-  {id:'canal',name:'水渠',role:'把公共水送到田里',range:4 as const,days:r.canalDays,cost:`${r.projectWood}木材`,effect:`每${r.waterCycleDays}天，覆盖田共享${r.canalDoses}次补水；每次耗1公共水，将缺水田恢复到作物所需档位。`,site:'先修复发现的旧渠。荒地新建水渠必须连接同高或更高的已建水渠；水不能自行送到更高的田。',choice:'适合集中照料渠边田，也为水稻提供种植条件。公共水不足时，有渠也不能补水。'},
-  {id:'pond',name:'蓄水塘',role:'把雨水留到缺水时用',range:8 as const,days:r.pondDays,cost:`${r.projectWood}木材`,effect:`建成时为空，最多存${r.pondCapacity}份补水；每连续${r.rainRiseDays}天连雨蓄${r.pondRainGain}份。每${r.waterCycleDays}天最多补水${r.pondDoses}次，每次耗1份储水。`,site:'选在多块田的中间，斜角田也能得到照料。塘水服务包含搬运，不受田地高低限制。',choice:'能在公共水紧张时提供另一种水源，但需要先等雨蓄水。覆盖八格，不等于八格各有一塘水。'},
-  {id:'drain',name:'排水沟',role:'把多余的水排走',range:4 as const,days:r.drainDays,cost:`${r.projectWood}木材`,effect:`每${r.waterCycleDays}天共享${r.drainDoses}次排水；每次将过湿或积水田降低一档，最低降至适宜。优先处理最湿的田。`,site:'沟不能高于受益田。须有正交相邻低地、通过等高排水沟接到出口，或位于地图北／西边界。施工按钮会说明缺少的条件。',choice:'适合保护容易积水的田。水稻需要过湿，沟也会排走稻田的水，规划时留意这种冲突。'},
+  {id:'canal',name:'水渠',role:'把水源引进田里',range:4 as const,days:r.canalDays,cost:`${r.projectWood}木材`,effect:'与水源格或通水渠正交相邻才能开工，沿渠链高程不升。通水后在渠格开闸放水，一次把渠链相邻的田灌到各自作物所需水分，不耗公共水。',site:'从水源格旁边起步，逐段向外延伸；水不能自行送到更高的田。',choice:'适合集中照料一片田，也是改造水田的前提。未接通水源的渠不会通水。'},
+  {id:'drain',name:'排水沟',role:'把多余的水排走',range:4 as const,days:r.drainDays,cost:`${r.projectWood}木材`,effect:'被动生效：有低位出口时，正交相邻田过湿／积水自然退档所需天数-1（下限1天）。',site:'沟不能高于受益田。须有正交相邻低地、通过等高排水沟接到出口，或位于地图北／西边界。施工按钮会说明缺少的条件。',choice:'适合保护容易积水的田。被动生效，无需操作；适宜或更干的田不受影响。'},
   {id:'shelter',name:'护田林',role:'让土里的水留得久一些',range:4 as const,days:r.woodlandDays,cost:'占用林地',effect:`正交相邻田的干燥失水间隔延长${r.shelterDays}天，晴和时再翻倍；多处护田林不叠加。`,site:'从探索到的林地选择营造护田林。保留林格，就放弃这格采木或清林建田的用途。',choice:'不消耗补水次数，也不直接加水。已经干旱的田仍要灌溉，连雨积水仍要排水。'},
  ];
- const crops=(Object.keys(CROPS) as Crop[]).map(id=>{const c=CROPS[id];const note=id==='rice'?'需同高或更高的相邻水渠；免涝':id==='millet'?'需水低，仍怕过湿和积水':id==='adzuki'?'养地；迟收损失比其他作物快':id==='soy'?'收获后恢复肥力':id==='flax'?'纤维原料，不能作为口粮':id==='mallow'?'短周期菜蔬，不产秸秆':id==='mustard'?'可接腌渍加工，不产秸秆':'主粮，兼得秸秆';return `<tr><th scope="row">${c.name}</th><td>${sowingSeasons(id).map(n=>['春','夏','秋','冬'][n]).join('、')}</td><td>${c.duration}天</td><td>${id==='rice'?'至少过湿':id==='millet'?'至少偏干':'至少适宜'}</td><td>${note}</td></tr>`;}).join('');
+ const crops=(Object.keys(CROPS) as Crop[]).map(id=>{const c=CROPS[id];const note=id==='rice'?'需改造为水田；免涝':id==='millet'?'需水低，仍怕过湿和积水':id==='adzuki'?'养地；迟收损失比其他作物快':id==='soy'?'收获后恢复肥力':id==='flax'?'纤维原料，不能作为口粮':id==='mallow'?'短周期菜蔬，不产秸秆':id==='mustard'?'可接腌渍加工，不产秸秆':'主粮，兼得秸秆';return `<tr><th scope="row">${c.name}</th><td>${sowingSeasons(id).map(n=>['春','夏','秋','冬'][n]).join('、')}</td><td>${c.duration}天</td><td>${id==='rice'?'水田恒过湿':id==='millet'?'至少偏干':'至少适宜'}</td><td>${note}</td></tr>`;}).join('');
  return `<article class="rules-page land-guide" aria-labelledby="land-guide-title">
  <div class="land-guide-top"><button type="button" class="text-btn" data-page="农业">← 返回农场</button><span>随时查阅 · 阅读不消耗游戏时间</span></div>
- <header class="land-guide-hero"><div><span class="eyebrow">田间手册 · 土地与水利</span><h2 id="land-guide-title">一块地种粮，一块地护田</h2><p>田越多，越要考虑水从哪里来、雨后往哪里去。留出合适的位置修渠、蓄水或护林，让周围的田更容易照料。</p></div><div class="land-guide-hero-art" aria-hidden="true">${landArt('loam')}${landArt('canal')}${landArt('pond')}</div></header>
+ <header class="land-guide-hero"><div><span class="eyebrow">田间手册 · 土地与水利</span><h2 id="land-guide-title">一块地种粮，一块地护田</h2><p>田越多，越要考虑水从哪里来、雨后往哪里去。找到水源、沿链修渠，或护林保墒，让周围的田更容易照料。</p></div><div class="land-guide-hero-art" aria-hidden="true">${landArt('loam')}${landArt('canal')}${landArt('water')}</div></header>
  <nav class="land-guide-nav" aria-label="土地指南目录"><a href="#land-first">开始经营</a><a href="#land-properties">看懂土地</a><a href="#land-buildings">选择设施</a><a href="#land-crops">安排作物</a><a href="#land-trouble">遇到问题</a></nav>
  <section>${heading('01','land-first','先看地，再开工','每格只能选择一种主要用途。设施占下的位置，就不能同时种庄稼。')}
- <ol class="land-guide-steps"><li><strong>选中一格</strong><p>点击地图或使用“定位地块”。未知格先探索，揭晓后查看土质、地势和水分。</p></li><li><strong>比较周围</strong><p>准备种田，就看能否得到供水、排水；准备建设，就看范围里有多少田、地势是否合适。</p></li><li><strong>选用途与工期</strong><p>荒地可开田或建设。预览不花资源，开工才支付成本；开工后用途固定，工程可以分段完成。</p></li><li><strong>回来看变化</strong><p>日历推进时，天气和设施影响土地。查看水分、剩余服务次数和储水，再决定播种、补水或收获。</p></li></ol>
+ <ol class="land-guide-steps"><li><strong>选中一格</strong><p>点击地图或使用“定位地块”。未知格先探索，揭晓后查看土质、地势和水分。</p></li><li><strong>比较周围</strong><p>准备种田，就看能否得到供水、排水；准备建设，就看范围里有多少田、地势是否合适。</p></li><li><strong>选用途与工期</strong><p>荒地可开田或建设。预览不花资源，开工才支付成本；开工后用途固定，工程可以分段完成。</p></li><li><strong>回来看变化</strong><p>日历推进时，天气和设施影响土地。查看水分与渠的通水状态，再决定播种、浇水或收获。</p></li></ol>
  <p class="land-guide-note">普通开垦需${r.reclaimDays}天。工程分两阶段，物料在首次开工时扣除，全部完工后才生效；进度和设施跨季、跨代保留。工期会与收获、学习、饮食消耗争夺日历，以当前按钮报价为准。</p></section>
  <section>${heading('02','land-properties','看懂土地上的四项信息','土质和地势决定适合怎么经营；水分和肥力会随着天气与管理变化。')}
  <div class="land-guide-soils">${[['sand','沙质土','保水小 · 排水强',r.sandDryDays,'失水快，要更频繁地留意补水；雨后多余水分退得快。'],['loam','壤质土','保水中 · 排水中',r.loamDryDays,'保水和排水居中，适合用来熟悉不同作物的照料。'],['clay','黏质土','保水大 · 排水弱',r.clayDryDays,'水留得久，连雨后也更容易长时间过湿，要留意排水。']].map(([art,name,label,days,note])=>`<div>${landArt(String(art))}<h4>${name}</h4><strong>${label}</strong><p>${note}</p><small>持续干燥时约${days}天失水一档</small></div>`).join('')}</div>
  <p>晴和时，失水所需时间是干燥时的两倍；连雨每持续${r.rainRiseDays}天升一档。雨后若仍过湿或积水，沙、壤、黏土分别每1、2、3天自然降低一档，回到适宜后再按失水规则变化。空田也会变干或变湿。</p>
  <div class="land-guide-water" aria-label="水分由低到高的五档">${[['dry','干旱','作物缺水'],['parched','偏干','粟可满足需水'],['moist','适宜','普通作物所需'],['wet','过湿','水稻所需，普通作物有涝害'],['flood','积水','普通作物涝害更重']].map(([art,name,note])=>`<div>${landArt(art)}<strong>${name}</strong><span>${note}</span></div>`).join('')}</div>
  <div class="land-guide-pair"><div>${landArt('high')}<h4>地势：低、平、高</h4><p>水渠不能给更高的田自流供水；排水沟不能替更低的田排水。先比较设施格和田格的高低，再决定位置。</p></div><div>${landArt('fertility')}<h4>肥力：看下一茬，也看长期</h4><p>当前肥力仍为0～3。大豆、小豆收获后增加1，其余作物减少1；施堆肥可以恢复。肥力1、2、3当茬的直接收益相同，更高肥力能多支撑几茬。</p></div></div></section>
- <section>${heading('03','land-buildings','四种设施，四种分工','图中“覆盖”只说明范围；水源、地势、储水和剩余次数仍要满足条件。')}
+ <section>${heading('03','land-buildings','水利阶梯：从浇水到水田','图中“覆盖”只说明范围；水源与地势仍要满足条件。')}
+ <ol class="land-guide-steps"><li><strong>手动浇水</strong><p>逐田灌溉，每次耗1公共水，恢复到作物所需水分。</p></li><li><strong>护田林</strong><p>正交四格失水变慢，但不直接加水。</p></li><li><strong>水源格与渠链</strong><p>开闸一次浇一片，不耗公共水，沿链高程不升。</p></li><li><strong>水田</strong><p>邻水的田改为水田，恒过湿，水稻免浇。</p></li></ol>
+ <p class="land-guide-note"><strong>水从哪里来？</strong> 探索时遇到「溪涧活水」见闻，选择疏浚，此格成为永久水源；也可填平整成荒地。水从水源格沿渠链流动：新渠只能修在与水源或通水渠正交相邻的格，且高程沿链不升。</p>
  <div class="land-guide-facilities">${facilities.map(f=>`<article><header>${landArt(f.id)}<div><h4>${f.name}</h4><p>${f.role}</p><small>${f.days}天工程 · ${f.cost}</small></div></header><div class="land-guide-facility-body">${reach(f.id,f.range)}<div><p><strong>怎样生效</strong> ${f.effect}</p><p><strong>建在哪里</strong> ${f.site}</p></div></div><p class="land-guide-choice">${f.choice}</p></article>`).join('')}</div>
- <p class="land-guide-note"><strong>共享次数怎么理解？</strong> 一条渠每${r.waterCycleDays}天有${r.canalDoses}次补水，是所有覆盖田合用，不是每块田各有${r.canalDoses}次。渠、塘优先照料水分档位最低且确实缺水的田；同档按地块编号排序。次数按开局起每${r.waterCycleDays}天统一恢复，不从建成日期单独计时，剩余次数不累计；塘内未用的水继续保留。</p></section>
+ <p class="land-guide-note"><strong>再进一步：水田。</strong> 掌握水田稻作后，与水源格或通水渠相邻的田可做水田改造（${r.paddyDays}天工程，首次开工需${r.projectWood}木材）；完工后田块水分恒为过湿，水稻免浇水，非耐涝作物不能种。</p></section>
  <section>${heading('04','land-crops','按季节、水分和用途选下一茬','下面列出适播季节；实际播种还需要已发现的种子与对应栽培知识。')}
  <table class="land-guide-crops"><caption>当前可种作物的农时与照料差异</caption><thead><tr><th scope="col">作物</th><th scope="col">播种季</th><th scope="col">生长期</th><th scope="col">水分门槛</th><th scope="col">选择理由与限制</th></tr></thead><tbody>${crops}</tbody></table>
  <p>起始田的井泵和社会供水不自动覆盖所有新田；扩展田要依靠手动照料或地图设施。亲自灌溉消耗1公共水，恢复到该作物所需水分；已有受灾不会消失，也不会提前成熟。</p>
  <p>成熟后需要手动收获，收完留空，由你决定下一茬。掌握轮作后，更换作物有收成收益。播种前看预计成熟日期，避免多块田同时成熟时又开长工程；尤其留意小豆迟收损失更快。</p>
- <div class="land-guide-example"><strong>一个选址思路</strong><p>渠旁的田可为稻作留位置；外围缺少供水的田可考虑需水较低的粟。若普通作物田连雨后常积水，找不高于田地且有出口的位置开沟。塘可照料斜角田，适合放在多块田之间，但要先等雨蓄水。</p></div></section>
- <section>${heading('05','land-trouble','设施不生效，先看这些','选中设施，看储水、服务次数和出口；选中田地，看当前水分与作物需求。')}
+ <div class="land-guide-example"><strong>一个选址思路</strong><p>水源旁的田可为稻作留位置；从水源格向外逐段修渠，开闸一次浇一片。外围缺少供水的田可考虑需水较低的粟。若普通作物田连雨后常积水，找不高于田地且有出口的位置开沟。</p></div></section>
+ <section>${heading('05','land-trouble','设施不生效，先看这些','选中设施，看通水状态；选中田地，看当前水分与作物需求。')}
  <div class="land-guide-faq">${[
- ['有渠，为什么田还缺水？','先确认田在上下左右四格内，且不高于渠；再看公共水和本旬剩余次数。水渠按日历推进服务，覆盖并不保证持续满水。'],
- ['塘建好了，为什么没有水？',`建成为空，需要连续连雨蓄水。储水用完或本${r.waterCycleDays}天的补水次数耗尽，都会暂停服务。`],
- ['排水沟为什么不能建，或建了不排水？','检查有没有低位出口、是否与有出口的等高沟连通，以及田是否低于沟。出口通畅还需要剩余次数；适宜或更干的田不会被继续排水。'],
+ ['有渠，为什么田还缺水？','先看渠是否通水：渠要与水源格或通水渠正交相邻，且高程沿链不升。再确认田与通水的渠相邻。开闸放水按次结算，灌到作物所需水分，不会自动持续供水。'],
+ ['水源从哪里来？','探索时遇到「溪涧活水」见闻，选择「疏浚溪涧」即成永久水源；初始田地附近就有一处。水源格不可开垦，是修渠引水的起点。'],
+ ['排水沟为什么不能建，或建了不排水？','检查有没有低位出口、是否与有出口的等高沟连通，以及田是否低于沟。排水沟被动生效，无需操作；适宜或更干的田不受影响。'],
  ['有护田林，为什么还要浇水？','林地只减缓失水，不产生水，也不能防涝。田已低于作物所需水分时，仍要寻找水源。'],
  ['现在变得适宜了，预计收成为什么没恢复？','缺水与涝害会累计受灾。补水、排水只能减轻后续损失，不能消除已经发生的损失。'],
  ['扩张之前还要准备什么？','检查口粮、种子、工程材料和照料时间。到“同门”换种或求助，到“买卖与补给”补货；需要休息与烹饪时去“农舍”。不必把所有荒地立刻开完。'],

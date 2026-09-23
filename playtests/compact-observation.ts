@@ -20,7 +20,7 @@ export interface CompactActionQuote {
 }
 
 export interface CompactObservation {
-  // Shared farm observation includes land bands, coverage, storage and remaining service quotas.
+  // Shared farm observation includes land bands, coverage, water connectivity and paddy marks.
   farm?:NonNullable<SessionObservation['game']['economy']>['farm'];
   calendar?:NonNullable<SessionObservation['game']['life']>['calendar'];
   diet?:NonNullable<SessionObservation['game']['life']>['diet'];
@@ -187,6 +187,26 @@ export function compactObservation(
   };
 }
 
+function farmWaterSummary(farm: unknown): string | undefined {
+  const f = record(farm);
+  const plots = f && Array.isArray(f.plots) ? f.plots : [];
+  const sources: string[] = [], connected: string[] = [], disconnected: string[] = [], paddies: string[] = [];
+  for (const raw of plots) {
+    const p = record(raw);
+    const id = p && str(p.id);
+    if (!p || !id) continue;
+    if (p.kind === 'water') { sources.push(id); continue; }
+    const land = record(p.land);
+    if (land?.paddy === true || p.paddy === true) paddies.push(id);
+    if (p.improvement === 'canal') (p.waterConnected === true ? connected : disconnected).push(id);
+  }
+  if (!sources.length && !connected.length && !disconnected.length && !paddies.length) return undefined;
+  const parts = [`水源格 ${sources.join('、') || '无'}`, `通水渠 ${connected.join('、') || '无'}`];
+  if (disconnected.length) parts.push(`未通水渠 ${disconnected.join('、')}`);
+  parts.push(`水田 ${paddies.join('、') || '无'}`);
+  return parts.join('；');
+}
+
 function eventLine(event: unknown): string {
   const item = record(event);
   if (!item) return String(event);
@@ -219,7 +239,7 @@ export function formatCompactObservation(compact: CompactObservation): string {
   if(compact.calendar){const c=compact.calendar;lines.push(`天气：${c.weather.name}；${c.weather.effect}；约${c.weather.days}天后变化`);lines.push(`节气见闻：${c.termEvents.map(e=>e.date+' '+e.term+' '+e.title+'：'+e.text+' '+e.effect).join('；')||'尚未触发'}；任何推进时间的行动均可触发，同日不重复。`);}
   if(compact.calendar)lines.push(`节令：${compact.calendar.currentTerm}${compact.calendar.solarTerm?'（今日交节）':''}；今日节日：${compact.calendar.festivals.map(f=>f.name).join('、')||'无'}；将至：${compact.calendar.upcoming.map(d=>d.name+' ' +d.days+'天后').join('、')}`);
   if(compact.diet)lines.push(`饮食：${compact.diet.name}；可支持${compact.diet.days}天，每天${compact.diet.dailyGrain}批食材、做饭需${compact.diet.dailyWood}批柴火；餐食调养剩${compact.diet.mealDays}天`);
-  if(compact.farm)lines.push(`地块与同门：${JSON.stringify(compact.farm)}`);
+  if(compact.farm){lines.push(`地块与同门：${JSON.stringify(compact.farm)}`);const water=farmWaterSummary(compact.farm);if(water)lines.push(`水利：${water}`);}
   lines.push(`近期生活经历：${JSON.stringify(compact.seasonalEvents)}`);
   if(compact.sect)lines.push(`师徒与道：${JSON.stringify(compact.sect)}`);
   if(compact.crises)lines.push(`现代使命：${JSON.stringify(compact.crises)}`);

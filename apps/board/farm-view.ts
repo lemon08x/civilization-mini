@@ -15,7 +15,9 @@ const projectChoices:Record<string,string>={},projectDurations:Record<string,str
 export function selectFarmProject(kind:string){projectChoices[selected]=kind;delete projectDurations[selected];}
 export function selectFarmProjectDuration(id:string){projectDurations[selected]=id;}
 function projectSketch(kind:string):string {
- if(kind==='pond'||kind==='drain')return landArt(kind,'farm-route-sketch');
+ if(kind==='drain')return landArt('drain','farm-route-sketch');
+ // 水田暂无独立绘件，复用土地图鉴里的过湿格。
+ if(kind==='paddy')return landArt('paddy','farm-route-sketch');
  return `<img class="farm-route-sketch" src="/illustrations/farm/farm-project-${kind}-v2-ui.webp" alt="" width="320" height="320">`;
 }
 function landProfile(p:NonNullable<NonNullable<FarmGame['economy']>['farm']>['plots'][number]):string {
@@ -24,14 +26,14 @@ function landProfile(p:NonNullable<NonNullable<FarmGame['economy']>['farm']>['pl
  const property=(art:string,label:string,value:string,note:string)=>`<div class="farm-land-property">${landArt(art)}<div><small>${label}</small><strong>${esc(value)}</strong><span>${esc(note)}</span></div></div>`;
  const water=['dry','parched','moist','wet','flood'][l.water]??'moist';
  const fertility=p.field?.fertility??p.fertility;
- const service=l.service;
- return `<section class="farm-land-profile" aria-label="${p.id}土地属性"><div class="farm-land-properties">${property({'沙质':'sand','壤质':'loam','黏质':'clay'}[l.soil]??'loam','土质',l.soil+'土',`保水${l.retention} · 排水${l.drainage}`)}${property({'低':'low','平':'flat','高':'high'}[l.elevation]??'flat','地势',l.elevation+'地',`${l.areaM2} 平方米`)}${property(water,'当前水分',l.waterName,`第 ${l.water+1} / 5 档`)}${fertility!==undefined?property('fertility','土地肥力',`${fertility} / 3`,'随田间管理变化'):''}</div>${p.improvement?`<div class="farm-land-facility">${landArt(p.improvement)}<div><strong>${IMPROVEMENT_NAMES[p.improvement]}</strong><span>${service?`本旬剩余 ${service.remaining} / ${service.limit} 次 · ${service.nextCycleIn} 天后恢复额度`:'减缓相邻田块失水'}</span>${service&&p.improvement==='pond'?`<span>储水${service.storageName} · 可补 ${service.stored} / ${service.capacity} 次</span>`:''}${service&&p.improvement==='drain'?`<span>${service.outlet?'排水出口通畅':'无有效排水出口'}</span>`:''}</div></div>`:''}</section>`;
+ const facilityNote=p.improvement==='canal'?(p.waterConnected?'已通水 · 可开闸放水':'未通水 · 需与水源或通水渠相邻'):p.improvement==='drain'?'相邻田过湿／积水自然退档快1天':'减缓相邻田块失水';
+ return `<section class="farm-land-profile" aria-label="${p.id}土地属性"><div class="farm-land-properties">${property({'沙质':'sand','壤质':'loam','黏质':'clay'}[l.soil]??'loam','土质',l.soil+'土',`保水${l.retention} · 排水${l.drainage}`)}${property({'低':'low','平':'flat','高':'high'}[l.elevation]??'flat','地势',l.elevation+'地',`${l.areaM2} 平方米`)}${property(water,'当前水分',l.waterName,`第 ${l.water+1} / 5 档`)}${fertility!==undefined?property('fertility','土地肥力',`${fertility} / 3`,'随田间管理变化'):''}</div>${p.improvement?`<div class="farm-land-facility">${landArt(p.improvement)}<div><strong>${IMPROVEMENT_NAMES[p.improvement]}</strong><span>${facilityNote}</span></div></div>`:''}</section>`;
 }
 export function selectFarmStock(id:string){stockSelection=id;}
 export const selectedFarmPlot=()=>selected;
 export function selectFarmPlot(id:string){selected=id;panel='field';}
 export function selectFarmPanel(id:FarmPanel){panel=id;}
-const names={unknown:'未知地块',wild:'可耕荒地',field:'自家田地',tree:'古树',rock:'岩石与地标',brush:'荆棘地',story:'乡野发现'};
+const names={unknown:'未知地块',wild:'可耕荒地',field:'自家田地',tree:'古树',rock:'岩石与地标',brush:'荆棘地',story:'乡野发现',water:'水源'};
 const panels:Record<FarmPanel,string>={field:'田地与探索',home:'农舍',store:'仓库',market:'买卖与补给',neighbor:'同门',discoveries:'探索见闻',manufacture:'农具与加工'};
 const goodsArt=new Set(['wheat','soy','flax','seedWheat','seedSoy','seedFlax','wood','clay','compost','straw','flour','food']);
 const affairsArt=new Set(['talk','exchange','learn','basket','explore','reclaim','water','rare','story']);
@@ -68,7 +70,7 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing='
   ?`<div class="farm-item-art farm-painted-art" aria-hidden="true"><img src="${assetUrl(artSource(id)??'farm-affairs-story.webp')}" alt="" width="300" height="300"></div>`
   :`<div class="farm-item-art">${uiIcon(id)}</div>`;
  const illustratedAction=(id:string,art:string)=>button(id).replace('<span class="action-name">',`<span class="action-name"><img class="farm-choice-art" src="${assetUrl(artSource(art)??'farm-affairs-story.webp')}" alt="" width="64" height="64">`);
- const storyArt=(id:string)=>id.endsWith('-identify')?'affairs:rare':id.endsWith('-clear')?'affairs:reclaim':id.endsWith('-repair')?'affairs:water':id.endsWith('-share')?'goods:food':id.endsWith('-leave')?'affairs:explore':'affairs:story';
+ const storyArt=(id:string)=>id.endsWith('-identify')?'affairs:rare':id.endsWith('-clear')||id.endsWith('-fill')?'affairs:reclaim':id.endsWith('-repair')||id.endsWith('-dredge')?'affairs:water':id.endsWith('-share')?'goods:food':id.endsWith('-leave')?'affairs:explore':'affairs:story';
  const card=(name:string,detail:string,actions:string,icon='box')=>`<article class="farm-item-card">${emblem(icon)}<h4>${esc(name)}</h4>${detail}<div class="farm-card-actions">${actions}</div></article>`;
  const uses:Record<string,[string,string]>={
   food:['直接食用','批量干粮，按天食用；没有柴火时也可充饥。'],
@@ -83,7 +85,7 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing='
   seedWheat:['播种专用','在空田播种小麦。种子与收成分别存放，不计入口粮。'],
   seedSoy:['播种专用','在空田播种大豆，还需掌握对应种植知识；种子不能当口粮。'],
   seedFlax:['播种专用','在空田播种亚麻，还需掌握对应种植知识；收获的是制作原料。'],
-  seedRice:['播种专用','在空田播种水稻，需掌握水田稻作且田边有渠格供水；种子不能当口粮。'],
+  seedRice:['播种专用','在空田播种水稻，需掌握水田稻作且田块已改造为水田；种子不能当口粮。'],
   seedFoxtail:['播种专用','在空田播种粟，需掌握旱地谷物；种子不能当口粮。'],
   seedAdzuki:['播种专用','在空田播种小豆，需掌握杂粮接茬；种子不能当口粮。'],
   seedMallow:['播种专用','在空田播种葵菜，需掌握园圃菜蔬；种子不能当口粮。'],
@@ -104,7 +106,7 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing='
   if((spec.waterNeed??2)>2)tags.push('需水高');
   if(spec.waterNeed===1)tags.push('耐旱');
   if(spec.floodTolerant)tags.push('免涝');
-  if(c==='rice')tags.push('需渠边田');
+  if(c==='rice')tags.push('需水田');
   if((spec.lateRate??1)>1)tags.push('迟收落粒加倍');
   if(spec.legume)tags.push('豆科养地');
   return tags;
@@ -129,7 +131,7 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing='
   const explore=map.plots.find(t=>t.kind==='unknown'&&g.actions.some(a=>a.id==='economy:farmexplore:'+t.id&&a.enabled));
   if(p.kind==='unknown'){hint='走近以后，才能知道这里有什么。';fieldTags.push('尚未探索','抵达后揭晓');actions=illustratedAction('economy:farmexplore:'+p.id,'affairs:explore')||'<p>先探索相邻的未知地块。</p>';}
   if(p.kind==='wild'&&!p.project){hint='开垦后可以播种，独立照料这一方田。';fieldTags.push('可开垦',`初始肥力 ${p.fertility??2}`);actions=illustratedAction('economy:farmreclaim:'+p.id,'affairs:reclaim');}
-  if((p.kind==='tree'||p.kind==='rock')&&!p.improvement){hint='保留这处地貌，沿周边继续探索。';fieldTags.push('不可开垦','地貌保留');actions=explore?`<div class="action-option"><button type="button" class="game-action" data-farm-jump="${explore.id}"><span class="action-name"><img class="farm-choice-art" src="${assetUrl(artSource('affairs:explore')??'farm-affairs-story.webp')}" alt="" width="64" height="64">寻找未知地块</span><span class="action-cost"><span>前往可探索地块 →</span></span></button></div>`:'';}
+  if((p.kind==='tree'||p.kind==='rock'||p.kind==='water')&&!p.improvement){hint=p.kind==='water'?'活水长流，是修渠引水的源头。':'保留这处地貌，沿周边继续探索。';fieldTags.push('不可开垦',p.kind==='water'?'永久水源':'地貌保留');actions=explore?`<div class="action-option"><button type="button" class="game-action" data-farm-jump="${explore.id}"><span class="action-name"><img class="farm-choice-art" src="${assetUrl(artSource('affairs:explore')??'farm-affairs-story.webp')}" alt="" width="64" height="64">寻找未知地块</span><span class="action-cost"><span>前往可探索地块 →</span></span></button></div>`:'';}
   if(p.discovery){
    fieldTags.push(p.discovery.resolved?'见闻已收录':'见闻待处理');
    if(!p.discovery.resolved)actions+=g.actions.filter(a=>a.id.startsWith(`economy:farmstory:${p.id}-`)).map(a=>illustratedAction(a.id,storyArt(a.id))).join('');
@@ -138,23 +140,24 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing='
   if(p.land){fieldTags.push(`${p.land.soil}土 · ${p.land.elevation}地`,`保水${p.land.retention} · 排水${p.land.drainage}`);if(!p.improvement)fieldTags.push(`水分：${p.land.waterName}`);}
   if(p.improvement){
    title=IMPROVEMENT_NAMES[p.improvement];
-   hint=p.improvement==='canal'?'正交四格共享补水次数，每次消耗公共水，优先照料最缺水的田。':p.improvement==='pond'?'雨天蓄水，周围八格共享储水和补水次数，优先照料最缺水的田。':p.improvement==='drain'?'有低位出口时，为正交四格排除多余水分。':'正交四格失水变慢，不直接增加水分。';
-   if(p.land?.service){const v=p.land.service;fieldTags.push(`覆盖${v.range}格`,`本旬剩余${v.remaining}/${v.limit}次`,`${v.nextCycleIn}天后恢复额度`);
-    if(p.improvement==='pond')fieldTags.push(`储水${v.storageName} · 可补${v.stored}/${v.capacity}次`);
-    if(p.improvement==='drain')fieldTags.push(v.outlet?'排水出口通畅':'无有效排水出口');
-   }
-   careInfo=`<div class="farm-water-guide"><strong>${hint}</strong><p>覆盖已知格：${p.affected.join('、')||'尚无'}。覆盖不代表无限供给；设施只在完工后生效。</p></div>`;
+   hint=p.improvement==='canal'?(p.waterConnected?'渠水畅通，可开闸放水，灌溉渠链正交相邻的田。':'渠已建成但未通水；需与水源格或通水渠正交相邻，且高程沿链不升。'):p.improvement==='drain'?'有低位出口时，正交相邻田过湿／积水自然退档快1天。':'正交四格失水变慢，不直接增加水分。';
+   if(p.improvement==='canal')fieldTags.push(p.waterConnected?'已通水':'未通水');
+   careInfo=`<div class="farm-water-guide"><strong>${hint}</strong><p>${p.improvement==='canal'?'开闸放水沿渠链灌溉相邻田块，灌到各自作物所需水分，不耗公共水。':p.improvement==='drain'?'被动生效，无需操作；不排干适宜或更干的田。':'被动生效，无需操作；已干旱的田仍需寻找水源。'}</p></div>`;
+   if(p.improvement==='canal'&&p.waterConnected)actions+=illustratedAction('economy:floodgate:'+p.id,'affairs:water');
   }
   if(p.kind==='field'&&f){
-   title=f.variety==='heritage'?'异穗麦田':f.crop?CROPS[f.crop].name+'田':'空田待播';
-   hint=f.crop?(f.growth>=f.duration?'庄稼成熟，可以收获了。':'庄稼正在生长，可以补水照料。'):'选一袋种子，开始新一茬。';
+   title=f.variety==='heritage'?'异穗麦田':f.crop?CROPS[f.crop].name+'田':p.land?.paddy?'水田待播':'空田待播';
+   hint=f.crop?(f.growth>=f.duration?'庄稼成熟，可以收获了。':p.land?.paddy?'水田保持蓄水，水稻免浇水。':'庄稼正在生长，可以补水照料。'):p.land?.paddy?'水田恒过湿，只能种水稻等耐涝作物。':'选一袋种子，开始新一茬。';
    fieldTags.push(f.crop?(f.growth>=f.duration?'成熟待收':`距收获 ${p.maturity?.days??0} 天`):'等待播种',`肥力 ${f.fertility}/3`,`水分 ${p.land?.waterName??"适宜"}`,p.id===map.homeId?'起始田 · 自动供水':'扩展田 · 手动照料');
+   if(p.land?.paddy)fieldTags.push('水田 · 恒过湿');
    if(p.maturity)fieldTags.push('预计 '+p.maturity.date+' 收获');
    if(f.crop)fieldTags.push(`预计收成 ${p.harvest}`,`累计受灾 ${Number(f.stress.toFixed(2))}`);
    if(f.crop&&f.growth<f.duration){
     const req=CROPS[f.crop].waterNeed??2,water=p.land?.water??2,need=water<req;
     const offer=g.actions.find(a=>a.id===`economy:farmplot:${p.id}-${f.crop}`);
-    careInfo=`<div class="farm-water-guide"><div class="farm-water-heading"><strong>水分${p.land?.waterName} · ${need?'需要补水':water>2&&!CROPS[f.crop].floodTolerant?'有涝害风险':'满足作物需要'}</strong><span>${CROPS[f.crop].name}至少需要${WATER_NAMES[req]}</span></div><p>标准灌溉消耗1公共水，恢复到该作物所需水分；已有受灾不会消除。渠、塘按剩余额度补水，多个田块共享。</p><small>此田持续干燥${p.land?.dryingDays}天失水一档，晴和时需两倍天数；连续${map.rules.rainRiseDays}天连雨升一档。雨后按土质排除多余水分，沟渠可加快排水。</small>${offer&&!offer.enabled?`<p class="farm-water-blocked">${esc(offer.reason??'暂不可用')}</p>`:''}</div>`;
+    careInfo=p.land?.paddy
+     ?`<div class="farm-water-guide"><div class="farm-water-heading"><strong>水田 · 每日保持蓄水</strong><span>${CROPS[f.crop].name}无需手动浇水</span></div><p>水田完工后水分恒为过湿，不随天气失水；已有受灾不会消除。</p>${offer&&!offer.enabled?`<p class="farm-water-blocked">${esc(offer.reason??'暂不可用')}</p>`:''}</div>`
+     :`<div class="farm-water-guide"><div class="farm-water-heading"><strong>水分${p.land?.waterName} · ${need?'需要补水':water>2&&!CROPS[f.crop].floodTolerant?'有涝害风险':'满足作物需要'}</strong><span>${CROPS[f.crop].name}至少需要${WATER_NAMES[req]}</span></div><p>标准灌溉消耗1公共水，恢复到该作物所需水分；已有受灾不会消除。通水的渠可开闸放水，一次灌溉渠链相邻的田。</p><small>此田持续干燥${p.land?.dryingDays}天失水一档，晴和时需两倍天数；连续${map.rules.rainRiseDays}天连雨升一档。雨后按土质排除多余水分，排水沟可加快退湿。</small>${offer&&!offer.enabled?`<p class="farm-water-blocked">${esc(offer.reason??'暂不可用')}</p>`:''}</div>`;
    }
 
    actions=(f.crop?[f.crop]:map.discovered).map(c=>{const btn=illustratedAction(`economy:farmplot:${p.id}-${c}`,f.crop?(f.growth>=f.duration?goodArt(c):'affairs:water'):goodArt(CROPS[c].seed));return f.crop?btn:btn.replace('</button>','</button>'+cropMeta(c));}).join('')+(!f.crop?illustratedAction('economy:farmrare:'+p.id,'affairs:rare'):'');
@@ -166,35 +169,35 @@ export function farm(g:FarmGame,renderButton:(id:string)=>string,manufacturing='
   body=`<section class="farm-map-dock" aria-label="当前地块操作" data-primary-action="${quickId}"><div class="farm-dock-main"><div class="farm-dock-heading"><span>${p.id} · ${p.improvement?IMPROVEMENT_NAMES[p.improvement]:names[p.kind]}</span><h3>${esc(title)}</h3><p>${hint}</p>${seedInfo}</div><div class="farm-dock-actions" aria-label="地块行动">${actions}</div></div>${careInfo}</section>`;
   if(p.discovery){
    const d=p.discovery;
-   const art=d.id==='traveler'?'explore':d.id==='seedbag'||d.id==='heritage'?'sow':d.id==='canal'?'tend':d.id==='brambles'?'reclaim':'discovery';
+   const art=d.id==='traveler'?'explore':d.id==='seedbag'||d.id==='heritage'?'sow':d.id==='spring'?'tend':d.id==='brambles'?'reclaim':'discovery';
    body=`<section class="farm-map-dock farm-story-dock" aria-label="${esc(d.title)}"><div class="farm-story-layout"><div class="farm-story-picture">${farmEventArt(art)}<span>田野见闻</span></div><div class="farm-story-content"><div class="farm-story-meta"><span>${p.id} · ${p.improvement?IMPROVEMENT_NAMES[p.improvement]:names[p.kind]}</span><span class="farm-story-state">${d.resolved?'已收录':'待抉择'}</span></div><h3>${esc(d.title)}</h3><p class="farm-story-prose">${esc(d.text)}</p>${d.resolved?`<p class="farm-story-outcome"><span>后记</span>${esc(d.outcome||'已记录地貌。')}</p>`:''}${actions?`<div class="farm-story-choices">${actions}</div>`:''}<small class="farm-story-source">灵感 · ${esc(d.inspiration)}</small></div></div>${careInfo}</section>`;
   }
   if(projects.length){
    const routeInfo:Record<string,{name:string;result:string;note:string;days:number}>={
-    canal:{name:'修建水渠',result:'正交四格共享补水',note:`每${map.rules.waterCycleDays}天${map.rules.canalDoses}次，每次耗1公共水；不能供给更高田`,days:map.rules.canalDays},
-    pond:{name:'开挖蓄水塘',result:'周围八格共享储水',note:`储水最多${map.rules.pondCapacity}次补水，每旬最多${map.rules.pondDoses}次；建成时为空，连雨蓄水`,days:map.rules.pondDays},
-    drain:{name:'开挖排水沟',result:'正交四格排除积水',note:`每旬共享${map.rules.drainDoses}次排水，需要低位出口；不排干适宜田`,days:map.rules.drainDays},
+    canal:{name:'修建水渠',result:'引水入田，可开闸放水',note:'引水链：与水源或通水渠相邻才能开工；完工后可开闸放水',days:map.rules.canalDays},
+    paddy:{name:'改造水田',result:'改为水田，恒过湿，可种水稻',note:'需与水源格或通水渠相邻；完工后每日保持蓄水',days:map.rules.paddyDays},
+    drain:{name:'开挖排水沟',result:'相邻田加快退湿',note:'被动生效：有低位出口时，正交相邻田过湿／积水自然退档快1天',days:map.rules.drainDays},
     restore:{name:'整治良田',result:'建成肥力 3 的田',note:'可直接播种',days:map.rules.restoreDays},
     timber:{name:'采木留地',result:`获得 ${map.rules.timberYield} 木材`,note:'留下荒地，种植还需开垦',days:map.rules.woodlandDays},
     clearwood:{name:'清林建田',result:'建成肥力 2 的田',note:'可直接播种，不额外得木材',days:map.rules.woodlandDays},
     shelter:{name:'保留护田林',result:'正交四格减缓失水',note:'保留林格，不能种植',days:map.rules.woodlandDays},
-    leave:{name:'按普通荒地处理',result:p.discovery?.id==='fallow'?'开垦后肥力 0':'放弃旧渠供水',note:`整理后另花 ${map.rules.reclaimDays} 天开垦`,days:map.rules.reclaimDays},
+    leave:{name:'按普通荒地处理',result:p.discovery?.id==='fallow'?'开垦后肥力 0':'不保留此见闻的收益',note:`整理后另花 ${map.rules.reclaimDays} 天开垦`,days:map.rules.reclaimDays},
    };
    const leave=g.actions.find(a=>a.id===`economy:farmstory:${p.id}-leave`);
    const kinds=[...new Set(projects.map(a=>a.id.split('-')[1])),...(!p.project&&leave?['leave']:[])];
    const kind=p.project?.kind??(kinds.includes(projectChoices[p.id])?projectChoices[p.id]:kinds[0]);
    const info=routeInfo[kind],offers=kind==='leave'?[leave!]:projects.filter(a=>a.id.split('-')[1]===kind);
    const chosen=offers.find(a=>a.id===projectDurations[p.id])??offers.find(a=>a.time===7&&a.enabled)??offers.find(a=>a.enabled)??offers[0];
-   const nearby=['canal','shelter','pond','drain'].includes(kind);
+   const nearby=['canal','shelter','drain'].includes(kind);
    const cells=Array.from({length:9},(_,i)=>{
-    const dx=i%3-1,dy=Math.floor(i/3)-1,center=dx===0&&dy===0,affected=!center&&(kind==='pond'||Math.abs(dx)+Math.abs(dy)===1);
+    const dx=i%3-1,dy=Math.floor(i/3)-1,center=dx===0&&dy===0,affected=!center&&Math.abs(dx)+Math.abs(dy)===1;
     const plot=map.plots.find(t=>t.x===p.x+dx&&t.y===p.y+dy);
-    return `<span class="${center?'origin':nearby&&affected?'benefit':''}" title="${esc(plot?.id??'未探索')}">${center?projectSketch(kind):nearby&&affected?(kind==='drain'?'排水':kind==='shelter'?'保水':'补水'):'·'}</span>`;
+    return `<span class="${center?'origin':nearby&&affected?'benefit':''}" title="${esc(plot?.id??'未探索')}">${center?projectSketch(kind):nearby&&affected?(kind==='drain'?'排水':kind==='shelter'?'保水':'通水'):'·'}</span>`;
    }).join('');
    const preview=/本次至(.+?)，按当前饮食约需(.+?)批食材/.exec(chosen.description??'');
    const total=p.project?.total??info.days,done=p.project?.done??0;
    const routeCards=p.project?'':`<div class="farm-purpose-list" aria-label="选择地块用途">${kinds.map(k=>`<button type="button" class="farm-purpose ${kind===k?'selected':''}" data-farm-project="${k}" aria-pressed="${kind===k}">${projectSketch(k)}<span class="farm-purpose-name">${routeInfo[k].name}</span><strong>${routeInfo[k].result}</strong><small>${k==='leave'?'分步整理与开垦':`${routeInfo[k].days} 天 · 两阶段`}</small></button>`).join('')}</div>`;
-   body=`<section class="farm-map-dock farm-project-desk" aria-label="地块建设"><header><div><span>${p.id} · ${p.project?'建设中':'规划地块'}</span><h3>${p.project?info.name:esc(p.discovery?.title??'田地建设')}</h3></div><p>${p.project?'工程可以分次完成，离开后保留进度。':'先选这块地的用途，再决定这次做多久。'}</p></header>${routeCards}${p.kind==='wild'&&!p.project?`<div class="farm-story-choices">${illustratedAction('economy:farmreclaim:'+p.id,'affairs:reclaim')}</div>`:''}<div class="farm-project-plan"><div class="farm-project-explain"><div class="farm-benefit-grid" role="img" aria-label="${nearby?kind==='pond'?'覆盖周围八格':'覆盖正交四格':'只改造本格'}">${cells}</div><div><h4>${info.result}</h4><p>${info.note}</p><small>${nearby?'覆盖范围内共享有限服务能力，不能凭空增加水源。':'收益只在本格完工后生效。'}${['canal','pond','drain'].includes(kind)?` 首次开工需 ${map.rules.projectWood} 木材。`:''}</small>${nearby?'<small>不加快成熟，不消除已有受灾。</small>':''}</div></div><div class="farm-project-schedule">${kind!=='leave'?`<div class="farm-build-stages"><span class="${done<total/2?'current':'done'}">① 整备 · ${total/2}天</span><span>→</span><span class="${done>=total/2?'current':''}">② 施工 · ${total/2}天</span><b>${done}/${total} 天</b></div><progress max="${total}" value="${done}" aria-label="工程总进度"></progress>`:''}<div class="farm-duration-picker" aria-label="本次投入时间">${offers.map((a,i)=>`<button type="button" data-farm-duration="${a.id}" aria-pressed="${a.id===chosen.id}">${kind==='leave'?'先整理荒地':i===offers.length-1&&a.time&&a.time>7?`推进本阶段 · ${a.time}天`:a.time?`${a.time}天`:'暂不可施工'}</button>`).join('')}</div><div class="farm-build-preview">${preview?`<span>做到 <b>${esc(preview[1].replace(/^第\d+年 · /,''))}</b></span><span>食材约 <b>${preview[2]} 批</b></span>`:`<span>本次 ${chosen.time??0} 天，之后另行开垦</span>`}<span>精力 <b>${chosen.energy??0}</b></span></div><div class="farm-build-submit">${illustratedAction(chosen.id,kind==='canal'?'affairs:water':'affairs:reclaim').replace(esc(chosen.label),kind==='leave'?'整理为荒地':p.project?'继续施工':'按此方案开工')}</div><small class="farm-build-note">${p.project?'可随时离开，进度跨季保留。':'选择方案不耗资源；开工后用途固定。'} ${kind==='leave'?'放弃本地块的整治收益。':'投入时长已考虑收获期限、余粮与阶段期限。'}</small></div></div></section>`;
+   body=`<section class="farm-map-dock farm-project-desk" aria-label="地块建设"><header><div><span>${p.id} · ${p.project?'建设中':'规划地块'}</span><h3>${p.project?info.name:esc(p.discovery?.title??'田地建设')}</h3></div><p>${p.project?'工程可以分次完成，离开后保留进度。':'先选这块地的用途，再决定这次做多久。'}</p></header>${routeCards}${p.kind==='wild'&&!p.project?`<div class="farm-story-choices">${illustratedAction('economy:farmreclaim:'+p.id,'affairs:reclaim')}</div>`:''}<div class="farm-project-plan"><div class="farm-project-explain"><div class="farm-benefit-grid" role="img" aria-label="${nearby?'覆盖正交四格':'只改造本格'}">${cells}</div><div><h4>${info.result}</h4><p>${info.note}</p><small>${nearby?'覆盖指正交相邻格；水渠需接通水源才能放水。':'收益只在本格完工后生效。'}${['canal','paddy','drain'].includes(kind)?` 首次开工需 ${map.rules.projectWood} 木材。`:''}</small>${nearby?'<small>不加快成熟，不消除已有受灾。</small>':''}</div></div><div class="farm-project-schedule">${kind!=='leave'?`<div class="farm-build-stages"><span class="${done<total/2?'current':'done'}">① 整备 · ${total/2}天</span><span>→</span><span class="${done>=total/2?'current':''}">② 施工 · ${total/2}天</span><b>${done}/${total} 天</b></div><progress max="${total}" value="${done}" aria-label="工程总进度"></progress>`:''}<div class="farm-duration-picker" aria-label="本次投入时间">${offers.map((a,i)=>`<button type="button" data-farm-duration="${a.id}" aria-pressed="${a.id===chosen.id}">${kind==='leave'?'先整理荒地':i===offers.length-1&&a.time&&a.time>7?`推进本阶段 · ${a.time}天`:a.time?`${a.time}天`:'暂不可施工'}</button>`).join('')}</div><div class="farm-build-preview">${preview?`<span>做到 <b>${esc(preview[1].replace(/^第\d+年 · /,''))}</b></span><span>食材约 <b>${preview[2]} 批</b></span>`:`<span>本次 ${chosen.time??0} 天，之后另行开垦</span>`}<span>精力 <b>${chosen.energy??0}</b></span></div><div class="farm-build-submit">${illustratedAction(chosen.id,kind==='canal'?'affairs:water':'affairs:reclaim').replace(esc(chosen.label),kind==='leave'?'整理为荒地':p.project?'继续施工':'按此方案开工')}</div><small class="farm-build-note">${p.project?'可随时离开，进度跨季保留。':'选择方案不耗资源；开工后用途固定。'} ${kind==='leave'?'放弃本地块的整治收益。':'投入时长已考虑收获期限、余粮与阶段期限。'}</small></div></div></section>`;
   }
 
  }

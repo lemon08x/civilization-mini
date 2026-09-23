@@ -1,5 +1,5 @@
 import {seasonIndex} from '../systems/calendar.js';
-import {farmWork,plotField,farmCanalAccess,sowingSeasons} from '../systems/agriculture.js';
+import {farmWork,plotField,sowingSeasons} from '../systems/agriculture.js';
 import {amount} from '../systems/inventory.js';
 import {CROPS} from '../systems/economy-catalog.js';
 import { gainPractice,studyQuote } from '../systems/life.js';
@@ -14,7 +14,7 @@ import type {GameState} from '../model/state.js';
 import type {Ruleset} from '../ruleset.js';
 const TRIAL_LESSONS:Record<string,{crops:Crop[];paddy?:boolean;seedNeed:string;plotNeed:string;hint:string}>={
  A4:{crops:['soy','flax'],seedNeed:'先探索辨种或向同门换种，持有至少1份已发现的豆种或麻种',plotNeed:'试种需要一块空田',hint:'发现豆种或麻种并准备一块空田'},
- A12:{crops:['rice'],paddy:true,seedNeed:'先持有至少1份稻种；建成渠后可向同门换种',plotNeed:'水田试种需要一块相邻同高或更高水渠的空田',hint:'备妥稻种并准备一块相邻渠格的空田'},
+ A12:{crops:['rice'],paddy:true,seedNeed:'先持有至少1份稻种；渠链通水后可向同门换种',plotNeed:'需先把邻水的田改造为水田',hint:'备妥稻种并把一块邻水的田改造为水田'},
  A13:{crops:['millet'],seedNeed:'先探索辨种，持有至少1份粟种',plotNeed:'试种需要一块空田',hint:'发现粟种并准备一块空田'},
  A14:{crops:['adzuki'],seedNeed:'先探索辨种，持有至少1份小豆种子',plotNeed:'试种需要一块空田',hint:'发现小豆种子并准备一块空田'},
  A15:{crops:['mallow','mustard'],seedNeed:'先探索辨种或向同门换种，持有至少1份葵菜种或芥菜种',plotNeed:'试种需要一块空田',hint:'发现葵菜种或芥菜种并准备一块空田'},
@@ -28,7 +28,7 @@ export function branchActions(s:GameState,r:Ruleset):ActionDefinition[]{
     const spec=s.economy!.farm?TRIAL_LESSONS[node.id]:undefined;
     const trial=!!spec;
     const trialCrop=spec?.crops.find(c=>s.economy!.farm!.discovered.includes(c)&&amount(s,CROPS[c].seed)>0);
-    const trialPlot=spec?Object.values(s.economy!.farm!.plots).find(p=>p.kind==='field'&&!plotField(s,p.id)?.crop&&(!spec.paddy||farmCanalAccess(s,p)))?.id:undefined;
+    const trialPlot=spec?Object.values(s.economy!.farm!.plots).find(p=>p.kind==='field'&&!plotField(s,p.id)?.crop&&(!spec.paddy||p.land?.paddy))?.id:undefined;
     const trialNeeds=spec?[...(!trialCrop?[spec.seedNeed]:[]),...(!trialPlot?[spec.plotNeed]:[])]:[];
     const archived=b.archives.includes(node.id),sample=trial||s.economy!.industry||archived?{}:node.sample;
     out.push(defineAction(s,`economy:branchlearn:${node.id}`,trial?'试种并掌握：'+node.name+(trialCrop&&trialPlot?`（${trialPlot} · ${CROPS[trialCrop].name}）`:''):'研习：'+node.name+(s.life?.calendar?`（${lesson.done}/${lesson.total}天）`:''),'分支',s.life?.calendar?{time:lesson.time,energy:lesson.energy}:{},[
