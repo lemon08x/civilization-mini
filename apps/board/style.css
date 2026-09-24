@@ -922,13 +922,14 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .cultivation-daily h4 { font:19px var(--title); margin:0 0 15px; }
 .cultivation-daily p,.cultivation-teaching p { font-size:13px; line-height:1.7; }
 
-/* Grok watercolor course motifs sit on the same paper as the live labels. */
+/* Narrative course scenes share a fixed four-by-four atlas. */
 .cultivation-course { display:grid; grid-template-columns:58px minmax(0,1fr); gap:6px 9px; padding:12px; min-height:108px; align-content:center; transition:border-color .15s,background-color .15s; }
 .cultivation-course-top { grid-column:1 / -1; gap:6px; font-size:12px; }
-.cultivation-course-art { grid-column:1; grid-row:2 / 4; width:58px; height:66px; object-fit:contain; mix-blend-mode:multiply; }
+.cultivation-course-art,.cultivation-selected-art { display:block; background-image:url('/illustrations/characters/sect-courses-scenes-v3.png'); background-size:400% 400%; background-repeat:no-repeat; }
+.cultivation-course-art { grid-column:1; grid-row:2 / 4; width:58px; height:58px; border-radius:5px; }
 .cultivation-course strong { align-self:end; font-size:20px; white-space:nowrap; }
 .cultivation-course > span:last-child { grid-column:2; font-size:11px; white-space:nowrap; }
-.cultivation-course.locked .cultivation-course-art { filter:saturate(.45); opacity:.72; }
+.cultivation-course.locked .cultivation-course-art { filter:saturate(.7); opacity:.88; }
 .cultivation-course:hover { border-color:#8a9c82; background:#f4f4e8; }
 .cultivation-course.selected { background:#edf1e5; }
 .cultivation-path { border-top:3px solid var(--path-ink,#819582); padding-top:13px; }
@@ -938,9 +939,9 @@ body { background-image:radial-gradient(ellipse at 5% 0%,#c6ceb52b,transparent 4
 .cultivation-path-conduct { --path-ink:#ab8978; }
 .cultivation-path h4 { color:var(--path-ink); letter-spacing:.18em; }
 .cultivation-detail-art { height:136px; display:flex; justify-content:center; align-items:center; margin:-10px -10px 12px; border-bottom:1px solid var(--line); background:radial-gradient(ellipse at center,#e9edde88,transparent 70%); }
-.cultivation-selected-art { width:154px; height:136px; object-fit:contain; mix-blend-mode:multiply; }
-.cultivation-foundation .cultivation-course,.cultivation-synthesis-pair .cultivation-course { grid-template-columns:76px minmax(0,1fr); }
-.cultivation-foundation .cultivation-course-art,.cultivation-synthesis-pair .cultivation-course-art { width:76px; }
+.cultivation-selected-art { width:136px; height:136px; border-radius:6px; }
+.cultivation-foundation .cultivation-course,.cultivation-synthesis-pair .cultivation-course { grid-template-columns:68px minmax(0,1fr); }
+.cultivation-foundation .cultivation-course-art,.cultivation-synthesis-pair .cultivation-course-art { width:68px; height:68px; }
 
 /* Sect artwork is decorative; all progress and costs remain observation-driven HTML. */
 .sect-art { background-image:url('/illustrations/characters/sect-atlas.png'); background-size:300% 100%; background-repeat:no-repeat; aspect-ratio:1; flex-shrink:0; mix-blend-mode:multiply; }

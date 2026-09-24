@@ -85,7 +85,7 @@ function loadEnvironment():Promise<boolean>{
   const image=new Image();
   image.onload=()=>{if(destroyed){resolve(false);return;}environmentImages.set(name,image);resolve(true);};
   image.onerror=()=>resolve(false);
-  image.src=`/illustrations/farm/animation/painted/environment/farm-${name}-qinglu-${name==='woodland'?'v2':'v1'}.png`;
+  image.src=`/illustrations/farm/animation/painted/environment/farm-${name}-qinglu-${name==='woodland'?'v3':['tree','rock','brush','house'].includes(name)?'v2':'v1'}.png`;
  }))).then(results=>{environmentReady=true;return results.some(Boolean);});
  return environmentLoad;
 }
@@ -133,7 +133,10 @@ function groundTexture(field:boolean,land?:{soil:string;water:number}|null){
 function tileTexture(name:string){const image=tileImages.get(name);if(!image)return null;return texture('qinglu:tile:'+name,g=>g.drawImage(image,21,110,138,77));}
 function unknownTexture(){return tileTexture('unknown')??texture('unknown',g=>{polygon(g,[[90,110],[159,145],[90,180],[21,145]],'#bfcbb7');polygon(g,[[90,110],[159,145],[90,165],[21,145]],'#e7eddf');});}
 function paintedProp(name:string,width:number,height:number){const image=environmentImages.get(name);if(!image)return null;return texture('painted:'+name,g=>{const scale=Math.min(width/image.naturalWidth,height/image.naturalHeight),w=image.naturalWidth*scale,h=image.naturalHeight*scale;g.drawImage(image,(180-w)/2,166-h,w,h);});}
-function houseTexture(){return paintedProp('house',152,128)??texture('home',g=>{
+function houseTexture(){const image=environmentImages.get('house');if(image)return texture('painted:house-3x3',g=>{
+ const width=260,height=128;
+ g.drawImage(image,20,227-height,width,height);
+ },300,270);return texture('home',g=>{
  ellipse(g,91,157,36,10,'#59645020');
  polygon(g,[[61,115],[99,104],[124,120],[124,152],[94,165],[61,148]],'#d4c9aa');
  polygon(g,[[61,115],[94,130],[94,165],[61,148]],'#f2e9cd');

@@ -122,9 +122,7 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void,openHome:()=
   const woodland=p.kind==='story'&&p.discovery?.id==='woodland'&&!p.discovery.resolved;
   if(p.kind==='tree'||woodland){
    const shade=new P.Graphics().beginFill(0x516447,.12).drawEllipse(pos.x,pos.y+22,15,5).endFill();shade.eventMode='none';floor.addChild(shade);
-   // Keep the grove's root footprint inside this 72 × 36 diamond.
    sp=art!.sprite(art!.treeTexture(woodland),pos.x,pos.y+27,p.kind==='tree'?.55:.4);
-   // A grove includes undergrowth and ground contact; keep its base still.
    if(p.kind==='tree')treeSway.push(sp);
   }
   if(field&&p.field?.crop){sp=art!.sprite(art!.cropTexture(p.field.crop,p.field.growth>=p.field.duration?2:p.field.growth>=p.field.duration/3?1:0),pos.x,pos.y+30,.85);plotViews.get(p.id)!.crop=sp;plotViews.get(p.id)!.cropScale=.85/2;cropSway.push(sp);}
@@ -142,14 +140,10 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void,openHome:()=
    const marker=new P.Text('◇',{fontFamily:'Microsoft YaHei',fontSize:p.discovery?.id==='woodland'?12:24,fill:0x967245});marker.anchor.set(.5);marker.position.set(pos.x+(p.discovery?.id==='woodland'?26:0),pos.y+22);marker.zIndex=(p.x+p.y)*100+25;marker.eventMode='none';items.addChild(marker);
   }
  }
- // The homestead occupies a decorative grid cell outside the playable x>=0 land.
- // A one-cell verge separates its yard from the fields; it never replaces a plot.
+ // The homestead illustration spans a decorative three-by-three footprint outside playable land.
  const housePos=xy(-2,2);
- const yard=art!.sprite(art!.groundTexture(false),housePos.x,housePos.y+26,.52);yard.alpha=.55;floor.addChild(yard);
- const yardEdge=new P.Graphics().lineStyle(.8,0x78846a,.4).drawPolygon([0,0,36,18,0,36,-36,18]);yardEdge.position.set(housePos.x,housePos.y);floor.addChild(yardEdge);
- const path=new P.Graphics().lineStyle(5,0xc6bb93,.3).moveTo(housePos.x+26,housePos.y+29).lineTo(housePos.x+66,housePos.y+49);floor.addChild(path);
- const house=art!.sprite(art!.houseTexture(),housePos.x,housePos.y+28,.85);house.zIndex=10;house.eventMode='static';house.cursor='pointer';house.on('pointertap',()=>{if(!drag?.moved)openHome();});items.addChild(house);
- const houseLabel=new P.Text('农舍',{fontFamily:'SimSun',fontSize:9,fill:0x40583d,stroke:0xf7f3e8,strokeThickness:2});houseLabel.anchor.set(.5);houseLabel.position.set(housePos.x,housePos.y+38);houseLabel.eventMode='none';items.addChild(houseLabel);
+ const house=art!.sprite(art!.houseTexture(),housePos.x-27,housePos.y+86,.85);house.zIndex=10;house.eventMode='static';house.cursor='pointer';house.on('pointertap',()=>{if(!drag?.moved)openHome();});items.addChild(house);
+ const houseLabel=new P.Text('农舍',{fontFamily:'SimSun',fontSize:9,fill:0x40583d,stroke:0xf7f3e8,strokeThickness:2});houseLabel.anchor.set(.5);houseLabel.position.set(housePos.x-27,housePos.y+96);houseLabel.eventMode='none';items.addChild(houseLabel);
  items.addChild(targets);targets.zIndex=9998;
  items.addChild(hint);
 }
