@@ -18,7 +18,7 @@ function fixture(rules=r){
  const s=structuredClone(createInitialState(rules,17,'riverine'));
  s.era!.index=3;s.household.money=200;s.household.food=8;s.location.weather='normal';s.location.water=2;
  s.economy!.branches!.learned[s.household.activePersonId]=branchNodesFor(s).map(n=>n.id);
- activePerson(s).vitality!.energy=12;renewShop(s,rules,[]);return s;
+ activePerson(s).vitality!.pressure=12;renewShop(s,rules,[]);return s;
 }
 type State=ReturnType<typeof fixture>;
 const act=(s:State,id:string,rules=r)=>transition(s,parseActionId('economy:'+id),rules);

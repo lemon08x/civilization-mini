@@ -1,5 +1,14 @@
 {
   "farm": {
+    "landscapeBuildDays": 3,
+    "landscapeUpgradeDays": 5,
+    "landscapeTeaRelief": 7,
+    "landscapeTeaReliefUpgraded": 9,
+    "landscapePressurePercent": 20,
+    "landscapePressurePercentUpgraded": 30,
+    "landscapeTeachingPercent": 15,
+    "landscapeTeachingPercentUpgraded": 20,
+
     "sowBestDays": 7,
     "sowLateDays": 7,
     "lateSowPercent": 5,
@@ -90,6 +99,8 @@
     "steamFuel": 2
   },
   "life": {
+    "pressureThreshold": 20,
+    "pressureTimePercent": 1,
     "eventMoney": 4,
     "eventLearning": 2,
     "eventHealth": 5,
@@ -164,6 +175,9 @@
   "modern": true,
   "civilization": true,
   "sect": {
+    "dailyTime": 1,
+    "upkeepGain": 7,
+    "upkeepMax": 14,
     "practiceTime": 4,
     "practiceEnergy": 2,
     "practiceGain": 2,

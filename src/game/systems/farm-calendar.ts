@@ -1,4 +1,5 @@
-import {activePerson,type GameState} from '../model/state.js';
+import {landscapeCost} from './landscapes.js';
+import {type GameState} from '../model/state.js';
 import {dietView} from './social-food.js';
 import type {Crop,Field,FarmPlot,FarmPlan} from '../model/economy.js';
 import type {GameEvent} from '../model/events.js';
@@ -7,7 +8,7 @@ import {solarTermDay,solarYearAt,lunarDateAt} from './calendar.js';
 import {equipped,amount} from './inventory.js';
 import {branchHas} from './branches.js';
 import {plotField,fieldNeedsWater,shedCovers} from './agriculture.js';
-import {lifeCost,sectCosts,calendarCost} from './life.js';
+import {lifeCost,sectCosts,calendarCost,pressureTime} from './life.js';
 
 export function farmYearLabel(s:GameState,year:number){return '第'+(year-s.life!.calendar!.rules.referenceYear+1)+'年';}
 export function farmYear(s:GameState){const c=s.life!.calendar!;return solarYearAt(c.rules.referenceYear,c.absoluteDay);}
@@ -43,13 +44,13 @@ export function farmLabor(s:GameState,p:FarmPlot,op:'farmplot'|'farmfertilize',c
  const ap=op==='farmplot'&&!field?.crop&&equipped(s,'U02')&&s.economy!.shop?.seededTurn!==s.clock.absoluteTurn?0:1;
  const cost=calendarCost(s,id,sectCosts(s,id,lifeCost(s,id,ap)));
  if(op==='farmplot'&&shedCovers(s,p))cost.time=Math.max(0.5,Math.ceil(cost.time)/2);
- return cost;
+ const adjusted=landscapeCost(s,id,cost);adjusted.time=pressureTime(s,adjusted.time);return adjusted;
 }
 export interface FarmTask {id:string;plotId:string;planId?:string;kind:'sow'|'fertilize'|'harvest'|'water';name:string;day:number;release:number;deadline:number;time:number;energy:number;actionId:string;gaps:string[];}
 export function farmTasks(s:GameState):FarmTask[]{
  const tasks:FarmTask[]=[],now=s.life!.calendar!.absoluteDay;
  for(const p of Object.values(s.economy!.farm!.plots)){
-  const f=plotField(s,p.id);if(p.kind!=='field'||!f)continue;
+  const f=plotField(s,p.id);if(p.kind!=='field'||p.purpose!=='sowing'||!f)continue;
   for(const plan of p.plans??[]){
    if(plan.harvested||plan.failed)continue;
    const b=cropBatches(s,plan.year).find(b=>b.id===plan.batchId);if(!b)continue;
@@ -74,7 +75,7 @@ export function farmTasks(s:GameState):FarmTask[]{
    if(fieldNeedsWater(s,f))tasks.push({id:p.id+'-water',plotId:p.id,kind:'water',name:p.id+' 缺水',day:now,release:now,deadline:dates.mature,...farmLabor(s,p,'farmplot',f.crop),actionId:`economy:farmplot:${p.id}-${f.crop}`,gaps:[]});
   }
  }
- for(const t of tasks){if(activePerson(s).vitality!.energy<t.energy)t.gaps.push('当前精力不足');if((dietView(s)?.days??0)<t.time)t.gaps.push('当前口粮不足以支持劳动');}
+ for(const t of tasks){if((dietView(s)?.days??0)<t.time)t.gaps.push('当前口粮不足以支持劳动');}
  return tasks.sort((a,b)=>a.day-b.day||a.id.localeCompare(b.id));
 }
 export function farmScheduleView(s:GameState){
@@ -94,7 +95,7 @@ export function farmScheduleView(s:GameState){
 
  const date=(day:number)=>lunarDateAt(c.rules.referenceYear,day).date;
  const wildCalendar=Object.values(s.economy!.farm!.plots).filter(p=>p.wild?.kind==='yam').map(p=>({plotId:p.id,name:'山药采挖期',startDate:date(solarTermDay(c.rules.referenceYear,farmYear(s),'霜降')),endDate:date(solarTermDay(c.rules.referenceYear,farmYear(s)+1,'立春'))}));
- return {wildCalendar,year:farmYear(s),referenceYear:c.rules.referenceYear,tasks:tasks.map(t=>({...t,date:date(t.day),deadlineDate:date(t.deadline),due:t.day<=now&&t.release<=now&&now<t.deadline})),labor:{demand,overflow,conflicts:[...new Set(conflicts)],description:'时间下限：按期望日期和截止日期，以半天分配劳动；未计整段行动限制、未来天气、休息与临时事务。'},batches:[...new Set([farmYear(s),farmYear(s)+1,...Object.values(s.economy!.farm!.plots).flatMap(p=>(p.plans??[]).map(v=>v.year))])].sort().flatMap(y=>cropBatches(s,y)).map(b=>({...b,startDate:date(b.start),endDate:date(b.end),matureDate:date(b.mature),bestEndDate:date(b.bestEnd)}))};
+ return {wildCalendar,year:farmYear(s),referenceYear:c.rules.referenceYear,tasks:tasks.map(t=>({...t,date:date(t.day),deadlineDate:date(t.deadline),due:t.day<=now&&t.release<=now&&now<t.deadline})),labor:{demand,overflow,conflicts:[...new Set(conflicts)],description:'时间下限：按期望日期和截止日期，以半天分配劳动；未计整段行动限制、未来天气、休息与临时事务。'},batches:[...new Set([farmYear(s),farmYear(s)+1,...Object.values(s.economy!.farm!.plots).flatMap(p=>[...(p.plans??[]).map(v=>v.year),...(plotField(s,p.id)?.batch?[plotField(s,p.id)!.batch!.year]:[])])])].sort().flatMap(y=>cropBatches(s,y)).map(b=>({...b,startDate:date(b.start),endDate:date(b.end),matureDate:date(b.mature),bestEndDate:date(b.bestEnd)}))};
 }
 
 export function advanceWildDay(s:GameState,day:number,events:GameEvent[]){

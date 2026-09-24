@@ -1,7 +1,8 @@
+import {openFarmPlanner} from '../farm-planner.js';
 import {IMPROVEMENT_NAMES} from '../../../src/game/systems/agriculture.js';
 import {farmArt} from './scene.js';
 import {farmEventArt,type FarmArt} from '../illustration.js';
-import {type FarmGame,selectedFarmPlot,selectFarmPlot,selectFarmPanel,selectFarmStock,selectFarmProject,selectFarmProjectDuration,selectPlannedBatch,type FarmPanel} from '../farm-view.js';
+import {type FarmGame,selectedFarmPlot,selectFarmPlot,selectFarmPanel,selectFarmStock,selectFarmProject,selectFarmProjectDuration,selectFarmDock,type FarmPanel} from '../farm-view.js';
 
 type Pixi=typeof import('pixi.js-legacy');
 type Sprite=import('pixi.js-legacy').Sprite;
@@ -20,7 +21,7 @@ let app:Application|null=null;
 let art:ReturnType<typeof farmArt>|null=null;
 let canvas:HTMLCanvasElement|null=null;
 let world:Container|null=null,floor:Container|null=null,mistLayer:Container|null=null,items:Container|null=null;
-let background:Sprite|null=null,distantHouse:Sprite|null=null;
+let background:Sprite|null=null;
 let observer:ResizeObserver|null=null;
 let zoom=1.85,pan={x:0,y:0},viewW=1,viewH=360;
 let lastSelection='';
@@ -29,12 +30,14 @@ let currentMap:FarmMap|null=null;
 let quickEl:HTMLElement|null=null;
 let elapsed=0;
 const plotViews=new Map<string,{x:number;y:number;crop?:Sprite;cropScale?:number}>();
-let mistDrift:{sp:Sprite;baseX:number;seed:number}[]=[];
 let cropSway:Sprite[]=[];
 let treeSway:Sprite[]=[];
 let selectedRing:Graphics|null=null;
 let tweens:Tween[]=[];
 let particles:Particle[]=[];
+const effectTextures=new Map<string,import('pixi.js-legacy').Texture>();
+let effectsLoading=false;
+const effectSource=(kind:string)=>`/illustrations/farm/animation/painted/environment/farm-effect-${kind}-qinglu-v1.webp`;
 
 const easeOut=(k:number)=>1-Math.pow(1-k,3);
 const easeOutBack=(k:number)=>{const c=1.70158,c3=c+1;return 1+c3*Math.pow(k-1,3)+c*Math.pow(k-1,2);};
@@ -42,11 +45,8 @@ const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function tick(dt:number):void {
  elapsed+=dt;
- for(const m of mistDrift){m.sp.x=m.baseX+Math.sin(elapsed*.012+m.seed)*5;m.sp.alpha=.38+Math.sin(elapsed*.017+m.seed*1.7)*.08;}
  for(const c of cropSway)c.skew.x=Math.sin(elapsed*.025+c.position.x)*.012;
  for(const t of treeSway)t.skew.x=Math.sin(elapsed*.012+t.position.x)*.004;
- if(background)background.x=-12+Math.sin(elapsed*.002)*4+Math.max(-6,Math.min(6,pan.x*.012));
- if(distantHouse)distantHouse.x=viewW*.77+Math.max(-10,Math.min(10,pan.x*.025));
  if(selectedRing)selectedRing.alpha=.72+Math.sin(elapsed*.07)*.28;
  for(let i=tweens.length-1;i>=0;i--){const tw=tweens[i];tw.t+=dt/60;const k=Math.min(1,tw.t/tw.dur);tw.update(tw.ease(k));if(k>=1){tweens.splice(i,1);tw.done?.();}}
  for(let i=particles.length-1;i>=0;i--){const pt=particles[i];pt.life-=dt/60;pt.g.x+=pt.vx*dt;pt.g.y+=pt.vy*dt;pt.vy+=.06*dt;pt.g.alpha=Math.max(0,pt.life/pt.max);if(pt.life<=0){pt.g.destroy();particles.splice(i,1);}}
@@ -63,18 +63,26 @@ function placeQuick():void {
 
 function fit():void {
  if(!app||!world)return;
+ if(background){
+  // Camera limits are the painted world's edges, not a separate screen backdrop.
+  zoom=Math.max(zoom,viewW/background.width,viewH/background.height);
+  const minX=viewW-(background.x+background.width)*zoom,maxX=-background.x*zoom;
+  const minY=viewH-(background.y+background.height)*zoom,maxY=-background.y*zoom;
+  pan.x=Math.max(minX,Math.min(maxX,viewW/2+pan.x))-viewW/2;
+  pan.y=Math.max(minY,Math.min(maxY,85+pan.y))-85;
+ }
  world.scale.set(zoom);
  world.position.set(viewW/2+pan.x,85+pan.y);
  placeQuick();
  if(!app.ticker.started)app.render();
 }
 
-function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
+function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void,openHome:()=>void):void {
  if(!P||!floor||!mistLayer||!items)return;
  floor.removeChildren().forEach(c=>c.destroy());
  mistLayer.removeChildren().forEach(c=>c.destroy());
  items.removeChildren().forEach(c=>c.destroy());
- tweens=[];particles=[];mistDrift=[];cropSway=[];treeSway=[];plotViews.clear();selectedRing=null;
+ tweens=[];particles=[];cropSway=[];treeSway=[];plotViews.clear();selectedRing=null;
  const xy=(x:number,y:number)=>({x:(x-y)*36,y:(x+y)*18});
  const selected=selectedFarmPlot();
  const targets=new P.Container();
@@ -84,20 +92,20 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
   const id=p.kind==='unknown'?'economy:farmexplore:'+p.id:p.kind==='wild'?'economy:farmreclaim:'+p.id:'';
   if(p.improvement)return `${p.id} · ${IMPROVEMENT_NAMES[p.improvement]} · ${p.improvement==='canal'?(p.waterConnected?'已通水':'未通水'):p.improvement==='pit'?(p.pit?`转化中 · 剩 ${p.pit.remainingDays} 天`:'待投料 · 需3秸秆'):p.improvement==='shed'?'覆盖两格内的田':p.improvement==='retting'?'开放沤麻工序':p.improvement==='yard'?'相邻田正常收获期延长7天':p.improvement==='cellar'?'相邻田留种+1':'覆盖正交四格'}`;
   if(p.project&&p.project.done<p.project.total)return `${p.id} · ${p.project.name} ${p.project.done}/${p.project.total}天 · 点击续建`;
-  if(!id)return `${p.id} · ${p.kind==='field'?(p.land?.paddy?'水田':'田地'):p.kind==='tree'?'古树 · 不可开垦':p.kind==='rock'?'岩石 · 不可开垦':p.kind==='water'?'水源 · 不可开垦':'查看地块'}`;
+  if(!id)return `${p.id} · ${p.kind==='field'?(p.purpose==='other'?'其他用途':p.land?.paddy?'播种用途 · 水田':'播种用途'):p.kind==='tree'?'古树 · 不可开垦':p.kind==='rock'?'岩石 · 不可开垦':p.kind==='water'?'水源 · 不可开垦':'查看地块'}`;
   const a=g.actions.find(a=>a.id===id);
   if(!a||!a.enabled)return `${p.id} · ${a?.reason??'先探索相邻地块'}`;
   const name=a.label.replace(/\s*p\d+q\d+$/,'');
-  return `${name} · ${a.time??a.ap} 天${a.energy?` · 精力 ${a.energy}`:''}${a.money?` · 钱 ${a.money}`:''}`;
+  return `${name} · ${a.time??a.ap} 天${a.energy?` · 压力 ${a.energy}`:''}${a.money?` · 钱 ${a.money}`:''}`;
  };
  const tap=(id:string)=>{if(!drag?.moved)select(id);};
  for(const p of [...map.plots].sort((a,b)=>a.x+a.y-b.x-b.y)){
   const pos=xy(p.x,p.y),fog=p.kind==='unknown',field=p.kind==='field';
   plotViews.set(p.id,{x:pos.x,y:pos.y});
-  const tileKey=fog?'unknown':p.kind==='water'?'water':p.improvement==='canal'?(p.waterConnected?'canal-connected':'canal-dry'):p.improvement==='pit'&&p.pit?'pit-active':p.improvement??(field&&p.land?.paddy?'paddy':'');
-  const ground=tileKey?art!.tileTexture(tileKey):null;
-  floor.addChild(art!.sprite(ground??(fog?art!.unknownTexture():art!.groundTexture(field,p.land)),pos.x,pos.y+26,.52));
-  const tile=new P.Graphics();tile.position.set(pos.x,pos.y);tile.lineStyle(fog?1.1:.7,fog&&p.reachable?0x708668:0x91a080,fog&&!p.reachable?.28:.65).beginFill(0xd6e0cf,fog?.12:.01).drawPolygon([0,0,36,18,0,36,-36,18]).endFill();
+  const tileKey=fog?'':p.kind==='water'?'water':p.improvement==='canal'?(p.waterConnected?'canal-connected':'canal-dry'):p.improvement==='pit'&&p.pit?'pit-active':p.improvement??(field&&p.land?.paddy?'paddy':'');
+  const ground=field?(p.land?.paddy?art!.tileTexture('paddy'):null):tileKey?art!.tileTexture(tileKey):null;
+  const surface=art!.sprite(ground??art!.groundTexture(field,p.land),pos.x,pos.y+26,.52);surface.alpha=fog?.12:field||p.improvement||p.kind==='water'?.9:.5;floor.addChild(surface);
+  const tile=new P.Graphics();tile.position.set(pos.x,pos.y);tile.lineStyle(.6,0x738b6c,fog&&p.reachable?.28:.12).beginFill(0xd6e0cf,fog?.12:.01).drawPolygon([0,0,36,18,0,36,-36,18]).endFill();
   if(p.kind==='wild')for(let k=0;k<3;k++){const x=(p.x*13+k*19)%30-15,y=14+(p.y*7+k*9)%9;tile.lineStyle(.7,0x879b6f,.55).moveTo(x-2,y-3).lineTo(x,y).lineTo(x+2,y-4);}
   tile.eventMode='static';tile.cursor='pointer';tile.hitArea=new P.Polygon([0,0,36,18,0,36,-36,18]);tile.on('pointertap',()=>tap(p.id));targets.addChild(tile);
   if(p.id===selected){
@@ -108,43 +116,117 @@ function buildWorld(map:FarmMap,g:FarmGame,select:(id:string)=>void):void {
   const hintText=hintFor(p);
   tile.on('pointerover',()=>{hover.visible=true;if(hintText){hint.text=hintText;hint.position.set(pos.x,pos.y-8);hint.visible=true;}if(app&&!app.ticker.started)app.render();});
   tile.on('pointerout',()=>{hover.visible=false;hint.visible=false;if(app&&!app.ticker.started)app.render();});
-  if(fog){const cloud=new P.Sprite(art!.mistTexture());cloud.anchor.set(.5);cloud.position.set(pos.x,pos.y+18);cloud.width=84;cloud.height=40;cloud.alpha=.42;cloud.eventMode='none';mistLayer.addChild(cloud);mistDrift.push({sp:cloud,baseX:pos.x,seed:p.x*3.1+p.y*1.7});
+  if(fog){const cloud=new P.Sprite(art!.mistTexture());cloud.anchor.set(.5);cloud.position.set(pos.x,pos.y+18);cloud.width=84;cloud.height=40;cloud.alpha=.18;cloud.eventMode='none';mistLayer.addChild(cloud);const question=new P.Text('?',{fontFamily:'SimSun',fontSize:11,fill:0x6f8065});question.anchor.set(.5);question.position.set(pos.x,pos.y+18);question.alpha=p.reachable?.75:.35;question.eventMode='none';mistLayer.addChild(question);
   }
   let sp:Sprite|undefined;
-  if(p.kind==='tree'||p.discovery?.id==='woodland'&&!p.discovery.resolved){sp=art!.sprite(art!.treeTexture(),pos.x,pos.y+25,p.kind==='tree'?.4:.32);treeSway.push(sp);}
+  const woodland=p.kind==='story'&&p.discovery?.id==='woodland'&&!p.discovery.resolved;
+  if(p.kind==='tree'||woodland){
+   const shade=new P.Graphics().beginFill(0x516447,.12).drawEllipse(pos.x,pos.y+22,15,5).endFill();shade.eventMode='none';floor.addChild(shade);
+   // Keep the grove's root footprint inside this 72 × 36 diamond.
+   sp=art!.sprite(art!.treeTexture(woodland),pos.x,pos.y+27,p.kind==='tree'?.55:.4);
+   // A grove includes undergrowth and ground contact; keep its base still.
+   if(p.kind==='tree')treeSway.push(sp);
+  }
   if(field&&p.field?.crop){sp=art!.sprite(art!.cropTexture(p.field.crop,p.field.growth>=p.field.duration?2:p.field.growth>=p.field.duration/3?1:0),pos.x,pos.y+30,.85);plotViews.get(p.id)!.crop=sp;plotViews.get(p.id)!.cropScale=.85/2;cropSway.push(sp);}
   if(sp){sp.zIndex=(p.x+p.y)*100+20;sp.eventMode='none';items.addChild(sp);}
   if((p.kind==='rock'||p.kind==='brush')&&!p.improvement){
    const obstacle=art!.sprite(p.kind==='rock'?art!.rockTexture():art!.brushTexture(),pos.x,pos.y+25,.62);
    obstacle.zIndex=(p.x+p.y)*100+20;obstacle.eventMode='none';items.addChild(obstacle);
   }
-  const tileLabel=p.improvement?IMPROVEMENT_NAMES[p.improvement]:p.kind==='water'?'水源':'';
+  if(field&&p.improvement){const addon=art!.sprite(art!.tileTexture(tileKey)!,pos.x+20,pos.y+24,.16);addon.eventMode='none';addon.zIndex=(p.x+p.y)*100+24;items.addChild(addon);}
+  const tileLabel=p.improvement&&!field?IMPROVEMENT_NAMES[p.improvement]:p.kind==='water'?'水源':'';
   if(tileLabel){const label=new P.Text(tileLabel,{fontFamily:'Microsoft YaHei',fontSize:10,fill:0x31483d,stroke:0xf7f3e8,strokeThickness:3});label.anchor.set(.5);label.position.set(pos.x,pos.y+34);label.eventMode='none';label.zIndex=(p.x+p.y)*100+30;items.addChild(label);}
+  const task=field?map.schedule.tasks.find(t=>t.plotId===p.id&&t.deadline>g.life!.calendar.absoluteDay):undefined;
+  if(task){const days=Math.max(0,Math.ceil(task.day-g.life!.calendar.absoluteDay));const label=new P.Text(`${p.id} · ${days?days+'天后':'待办'}${{sow:'播种',fertilize:'施肥',harvest:'收获',water:'灌溉'}[task.kind]}`,{fontFamily:'Microsoft YaHei',fontSize:9,fill:0x43604c,stroke:0xfffbee,strokeThickness:3});label.anchor.set(.5);label.position.set(pos.x,pos.y+42);label.eventMode='none';label.zIndex=(p.x+p.y)*100+31;items.addChild(label);}
   if(p.kind==='story'){
-   const marker=new P.Text('◇',{fontFamily:'Microsoft YaHei',fontSize:24,fill:0x967245});marker.anchor.set(.5);marker.position.set(pos.x,pos.y+17);marker.zIndex=(p.x+p.y)*100+25;marker.eventMode='none';items.addChild(marker);
+   const marker=new P.Text('◇',{fontFamily:'Microsoft YaHei',fontSize:p.discovery?.id==='woodland'?12:24,fill:0x967245});marker.anchor.set(.5);marker.position.set(pos.x+(p.discovery?.id==='woodland'?26:0),pos.y+22);marker.zIndex=(p.x+p.y)*100+25;marker.eventMode='none';items.addChild(marker);
   }
  }
+ // The homestead occupies a decorative grid cell outside the playable x>=0 land.
+ // A one-cell verge separates its yard from the fields; it never replaces a plot.
+ const housePos=xy(-2,2);
+ const yard=art!.sprite(art!.groundTexture(false),housePos.x,housePos.y+26,.52);yard.alpha=.55;floor.addChild(yard);
+ const yardEdge=new P.Graphics().lineStyle(.8,0x78846a,.4).drawPolygon([0,0,36,18,0,36,-36,18]);yardEdge.position.set(housePos.x,housePos.y);floor.addChild(yardEdge);
+ const path=new P.Graphics().lineStyle(5,0xc6bb93,.3).moveTo(housePos.x+26,housePos.y+29).lineTo(housePos.x+66,housePos.y+49);floor.addChild(path);
+ const house=art!.sprite(art!.houseTexture(),housePos.x,housePos.y+28,.85);house.zIndex=10;house.eventMode='static';house.cursor='pointer';house.on('pointertap',()=>{if(!drag?.moved)openHome();});items.addChild(house);
+ const houseLabel=new P.Text('农舍',{fontFamily:'SimSun',fontSize:9,fill:0x40583d,stroke:0xf7f3e8,strokeThickness:2});houseLabel.anchor.set(.5);houseLabel.position.set(housePos.x,housePos.y+38);houseLabel.eventMode='none';items.addChild(houseLabel);
  items.addChild(targets);targets.zIndex=9998;
  items.addChild(hint);
 }
 
+// The document root survives action renders; fullscreen must never target a replaced panel.
+let farmFullscreen=false;
+function syncFarmFullscreen():void {
+ document.body.classList.toggle('farm-fullscreen',farmFullscreen);
+ document.querySelectorAll<HTMLButtonElement>('[data-farm-fullscreen]').forEach(b=>{
+  b.textContent=farmFullscreen?'↙':'⛶';
+  b.setAttribute('aria-label',farmFullscreen?'退出全屏':'进入全屏');
+  b.title=farmFullscreen?'退出全屏（Esc）':'进入全屏';
+  b.setAttribute('aria-pressed',String(farmFullscreen));
+ });
+}
+document.addEventListener('fullscreenchange',()=>{
+ if(!document.fullscreenElement){farmFullscreen=false;syncFarmFullscreen();}
+});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&farmFullscreen&&!document.fullscreenElement){farmFullscreen=false;syncFarmFullscreen();}
+});
 export function bindFarmScene(root:Document,g:FarmGame,rerender:()=>void):void {
  observer?.disconnect();observer=null;
  app?.ticker.stop();
+ if(!root.querySelector('.farm-field-scene')&&farmFullscreen){
+  farmFullscreen=false;
+  if(root.fullscreenElement)void root.exitFullscreen().catch(()=>{});
+ }
+ syncFarmFullscreen();
+ const scene=root.querySelector<HTMLElement>('.farm-field-scene');
+ if(scene){
+  const tooltip=root.createElement('div');tooltip.className='farm-action-tooltip';tooltip.id='farm-action-tooltip';tooltip.role='tooltip';tooltip.hidden=true;scene.append(tooltip);
+  scene.querySelectorAll<HTMLElement>('.farm-scene-dock-content .game-action .action-name').forEach(name=>{
+   if(name.querySelector('img,.farm-land-art'))return;
+   const picture=root.createElement('img');picture.src='/illustrations/farm/field-empty-ui.webp';picture.alt='';picture.className='farm-choice-art';picture.width=78;picture.height=64;name.prepend(picture);
+  });
+  let active:HTMLElement|null=null;
+  const hide=()=>{active?.removeAttribute('aria-describedby');active=null;tooltip.hidden=true;};
+  scene.querySelectorAll<HTMLElement>('.action-option,[data-farm-explain],.farm-sow-entry').forEach(el=>{
+   const button=el.matches('button')?el:el.querySelector<HTMLElement>('[data-action]');
+   const action=g.actions.find(a=>a.id===button?.dataset.action);
+   const description=el.dataset.farmExplain??(action?[action.description,!action.enabled?action.reason:''].filter(Boolean).join('\n'):el.classList.contains('farm-sow-entry')?'选择已有种子，查看此地块可安排的作物与农时。':'');
+   if(!description)return;
+   if(button?.matches(':disabled'))el.tabIndex=0;
+   const show=()=>{
+    hide();active=el;el.setAttribute('aria-describedby',tooltip.id);tooltip.textContent=description;tooltip.hidden=false;
+    const rect=el.getBoundingClientRect(),box=tooltip.getBoundingClientRect();
+    tooltip.style.left=Math.max(12,Math.min(innerWidth-box.width-12,rect.left+(rect.width-box.width)/2))+'px';
+    tooltip.style.top=Math.max(12,rect.top-box.height-10>=12?rect.top-box.height-10:Math.min(innerHeight-box.height-12,rect.bottom+10))+'px';
+   };
+   el.addEventListener('pointerenter',show);el.addEventListener('focusin',show);
+   el.addEventListener('pointerleave',e=>{if(!(e.relatedTarget instanceof Node&&tooltip.contains(e.relatedTarget)))hide();});
+   el.addEventListener('focusout',hide);
+  });
+  tooltip.addEventListener('pointerleave',hide);
+  scene.addEventListener('keydown',e=>{if(e.key==='Escape')hide();});
+  scene.querySelector('.farm-scene-dock-content')?.addEventListener('scroll',hide);
+ }
+ root.querySelector<HTMLButtonElement>('[data-farm-fullscreen]')?.addEventListener('click',async()=>{
+  if(farmFullscreen){farmFullscreen=false;syncFarmFullscreen();if(root.fullscreenElement)await root.exitFullscreen().catch(()=>{});}
+  else {farmFullscreen=true;syncFarmFullscreen();if(root.fullscreenEnabled)await root.documentElement.requestFullscreen().catch(()=>{/* Keep the in-window immersive layout when native fullscreen is unavailable. */});}
+ });
+ root.querySelectorAll<HTMLButtonElement>('[data-farm-dock]').forEach(b=>b.onclick=()=>{selectFarmDock(b.dataset.farmDock as Parameters<typeof selectFarmDock>[0]);rerender();});
  const select=(id:string)=>{selectFarmPlot(id);rerender();};
  root.querySelectorAll<HTMLButtonElement>('[data-farm-panel]').forEach(b=>b.onclick=()=>{selectFarmPanel(b.dataset.farmPanel as FarmPanel);rerender();});
  root.querySelectorAll<HTMLButtonElement>('[data-farm-stock]').forEach(b=>b.onclick=()=>{selectFarmStock(b.dataset.farmStock!);rerender();});
  root.querySelectorAll<HTMLButtonElement>('[data-farm-jump]').forEach(b=>b.onclick=()=>select(b.dataset.farmJump!));
+ root.querySelectorAll<HTMLButtonElement>('[data-farm-plan]').forEach(b=>b.onclick=()=>{openFarmPlanner(g,b.dataset.farmPlan);selectFarmPanel('calendar');rerender();root.getElementById('farm-planner')?.scrollIntoView({behavior:reduced()?'instant':'smooth',block:'start'});});
  root.querySelectorAll<HTMLButtonElement>('[data-farm-project]').forEach(b=>b.onclick=()=>{selectFarmProject(b.dataset.farmProject!);rerender();});
  root.querySelectorAll<HTMLButtonElement>('[data-farm-duration]').forEach(b=>b.onclick=()=>{selectFarmProjectDuration(b.dataset.farmDuration!);rerender();});
- const planPicker=root.getElementById('farm-plan-plot') as HTMLSelectElement|null;if(planPicker)planPicker.onchange=()=>{selectFarmPlot(planPicker.value);selectFarmPanel('calendar');rerender();};
- const batchPicker=root.getElementById('farm-plan-batch') as HTMLSelectElement|null;if(batchPicker)batchPicker.onchange=()=>{selectPlannedBatch(batchPicker.value);rerender();};
  const picker=root.getElementById('farm-plot-select') as HTMLSelectElement|null;if(picker)picker.onchange=()=>select(picker.value);
  quickEl=root.querySelector<HTMLElement>('.farm-map-quick');
  const host=root.getElementById('farm-map'),map=g.economy?.farm;
  if(!host||!map)return;
  P=P??(window as unknown as {PIXI:Pixi}).PIXI;
  if(!P){host.textContent='地图加载失败，请刷新。仍可使用右上角地块选择器进行操作。';return;}
+ if(!effectsLoading){effectsLoading=true;for(const kind of ['sow','water','harvest'])void P.Assets.load<import('pixi.js-legacy').Texture>(effectSource(kind)).then(t=>effectTextures.set(kind,t)).catch(()=>{});}
  currentMap=map;
  const sizeMap=()=>{viewH=Math.max(1,host.clientHeight);};
  sizeMap();
@@ -154,10 +236,9 @@ export function bindFarmScene(root:Document,g:FarmGame,rerender:()=>void):void {
   canvas=app.view as HTMLCanvasElement;canvas.setAttribute('aria-label','田地与探索地图；也可用右上角选择器操作');
   art=farmArt(P);
   background=new P.Sprite(art.landscapeTexture());background.height=viewH+12;
-  distantHouse=art.sprite(art.houseTexture(),W*.77,290,.85);distantHouse.alpha=.82;distantHouse.eventMode='none';
   floor=new P.Container();mistLayer=new P.Container();items=new P.Container();items.sortableChildren=true;
-  world=new P.Container();world.addChild(floor,mistLayer,items);
-  app.stage.addChild(background,distantHouse,world);
+  world=new P.Container();world.addChild(background,floor,mistLayer,items);
+  app.stage.addChild(world);
   app.stage.eventMode='static';
   app.stage.on('pointerdown',e=>{drag={x:e.global.x,y:e.global.y,px:pan.x,py:pan.y,moved:false};});
   app.stage.on('globalpointermove',e=>{if(!drag)return;const dx=e.global.x-drag.x,dy=e.global.y-drag.y;if(Math.abs(dx)+Math.abs(dy)>7)drag.moved=true;if(drag.moved){pan={x:drag.px+dx,y:drag.py+dy};fit();}});
@@ -165,17 +246,25 @@ export function bindFarmScene(root:Document,g:FarmGame,rerender:()=>void):void {
   app.ticker.add(tick);
  }
  host.replaceChildren(canvas!);
- app.renderer.resize(W,viewH);background!.texture=art!.landscapeTexture();background!.height=viewH+12;
- background!.width=W+24;distantHouse!.texture=art!.houseTexture();distantHouse!.x=W*.77;
+ const placeLandscape=()=>{
+  const texture=art!.landscapeTexture();background!.texture=texture;
+  const xs=[-144,...map.plots.map(p=>(p.x-p.y)*36)],ys=[0,...map.plots.map(p=>(p.x+p.y)*18+18)];
+  const left=Math.min(...xs),right=Math.max(...xs),top=Math.min(...ys),bottom=Math.max(...ys);
+  const scale=Math.max((right-left+viewW/1.2)/texture.width,(bottom-top+viewH/1.2)/texture.height);
+  background!.scale.set(scale);
+  background!.position.set((left+right-background!.width)/2,(top+bottom-background!.height)/2);
+  background!.eventMode='none';
+ };
+ app.renderer.resize(W,viewH);placeLandscape();
  app.stage.hitArea=new P.Rectangle(0,0,W,viewH);
- buildWorld(map,g,select);
- const focus=()=>{const selected=map.plots.find(p=>p.id===selectedFarmPlot())!;pan={x:-(selected.x-selected.y)*36*zoom,y:viewH*.53-85-((selected.x+selected.y)*18+18)*zoom};};
+ buildWorld(map,g,select,()=>{selectFarmPanel('home');rerender();});
+ const focus=()=>{const selected=map.plots.find(p=>p.id===selectedFarmPlot())!;pan={x:-(selected.x-selected.y)*36*zoom,y:viewH*.42-85-((selected.x+selected.y)*18+18)*zoom};};
  if(lastSelection!==selectedFarmPlot()){focus();lastSelection=selectedFarmPlot();}
  fit();
  root.querySelectorAll<HTMLButtonElement>('[data-farm-zoom]').forEach(b=>b.onclick=()=>{zoom=Math.min(2.6,Math.max(.4,zoom+Number(b.dataset.farmZoom)*.15));fit();});
  const center=root.querySelector<HTMLButtonElement>('[data-farm-center]');
  if(center)center.onclick=()=>{focus();fit();};
- observer=new ResizeObserver(()=>{if(host.clientWidth){const oldHeight=viewH;sizeMap();viewW=host.clientWidth;app!.renderer.resize(viewW,viewH);background!.width=viewW+24;background!.height=viewH+12;distantHouse!.x=viewW*.77;app!.stage.hitArea=new P!.Rectangle(0,0,viewW,viewH);if(oldHeight!==viewH)focus();fit();}});
+ observer=new ResizeObserver(()=>{if(host.clientWidth){const oldHeight=viewH;sizeMap();viewW=host.clientWidth;app!.renderer.resize(viewW,viewH);placeLandscape();app!.stage.hitArea=new P!.Rectangle(0,0,viewW,viewH);if(oldHeight!==viewH)focus();fit();}});
  observer.observe(host);
  if(!reduced())app.ticker.start();else app.render();
  // Complete the artwork swap only for the still-mounted, current observation.
@@ -227,6 +316,12 @@ function seedDrop(x:number,y:number):void {
   particles.push({g,vx:0,vy:1.1+Math.random()*.5,life:.45, max:.45});
  }
 }
+function watercolorEffect(kind:'sow'|'water'|'harvest',x:number,y:number):void {
+ const texture=effectTextures.get(kind);if(!P||!items||!texture)return;
+ const sp=new P.Sprite(texture);sp.anchor.set(.5);sp.position.set(x,y+12);sp.eventMode='none';sp.zIndex=10000;
+ const scale=(kind==='water'?78:48)/texture.width;sp.scale.set(scale);items.addChild(sp);
+ tweens.push({t:0,dur:1.2,ease:k=>k,update:k=>{sp.alpha=Math.min(1,k*7)*(1-k);sp.scale.set(scale*(kind==='water'?.7+k*.6:1+k*.12));sp.y=y+12+(kind==='sow'?-12*(1-k):kind==='harvest'?-k*22:0);},done:()=>sp.destroy()});
+}
 const shortLabel=(label:string):string=>{
  const s=label.replace(/^p\d+q\d+\s*[· ]?\s*/,'');
  const parts=s.split(/[：:，。；]/).filter(Boolean);
@@ -238,11 +333,14 @@ export function playFarmFeedback(root:Document,events:readonly FarmFeedback[]):v
  const layer=root.querySelector<HTMLElement>('.farm-effect-layer,.farm-room-feedback');
  if(layer&&events.length){
   const topic=events.find(e=>e.kind!=='notice'&&e.kind!=='grow')?.kind;
-  layer.innerHTML=layer.classList.contains('farm-effect-layer')&&topic?farmEventArt(topic as FarmArt):'';
+  const planned=events.some(e=>e.label==='田块时间安排已更新，已同步到农事日历。');
+  const ink=planned?'plan':topic==='tend'?'water':topic==='sow'||topic==='harvest'?topic:undefined;
+  layer.innerHTML=ink?`<img class="farm-feedback-ink" src="${effectSource(ink)}" alt="">`:layer.classList.contains('farm-effect-layer')&&topic?farmEventArt(topic as FarmArt):'';
+  if(planned)root.querySelector('.farm-date.is-selected')?.classList.add('farm-date-stamped');
   const text=root.createElement('span');text.textContent=events.map(e=>e.label).join('；');layer.append(text);
   if(!reduced())layer.animate([{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'translateY(0)'}],{duration:350,fill:'both'});
  }
- if(reduced())return;
+ if(reduced()||!root.getElementById('farm-map'))return;
  for(const e of events){
   if(e.kind==='grow'){
    for(const [pid,view] of plotViews){
@@ -259,8 +357,8 @@ export function playFarmFeedback(root:Document,events:readonly FarmFeedback[]):v
   if(e.kind==='explore'){mistLift(view.x,view.y);ring(view.x,view.y,0x8ba888);floatText(float,view.x,view.y-6);}
   else if(e.kind==='discovery'){ring(view.x,view.y,0x967245);floatText(float,view.x,view.y-6,0x7c5a30);}
   else if(e.kind==='reclaim'){burst(view.x,view.y+14,0x8a6d4a,8);ring(view.x,view.y,0xa08c5c);floatText(float,view.x,view.y-6);}
-  else if(e.kind==='sow'){seedDrop(view.x,view.y);popCrop(view,.25);floatText(float,view.x,view.y-6);}
-  else if(e.kind==='harvest'){burst(view.x,view.y+8,0xd9a83c,10);floatText(float,view.x,view.y-6,0x8a6a1e);}
-  else if(e.kind==='tend'){burst(view.x,view.y+8,0x7fa8c9,6);floatText(float,view.x,view.y-6,0x46657c);}
+  else if(e.kind==='sow'){watercolorEffect('sow',view.x,view.y);seedDrop(view.x,view.y);popCrop(view,.25);floatText(float,view.x,view.y-6);}
+  else if(e.kind==='harvest'){watercolorEffect('harvest',view.x,view.y);burst(view.x,view.y+8,0xc7a55d,7);floatText(float,view.x,view.y-6,0x8a6a1e);}
+  else if(e.kind==='tend'){watercolorEffect('water',view.x,view.y);burst(view.x,view.y+8,0x79a995,5);floatText(float,view.x,view.y-6,0x46657c);}
  }
 }

@@ -1,3 +1,5 @@
+import {narrativeView} from './systems/narrative-adapter.js';
+import {landscapeView} from './systems/landscapes.js';
 import {seasonTime} from './model/electric.js';
 import {eraView} from './systems/eras.js';
 import {socialFoodQuote,dietView} from './systems/social-food.js';
@@ -25,6 +27,7 @@ export function projectView(trial: TrialProject | null) {
 export function getObservation(state: GameState, rules: Ruleset) {
   const person = activePerson(state), child = heir(state), family = state.household, canal = channel(state), scenario = rules.scenarios[state.location.id];
   return {
+    story:narrativeView(state),landscapes:landscapeView(state),
     ...(state.productNetwork ? {productNetwork:productNetworkView(state,rules)} : {}),
     ...(state.economy?{economy:economyView(state,rules)}:{}),
     ...(state.socialFood?{socialFood:socialFoodQuote(state,false,state.economy?.industry?systemLabor(state).time:0)}:{}),

@@ -1,3 +1,5 @@
+import {emptyStory,settleNarrative} from './systems/narrative-adapter.js';
+import {recordLandscapeUse} from './systems/landscapes.js';
 import {initializeFarm} from './systems/agriculture.js';
 import {initializeEras,recordEraProduction,settleEra} from './systems/eras.js';
 import {recordProducts} from './systems/industry-products.js';
@@ -31,7 +33,7 @@ export function createInitialState(rules: Ruleset, seed: number, frameworkId: st
   if (!FRAMEWORKS.some(f => f.id === frameworkId && f.implemented)) throw new Error('未知或尚未开放的发展框架');
   const p = rules.parameters;
   const state: GameState = {
-    schemaVersion: 1, clock: { generation: 1, turn: 1, absoluteTurn: 1 }, status: 'active', ap: p.actionsPerTurn,
+    story:emptyStory(),schemaVersion: 1, clock: { generation: 1, turn: 1, absoluteTurn: 1 }, status: 'active', ap: p.actionsPerTurn,
     world: { era: '传统农业技术条件（非具体史年）', technologies: [...rules.worldTechnologies] },
     location: { id: 'river', weather: 'normal', rain: 2, water: 2, teachers: rules.technologies.map(t => t.id), season: { cultivated: false, usedChannel: false, trialSample: false } },
     household: { id: 'household:1', activePersonId: 'person:1', heirId: 'person:2', memberIds: ['person:1', 'person:2'], food: p.initialFood, money: p.initialMoney, hardship: 0, assetIds: ['seed:initial'], stockId: 'seed:initial', candidateId: null, activeProjectId: null },
@@ -51,11 +53,11 @@ export function createInitialState(rules: Ruleset, seed: number, frameworkId: st
   if(rules.economy){state.economy=initialEconomy();if(rules.tower)state.economy.tower=initialTower();if(rules.workshops)state.economy.workshops=initialWorkshops();if(rules.shop)state.economy.shop=initialShop();if(rules.operations)state.economy.operations=initialOperations();state.world.era="学科与生产组织的形成";delete state.society;delete state.development;delete state.productNetwork;}
   if(rules.modern&&!state.economy?.modern)initializeModern(state,!!rules.civilization);
   if(rules.civilization){state.economy!.expeditions=initialExpeditions(!!rules.householdLineage);if(rules.householdLineage)state.economy!.lineage=true;}
-  if(rules.branches){state.economy!.branches={learned:{[state.household.activePersonId]:['A0'],[state.household.heirId]:['A0']},archives:[],protocols:[],channels:[],delivered:[]};state.economy!.knowledge={};state.economy!.notes={};delete state.economy!.expeditions;delete state.economy!.workshops;}
+  if(rules.branches){for(const id of new Set([state.household.activePersonId,state.household.heirId]))state.persons[id].practices.push('technology:A0');state.economy!.branches={learned:{[state.household.activePersonId]:['A0'],[state.household.heirId]:['A0']},archives:[],protocols:[],channels:[],delivered:[]};state.economy!.knowledge={};state.economy!.notes={};delete state.economy!.expeditions;delete state.economy!.workshops;}
   if(rules.industry)state.economy!.industry={rules:structuredClone(rules.industry),products:{},commissioned:[],instances:{},workers:{}};
   if(rules.life)initializeLife(state,rules.life);
   if(rules.calendar&&state.life)state.life.calendar={rules:structuredClone(rules.calendar),continuousVersion:1,nextBusinessDay:rules.calendar.businessCycleDays,absoluteDay:0,seasonStarted:0,seasonLength:0,day:0,diet:'simple',mealDays:0,consumed:0,missing:0,purchaseSpent:0,systemsSettled:false,study:{},weatherNextDay:0,lastTermDay:-1,termEvents:[],lastNotice:'正月初一，岁首启程：探索荒野，安排这一年的田地。'};
-  if(rules.renewal){state.life!.renewal=structuredClone(rules.renewal);for(const p of Object.values(state.persons))if(p.vitality)p.vitality.minimumEnergy=rules.renewal.minimumEnergy;}
+  if(rules.renewal){state.life!.renewal=structuredClone(rules.renewal);}
   if(rules.socialFood){state.socialFood={rules:structuredClone(rules.socialFood),foodPerSeason:p.foodPerTurn,price:p.foodPrice,policy:'off',budget:rules.socialFood.defaultBudget,reserve:rules.socialFood.defaultReserve,delivery:false,serviceRemaining:rules.socialFood.serviceCapacity};state.production!.market.food=Math.min(state.production!.market.food,rules.socialFood.storage);}
   if(rules.electric)state.electric={rules:structuredClone(rules.electric)};
   if(rules.sect&&state.life)initializeSect(state,rules.sect);
@@ -63,6 +65,7 @@ export function createInitialState(rules: Ruleset, seed: number, frameworkId: st
   initializeEras(state,rules,frameworkId);
   newSeason(state, rules, []);
   recordCharacterGrowth(state,[]);
+  settleNarrative(state,state,[]);
   return deepFreeze(state);
 }
 export function getAvailableActions(state: GameState, rules: Ruleset): ActionOffer[] {
@@ -73,9 +76,9 @@ export function transition(state: GameState, action: GameAction, rules: Ruleset)
   const definition = actionDefinitions(state, rules).find(def => def.offer.id === id);
   if (!definition?.offer.enabled) throw new Error(definition?.offer.reason || '此状态下不存在该行动');
   const next = structuredClone(state), events: GameEvent[] = [];
-  if(action.type==='economy'&&action.operation==='plotplan'){definition.execute(next,events);return {state:deepFreeze(next),events:deepFreeze(events)};}
+  if(action.type==='economy'&&['plotplan','farmuse','branchpractice'].includes(action.operation)){definition.execute(next,events);settleNarrative(state,next,events,id);return {state:deepFreeze(next),events:deepFreeze(events)};}
   const { ap, time, energy, money, food, materials } = definition.offer;
-  if(next.life){if(!next.life.calendar)next.life.timeRemaining=Math.round((next.life.timeRemaining-(time??0))*100)/100;activePerson(next).vitality!.energy=Math.round((activePerson(next).vitality!.energy-(energy??0))*100)/100;}
+  if(next.life){if(!next.life.calendar)next.life.timeRemaining=Math.round((next.life.timeRemaining-(time??0))*100)/100;activePerson(next).vitality!.pressure=Math.round((activePerson(next).vitality!.pressure+(energy??0))*100)/100;}
   next.ap -= ap; next.household.money -= money; next.household.food -= food;
   if (materials) for (const [material, amount] of Object.entries(materials)) next.production!.inventory[material as Material] -= amount;
   events.push({ type: 'action-paid', action: structuredClone(definition.offer.action), cost: { ap, ...(next.life?{time,energy}:{}), money, food, ...(materials ? { materials: { ...materials } } : {}) } });
@@ -96,10 +99,12 @@ export function transition(state: GameState, action: GameAction, rules: Ruleset)
   if(next.life?.calendar&&action.type!=='handover'){
     const op=action.type==='economy'?action.operation:'';
     const days=op==='end'?next.life.calendar.rules.daysPerWeek:(time??0);
-    if(days>0)advanceCalendar(next,rules,days,events,op==='wait'||op==='end');
+    if(days>0)advanceCalendar(next,rules,days,events,op==='wait'||op==='end'||op==='rest',op==='rest'||op==='wait'&&['half','week','calendar'].includes(action.type==='economy'?action.target:''),op==='rest'&&action.type==='economy'?action.target:'self');
     if(op==='erasettle'){settleEra(next,rules,events);next.life.timeRemaining=next.era?.dayBudget?Math.max(0,next.era.dayBudget.started+next.era.dayBudget.limit-next.life.calendar.absoluteDay):next.life.timeRemaining;}
   }else if (action.type !== 'handover' && (action.type === 'end-turn' || action.type==='economy'&&(action.operation==='end'||action.operation==='erasettle') || (!next.sect&&(next.life?next.life.timeRemaining===0:next.ap === 0)))) finishSeason(next, rules, events);
   if(deferredFarmProject&&next.status==='active'&&next.household.activePersonId===startedPerson&&(next.life?.calendar?.absoluteDay??0)>=startedDay+(time??0)){const start=events.length;definition.execute(next,events);recordBranchWork(next,events.slice(start));}
   recordCharacterGrowth(next,events);
+  recordLandscapeUse(state,next,events,id);
+  settleNarrative(state,next,events,id);
   return { state: deepFreeze(next), events: deepFreeze(events) };
 }

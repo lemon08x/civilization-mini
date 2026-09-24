@@ -18,6 +18,8 @@ const COURSE_ART:Record<string,string>={
  Q0:'item-book-ui.webp',Q1:'tech-mechanics-ui.webp',Q2:'chronicle-journal-ui.webp',
 };
 export const courseArtUrl=(id:string):string=>assetUrl(COURSE_ART[id]??'chronicle-study-ui.webp');
+// Cultivation motifs are decorative; unlocks and effects remain live text.
+export const cultivationImage=(id:string,className='cultivation-course-art'):string=>`<img class="${esc(className)}" src="${assetUrl('sect-course-'+(/^(C[0-9]|C1[0-5])$/.test(id)?id:'C0')+'-v2.webp')}" alt="" aria-hidden="true" width="192" height="192" decoding="async">`;
 export function productArt(id:string):string {
   if(['W01','W03','U08','valve'].includes(id))return 'product-water';
   if(['S01','S02','mill','U06'].includes(id))return 'chronicle-pantry';

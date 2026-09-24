@@ -43,7 +43,7 @@ export const CROPS:Record<Crop,CropSpec>={
 };
 export interface ProductSpec {id:string;name:string;category:string;effect:string;requires:Partial<Record<Subject,number>>;inputs:Record<string,number>;from:string[];}
 export const PRODUCTS:ProductSpec[]=[
-  {id:'W01',name:'提水辘轳',category:'供水与排水',effect:'地块灌溉消耗1公共水恢复作物所需水分，提水辘轳使基础精力成本减半；每次扣1耐用度。',requires:{mechanics:1},inputs:{wood:3},from:[]},
+  {id:'W01',name:'提水辘轳',category:'供水与排水',effect:'地块灌溉消耗1公共水恢复作物所需水分，提水辘轳使基础压力成本减半；每次扣1耐用度。',requires:{mechanics:1},inputs:{wood:3},from:[]},
   {id:'W03',name:'活塞泵',category:'供水与排水',effect:'有作物且缺水时每季自动抽取1公共水灌溉，消耗1木材和1耐用度。',requires:{mechanics:5,materials:3},inputs:{iron:2,valve:1,seal:1},from:['W01']},
   {id:'P01',name:'手摇传动装置',category:'生产动力',effect:'纤维和绳索加工一次处理双份，原料产出均翻倍，每批扣1耐用度。',requires:{mechanics:2},inputs:{wood:3,shaft:1},from:[]},
   {id:'P03',name:'水轮动力装置',category:'生产动力',effect:'有公共水时，磨粮、脱粒、榨油可免个人行动；每季限一批，仍扣原料与耐用度。',requires:{mechanics:3},inputs:{wood:4,iron:1,shaft:1},from:['P01']},
@@ -95,11 +95,13 @@ export const ALL_PRODUCTS=[...PRODUCTS,...MODERN_PRODUCTS,...ELECTRIC_PRODUCTS];
 export const ALL_PROCESSES=[...PROCESSES,...MODERN_PROCESSES,...ELECTRIC_PROCESSES];
 export const ALL_JOB_NAMES:Record<string,string>={...JOB_NAMES,...Object.fromEntries(MODERN_PROCESSES.map(p=>[p.id,p.name]))};
 export const topicsFor=(s:GameState)=>s.economy?.branches?[]:s.economy?.modern?ALL_TOPICS:TOPICS;
-export const productsFor=(s:GameState)=>s.economy?.branches?ALL_PRODUCTS.filter(p=>BRANCH_PRODUCTS[p.id]||s.electric&&ELECTRIC_KNOWLEDGE[p.id]).map(p=>({...p,requires:{},...(s.electric&&p.id==='E01'?{effect:`每季手动供能最多一次，消耗1公共水和1耐用；旱季发${s.electric.rules.dryHydroPower}电，其余季发6电。`}:{}),...(s.electric&&p.id==='E04'?{effect:'启用后季末存入最多6份余电，充电扣1耐用；次季手动供能时放电，每季最多一次。不自动发电或放电。'}:{}),...(s.electric&&p.id==='LAMP'?{effect:`手动供能时本季首次点灯耗${s.electric.rules.servicePower}电、1耐用，工作精力成本降至${s.life?.calendar?.rules.lampEnergyPercent??100}%，日历不会凭空多出天数。`}:{}),...(s.electric&&p.id==='TELEGRAPH'?{effect:`手动供能时每季耗${s.electric.rules.servicePower}电、1耐用，本季新订货即时交付；库存、运输、价款照常，不加速维修。`}:{})})):s.economy?.modern?[...PRODUCTS,...MODERN_PRODUCTS]:PRODUCTS;
+export const productsFor=(s:GameState)=>s.economy?.branches?ALL_PRODUCTS.filter(p=>BRANCH_PRODUCTS[p.id]||s.electric&&ELECTRIC_KNOWLEDGE[p.id]).map(p=>({...p,requires:{},...(s.electric&&p.id==='E01'?{effect:`每季手动供能最多一次，消耗1公共水和1耐用；旱季发${s.electric.rules.dryHydroPower}电，其余季发6电。`}:{}),...(s.electric&&p.id==='E04'?{effect:'启用后季末存入最多6份余电，充电扣1耐用；次季手动供能时放电，每季最多一次。不自动发电或放电。'}:{}),...(s.electric&&p.id==='LAMP'?{effect:`手动供能时本季首次点灯耗${s.electric.rules.servicePower}电、1耐用，工作压力成本降至${s.life?.calendar?.rules.lampEnergyPercent??100}%，日历不会凭空多出天数。`}:{}),...(s.electric&&p.id==='TELEGRAPH'?{effect:`手动供能时每季耗${s.electric.rules.servicePower}电、1耐用，本季新订货即时交付；库存、运输、价款照常，不加速维修。`}:{})})):s.economy?.modern?[...PRODUCTS,...MODERN_PRODUCTS]:PRODUCTS;
 export const processesFor=(s:GameState)=>s.economy?.branches?ALL_PROCESSES.filter(p=>BRANCH_PROCESSES[p.id]||s.electric&&ELECTRIC_KNOWLEDGE[p.id]).map(p=>({...p,requires:{}})):s.economy?.modern?[...PROCESSES,...MODERN_PROCESSES]:PROCESSES;
 export const goodsFor=(s:GameState)=>s.electric?ALL_GOODS:s.economy?.modern?{...GOODS,...MODERN_GOODS}:GOODS;
 
+export const LANDSCAPE_INPUTS={build:{wood:0,clay:0},upgrade:{wood:0,clay:0},tea:{food:0}};
 export interface CatalogOverlay {
+  landscapes:typeof LANDSCAPE_INPUTS;
   cooking: Record<string,{inputs:Record<string,number>;food:number;time:number;energy:number}>;
   goods: Record<string, { price: number; food: number }>;
   crops: Record<string, { seasons:CropSeason[]; duration: number; yield: number; straw: number; level: number; waterNeed?: number; floodTolerant?: boolean; lateRate?: number; legume?: boolean }>;
@@ -115,6 +117,11 @@ function integerMap(value: Record<string, number>, allowZero = true): void {
 
 /** JSON 是数字来源；TypeScript 目录只保留名称、效果和结构。 */
 export function applyCatalogOverlay(overlay: CatalogOverlay): void {
+  const landscapes=overlay.landscapes;
+  if(!landscapes||Object.keys(landscapes).sort().join()!=='build,tea,upgrade')throw new Error('缺少景观投入目录，请新开游戏');
+  for(const kind of ['build','upgrade'] as const){const inputs=landscapes[kind];if(!inputs||Object.keys(inputs).sort().join()!=='clay,wood'||Object.values(inputs).some(n=>!Number.isInteger(n)||n<1||n>12))throw new Error('景观材料数值无效');}
+  if(!landscapes.tea||Object.keys(landscapes.tea).join()!=='food'||!Number.isFinite(landscapes.tea.food)||landscapes.tea.food<0.001||landscapes.tea.food>1)throw new Error('品茶投入无效');
+  Object.assign(LANDSCAPE_INPUTS,structuredClone(landscapes));
   if(!overlay.cooking||Object.keys(overlay.cooking).length!==COOKING.length)throw new Error('存档缺少当前烹饪目录，请新开游戏；原档不修改');
   for(const recipe of COOKING){
     const n=overlay.cooking[recipe.id];

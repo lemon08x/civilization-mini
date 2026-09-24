@@ -1,14 +1,16 @@
+import {landscapeDescription,LANDSCAPE_NAMES} from './landscapes.js';
+import {discoveryText as FARM_EVENTS} from './narrative-adapter.js';
 import {solarTermDay,solarYearAt,lunarDateAt} from './calendar.js';
-import {cropBatches,sowBatch,harvestDates,planForField,farmScheduleView,advanceWildDay} from './farm-calendar.js';
+import {cropBatches,sowBatch,harvestDates,planForField,farmScheduleView,advanceWildDay,farmLabor} from './farm-calendar.js';
 import {draw} from './life.js';
 import { activePerson, type GameState } from '../model/state.js';
 import type { GameEvent } from '../model/events.js';
-import {FARM_DISCOVERIES,type FarmDiscovery} from '../model/economy.js';
+import {FARM_DISCOVERIES,FARM_PROJECT_TECH,type FarmDiscovery} from '../model/economy.js';
 import type { Crop, Worker, Field, FarmRules, FarmPlot, PlotLand } from '../model/economy.js';
 import { CROPS, WORKER_NAMES } from './economy-catalog.js';
 import { amount, changeGoods, consumeEquipment, equipped, missingGoods } from './inventory.js';
 import { level, recordEvidence, requirements } from './knowledge.js';
-import { branchHas } from './branches.js';
+import { branchHas, branchNeeds } from './branches.js';
 import { made } from './shop.js';
 
 export const WATER_NAMES=['干旱','偏干','适宜','过湿','积水'] as const;
@@ -142,16 +144,18 @@ export function fieldYield(s: GameState,f:Field=s.economy!.field): number {
   return Math.max(1, Math.floor(CROPS[f.crop].yield + f.bonus + (f===s.economy!.field?(s.economy!.modern?.cropBonus ?? 0):0) + Math.min(1, f.fertility) - f.stress - late));
 }
 export function farmBlocker(s: GameState, crop: Crop, worker?: Worker,f:Field=s.economy!.field,heritage=false): string[] {
+  const land=fieldPlot(s,f);
+  if(land?.kind==='field'&&land.purpose!=='sowing')return ['此地为其他用途，请先改为播种用途'];
   if (s.economy!.branches) {
-    if (crop === 'wheat' && !branchHas(s, 'A0') && !worker) return ['需掌握基础栽培'];
-    if ((crop === 'soy' || crop === 'flax') && !branchHas(s, 'A4')) return ['需掌握油料与纤维作物'];
+    if (crop === 'wheat' && !branchHas(s, 'A0') && !worker) return branchNeeds(s,['A0']);
+    if ((crop === 'soy' || crop === 'flax') && !branchHas(s, 'A4')) return branchNeeds(s,['A4']);
     if (crop === 'rice') {
-      if (!branchHas(s, 'A12')) return ['需掌握水田稻作'];
+      if (!branchHas(s, 'A12')) return branchNeeds(s,['A12']);
       if (!fieldPlot(s, f)?.land?.paddy) return ['需把邻水的田改造为水田'];
     }
-    if (crop === 'millet' && !branchHas(s, 'A13')) return ['需掌握旱地谷物'];
-    if (crop === 'adzuki' && !branchHas(s, 'A14')) return ['需掌握杂粮接茬'];
-    if ((crop === 'mallow' || crop === 'mustard') && !branchHas(s, 'A15')) return ['需掌握园圃菜蔬'];
+    if (crop === 'millet' && !branchHas(s, 'A13')) return branchNeeds(s,['A13']);
+    if (crop === 'adzuki' && !branchHas(s, 'A14')) return branchNeeds(s,['A14']);
+    if ((crop === 'mallow' || crop === 'mustard') && !branchHas(s, 'A15')) return branchNeeds(s,['A15']);
   }
   if (!f.crop) {
     const plot=fieldPlot(s,f);if(plot?.project&&plot.project.done<plot.project.total)return ['工程进行中，不能播种'];
@@ -223,7 +227,7 @@ export function farmWork(s: GameState, crop: Crop, events: GameEvent[], worker?:
 }
 export function cookMeal(s:GameState,recipe:import('../model/economy.js').CookingRecipe,events:GameEvent[]):void{
  changeGoods(s,recipe.inputs,-1,events,'烹饪'+recipe.name);
- if(s.life?.calendar){s.life.calendar.mealDays=recipe.food;events.push({type:'life',personId:s.household.activePersonId,operation:'cooking',detail:`享用${recipe.name}，未来${recipe.food}天每日额外恢复${s.life.calendar.rules.mealRecovery}精力；每天另按饮食安排现做现吃。`});return;}
+ if(s.life?.calendar){s.life.calendar.mealDays=recipe.food;events.push({type:'life',personId:s.household.activePersonId,operation:'cooking',detail:`享用${recipe.name}，未来${recipe.food}天主动放松时每日额外降低${s.life.calendar.rules.mealRecovery}压力；每天另按饮食安排现做现吃。`});return;}
  s.household.food+=recipe.food;
  events.push({type:'life',personId:s.household.activePersonId,operation:'farm-map',detail:`做成${recipe.name}，备下${recipe.food}份即食口粮。`});
 }
@@ -237,6 +241,7 @@ export function initializeFarm(s:GameState,rules:FarmRules):void{
  const plots:Record<string,FarmPlot>={};
  for(let y=1;y<=4;y++)for(let x=1;x<=5;x++){const id=plotId(x,y);plots[id]={id,x,y,kind:x<=3?'wild':'unknown'};}
  plots[HOME_PLOT].kind='field';
+ plots[HOME_PLOT].purpose='sowing';
  for(const p of Object.values(plots))if(p.kind!=='unknown')revealLand(s,p);
  plots[HOME_PLOT].land!.soil='loam';plots[HOME_PLOT].land!.elevation=1;plots.p1q2.land!.elevation=2;
  for(const [id,key] of [['p1q2','spring'],['p3q2','fallow'],['p2q3','woodland']] as const){plots[id].kind='story';plots[id].discovery={id:key,resolved:false,outcome:''};}
@@ -244,12 +249,12 @@ export function initializeFarm(s:GameState,rules:FarmRules):void{
  s.economy!.farm={calendarVersion:1,explorationVersion:3,landVersion:2,rareSeeds:0,rules:structuredClone(rules),plots,discovered:['wheat'],explored:0,neighbor:{personId:s.sect!.current[1],goods:{seedSoy:rules.neighborStock,seedFlax:rules.neighborStock,seedMallow:rules.neighborStock,seedRice:rules.neighborStock,wheat:0},field:{...blankField(),crop:'soy',duration:CROPS.soy.duration},talked:-1,traded:-1,helped:-1,busy:false}};
  for(const p of Object.values(plots))if(p.kind!=='unknown')extendFarm(s,p);
  s.economy!.goods.seedSoy=0;s.economy!.goods.seedFlax=0;
- const id=s.sect!.current[1];s.economy!.branches!.learned[id]=['A0','A4'];
+ const id=s.sect!.current[1];s.economy!.branches!.learned[id]=['A0','A4'];s.persons[id].practices.push('technology:A0','technology:A4');
 }
 export function farmView(s:GameState){
  const f=s.economy?.farm;if(!f)return undefined;
  const id=s.sect!.current[1],v=s.persons[id].vitality!,trust=activePerson(s).vitality?.experiences?.relationships[id]??0;
- return {schedule:farmScheduleView(s),techniques:{rotation:branchHas(s,'A5'),seedSelection:branchHas(s,'A6'),scouting:branchHas(s,'A11'),paddy:branchHas(s,'A12'),dryland:branchHas(s,'A13'),relay:branchHas(s,'A14'),garden:branchHas(s,'A15'),nursery:equipped(s,'U10'),drainage:equipped(s,'U08'),harvestTools:equipped(s,'U04')},homeId:HOME_PLOT,rareSeeds:f.rareSeeds,discovered:[...f.discovered],plots:Object.values(f.plots).map(p=>{const field=plotField(s,p.id);return {id:p.id,x:p.x,y:p.y,kind:p.kind,land:landView(s,p),plans:structuredClone(p.plans??[]),...(p.wild?{wild:{kind:p.wild.kind,stock:p.wild.stock,expires:p.wild.expires,expiresDate:p.wild.stock?lunarDateAt(s.life!.calendar!.rules.referenceYear,p.wild.expires).date:null,nextSeason:p.wild.kind==='yam'?'霜降至次年立春':null}}:{}),...(p.kind==='field'&&field?{field:{...field},harvest:fieldYield(s,field),maturity:field.crop?maturityView(s,field):null}:{}),...(p.kind==='unknown'?{reachable:farmNeighbors(p).some(n=>f.plots[n.id]&&f.plots[n.id].kind!=='unknown')}:{}),...(p.project?{project:{...p.project,name:FARM_PROJECT_NAMES[p.project.kind],stage:p.project.done<p.project.total/2?'整备':'施工',remaining:p.project.total-p.project.done}}:{}),...(p.improvement?{improvement:p.improvement}:{}),...(p.pit?{pit:{readyDay:p.pit.readyDay,remainingDays:Math.max(0,Math.ceil(p.pit.readyDay-(s.life?.calendar?.absoluteDay??0)))}}:{}),...(p.kind==='water'||p.improvement==='canal'?{waterConnected:waterConnected(s,p)}:{}),waterAccess:waterAccess(s,p),...(p.discovery?{discovery:{...p.discovery,...FARM_EVENTS[p.discovery.id]}}:{}),...(p.fertility!==undefined?{fertility:p.fertility}:{})};}),neighbor:{id,title:v.sex==='female'?'师姐':'师兄',name:s.persons[id].name,alive:v.alive,trust,busy:f.neighbor.busy,offers:{seedSoy:f.neighbor.goods.seedSoy??0,seedFlax:f.neighbor.goods.seedFlax??0,seedMallow:f.neighbor.goods.seedMallow??0,...(isCanalBuilt(s)?{seedRice:f.neighbor.goods.seedRice??0}:{})},description:'独立同门，不可切换控制；自己的田地与物资独立结算'},rules:{...f.rules}};
+ return {otherUseUnlocked:otherFarmUseUnlocked(s),construction:Object.entries(FARM_PROJECT_TECH).map(([kind,technology])=>({kind,technology,unlocked:branchHas(s,technology)})),schedule:farmScheduleView(s),techniques:{rotation:branchHas(s,'A5'),seedSelection:branchHas(s,'A6'),scouting:branchHas(s,'A11'),paddy:branchHas(s,'A12'),dryland:branchHas(s,'A13'),relay:branchHas(s,'A14'),garden:branchHas(s,'A15'),nursery:equipped(s,'U10'),drainage:equipped(s,'U08'),harvestTools:equipped(s,'U04')},homeId:HOME_PLOT,rareSeeds:f.rareSeeds,discovered:[...f.discovered],plots:Object.values(f.plots).map(p=>{const field=plotField(s,p.id);return {...(p.landscape?{landscape:{...p.landscape,name:LANDSCAPE_NAMES[p.landscape.kind],description:landscapeDescription(s,p)}}:{}),id:p.id,x:p.x,y:p.y,kind:p.kind,purpose:p.purpose,...(p.kind==='field'&&p.purpose==='sowing'?{labor:{sow:farmLabor(s,p,'farmplot','wheat','sow'),harvest:farmLabor(s,p,'farmplot','wheat','harvest')}}:{}),category:p.kind==='field'?'production' as const:'wilderness' as const,land:landView(s,p),plans:structuredClone(p.plans??[]),...(p.wild?{wild:{kind:p.wild.kind,stock:p.wild.stock,expires:p.wild.expires,expiresDate:p.wild.stock?lunarDateAt(s.life!.calendar!.rules.referenceYear,p.wild.expires).date:null,nextSeason:p.wild.kind==='yam'?'霜降至次年立春':null}}:{}),...(p.kind==='field'&&field?{field:{...field},harvest:fieldYield(s,field),maturity:field.crop?maturityView(s,field):null}:{}),...(p.kind==='unknown'?{reachable:farmNeighbors(p).some(n=>f.plots[n.id]&&f.plots[n.id].kind!=='unknown')}:{}),...(p.project?{project:{...p.project,name:FARM_PROJECT_NAMES[p.project.kind],stage:p.project.done<p.project.total/2?'整备':'施工',remaining:p.project.total-p.project.done}}:{}),...(p.improvement?{improvement:p.improvement}:{}),...(p.pit?{pit:{readyDay:p.pit.readyDay,remainingDays:Math.max(0,Math.ceil(p.pit.readyDay-(s.life?.calendar?.absoluteDay??0)))}}:{}),...(p.kind==='water'||p.improvement==='canal'?{waterConnected:waterConnected(s,p)}:{}),waterAccess:waterAccess(s,p),...(p.discovery?{discovery:{...p.discovery,...FARM_EVENTS[p.discovery.id]}}:{}),...(p.fertility!==undefined?{fertility:p.fertility}:{})};}),neighbor:{id,title:v.sex==='female'?'师姐':'师兄',name:s.persons[id].name,alive:v.alive,trust,busy:f.neighbor.busy,offers:{seedSoy:f.neighbor.goods.seedSoy??0,seedFlax:f.neighbor.goods.seedFlax??0,seedMallow:f.neighbor.goods.seedMallow??0,...(isCanalBuilt(s)?{seedRice:f.neighbor.goods.seedRice??0}:{})},description:'独立同门，不可切换控制；自己的田地与物资独立结算'},rules:{...f.rules}};
 }
 export function growField(s:GameState,f:Field,events:GameEvent[],id:string):void{
  if(!f.crop)return;
@@ -269,8 +274,8 @@ export function settleNeighbor(s:GameState):void{
  const v=s.persons[n.personId].vitality!,m=s.sect!.members[n.personId],f=n.field;
  if(!v.alive)return;
  n.busy=f.growth>=f.duration;
- if(m.time>=2&&v.energy>=2){
-  m.time-=2;v.energy-=2;
+ if(m.time>=2){
+  m.time-=2;v.pressure+=2;
   if(f.crop&&f.growth>=f.duration){const crop=f.crop;n.goods[crop]=(n.goods[crop]??0)+Math.max(1,CROPS[crop].yield-f.stress);n.goods[CROPS[crop].seed]=(n.goods[CROPS[crop].seed]??0)+2;f.crop=crop==='soy'?'flax':'soy';f.growth=0;f.stress=0;f.duration=CROPS[f.crop].duration;}
   else {f.moisture=2;}
  }
@@ -278,21 +283,7 @@ export function settleNeighbor(s:GameState):void{
 }
 
 /** Fictional vignettes inspired by traditional farming and rural literature. */
-export const FARM_EVENTS:Record<FarmDiscovery,{title:string;text:string;inspiration:string}>={
- mushroom:{title:'雨后菌林',text:'保留林下生境，暖季连雨后可采野蘑菇；开垦会永久失去菌林。',inspiration:'林下采集'},
- yam:{title:'山药坡',text:'霜降至立春可分次采挖山药，保留地块便能年年采集；开垦会失去这处储备。',inspiration:'季节性采集'},
- fallow:{title:'荒草下的旧田',text:'旧田埂还在，土层却已贫瘠。可以尽快翻土，也可以分两段清荒、归肥，再建成良田。',inspiration:'传统复垦与培肥实践'},
- woodland:{title:'林间取舍',text:'杂木覆盖缓坡。可以取木后留下荒地，费时清根建田，或整理成护田林，减轻相邻田的旱害。',inspiration:'传统农林经营；地景为虚构'},
- meadow:{title:'风过平畴',text:'拨开草丛，是一片土层平整的荒地。翻土之后就能种下作物。',inspiration:'传统垦荒生活'},
- oldtree:{title:'社树的浓荫',text:'一棵老树盘根错节。树下有歇脚留下的石凳，村人一直留着这片树荫。这里不能开垦，仍可绕树向外探索。',inspiration:'传统社树习俗；故事为虚构'},
- boulder:{title:'卧牛石',text:'土下连着整片岩床，不是挪开一块石头就能耕种。留下这处地标，沿旁边继续探路。',inspiration:'乡野地名与地景叙事；故事为虚构'},
- brambles:{title:'荆棘掩径',text:'荆棘覆盖了旧田埂。投入劳力清理后能露出可耕土层，也可以暂时绕行。',inspiration:'传统清荒农事'},
- seedbag:{title:'埂边的种囊',text:'旧田埂里落着一只种囊，籽粒与家里的麦种不同。先辨认，再决定如何栽种；未经辨认不能直接下地。',inspiration:'传统辨种、留种实践；事件为虚构'},
- heritage:{title:'一束异穗',text:'荒草间有几株深色长穗的麦子。仔细选留后可以培育“异穗麦”，仍受旱涝影响，并非仙种。',inspiration:'农书中的选种思想；品种与故事为虚构'},
- spring:{title:'溪涧活水',text:'石缝间渗出活水，在低处汇成一线溪涧。疏浚泉眼，可留作永久水源，再修渠引水灌田；也可填平此处，整成荒地。',inspiration:'乡野泉溪与引水灌溉叙事；故事为虚构'},
- traveler:{title:'渡口借火',text:'一位赶路人蹲在田边，想借一份口粮暖胃。你可分粮听他讲一路采种的见闻，也可指路告别。',inspiration:'乡野行旅叙事；人物与故事为虚构'},
- shrine:{title:'桑下旧界',text:'石片上刻着两家旧田的界线。描下界线，保留一隅地标；或将可耕部分整理成荒地。',inspiration:'传统田界与乡土记忆；故事为虚构'},
-};
+
 export function exploreFarm(s:GameState,id:string,events:GameEvent[]):void{
  const farm=s.economy!.farm!,p=farm.plots[id];
  revealLand(s,p);
@@ -306,6 +297,7 @@ export function exploreFarm(s:GameState,id:string,events:GameEvent[]):void{
   p.wild={kind:key,stock:key==='yam'&&c.absoluteDay<expiry?farm.rules.yamYield:0,year:key==='yam'?harvestYear:year,bursts:0,wetDays:0,lastSpawn:-farm.rules.mushroomIntervalDays,expires:key==='yam'?expiry:0};
  }
  farm.explored++;extendFarm(s,p);
+ events.push({type:'story-fact',topic:'place.discovered',subjectId:id,actorId:s.household.activePersonId,values:{discovery:key}});
  events.push({type:'life',personId:s.household.activePersonId,operation:'farm-map',detail:`${id} · ${FARM_EVENTS[key].title}：${FARM_EVENTS[key].text}`});
 }
 export function discoverFarmSeed(s:GameState,events:GameEvent[]):string{
@@ -321,8 +313,9 @@ export function resolveFarmDiscovery(s:GameState,id:string,choice:string,events:
  if(choice==='dredge'&&d.id==='spring'){p.kind='water';outcome='疏浚泉眼，活水长流。此格成为永久水源，不可开垦；可从同高或更低的相邻格修渠引水。';}
  if(choice==='fill'&&d.id==='spring'){p.kind='wild';outcome='填平溪涧，整成普通荒地；不获得水源。';}
  if(choice==='share'){changeGoods(s,{seedWheat:f.rules.discoverySeeds},1,events,'行旅回赠');p.kind='wild';outcome=`分出${f.rules.storyFood}份口粮。旅人讲起沿河选种的见闻，回赠${f.rules.discoverySeeds}份麦种。`;}
- if(choice==='preserve'){p.kind='rock';outcome='记下旧界，保留为地标。此格不再开垦，可继续探索周边。';}
+ if(choice==='preserve'){p.kind='rock';p.landscape={kind:'landmark',level:1,builtBy:s.household.activePersonId,uses:0};outcome='记下旧界，保留为地标。此格不再开垦，可继续探索周边。';}
  if(choice==='leave'){p.kind='wild';if(d.id==='fallow')p.fertility=0;outcome='告别这段见闻，将可耕地记为普通荒地；不获得事件奖励。';}
+ if(d.id==='shrine')events.push({type:'story-fact',topic:choice==='preserve'?'landmark.preserved':'landmark.reclaimed',subjectId:id,actorId:s.household.activePersonId,values:{}});
  d.resolved=true;d.outcome=outcome;
  events.push({type:'life',personId:s.household.activePersonId,operation:'farm-map',detail:`${id} · ${FARM_EVENTS[d.id].title}：${outcome}`});
 }
@@ -373,22 +366,27 @@ export function workFarmProject(s:GameState,id:string,kind:import('../model/econ
  let detail=`${FARM_PROJECT_NAMES[kind]} ${p.project.done}/${p.project.total}天`;
  if(complete){
   if(kind==='canal'||kind==='shelter'||kind==='drain'){
-   p.kind='rock';p.improvement=kind;
+   if(kind==='shelter')p.kind='rock';
+   p.improvement=kind;
    detail+='；'+(kind==='canal'?'沿高程不升的渠链通水，相邻田可开闸灌溉。':kind==='drain'?'有低位出口时，相邻田过湿退档快一天。':'正交四格失水变慢。');
   }
   else if(kind==='yard'||kind==='cellar'||kind==='pit'||kind==='shed'||kind==='retting'){
-   p.kind='rock';p.improvement=kind;
+   p.improvement=kind;
    detail+='；'+({yard:'正交相邻田正常收获期延长7天，仍会绝收。',cellar:'正交相邻田收获额外留种1份，异穗麦额外留1份异穗麦种。',pit:'投料3份秸秆，腐熟转化后得2份堆肥。',shed:'两格内的田播种、浇水、收获的基础时间减半。',retting:'开放沤麻工序：2份亚麻茎跨季沤为1份亚麻纤维。'} as const)[kind];
   }
   else if(kind==='paddy'){if(p.land){p.land.paddy=true;p.land.water=3;p.land.dryDays=0;p.land.wetDays=0;p.land.drainDays=0;}detail+='；田块改为水田，每日保持蓄水，可播种水稻等耐涝作物。';}
   else if(kind==='timber'){changeGoods(s,{wood:farm.rules.timberYield},1,events,'林地采木');p.kind='wild';delete p.project;detail+='；木材入库，留下可开垦荒地。';}
-  else {p.kind='field';p.field={...blankField(),fertility:kind==='restore'?3:2};detail+='；田块可播种。';}
+  else {p.kind='field';p.purpose='sowing';p.field={...blankField(),fertility:kind==='restore'?3:2};detail+='；已整理为播种用途，可到农时安排页分配作物。';}
   if(p.discovery){p.discovery.resolved=true;p.discovery.outcome=detail;}
  }
  events.push({type:'life',personId:s.household.activePersonId,operation:'farm-map',detail:id+' · '+detail});
 }
 
 export function isCanalBuilt(s:GameState):boolean{return Object.values(s.economy?.farm?.plots??{}).some(p=>p.improvement==='canal'&&waterConnected(s,p));}
+
+export function otherFarmUseUnlocked(s:GameState):boolean {
+ return Object.entries(FARM_PROJECT_TECH).some(([kind,technology])=>kind!=='paddy'&&branchHas(s,technology!));
+}
 
 export function startFarmProject(s:GameState,id:string,kind:import('../model/economy.js').FarmProjectKind,total:number,events:GameEvent[]):void {
  const farm=s.economy!.farm!,p=farm.plots[id];

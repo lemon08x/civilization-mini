@@ -81,11 +81,11 @@ async function loadCrops(crops:readonly string[]):Promise<boolean>{
 function loadEnvironment():Promise<boolean>{
  if(environmentReady)return Promise.resolve(false);
  if(environmentLoad)return environmentLoad;
- environmentLoad=Promise.all(['landscape','tree','rock','house','brush'].map(name=>new Promise<boolean>(resolve=>{
+ environmentLoad=Promise.all(['landscape','tree','woodland','rock','house','brush'].map(name=>new Promise<boolean>(resolve=>{
   const image=new Image();
   image.onload=()=>{if(destroyed){resolve(false);return;}environmentImages.set(name,image);resolve(true);};
   image.onerror=()=>resolve(false);
-  image.src=`/illustrations/farm/animation/painted/environment/farm-${name}-qinglu-v1.png`;
+  image.src=`/illustrations/farm/animation/painted/environment/farm-${name}-qinglu-${name==='woodland'?'v2':'v1'}.png`;
  }))).then(results=>{environmentReady=true;return results.some(Boolean);});
  return environmentLoad;
 }
@@ -104,7 +104,7 @@ function texture(key:string,painter:(g:CanvasRenderingContext2D,w:number,h:numbe
 function ellipse(g:CanvasRenderingContext2D,x:number,y:number,rx:number,ry:number,fill:string|CanvasGradient){g.fillStyle=fill;g.beginPath();g.ellipse(x,y,Math.max(.01,rx),Math.max(.01,ry),0,0,Math.PI*2);g.fill();}
 const noise=(n:number)=>{const v=Math.sin(n*127.1+311.7)*43758.5453;return v-Math.floor(v);};
 function polygon(g:CanvasRenderingContext2D,points:number[][],color:string){g.beginPath();points.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.fillStyle=color;g.fill();}
-function landscapeTexture(){const image=environmentImages.get('landscape');if(image)return texture('painted:landscape',(g,w,h)=>g.drawImage(image,0,0,w,h),1000,560);return texture('landscape',(g,w,h)=>{
+function landscapeTexture(){const image=environmentImages.get('landscape');if(image)return texture('painted:landscape',(g,w,h)=>g.drawImage(image,0,0,w,h),1000,Math.round(1000*image.naturalHeight/image.naturalWidth));return texture('landscape',(g,w,h)=>{
  g.fillStyle='#e8ecdf';g.fillRect(0,0,w,h);
  for(let layer=0;layer<3;layer++){
   const points=[[0,h]];for(let x=0;x<=w;x+=20)points.push([x,95+layer*34-Math.sin(x/130+layer)*30-Math.sin(x/67+layer)*13]);points.push([w,h]);
@@ -116,8 +116,13 @@ function landscapeTexture(){const image=environmentImages.get('landscape');if(im
 function mistTexture(){return texture('mist',(g,w,h)=>{g.translate(w/2,h/2);g.scale(1,.55);const fog=g.createRadialGradient(0,0,3,0,0,w*.48);fog.addColorStop(0,'#faf9ecba');fog.addColorStop(.45,'#eff3e5a0');fog.addColorStop(1,'#edf1e000');ellipse(g,0,0,w*.49,w*.49,fog);},160,100);}
 function groundTexture(field:boolean,land?:{soil:string;water:number}|null){
  const soil=land?.soil==='沙质'?1:land?.soil==='黏质'?3:2;
- const frame=land?.water===0?4:land?.water===3?6:land?.water===4?7:field?(soil===2&&land?.water===2?5:soil):0;
- if(landImage){const f=landFrames[frame];return texture('land-qinglu:'+frame,g=>{g.drawImage(landImage!,f.x,f.y,f.w,f.h,21,110,138,77);});}
+ // Moisture variants depict tilled soil; wild land must stay meadow in any weather.
+ const frame=!field?0:land?.water===0?4:land?.water===3?6:land?.water===4?7:soil===2&&land?.water===2?5:soil;
+ if(landImage){const f=landFrames[frame];return texture('land-qinglu:'+frame,g=>{
+  g.save();g.beginPath();g.moveTo(90,110);g.lineTo(159,145);g.lineTo(90,180);g.lineTo(21,145);g.closePath();g.clip();
+  // Remove the illustrated slab side; the surface sits flush with the landscape.
+  g.drawImage(landImage!,f.x,f.y,f.w,f.h*.91,21,110,138,70);g.restore();
+ });}
  return texture(field?'soil':'grass',(g)=>{
  const points=[[90,110],[159,145],[90,180],[21,145]];polygon(g,points,field?'#b6aa80':'#b6c59c');
  g.save();g.beginPath();points.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.clip();
@@ -138,7 +143,20 @@ function houseTexture(){return paintedProp('house',152,128)??texture('home',g=>{
  stroke(g,[[61,149],[94,166],[124,153]],'#979778',2);
  });}
 function stroke(g:CanvasRenderingContext2D,pts:number[][],color:string,width=1){g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.strokeStyle=color;g.lineWidth=width;g.lineCap='round';g.stroke();}
-function treeTexture(){return paintedProp('tree',106,112)??texture('tree',(g)=>{ellipse(g,86,159,32,11,'#46643b24');stroke(g,[[86,153],[88,68]],'#7a7652',7);stroke(g,[[87,122],[67,87]],'#7a7652',4);const blobs:[number,number,number,number,string][]=[[64,96,29,28,'#58776bb5'],[106,100,27,29,'#6c8c77b8'],[82,73,34,35,'#779984c4'],[71,68,22,24,'#9db395bd'],[102,80,20,25,'#819e89bf']];for(const b of blobs)ellipse(g,...b);for(let i=0;i<26;i++){let x=57+(i*17%58),y=55+(i*13%56);ellipse(g,x,y,2+(i%3),1.5,'#b9c78c50');}});}
+function treeTexture(woodland=false){
+ const image=environmentImages.get(woodland?'woodland':'tree')??environmentImages.get('tree');
+ if(image)return texture('painted:rooted-'+(woodland?'woodland':'tree'),g=>{
+  // Size the tree by visible ink, not the large transparent margins in its source.
+  const c=document.createElement('canvas');c.width=image.naturalWidth;c.height=image.naturalHeight;
+  const ctx=c.getContext('2d')!;ctx.drawImage(image,0,0);const pixels=ctx.getImageData(0,0,c.width,c.height).data;
+  let left=c.width,top=c.height,right=-1,bottom=-1;
+  for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++)if(pixels[(y*c.width+x)*4+3]>32){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
+  if(right<left)return;
+  const w=right-left+1,h=bottom-top+1,scale=Math.min((woodland?150:116)/w,140/h);
+  g.drawImage(image,left,top,w,h,90-w*scale/2,160-h*scale,w*scale,h*scale);
+ });
+ return texture('tree',(g)=>{ellipse(g,86,159,32,11,'#46643b24');stroke(g,[[86,153],[88,68]],'#7a7652',7);stroke(g,[[87,122],[67,87]],'#7a7652',4);const blobs:[number,number,number,number,string][]=[[64,96,29,28,'#58776bb5'],[106,100,27,29,'#6c8c77b8'],[82,73,34,35,'#779984c4'],[71,68,22,24,'#9db395bd'],[102,80,20,25,'#819e89bf']];for(const b of blobs)ellipse(g,...b);for(let i=0;i<26;i++){let x=57+(i*17%58),y=55+(i*13%56);ellipse(g,x,y,2+(i%3),1.5,'#b9c78c50');}});
+}
 function rockTexture(){return paintedProp('rock',105,58)??texture('rock',g=>{polygon(g,[[40,158],[51,136],[86,124],[112,137],[128,158]],'#8a9184');polygon(g,[[51,136],[86,124],[95,146],[66,150]],'#b1b29b');});}
 function brushTexture(){return paintedProp('brush',106,65)??texture('brush',g=>{for(let k=0;k<7;k++){const x=48+k*14;stroke(g,[[x,164],[x-8,118+k%3*5]],'#71854c',3);stroke(g,[[x,164],[x+10,126+k%2*8]],'#8da05c',3);}});}
 // 新作物复用相近形态的程序绘制，不重绘素材：小豆按豆科结荚（同大豆），水稻/粟按禾谷收穗，

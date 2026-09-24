@@ -16,7 +16,7 @@ export function industryActions(s:GameState):ActionDefinition[]{
    ...(equipment&&installedIn(s,p.id)?['先拆出已安装产品再检验']:[]),
    ...(['W03','E01'].includes(p.id)&&s.location.water<1?['试验需要1公共水']:[]),
    ...(p.id==='W03'?missingGoods(s,{wood:1}):[]),
-  ],'检验占用时间精力；部件消耗一件样品，设备消耗1耐用。泵/发电机额外用1水试运行，泵另耗1木材。只记录产品验证，不赠送制造规程。',(d,ev)=>{
+  ],'检验占用时间压力；部件消耗一件样品，设备消耗1耐用。泵/发电机额外用1水试运行，泵另耗1木材。只记录产品验证，不赠送制造规程。',(d,ev)=>{
    if(equipment)consumeEquipment(d,p.id,ev);else changeGoods(d,{[p.good!]:1},-1,ev,'检验样品');
    if(['W03','E01'].includes(p.id))d.location.water--;
    if(p.id==='W03')changeGoods(d,{wood:1},-1,ev,'试抽耗材');
@@ -29,13 +29,13 @@ export function industryActions(s:GameState):ActionDefinition[]{
    ...systemUnlockNeeds(s,def),...(def.id==='well'?missingGoods(s,{wood:4,clay:2}):[]),...(i?['已建此系统']:[]),
    ...(def.equipment&&!equipped(s,def.equipment)?['需可用'+productName(def.equipment)]:[]),
    ...(def.equipment&&installedIn(s,def.equipment)?['设备已安装在系统中']:[]),
-  ],def.id==='well'?'挖井耗4木材、2黏土、6时间、4精力；建成后实际试抽并安排人员。':'投入安装时间；占用已有实物设备，不凭空赠送设备。建成后需本人调试，随后安排操作人员。',(d,ev)=>{
+  ],def.id==='well'?'挖井耗4木材、2黏土、6时间、4压力；建成后实际试抽并安排人员。':'投入安装时间；占用已有实物设备，不凭空赠送设备。建成后需本人调试，随后安排操作人员。',(d,ev)=>{
    if(def.id==='well')changeGoods(d,{wood:4,clay:2},-1,ev,'家庭水井建设');
    d.economy!.industry!.instances[def.id]={id:def.id,commissioned:false,enabled:false,operator:null};industryEvent(ev,'built',def.id,'self',def.name+'已安装，等待调试');
   }));
   result.push(defineAction(s,'economy:syscommission:'+def.id,'调试：'+def.name,'系统',{time:def.time,energy:def.energy},[
    ...(!i?['先建设系统']:[]),...(i?.commissioned?['已经调试完成']:[]),...systemUnlockNeeds(s,def),...physicalNeeds(s,def),
-  ],'本人按一批任务报价完成实际调试。供水进行试抽；加工产出真实轴。耗材、设备和时间精力均扣一次，不重复收费。',(d,ev)=>{
+  ],'本人按一批任务报价完成实际调试。供水进行试抽；加工产出真实轴。耗材、设备和时间压力均扣一次，不重复收费。',(d,ev)=>{
    changeGoods(d,systemInputs(def),-1,ev,'系统调试投入');
    if(def.equipment){consumeEquipment(d,def.equipment,ev);d.economy!.equipmentUsed[def.equipment]=d.clock.absoluteTurn;}
    if(def.id==='shaft'){changeGoods(d,{shaft:2},1,ev,'调试合格产出');if(d.era)ev.push({type:'economy-process',recipe:'shaft',actor:'调试：本人',stage:'complete',factor:1});}else if(def.id==='well')d.era!.groundwater--;else d.location.water--;

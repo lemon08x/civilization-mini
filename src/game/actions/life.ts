@@ -1,9 +1,12 @@
+import {LANDSCAPE_INPUTS} from '../systems/economy-catalog.js';
+import {landscapeSource} from '../systems/landscapes.js';
 import {calendarView,availableDays} from '../systems/calendar.js';
 import {eraCard} from '../systems/eras.js';
 import { activePerson, blankPerson, heir, type GameState } from '../model/state.js';
 import { branchNodesFor } from '../model/branches.js';
 import { branchName, branchNeeds } from '../systems/branches.js';
-import { recordLifeGeneration, hasTalent, canSucceed, consultableNodes, energyCeiling, healthCeiling, lifeEvent, livingElders, makeVitality, namePerson, initializeCharacter, characterMemory, gainPractice, sectStage, sectStrength, sectDrawOdds, SECT_CARDS, draw } from '../systems/life.js';
+import { recordLifeGeneration, relaxationRate, hasTalent, canSucceed, consultableNodes,  healthCeiling, lifeEvent, livingElders, makeVitality, namePerson, initializeCharacter, characterMemory, initialCultivation, cultivationKnown, cultivationMissing, cultivationQuote, completeCultivationStudy, maintainCultivation } from '../systems/life.js';
+import { CULTIVATION_COURSES } from '../model/life.js';
 import { defineAction, type ActionDefinition } from './definition.js';
 
 export function lifeActions(s:GameState):ActionDefinition[] {
@@ -11,14 +14,13 @@ export function lifeActions(s:GameState):ActionDefinition[] {
   const v=activePerson(s).vitality!,r=s.life.rules;
   const nextDate=s.life.calendar?calendarView(s).nextTerm:undefined;
   const actions:ActionDefinition[]=[
-    ...(nextDate?[defineAction(s,'economy:wait:calendar','休整至'+nextDate.name,'日历',{ap:0,time:Math.min(nextDate.days,availableDays(s)),energy:0},[],`前往${nextDate.date}，最多${nextDate.days}天；按日恢复精力和消耗食物；节气会触发随机见闻，其他行动经过同一天也会触发。作物成熟、缺粮、节气或节日时会停下。`,()=>{})]:[]),
-    ...(s.life.calendar?(['simple','hearty'] as const).map(mode=>defineAction(s,'economy:diet:'+mode,mode==='simple'?'采用简单饮食':'采用丰足饮食','饮食',{ap:0,time:0,energy:0},s.life!.calendar!.diet===mode?['当前安排']:[],mode==='simple'?'每日现做现吃；有食材和柴火就做饭，否则吃库存干粮。':'每日食材消耗增加50%，饱食时额外恢复精力；不需要每天点击做饭。',(d)=>{d.life!.calendar!.diet=mode;})):[]),
-    ...(s.life.calendar?[0.5,7].map(days=>defineAction(s,'economy:wait:'+(days===0.5?'half':'week'),days===0.5?'休息半天':'休整7天','日历',{ap:0,time:Math.min(days,availableDays(s)),energy:0},[],'推进日历，按日恢复、进食、作物生长。成熟、缺粮、节气或节日时提前停下。',()=>{})):[]),
+    ...(nextDate?[defineAction(s,'economy:wait:calendar','休养至'+nextDate.name,'日历',{ap:0,time:Math.min(nextDate.days,availableDays(s)),energy:0},v.pressure<=0?['压力已为0']:[],`前往${nextDate.date}，最多${nextDate.days}天；主动休养降低压力并消耗食物；节气会触发随机见闻，其他行动经过同一天也会触发。压力归零、作物成熟、缺粮、节气或节日时会停下。`,()=>{})]:[]),
+    ...(s.life.calendar?(['simple','hearty'] as const).map(mode=>defineAction(s,'economy:diet:'+mode,mode==='simple'?'采用简单饮食':'采用丰足饮食','饮食',{ap:0,time:0,energy:0},s.life!.calendar!.diet===mode?['当前安排']:[],mode==='simple'?'每日现做现吃；有食材和柴火就做饭，否则吃库存干粮。':'每日食材消耗增加50%，主动放松时额外降低压力；不需要每天点击做饭。',(d)=>{d.life!.calendar!.diet=mode;})):[]),
+    ...(s.life.calendar?[0.5,7].map(days=>defineAction(s,'economy:wait:'+(days===0.5?'half':'week'),days===0.5?'放松半日':'休养数日','日历',{ap:0,time:Math.min(days,availableDays(s)),energy:0},v.pressure<=0?['压力已为0']:[],`主动放松，每天降低${relaxationRate(s)}压力，预计最多降低${Math.min(v.pressure,days*relaxationRate(s))}；压力归零、成熟、缺粮、节气或节日时提前停下。`,()=>{})):[]),
 
-    defineAction(s,'economy:rest:self','休息','身体',{},v.energy>=energyCeiling(v)?['精力已满']:[],`休息半天恢复${r.restRecovery+(hasTalent(v,'resilient')?1:0)}精力，不超过健康决定的上限。`,(d,ev)=>{
-      const x=activePerson(d).vitality!,before=x.energy;x.energy=Math.min(energyCeiling(x),x.energy+r.restRecovery+(hasTalent(x,'resilient')?1:0));lifeEvent(ev,d.household.activePersonId,'rest',`休息恢复${x.energy-before}精力`);
-    }),
-    defineAction(s,'economy:care:self','营养疗养','身体',{money:Math.max(0,(s.life.renewal?.careMoney??2)-(eraCard(s)?.care??0))},v.health>=healthCeiling(v,r)?['健康已达到当前年龄上限']:[],`投入调养时间、${s.life.renewal?.careEnergy??1}精力、${Math.max(0,(s.life.renewal?.careMoney??2)-(eraCard(s)?.care??0))}钱购买营养照护，恢复${r.careRecovery}健康；不能逆转衰老。`,(d,ev)=>{
+    ...(['landmark','tea'] as const).flatMap(kind=>{const source=landscapeSource(s,kind);return source?[defineAction(s,'economy:rest:'+kind,kind==='tea'?'品茶半日':'凭栏散心','身体',{time:0.5,energy:0,food:kind==='tea'?LANDSCAPE_INPUTS.tea.food:0},v.pressure<=0?['压力已为0']:[],`由${source.id}景观解锁，在此直接使用。半日基础减压${relaxationRate(s,kind)/2}；实际按经过时间结算，最低为0。`,()=>{})]:[];}),
+    defineAction(s,'economy:rest:self','放松半日','身体',{time:0.5,energy:0},v.pressure<=0?['压力已为0']:[],`花半天放松，基础降低${r.restRecovery+(hasTalent(v,'resilient')?1:0)}压力；压力最低为0。`,()=>{}),
+    defineAction(s,'economy:care:self','营养疗养','身体',{money:Math.max(0,(s.life.renewal?.careMoney??2)-(eraCard(s)?.care??0))},v.health>=healthCeiling(v,r)?['健康已达到当前年龄上限']:[],`投入调养时间、${s.life.renewal?.careEnergy??1}压力、${Math.max(0,(s.life.renewal?.careMoney??2)-(eraCard(s)?.care??0))}钱购买营养照护，恢复${r.careRecovery}健康；不能逆转衰老。`,(d,ev)=>{
       const x=activePerson(d).vitality!,before=x.health;x.health=Math.min(healthCeiling(x,r),x.health+r.careRecovery);lifeEvent(ev,d.household.activePersonId,'care',`疗养恢复${x.health-before}健康`);
     }),
   ];
@@ -40,7 +42,7 @@ export function lifeActions(s:GameState):ActionDefinition[] {
     ...(cv&&!cv.alive?['后辈已故']:[]),
     ...(cv?.alive&&cv.ageSeasons>=r.adultYears*4?['后辈已成年，养育已在成年时结算']:[]),
     ...(s.life.seasonCompany?['本季已陪伴过后辈']:[]),
-  ],`用${s.life.renewal?.companyTime??2}时间、${s.life.renewal?.companyEnergy??1}精力陪伴后辈。季末连同饱食、受教一起记入养育；后辈成年时按养育记录结算体质加成，出生天赋终身保留。`,(d,ev)=>{
+  ],`用${s.life.renewal?.companyTime??2}时间、${s.life.renewal?.companyEnergy??1}压力陪伴后辈。季末连同饱食、受教一起记入养育；后辈成年时按养育记录结算体质加成，出生天赋终身保留。`,(d,ev)=>{
     d.life!.seasonCompany=true;lifeEvent(ev,d.household.heirId,'company','本季陪伴了成长中的后辈');
   }));
   for(const elder of livingElders(s)){
@@ -58,7 +60,7 @@ export function lifeActions(s:GameState):ActionDefinition[] {
   actions.push(defineAction(s,'economy:retire:family','准备交接','身体',{ap:0},[
     ...(!canSucceed(s)?[s.sect?'自己的弟子须存活并成年':s.household.heirId===s.household.activePersonId?'尚无后辈':`后辈须存活并满${r.adultYears}岁，当前${Math.floor(heir(s).vitality!.ageSeasons/4)}岁`]:[]),
     ...(s.life.pendingRetirement?['已安排本季交接']:[]),
-  ],'现在进入交接，不额外推进日历。自己的成年弟子接手，同门不参与交接，个人修为与所学各自独立；门派道法、规程、气运与资产延续。',(d,ev)=>{if(d.life?.calendar){d.status='handover';recordLifeGeneration(d,ev);}else d.life!.pendingRetirement=true;lifeEvent(ev,d.household.activePersonId,'retire','已准备交接');}));
+  ],'现在进入交接，不额外推进日历。自己的成年弟子接手，同门不参与交接，个人修为与所学各自独立；门派、规程、计划与资产延续，修行课程和功课状态属于各人。',(d,ev)=>{if(d.life?.calendar){d.status='handover';recordLifeGeneration(d,ev);}else d.life!.pendingRetirement=true;lifeEvent(ev,d.household.activePersonId,'retire','已准备交接');}));
   return s.sect?[...actions.filter(a=>a.offer.id!=='economy:company:heir'),...sectActions(s)]:actions;
 }
 
@@ -67,12 +69,12 @@ function sectActions(s:GameState):ActionDefinition[]{
   const say=(d:GameState,ev:import('../model/events.js').GameEvent[],detail:string)=>lifeEvent(ev,d.household.activePersonId,'sect',detail);
   out.push(defineAction(s,'economy:sectseek:disciple','寻访弟子','师徒',{time:2,energy:1},[
     ...(m.discipleId?['每位师父只收一名正式弟子']:[]),...(m.candidateId?['已经找到候选人，资质固定']:[]),
-  ],`寻访一位${r.candidateAge}岁候选人；独立于婚育。修道只小幅改善候选体质机会，资质生成后不重抽。`,(d,ev)=>{
+  ],`寻访一位${r.candidateAge}岁候选人；独立于婚育。资质生成后固定，不随修行或刷新重抽。`,(d,ev)=>{
     const q=d.sect!,master=q.members[id],pid=`person:${Object.keys(d.persons).length+1}`,p=blankPerson(pid,'候选弟子');
-    p.vitality=makeVitality(d,d.life!.rules,r.candidateAge);if(d.life!.renewal)p.vitality.minimumEnergy=d.life!.renewal.minimumEnergy;
-    if(draw(d)<sectStrength(d)*0.1)p.vitality.constitution++;
+    p.vitality=makeVitality(d,d.life!.rules,r.candidateAge);
+
     d.persons[pid]=p;namePerson(d,p);initializeCharacter(d,p);master.candidateId=pid;
-    q.members[pid]={generation:master.generation+1,masterId:id,discipleId:null,candidateId:null,admitted:false,practice:0,rewardedStage:0,time:d.life!.rules.timePerSeason,consulted:[]};
+    q.members[pid]={generation:master.generation+1,masterId:id,discipleId:null,candidateId:null,admitted:false,practice:0,rewardedStage:0,time:d.life!.rules.timePerSeason,consulted:[],cultivation:initialCultivation()};
     say(d,ev,`寻得${p.name}，${r.candidateAge}岁；入门须从零修道`);
   }));
   out.push(defineAction(s,'economy:sectadmit:disciple','正式收徒','师徒',{time:2,energy:1,money:r.recruitMoney},[
@@ -84,32 +86,31 @@ function sectActions(s:GameState):ActionDefinition[]{
     characterMemory(d,pid,'admitted',`拜${d.persons[id].name}为师，从今日开始修道习术。`,'对新的师承心怀期待，也还惦念原来的生活。',ev);
     d.economy!.branches!.learned[pid]=[];say(d,ev,`${d.persons[pid].name}正式入门，师父${d.persons[id].name}`);
   }));
-  out.push(defineAction(s,'economy:sectpractice:dao','静心修道','道',{time:r.practiceTime,energy:r.practiceEnergy},sectStage(s)>=r.maxStage?['个人修为已至当前上限']:[],`修为+${r.practiceGain}；每${r.stageProgress}进度一境。每境首次衍生${r.fortunePerStage}气运，最多储备${r.fortuneCap}。道改善其他行动效率。`,(d,ev)=>gainPractice(d,id,r.practiceGain,ev)));
-  const disciple=m.discipleId,student=disciple?x.members[disciple]:null;
-  out.push(defineAction(s,'economy:sectteach:dao','授徒修道','道',{time:2,energy:1},[
-    ...(!disciple?['先正式收徒']:[]),...(disciple&&!s.persons[disciple].vitality?.alive?['弟子已故']:[]),
-    ...(student&&student.practice>=m.practice?['师父修为须高于弟子']:[]),...(student&&student.time<2?['弟子本季学习时间不足']:[]),
-    ...(disciple&&s.persons[disciple].vitality!.energy<1?['弟子精力不足']:[]),
-  ],'师徒双方投入：弟子耗2时间、1精力，修为最多+2且不超过师父；有效授业同时令师父修为+1，作为兼顾成长与善行的收获。',(d,ev)=>{
-    const st=d.sect!.members[disciple!];st.time-=2;d.persons[disciple!].vitality!.energy-=1;
-    gainPractice(d,disciple!,Math.min(2,m.practice-st.practice),ev);gainPractice(d,id,1,ev);
-  }));
-  const learned=s.economy!.branches!.learned[id]??[],needed=r.doctrineCourses*(x.doctrine+1);
-  out.push(defineAction(s,'economy:sectimprove:dao','研证本门心法','道',{time:r.practiceTime,energy:r.practiceEnergy,money:r.doctrineMoney},[
-    ...(sectStage(s)<r.maxStage?['须达到个人修为上限']:[]),...(x.doctrine>=r.doctrineMax?['本门道法改进已达上限']:[]),
-    ...(learned.length<needed?[`须亲自掌握${needed}门术，当前${learned.length}`]:[]),
-    ...(new Set(learned.map(k=>k[0])).size<3?['须至少涉猎三个学科分支']:[]),
-      ...(s.persons[id].practices.filter(v=>v.startsWith('dao:')).length<2?['须亲自完成耕作、生产、授术中至少两类实践']:[]),
-  ],`实际验证${r.doctrineSteps}次才能永久改进一级心法，每步支付资源。当前${x.research}/${r.doctrineSteps}；新人仍从零修行。`,(d,ev)=>{
-    const q=d.sect!;q.research++;if(q.research>=r.doctrineSteps){q.research=0;q.doctrine++;q.improvements.push({level:q.doctrine,personId:id,courses:[...learned]});say(d,ev,`本门心法永久提升至${q.doctrine}级，后世须亲自修习以发挥效果`);}else say(d,ev,`心法验证${q.research}/${r.doctrineSteps}`);
-  }));
-  const odds=sectDrawOdds(s);
-  out.push(defineAction(s,'economy:sectdraw:opportunity','求取辅助机缘','机缘',{time:1,energy:0},x.fortune<r.drawCost?[`需${r.drawCost}衍生气运，当前${x.fortune}`]:[],
-    `消耗${r.drawCost}气运；基础/进阶/稀有概率${odds.map(v=>(v*100).toFixed(2)+'%').join('/')}，按扣费前计算。只获辅助卡，不改变修为，不抽卡也可完成使命。`,(d,ev)=>{
-      const q=d.sect!,p=sectDrawOdds(d),roll=draw(d),rank=roll<p[0]?1:roll<p[0]+p[1]?2:3;
-      q.fortune-=r.drawCost;const keys=Object.keys(SECT_CARDS) as (keyof typeof SECT_CARDS)[],key=keys[Math.floor(draw(d)*keys.length)];
-      const old=q.cards[key];q.cards[key]=Math.min(r.cardMax,old+rank);const extra=Math.max(0,old+rank-r.cardMax);d.household.food+=extra;
-      q.draws++;q.lastDraw=`${SECT_CARDS[key]}：${old}→${q.cards[key]}级${extra?`，溢出转${extra}粮`:''}；气运余${q.fortune}`;say(d,ev,q.lastDraw);
-    }));
+  const daily=defineAction(s,'economy:sectdaily:practice','温习日课','修行',{time:r.dailyTime*(s.life?.calendar?.rules.actionDaysPerUnit??1),energy:0},[
+    ...(!cultivationKnown(s,'C0')?['先修成入门课「修身」']:[]),
+    ...(m.cultivation.upkeep>=r.upkeepMax?['功课状态已充足']:[]),
+  ],`调息、导引与温习；完成后补充${r.upkeepGain}天功课，最多储备${r.upkeepMax}天。课程效果待定，当前不增加全局加成。`,(d,ev)=>maintainCultivation(d,id,ev));
+  daily.deferred=true;out.push(daily);
+  for(const course of CULTIVATION_COURSES){
+    const quote=cultivationQuote(s,course),known=cultivationKnown(s,course.id);
+    const learn=defineAction(s,'economy:sectlearn:'+course.id,'精修 · '+course.name,'修行',{time:quote.time,energy:quote.energy},[
+      ...cultivationMissing(s,course),...(known?['此课已修成']:[]),...(quote.time<=0?['没有可投入的时间或口粮']:[]),
+    ],`${course.summary} 本次进度+${Number(quote.progress.toFixed(3))}，当前${Number(quote.done.toFixed(3))}/${quote.total}；进度可接续，完成本次修习也温养功课。效果待定，不发放旧境界或机缘奖励。`,(d,ev)=>completeCultivationStudy(d,id,course,quote.progress,ev));
+    learn.deferred=true;out.push(learn);
+    const disciple=m.discipleId,student=disciple?x.members[disciple]:null;
+    const lesson=cultivationQuote(s,course,disciple??id);
+    const teach=defineAction(s,'economy:sectteach:'+course.id,'传授 · '+course.name,'师徒',{time:lesson.time,energy:lesson.energy},[
+      ...(!disciple?['尚未正式收徒']:[]),...(!known?['师父须先修成此课']:[]),
+      ...(disciple&&!s.persons[disciple]?.vitality?.alive?['弟子已故']:[]),
+      ...(disciple?cultivationMissing(s,course,disciple):[]),
+      ...(disciple&&cultivationKnown(s,course.id,disciple)?['弟子已经修成此课']:[]),
+      ...(student&&student.time<lesson.time?['弟子本轮学习时间不足']:[]),...(lesson.time<=0?['没有可投入的时间或口粮']:[]),
+    ],`师徒共同修习，双方各占${lesson.time}天、增加${lesson.energy}压力；弟子进度+${Number(lesson.progress.toFixed(3))}，不会直接复制师父所学。`,(d,ev)=>{
+      if(d.persons[disciple!]?.vitality?.alive)completeCultivationStudy(d,disciple!,course,lesson.progress,ev);
+    });
+    teach.deferred=true;
+    teach.prepare=(d)=>{d.sect!.members[disciple!].time-=lesson.time;d.persons[disciple!].vitality!.pressure+=lesson.energy;};
+    out.push(teach);
+  }
   return out;
 }

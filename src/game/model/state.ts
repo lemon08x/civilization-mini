@@ -31,6 +31,7 @@ export interface TrialProject {
   samples: TrialSample[];
 }
 export interface GameState {
+  story?:import('../narrative/index.js').StoryState;
   electric?: {rules:import('./electric.js').ElectricRules};
   sect?: import('./life.js').SectState;
   schemaVersion: 1;

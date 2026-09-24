@@ -1,4 +1,4 @@
-import {draw,energyCeiling} from './life.js';
+import {draw} from './life.js';
 import {activePerson} from '../model/state.js';
 import {changeGoods} from './inventory.js';
 import type {GameEvent} from '../model/events.js';
@@ -131,28 +131,28 @@ export function calendarView(s: GameState) {
 // Every solar term has its own rural vignette. Only the resolved outcome is public.
 const TERM_EVENTS:Record<string,[string,string,string,string]>={
   立春:['春土初醒','邻里分赠留存的春播麦种。','seedWheat','翻检旧种时发现受潮，费力整理种袋。'],
-  雨水:['润土寻肥','沟边积下松软腐叶，收作堆肥。','compost','整理旧农具棚与清扫沟口，忙碌消耗了精力。'],
+  雨水:['润土寻肥','沟边积下松软腐叶，收作堆肥。','compost','整理旧农具棚与清扫沟口，忙碌消耗了压力。'],
   惊蛰:['虫醒巡田','巡田时收拢越冬枯枝，可供灶火。','wood','新醒的虫蚁扰动苗床，巡护耗了精神。'],
   春分:['分种春耕','同门送来一小袋挑好的麦种。','seedWheat','春耕路上泥泞难行，搬运格外疲惫。'],
   清明:['踏青拾薪','踏青归来捡得干燥落枝。','wood','田埂草盛，顺路清理花了力气。'],
-  谷雨:['谷雨养地','收集沟边腐殖土，留作肥料。','compost','沟口淤堵，临时清理耗费精力。'],
+  谷雨:['谷雨养地','收集沟边腐殖土，留作肥料。','compost','沟口淤堵，临时清理增加压力。'],
   立夏:['夏苗初盛','同门整理旧仓，分赠一份余粮。','wheat','初夏杂草旺长，巡视清理颇费精神。'],
-  小满:['田间看穗','老农分赠一份去年精选的麦种。','seedWheat','田边虫情增多，仔细查苗耗费精力。'],
+  小满:['田间看穗','老农分赠一份去年精选的麦种。','seedWheat','田边虫情增多，仔细查苗增加压力。'],
   芒种:['忙里互助','帮邻里归整晒场，获赠储粮。','wheat','农忙时节来回奔走，身体疲惫。'],
   夏至:['树荫歇脚','树荫下喝茶歇脚，精神恢复。','energy','日长炎热，户外巡视让人疲惫。'],
-  小暑:['暑日柴棚','整理柴棚收拢散落干柴。','wood','暑热难耐，照看田地耗费精力。'],
+  小暑:['暑日柴棚','整理柴棚收拢散落干柴。','wood','暑热难耐，照看田地增加压力。'],
   大暑:['雨后归肥','整理沟边积存的腐叶，收作堆肥。','compost','修整遮雨棚、搬运物资，忙到疲惫。'],
   立秋:['秋播留种','同门分赠秋播麦种。','seedWheat','更换农具和翻检种袋，忙碌耗神。'],
-  处暑:['暑退归仓','整理旧粮仓找回一份可用储粮。','wheat','旧仓角落漏雨，临时修缮耗费精力。'],
+  处暑:['暑退归仓','整理旧粮仓找回一份可用储粮。','wheat','旧仓角落漏雨，临时修缮增加压力。'],
   白露:['晨露巡埂','田边拾得落枝，晾作柴火。','wood','晨露打湿衣物，巡田归来疲倦。'],
-  秋分:['秋日馈赠','同门送来一份秋粮。','wheat','秋收路上帮忙搬运，精力有所消耗。'],
+  秋分:['秋日馈赠','同门送来一份秋粮。','wheat','秋收路上帮忙搬运，压力有所消耗。'],
   寒露:['积叶养土','收集落叶腐土作肥。','compost','冷露湿滑，照看田埂格外费力。'],
   霜降:['霜前备柴','捡拾干枯枝条，添置冬柴。','wood','赶在霜前整理农具，忙到疲惫。'],
-  立冬:['收工具冬藏','归拢田边木料，带回柴棚。','wood','冬藏整理忙碌，耗费精力。'],
-  小雪:['围炉叙话','围炉暖身，恢复精神。','energy','寒风来袭，巡查农舍耗费精力。'],
+  立冬:['收工具冬藏','归拢田边木料，带回柴棚。','wood','冬藏整理忙碌，增加压力。'],
+  小雪:['围炉叙话','围炉暖身，恢复精神。','energy','寒风来袭，巡查农舍增加压力。'],
   大雪:['雪前送薪','同门送来一份备冬干柴。','wood','风雪前加固遮棚，身体疲惫。'],
-  冬至:['冬至分粮','同门送来一份冬粮。','wheat','冬日奔走置办物资，精力有所消耗。'],
-  小寒:['寒日养息','暖屋小坐，精神恢复。','energy','寒意侵人，搬柴护屋耗费精力。'],
+  冬至:['冬至分粮','同门送来一份冬粮。','wheat','冬日奔走置办物资，压力有所消耗。'],
+  小寒:['寒日养息','暖屋小坐，精神恢复。','energy','寒意侵人，搬柴护屋增加压力。'],
   大寒:['岁末备种','整理种箱，收得一份完好的麦种。','seedWheat','岁末清扫与检修，忙碌耗神。'],
 };
 export function settleTermEvent(s:GameState,events:GameEvent[]):void {
@@ -163,7 +163,7 @@ export function settleTermEvent(s:GameState,events:GameEvent[]):void {
  const positive=draw(s)*100<c.rules.termGoodPercent;
  let effect='',text=positive?good:bad;const v=activePerson(s).vitality!;
  if(positive&&item!=='energy'){changeGoods(s,{[item]:c.rules.termGoods},1,events,'节气见闻');effect=({wood:'木材',wheat:'小麦',compost:'堆肥',seedWheat:'麦种'} as Record<string,string>)[item]+' +'+c.rules.termGoods;}
- else {const before=v.energy;v.energy=positive?Math.min(energyCeiling(v),v.energy+c.rules.termEnergy):Math.max(0,v.energy-c.rules.termEnergy);const delta=Math.round((v.energy-before)*100)/100;effect=delta===0?(positive?'精力已满':'精力已耗尽'):'精力 '+(delta>0?'+':'')+delta;}
+ else {const before=v.pressure;v.pressure=positive?Math.max(0,v.pressure-c.rules.termEnergy):v.pressure+c.rules.termEnergy;const delta=Math.round((v.pressure-before)*100)/100;effect=delta===0?'压力未变':'压力 '+(delta>0?'+':'')+delta;}
  const result={day,date:date.date,term:date.solarTerm,title,text,effect,positive};
  c.termEvents=[...c.termEvents,result].slice(-6);
  events.push({type:'life',personId:s.household.activePersonId,operation:'solar-term',detail:`${date.solarTerm} · ${title}：${text} ${effect}`});

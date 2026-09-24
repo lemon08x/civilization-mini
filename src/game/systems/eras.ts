@@ -95,8 +95,8 @@ export function runnableSystems(s:GameState):Set<string>{
   const inst=x.instances[id];if(!inst?.commissioned)continue;
   const operator=inst.enabled&&inst.operator?inst.operator:!inst.operator?'self':null;
   if(!operator)continue;
-  const labor=systemLabor(s,id),b=budgets[operator];if(!b||b.time<labor.time||b.energy<labor.energy)continue;
-  b.time-=labor.time;b.energy-=labor.energy;run.add(id);
+  const labor=systemLabor(s,id),b=budgets[operator];if(!b||b.time<labor.time)continue;
+  b.time-=labor.time;b.energy+=labor.energy;run.add(id);
  }
  return run;
 }

@@ -1,3 +1,4 @@
+import {validNarrative} from '../game/systems/narrative-adapter.js';
 import type {GameState} from '../game/model/state.js';
 import {cropBatches} from '../game/systems/farm-calendar.js';
 import {seasonAt} from '../game/systems/calendar.js';
@@ -9,6 +10,7 @@ import { parseActionId } from '../game/model/action.js';
 import { deepFreeze, isRecord, validateRuleset } from '../game/ruleset.js';
 import type { Ruleset } from '../game/ruleset.js';
 import { CRISES } from '../game/model/eras.js';
+import { CULTIVATION_COURSES } from '../game/model/life.js';
 import { canonical } from './records.js';
 import type { Command, RunRecord, Session } from './records.js';
 
@@ -55,6 +57,7 @@ export function parseSession(value: unknown): Session {
   const record = value.record as unknown as RunRecord;
   if (record.format !== 'civilization-mini-run' || record.formatVersion !== 3 || !isRecord(record.manifest) || !Array.isArray(record.entries)) throw new Error('存档格式无效，原文件应保留');
   validateRunId(record.manifest.runId);
+  if(!isRecord(value.state.sect)||value.state.sect.curriculumVersion!==1)throw new Error('此存档使用旧修为境界，请新开修行课程树游戏；原存档保留，不自动迁移。');
   validateRuleset(record.manifest.ruleset);
   // Current save shape is deliberately not migrated: preserve incompatible files.
   const sect=value.state.sect,persons=value.state.persons;
@@ -66,7 +69,7 @@ export function parseSession(value: unknown): Session {
   const q=sect as Record<string,any>,people=persons as Record<string,any>;
   const economy=value.state.economy;
   const recordShape=(v:unknown):boolean=>isRecord(v);
-  const farmInvalid=()=>{throw new Error('存档缺少有效农时、地块或独立同门数据，请新开游戏；原存档不修改。');};
+  const farmInvalid=()=>{throw new Error('存档缺少有效农时、土地用途、地块或独立同门数据，请新开游戏；原存档不修改。');};
   if(!isRecord(economy)||!isRecord(economy.farm))farmInvalid();
   const farm=(economy as Record<string,any>).farm;
   const validField=(f:unknown)=>isRecord(f)&&[null,...Object.keys(CROPS)].includes(f.crop as null|string)&&[null,...Object.keys(CROPS)].includes(f.lastCrop as null|string)&&['planted','moisture','growth','stress','fertility','tended','bonus','duration'].every(k=>finite(f[k]))&&Number(f.fertility)<=3&&Number(f.duration)>=1&&typeof f.composted==='boolean'&&(f.variety===undefined||f.variety==='heritage'&&f.crop==='wheat');
@@ -76,6 +79,7 @@ export function parseSession(value: unknown): Session {
   for(const [id,raw] of Object.entries(farm.plots)){
     if(!isRecord(raw)||raw.id!==id||!Number.isSafeInteger(raw.x)||!Number.isSafeInteger(raw.y)||Number(raw.x)<0||Number(raw.y)<0||id!==`p${raw.x}q${raw.y}`||!['unknown','wild','field','tree','rock','brush','story','water'].includes(String(raw.kind)))farmInvalid();
     const p=raw as Record<string,any>;
+    if(p.kind==='field'?!['sowing','other'].includes(p.purpose):p.purpose!==undefined)farmInvalid();
     if(p.kind==='field'&&id!=='p2q2'?!validField(p.field):p.field!==undefined)farmInvalid();
     if(p.fertility!==undefined&&(!Number.isInteger(p.fertility)||p.fertility<0||p.fertility>3))farmInvalid();
     if(p.discovery!==undefined&&(!isRecord(p.discovery)||!(FARM_DISCOVERIES as readonly unknown[]).includes(p.discovery.id)||typeof p.discovery.resolved!=='boolean'||typeof p.discovery.outcome!=='string'))farmInvalid();
@@ -89,10 +93,10 @@ export function parseSession(value: unknown): Session {
       if(p.project.total!==expected)farmInvalid();
       if(p.project.done<p.project.total){
         const story=p.kind==='story'&&p.discovery&&!p.discovery.resolved&&({fallow:['restore'],woodland:['timber','clearwood','shelter']} as Record<string,string[]>)[p.discovery.id]?.includes(p.project.kind);
-        if(!story&&!(p.kind==='wild'&&['canal','drain','yard','cellar','pit','shed','retting'].includes(p.project.kind))&&!(p.kind==='field'&&p.project.kind==='paddy'))farmInvalid();
+        if(!story&&!(p.kind==='field'&&p.purpose==='other'&&['canal','drain','yard','cellar','pit','shed','retting'].includes(p.project.kind))&&!(p.kind==='field'&&p.purpose==='sowing'&&p.project.kind==='paddy'))farmInvalid();
       }else if(!p.improvement&&!(p.kind==='field'&&['restore','clearwood','paddy'].includes(p.project.kind)))farmInvalid();
     }
-    if(p.improvement!==undefined&&(!['canal','shelter','drain','yard','cellar','pit','shed','retting'].includes(p.improvement)||p.kind!=='rock'||p.project?.kind!==p.improvement||p.project.done!==p.project.total))farmInvalid();
+    if(p.improvement!==undefined&&(!['canal','shelter','drain','yard','cellar','pit','shed','retting'].includes(p.improvement)||(p.improvement==='shelter'?p.kind!=='rock':p.kind!=='field'||p.purpose!=='other')||p.project?.kind!==p.improvement||p.project.done!==p.project.total))farmInvalid();
     if(p.pit!==undefined&&(!isRecord(p.pit)||!Number.isInteger(Number(p.pit.readyDay))||Number(p.pit.readyDay)<0||p.improvement!=='pit'))farmInvalid();
     if(p.wild!==undefined&&(!recordShape(p.wild)||p.kind!=='wild'||p.project!==undefined||!['mushroom','yam'].includes(p.wild.kind)||!['stock','year','bursts','wetDays','expires'].every(k=>Number.isSafeInteger(p.wild[k])&&p.wild[k]>=0)||!Number.isSafeInteger(p.wild.lastSpawn)||p.wild.stock>(p.wild.kind==='yam'?farm.rules.yamYield:farm.rules.mushroomYield)||p.wild.bursts>farm.rules.mushroomMaxBursts))farmInvalid();
     if(p.plans!==undefined){
@@ -104,6 +108,7 @@ export function parseSession(value: unknown): Session {
       }
     }
     const field=id==='p2q2'?(economy as Record<string,any>).field:p.field;
+    if(p.purpose==='other'&&(field?.crop||p.land?.paddy||(p.plans??[]).some((plan:any)=>!plan.harvested&&!plan.failed)))farmInvalid();
     if(field?.crop){
       const b=field.batch;
       if(!recordShape(b)||!Number.isSafeInteger(b.year)||b.year<1900||b.year>2500||typeof b.id!=='string'||!['sownDay','matureDay','lateFactor'].every(k=>finite(b[k]))||b.lateFactor>1||b.matureDay<=b.sownDay)farmInvalid();
@@ -119,6 +124,12 @@ export function parseSession(value: unknown): Session {
   for(const [id,raw] of Object.entries(q.members)){
     if(!isRecord(raw)||!people[id]||!['generation','practice','rewardedStage','time'].every(k=>finite(raw[k]))||!Number.isInteger(raw.generation)||typeof raw.admitted!=='boolean'||!Array.isArray(raw.consulted))invalid();
     const m=raw as Record<string,any>;
+    if(!isRecord(m.cultivation)||!isRecord(m.cultivation.progress)||!finite(m.cultivation.upkeep)||Number(m.cultivation.upkeep)>q.rules.upkeepMax)invalid();
+    for(const [courseId,progress]of Object.entries(m.cultivation.progress)){
+      const course=CULTIVATION_COURSES.find(c=>c.id===courseId);
+      if(!course||!finite(progress)||Number(progress)<=0||Number(progress)>q.rules.stageProgress*course.tier)invalid();
+      if(course!.parents.some(parent=>(m.cultivation.progress[parent]??0)<q.rules.stageProgress*CULTIVATION_COURSES.find(c=>c.id===parent)!.tier))invalid();
+    }
     const experience=people[id]?.vitality?.experiences;
     if(!isRecord(experience)||!Number.isInteger(experience.learning)||Number(experience.learning)<0||Number(experience.learning)>12||!Number.isInteger(experience.outlook)||Math.abs(Number(experience.outlook))>record.manifest.ruleset.life!.eventPersonalityThreshold||typeof experience.lastEvent!=='string'||!Array.isArray(experience.talents)||!Array.isArray(experience.actions)||!Array.isArray(experience.contacts)||!isRecord(experience.relationships))invalid();
     const exp=experience as Record<string,any>;
@@ -155,9 +166,12 @@ export function parseSession(value: unknown): Session {
     if (!isRecord(value.state.persons) || Object.values(value.state.persons).some(person => {
       if (!isRecord(person) || !isRecord(person.vitality)) return true;
       const v=person.vitality;
+      if(typeof v.pressure!=='number'||!Number.isFinite(v.pressure)||v.pressure<0||'energy' in v)return true;
       return (v.sex!=='male'&&v.sex!=='female') || typeof v.portrait!=='string' || !new RegExp(`^${v.sex}-0[12]$`).test(v.portrait)
         || typeof v.portraitEra!=='number' || !Number.isInteger(v.portraitEra) || v.portraitEra<0 || v.portraitEra>3;
-    })) throw new Error('此存档缺少当前人物性别、肖像或时代数据，请新开游戏；原存档不修改。');
+    })) throw new Error('此存档缺少有效压力值、人物性别、肖像或时代数据，请新开游戏；原存档不修改。');
   }
+  if(!validNarrative(value.state.story))throw new Error('存档缺少当前独立剧情结构，请新开游戏；原存档不修改。');
+  for(const plot of Object.values((value.state as unknown as Session['state']).economy?.farm?.plots??{})){const l=plot.landscape;if(l&&(!['landmark','tea','reading','garden','memorial'].includes(l.kind)||![1,2,3].includes(l.level)||(l.kind==='landmark')!==(l.level===1)||!Number.isInteger(l.uses)||l.uses<0||!((value.state as unknown as Session['state']).persons[l.builtBy])||plot.kind!=='rock'||plot.discovery?.id!=='shrine'||!plot.discovery.resolved))throw new Error('景观存档结构无效，原存档不修改。');}
   return deepFreeze({ state: value.state as unknown as Session['state'], record });
 }

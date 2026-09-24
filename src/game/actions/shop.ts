@@ -15,7 +15,7 @@ export function shopActions(s:GameState,r:Ruleset):ActionDefinition[]{
  for(const item of shopCatalog(s,r)){
   if(s.era?.index===0){
    const one=cartQuote(s,r,{[item.id]:1});
-   add('checkout',item.id,'买入1份'+item.name,{ap:0,time:0,energy:0,money:one.total},one.blockers,`点击即购买1份${item.name}，支付${item.price}钱；不消耗时间和精力。${item.local?'现货立即入库':'订货在下次经营补货日交付'}。`,(draft,events)=>purchase(draft,one,events));
+   add('checkout',item.id,'买入1份'+item.name,{ap:0,time:0,energy:0,money:one.total},one.blockers,`点击即购买1份${item.name}，支付${item.price}钱；不消耗时间和压力。${item.local?'现货立即入库':'订货在下次经营补货日交付'}。`,(draft,events)=>purchase(draft,one,events));
    continue;
   }
   const quantity=sh.cart[item.id]??0;
@@ -23,7 +23,7 @@ export function shopActions(s:GameState,r:Ruleset):ActionDefinition[]{
   add('cartremove',item.id,'移除一份'+item.name,{ap:0},quantity<1?['清单中没有此商品']:[],'移除一份，未付款。',(draft,events)=>{const c=draft.economy!.shop!.cart;if(quantity===1)delete c[item.id];else c[item.id]=quantity-1;shopEvent(events,'cart',item.id,'已移除'+item.name);});
  }
  if(s.era?.index!==0)add('clearcart','all','清空采购清单',{ap:0},Object.keys(sh.cart).length?[]:['清单为空'],'清单不保留价格或占用库存。',(draft,events)=>{draft.economy!.shop!.cart={};shopEvent(events,'cart','all','采购清单已清空');});
- if(s.era?.index!==0)add('checkout','cart','确认整单采购',{ap:0,time:0,energy:0,money:quote.total},quote.blockers,`合计${quote.total}钱、${quote.weight}运输容量，付款后剩${quote.remainingMoney}钱。${instant?'电报在线，新订货即时交付':'现货立即交付，订货下次经营补货日交付'}；购买不耗时间和精力。`,(draft,events)=>{purchase(draft,quote,events);draft.economy!.shop!.cart={};});
+ if(s.era?.index!==0)add('checkout','cart','确认整单采购',{ap:0,time:0,energy:0,money:quote.total},quote.blockers,`合计${quote.total}钱、${quote.weight}运输容量，付款后剩${quote.remainingMoney}钱。${instant?'电报在线，新订货即时交付':'现货立即交付，订货下次经营补货日交付'}；购买不耗时间和压力。`,(draft,events)=>{purchase(draft,quote,events);draft.economy!.shop!.cart={};});
  function purchase(draft:GameState,quote:ReturnType<typeof cartQuote>,events:Parameters<ActionDefinition['execute']>[1]):void {
   const shop=draft.economy!.shop!;shop.transport-=quote.weight;
   for(const {item,quantity}of quote.lines){

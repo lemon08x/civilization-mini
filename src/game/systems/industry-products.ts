@@ -1,18 +1,18 @@
 import {ELECTRIC_KNOWLEDGE} from '../model/electric.js';
 import {industryProductsFor} from '../model/industry.js';
-import {branchNodesFor} from '../model/branches.js';
+import {branchNeeds} from './branches.js';
 import {changeGoods,consumeEquipment} from './inventory.js';
 import {ALL_PRODUCTS,ALL_PROCESSES} from './economy-catalog.js';
 import type {GameState} from '../model/state.js';
 import type {GameEvent} from '../model/events.js';
 
 export function productName(id:string):string{return ALL_PRODUCTS.find(p=>p.id===id)?.name??ALL_PROCESSES.find(p=>p.id===id)?.name??id;}
-export function knowledgeNeeds(s:GameState,ids:string[]):string[]{return ids.filter(id=>!s.economy!.branches!.learned[s.household.activePersonId]?.includes(id)).map(id=>'需掌握'+(branchNodesFor(s).find(n=>n.id===id)?.name??id));}
+export function knowledgeNeeds(s:GameState,ids:string[]):string[]{return branchNeeds(s,ids);}
 export function productNeeds(s:GameState,id:string,inspection=false):string[]{
  const state=s.economy?.industry;if(!state)return [];
  const p=industryProductsFor(s).find(p=>p.id===id);if(!p)return ['产品尚未纳入三类树'];
  if(inspection&&p.kind==='device'&&s.electric&&(s.era?.index??0)>=2&&(id==='E01'||ELECTRIC_KNOWLEDGE[id]))return knowledgeNeeds(s,['M4','L7']);
- if(!inspection&&state.products[id]?.protocol)return [];
+ if(!inspection&&state.products[id]?.protocol)return knowledgeNeeds(s,p.knowledge);
  return [...knowledgeNeeds(s,p.knowledge),...p.parents.filter(id=>!state.products[id]).map(id=>'需验证前置产品：'+productName(id))];
 }
 export function productTrialNeeds(s:GameState,id:string):string[]{

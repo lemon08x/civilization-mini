@@ -1,3 +1,5 @@
+import {landscapeSource} from './landscapes.js';
+import {relaxationRate} from './life.js';
 import {farmTasks} from './farm-calendar.js';
 import {settleTermEvent,changeCalendarWeather,seasonAt,lunarDateAt,availableDays} from './calendar.js';
 import {advanceFields} from './agriculture.js';
@@ -7,7 +9,7 @@ import {recordBranchWork} from './branches.js';
 import {renewSocialFood,settleSocialFood} from './social-food.js';
 import {renewEraServices,operateEraServices,recordEraProduction,settleEra} from './eras.js';
 import { renewIndustry } from './industry.js';
-import { settleSeasonEncounter, canSucceed, recordLifeGeneration, settleLife, renewSect, settleSect } from './life.js';
+import { advanceCultivation, settleSeasonEncounter, canSucceed, recordLifeGeneration, settleLife, renewSect, settleSect } from './life.js';
 import { arriveExpeditions,recordExpeditionEvidence,settleExpeditions } from './expedition.js';
 import { resetModern,generateModern,serveModern,storeModern } from './modern.js';
 import { arriveTower,dispatchTower,recordTowerEvidence,settleTower } from './tower.js';
@@ -166,21 +168,25 @@ function finishBusinessCycle(s:GameState,rules:Ruleset,events:GameEvent[]):void 
 }
 
 /** All date movement runs inside game.transition. Natural seasons have no settlement. */
-export function advanceCalendar(s:GameState,rules:Ruleset,days:number,events:GameEvent[],interruptible=false):void {
+export function advanceCalendar(s:GameState,rules:Ruleset,days:number,events:GameEvent[],interruptible=false,relaxing=false,restMethod='self'):void {
  const c=s.life?.calendar;if(!c)return;
  const stage=s.era?.index;
+ let relaxed=0;const restActor=s.household.activePersonId,restSource=relaxing&&(restMethod==='tea'||restMethod==='landmark')?landscapeSource(s,restMethod):undefined;
  let remaining=days,elapsed=0,ate=0,missing=0,notice='',spoiled=0,protectedFood=0;
  const before=s.life!.timeRemaining;settleIndustry(s,events);
- remaining+=Math.max(0,before-s.life!.timeRemaining);
+ let systemDays=Math.max(0,before-s.life!.timeRemaining);remaining+=systemDays;
  while(remaining>0&&s.status==='active'){
   if(c.absoluteDay>=c.nextBusinessDay){finishBusinessCycle(s,rules,events);if(s.status!=='active')break;}
   const previousDay=Math.floor(c.absoluteDay);
   const step=Math.min(0.5,remaining,availableDays(s),c.nextBusinessDay-c.absoluteDay);
   if(step<=0){settleEra(s,rules,events);break;}
   const foodBefore=c.consumed,missingBefore=c.missing;
+  const restStep=relaxing?Math.max(0,step-systemDays):0;systemDays=Math.max(0,systemDays-step);
+  if(restStep>0){relaxed+=restStep;const v=activePerson(s).vitality!;v.pressure=Math.max(0,Math.round((v.pressure-restStep*relaxationRate(s,restMethod))*100)/100);}
   const fed=feedCalendar(s,step,events);ate+=c.consumed-foodBefore;missing+=c.missing-missingBefore;
   const due=s.economy?.farm?farmTasks(s).filter(t=>t.day>c.absoluteDay&&t.day<=c.absoluteDay+step):[];
   const ripe=advanceFields(s,step,events);
+  advanceCultivation(s,step);
   const storageEvents:GameEvent[]=[];spoilEconomy(s,storageEvents,step);
   for(const event of storageEvents)if(event.type==='food-spoiled'){spoiled+=event.amount;protectedFood=event.protected;}
   c.absoluteDay=Math.round((c.absoluteDay+step)*100)/100;
@@ -202,8 +208,10 @@ export function advanceCalendar(s:GameState,rules:Ruleset,days:number,events:Gam
   if(c.absoluteDay>=c.nextBusinessDay&&s.status==='active')finishBusinessCycle(s,rules,events);
   settleEra(s,rules,events);
   if(stage!==s.era?.index){s.life!.timeRemaining=availableDays(s);notice='当前文明阶段已结束，剩余安排已停下。';break;}
+  if(relaxing&&activePerson(s).vitality!.pressure===0){notice='压力已归零，休养结束。';break;}
   if(interruptible&&notice)break;
  }
+ if(relaxed>0&&restSource){restSource.landscape!.uses++;events.push({type:'story-fact',topic:'landscape.used',subjectId:restSource.id,actorId:restActor,values:{kind:restMethod,elapsedDays:relaxed}});}
  if(spoiled>0)events.push({type:'food-spoiled',amount:Math.round(spoiled*1000000)/1000000,protected:protectedFood});
  c.lastNotice=notice||`日历推进${Math.round(elapsed*100)/100}天；作物继续生长，饮食与保存损耗随时间结算。`;
  events.push({type:'life',personId:s.household.activePersonId,operation:'calendar',detail:`经过${Math.round(elapsed*100)/100}天，饮食消耗${Math.round(ate*1000)/1000}批${missing>0?'，饮食不足':''}。${c.lastNotice}`});

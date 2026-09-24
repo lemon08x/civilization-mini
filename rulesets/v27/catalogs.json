@@ -1,4 +1,5 @@
 {
+  "landscapes": {"build": {"wood": 2, "clay": 1}, "upgrade": {"wood": 3, "clay": 2}, "tea": {"food": 0.025}},
   "cooking": {
     "porridge": {
       "inputs": {

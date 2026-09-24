@@ -15,7 +15,7 @@ const MANUFACTURE_LANES=[
  {id:'power',name:'电气设备与材料',ids:['wire','coil','cable','F07','fuel','battery','E01','E02','E04','LAMP','TELEGRAPH','ELECTROLYZER','aluminium','aluminiumwire']},
 ];
 const manufactureStages=[
- {name:'农场',era:'农耕村落',title:'为田地做工具，把收成留住',flow:'木材与黏土 → 农用设施 → 水土养护、育苗与储粮',description:'先满足自己的田地需要。设施制造、跨季堆肥和材料条件都通过实际行动结算。'},
+ {name:'农场',era:'农耕村落',title:'利用农产，把收成留住',flow:'秸秆腐熟 · 菜蔬腌渍 · 亚麻沤制',description:'按配方准备原料，并在科技树中备好所需设备；加工时间与材料按实际行动结算。'},
  {name:'工坊',era:'市镇百工',title:'把农产品加工成更有用的东西',flow:'谷物、油料与亚麻 → 工具与工序 → 面粉、油、纤维与绳索',description:'农产加工是主线，部件和动力是工具支线；不用先把整棵制造树做完。'},
  {name:'贸易',era:'电力工业',title:'制造是行业选择，购入设备也能经营',flow:'购入设备 → 检验与使用，或学习专业工艺 → 自行制造',description:'这里展示电气设备制造专业支线。外购设备不赠送制造规程，检验条件以实际报价为准。'},
  {name:'资本',era:'现代社会',title:'既有产业继续生产',flow:'农场、工坊与工业制造持续可用',description:'金融玩法尚在筹备，不额外编造金融制造物品。可切换之前的阶段继续制作。'},
@@ -23,16 +23,17 @@ const manufactureStages=[
 export function manufacturePage(g:SessionObservation['game'],button:(id:string)=>string,selectedId='',selectedStage=-1,embedded=false):string{
  const e=g.economy!,x=e.industryView!,current=g.era?.index??0;
  const stage=selectedStage>=0&&selectedStage<4?selectedStage:current,theme=manufactureStages[stage];
- const catalog=x.catalog.filter(p=>p.unlockStage===stage);
+ const catalog=x.catalog.filter(p=>p.unlockStage===stage&&!(embedded&&stage===0&&p.kind==='device'));
  const actionId=(p:typeof x.catalog[number])=>'economy:'+(p.kind==='device'?'build:':'process:')+p.id;
  const offer=(p:typeof x.catalog[number])=>g.actions.find(a=>a.id===actionId(p));
  const selected=catalog.find(p=>p.id===selectedId)??catalog.find(p=>offer(p)?.enabled)??catalog[0];
  const laneOf=(id:string)=>MANUFACTURE_LANES.find(l=>l.ids.includes(id))?.id??'parts';
  const stock=(p:typeof x.catalog[number])=>p.kind==='device'?`耐用 ${e.equipment[p.id]??0}`:`库存 ${e.goods[p.good!]??0}`;
  const state=(p:typeof x.catalog[number])=>e.project?.good===p.id?'制作中':offer(p)?.enabled?(p.kind==='device'?'可制作':'可加工'):'条件不足';
- const chip=(id:string)=>`<button type="button" data-product="${id}" class="prerequisite ${x.products[id]?'met':''}">${x.products[id]?'✓':'○'} ${esc(productName(id))}${x.catalog.find(p=>p.id===id)?.unlockStage!==stage?' · '+manufactureStages[x.catalog.find(p=>p.id===id)?.unlockStage??0].name:''} →</button>`;
+ const chip=(id:string)=>`<button type="button" ${embedded&&stage===0&&x.catalog.find(p=>p.id===id)?.kind==='device'?'data-page="学科"':`data-product="${id}"`} class="prerequisite ${x.products[id]?'met':''}">${x.products[id]?'✓':'○'} ${esc(productName(id))}${x.catalog.find(p=>p.id===id)?.unlockStage!==stage?' · '+manufactureStages[x.catalog.find(p=>p.id===id)?.unlockStage??0].name:''} →</button>`;
+ const equipmentLink=embedded&&stage===0?'<p class="subtle">农用设备集中在科技树的折叠区。<button type="button" class="text-btn" data-page="学科">查看所用设备 →</button></p>':'';
  const project=e.project?`<section class="manufacture-project"><div><strong>正在制作 · ${esc(productName(e.project.good))}</strong><p>材料已投入，跨季后完成；切换目录不影响项目。</p><button class="text-btn" type="button" data-product="${e.project.good}">查看项目 →</button></div>${button('economy:finish:project')}</section>`:'';
- const top=`${embedded?'':`<nav class="study-stage-nav" aria-label="按文明阶段选择制造">${manufactureStages.map((s,i)=>`<button type="button" data-manufacture-stage="${i}" aria-pressed="${i===stage}"><small>第 ${i+1} 阶段${i>current?' · 预览':i===current?' · 当前':''}</small><strong>${s.name}</strong><span>${s.era}</span></button>`).join('')}</nav>`}<header class="study-stage-overview"><span class="eyebrow">${theme.era} · ${stage>current?'尚未开放':stage<current?'可继续生产':'当前阶段'}</span><h3>${theme.title}</h3><p>${theme.flow}</p></header>${project}`;
+ const top=`${embedded?'':`<nav class="study-stage-nav" aria-label="按文明阶段选择制造">${manufactureStages.map((s,i)=>`<button type="button" data-manufacture-stage="${i}" aria-pressed="${i===stage}"><small>第 ${i+1} 阶段${i>current?' · 预览':i===current?' · 当前':''}</small><strong>${s.name}</strong><span>${s.era}</span></button>`).join('')}</nav>`}<header class="study-stage-overview"><span class="eyebrow">${theme.era} · ${stage>current?'尚未开放':stage<current?'可继续生产':'当前阶段'}</span><h3>${theme.title}</h3><p>${theme.flow}</p></header>${project}${equipmentLink}`;
  if(stage>current||!selected)return `${top}<section class="study-preview"><h3>${stage>current?'到达对应阶段后开放':'本阶段没有新增制造条目'}</h3><p>${theme.description}</p></section>`;
  const record=x.products[selected.id],spec=e.products.find(d=>d.id===selected.id),recipe=e.processes.find(d=>d.id===selected.id);
  const input=inputsText(spec?.inputs??recipe?.inputs??{})||'无';
@@ -62,7 +63,7 @@ export function industrySystems(g:SessionObservation['game'],button:(id:string)=
    <p>${selected.instance?`已安装 · ${selected.instance.commissioned?'已调试':'待调试'} · 操作人员 ${selected.instance.operator??'未安排'}`:'未建设'}。${esc(selected.blockers.join('；')||'当前没有额外阻碍。')}</p>
    <p>任务工资 ${selected.wage}钱（本人工资为0）；${selected.equipment?'同一设备装入后不能同时手动加工。':'按需使用公共水。'}缺料时不会显示为正在生产。</p>
    <div class="inspector-action">${!selected.instance?button('economy:sysbuild:'+selected.id):`${!selected.instance.commissioned?button('economy:syscommission:'+selected.id):['self','laborer','farmer','artisan'].map(id=>button('economy:sysassign:'+selected.id+'-'+id)).join('')}${button('economy:sysrun:'+selected.id)}${button('economy:sysremove:'+selected.id)}`}</div>`:'<p>暂无系统。</p>';
- return `<details><summary>运行顺序、人员预算与工资</summary><p>先建设、实际调试，再安排本人或雇员持续运行。灌溉按需执行，轴加工每季一批；顺序为人工供水 → 机械供水 → 轴加工。缺料、缺水、缺工资或人力时待命，不部分扣费。</p><p>本人预留 ${x.reserved.time}时间 / ${x.reserved.energy}精力；当前未预留 ${Math.max(0,g.life!.timeRemaining-x.reserved.time)}时间 / ${Math.max(0,g.life!.person.energy-x.reserved.energy)}精力。取消安排可释放预留。</p><p>员工每${x.rules.wageTimeUnit}工作时间计1钱（单任务向上取整）；精力不足时可花${x.rules.workerRestTime}时间恢复${x.rules.workerRestRecovery}精力，休息不扣工作工资。流水线及无人系统尚未开放。当前仍需本人播种、收获、采购和交付。</p>${Object.entries(x.workers).map(([id,b])=>`<p>${esc(e.staff.find(w=>w.kind===id)?.name??id)}：剩余${b.timeRemaining}时间 / ${b.energy}精力</p>`).join('')}</details>
+ return `<details><summary>运行顺序、人员预算与工资</summary><p>先建设、实际调试，再安排本人或雇员持续运行。灌溉按需执行，轴加工每季一批；顺序为人工供水 → 机械供水 → 轴加工。缺料、缺水、缺工资或人力时待命，不部分扣费。</p><p>本人预留 ${x.reserved.time}时间 / ${x.reserved.energy}压力；当前未预留 ${Math.max(0,g.life!.timeRemaining-x.reserved.time)}时间 / 当前压力 ${g.life!.person.pressure}。取消安排可释放预留。</p><p>员工每${x.rules.wageTimeUnit}工作时间计1钱（单任务向上取整）；员工压力超过20后延长劳动耗时，经营周期之间缓解${x.rules.workerRecovery}压力。流水线及无人系统尚未开放。当前仍需本人播种、收获、采购和交付。</p>${Object.entries(x.workers).map(([id,b])=>`<p>${esc(e.staff.find(w=>w.kind===id)?.name??id)}：剩余${b.timeRemaining}时间 / ${b.energy}压力</p>`).join('')}</details>
   <div class="page-workbench"><section><div class="library-heading"><h3>系统</h3><span>${x.systems.length} 项</span></div><div class="lesson-grid">${tile||'<p>暂无系统。</p>'}</div></section><aside class="course-inspector">${detail}</aside></div>
   ${panel('外部服务与招聘',`<p>生活页设置购粮策略与预算；食品配送与付费维修由外部人员提供，不代表自有系统无人运行。</p>${button('economy:foodplan:'+((g.socialFood?.delivery??e.operations?.food)?'off':'on'))}${g.actions.filter(a=>a.id.startsWith('economy:hire:')).map(a=>button(a.id)).join('')}`)}`;
 }

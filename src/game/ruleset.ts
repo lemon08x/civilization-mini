@@ -144,6 +144,7 @@ export function validateRuleset(value: unknown): Ruleset {
   if(!isRecord(value.sect)||Object.keys(value.sect).length!==Object.keys(SECT_BOUNDS).length)throw new Error('缺少师徒与道术规则，请新开游戏；旧存档不修改');
   for(const [key,[min,max]] of Object.entries(SECT_BOUNDS)){const n=value.sect[key];if(!Number.isInteger(n)||(n as number)<min||(n as number)>max)throw new Error('道术参数越界：'+key);}
   if((value.sect.drawCost as number)>(value.sect.fortuneCap as number))throw new Error('气运抽取消耗不能超过储备上限');
+  if((value.sect.upkeepGain as number)>(value.sect.upkeepMax as number))throw new Error('日课补充天数不能超过功课储备上限');
   if(value.life!==undefined){
     if(!isRecord(value.life)||Object.keys(value.life).length!==Object.keys(LIFE_BOUNDS).length)throw new Error('人生参数不完整');
     for(const [key,[min,max]] of Object.entries(LIFE_BOUNDS)){const n=value.life[key];if(!Number.isInteger(n)||(n as number)<min||(n as number)>max)throw new Error('人生参数越界：'+key);}
