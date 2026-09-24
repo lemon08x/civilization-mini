@@ -11,7 +11,7 @@ export function textObservation(observation: SessionObservation): string {
     '本文件是可再生成的观察，不是存档。修改本文件不会推进游戏。',
     '', '## 当前可用行动',
     ...actions.filter(a => a.enabled).map(a =>
-      `- ${a.id} | ${a.label} | 时间 ${a.time ?? a.ap} / 精力 ${a.energy ?? 0} / 钱 ${a.money ?? 0} / 粮 ${a.food ?? 0}\n  ${a.description}`),
+      `- ${a.id} | ${a.label} | 时间 ${a.time ?? a.ap} / ${a.pressureRelief?`预计减压 ${a.pressureRelief}`:`压力 +${a.energy ?? 0}`} / 钱 ${a.money ?? 0} / 粮 ${a.food ?? 0}\n  ${a.description}`),
     '', '## 暂不可用行动',
     ...actions.filter(a => !a.enabled).map(a => `- ${a.id} | ${a.label} | ${a.reason}`),
     '', '## 完整可见状态', '```json', JSON.stringify(state, null, 2), '```',

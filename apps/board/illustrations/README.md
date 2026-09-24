@@ -611,3 +611,29 @@ OVERRIDE COMPOSITION: Exactly THREE separate isolated botanical game sprites sid
 ### 正式农场接入
 
 小麦与大豆已使用 `farm-plant-*-v1.png` 三阶段精灵，按现有生长进度切换。场景缓存并合成三簇植株，加载失败保留原程序绘图，亚麻继续使用原绘图。萝卜和冬瓜已保留素材映射，但未新增种植规则。画面使用底部锚点的小幅倾斜微风，沿用原地块点击、选择和收获反馈接口。
+
+## 农事日历与青绿动效（2026-09-23）
+
+使用本机 Grok Build CLI `image_gen` 生成 `sources/farm-effects-qinglu-v1.jpg`：四宫格落种、水波、谷粒与嫩芽墨印。原图为白底 JPG，经浅色底分离和裁切导出 `farm/animation/painted/environment/farm-effect-{sow,water,harvest,plan}-qinglu-v1.webp`，最长边 256px，保留透明通道。
+
+播种、灌溉、收获使用地块锚定的短时淡入淡出动效；排期成功使用日历墨印。减少动态效果偏好下只保留静态反馈。素材仅呈现已发生的行动，不表示自动执行计划或额外产出。
+
+生成提示：Chinese qinglu mineral-pigment ink watercolor farm sprite atlas, precise 2 by 2 grid; isolated ochre falling seeds and soil dust, jade teal irrigation ripple rings, golden grains and harvest leaves, circular jade brush ring with a tiny sprout; pure white background, wide margins, no text, no frame, no scenery.
+
+## 林地组合绘件（2026-09-24）
+
+
+
+`farm/animation/painted/environment/farm-woodland-qinglu-v1.png` 由现有青绿树木和灌木透明绘件合成：四株高低错落的树、两丛林下植被与柔和接地阴影。Grok Build 本次因认证服务连接失败未生成新图，此素材为本地合成。仅用于未处理的林地见闻；古树仍用单株素材。按可见区域计算绘制比例，林地整体不摆动，见闻标记移至地块侧边。
+
+后续重试 Grok Build CLI `image_gen` 成功，当前改用 `farm/animation/painted/environment/farm-woodland-qinglu-v2.png`。五株树与林下灌木集中在同一基线上；白底生成图经去底、裁切导出透明 PNG。缩小绘制范围，树根留在所属菱形格内；只在未处理的林地事件格绘制，普通荒地不绘制林地。
+
+生成提示：Small natural grove of FIVE separate living leafy trees growing close together with bushes concealing the roots. Chinese qinglu watercolor mineral pigment fine ink style, muted sage jade foliage and ochre trunks, isometric view. Short trunks, lush rounded irregular connected canopy, compact wide silhouette, all trunk bases very close together on the same narrow baseline. PURE SOLID WHITE background, NO checkerboard, NO transparency simulation, NO diamond, NO ground tile, NO landscape, NO ropes, NO tied trunks, NO exposed roots, NO pots, NO text. Flat isolated artwork with margin.
+
+## 修行课程配图（2026-09-24）
+
+当前使用 `characters/sect-course-C0-v2.webp` 至 `sect-course-C15-v2.webp`，共 16 幅独立课程意象，192×192 WebP。原稿 `sources/sect-curriculum-atlas-v1.jpg` 由 Grok Build CLI `image_gen` 生成，裁切并分离浅纸底后接入课程树与详情页。v1 为先前复用旧门派素材的版本，界面已改用 v2。插画仅装饰课程主题，修成状态、进度、前置和效果仍以真实文字表示。
+
+调用 Grok 的进程需继承本机 Clash 代理环境。此前直连超时，向当次进程传入系统已配置的 HTTP_PROXY、HTTPS_PROXY、ALL_PROXY 后成功；没有修改全局配置。
+
+生成提示：Square sheet of warm ivory paper, strict 4 columns by 4 rows atlas, sixteen centered separate motifs with generous blank margins; soft gouache watercolor, muted sage jade green, wheat gold and umber, relaxed rural Chinese philosophy sect daily life. No grid, borders, text, labels, numbers, logos, weapons or glowing magic. Row 1: bamboo scroll and brush; incense burner with gentle smoke; plain-robed person doing gentle standing stretch; jade ring with leafy sprig. Row 2: mountain path ending at quiet pavilion; still water bowl reflecting moon; meditation cushion beside orchid; two open old books. Row 3: bamboo measuring slips with stone; wooden compass beside leaf; two half-open wooden doors; two ceramic cups facing each other. Row 4: hand holding balance scale; four seasonal leaves in circle; potter hands shaping clay bowl; mountain stream around pine tree.

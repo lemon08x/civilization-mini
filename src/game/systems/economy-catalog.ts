@@ -16,6 +16,7 @@ const topics:Record<Subject,string[]>={
 const prefixes:Record<Subject,string>={mechanics:'L',heat:'H',chemistry:'C',materials:'M',agronomy:'A',organization:'O'};
 export const TOPICS=Object.entries(topics).flatMap(([s,names])=>names.map((name,i)=>({id:prefixes[s as Subject]+String(i+1).padStart(2,'0'),subject:s as Subject,level:i+1,name})));
 export const GOODS:Record<string,{name:string;price:number;food:number}>={
+  mushroom:{name:'野蘑菇',price:1,food:1},yam:{name:'山药',price:1,food:1},
   wood:{name:'木材',price:1,food:0},clay:{name:'黏土',price:1,food:0},ore:{name:'矿料',price:2,food:0},iron:{name:'铁料',price:5,food:0},
   wheat:{name:'小麦',price:1,food:1},soy:{name:'大豆',price:2,food:1},flax:{name:'亚麻茎',price:2,food:0},straw:{name:'秸秆',price:1,food:0},
   flour:{name:'面粉',price:2,food:1},oil:{name:'植物油',price:4,food:0},fiber:{name:'亚麻纤维',price:4,food:0},rope:{name:'绳索',price:6,food:0},
@@ -29,8 +30,9 @@ export const GOODS:Record<string,{name:string;price:number;food:number}>={
   seedMustard:{name:'芥菜种子',price:2,food:0},mustard:{name:'芥菜',price:1,food:1},
   salt:{name:'食盐',price:2,food:0},pickles:{name:'腌菜',price:3,food:1},
 };
-export const EDIBLE=['flour','wheat','soy','millet','rice','milledRice','adzuki','mallow','mustard','pickles'];
-export interface CropSpec {name:string;seed:string;duration:number;yield:number;straw:number;level:number;waterNeed?:number;floodTolerant?:boolean;lateRate?:number;legume?:boolean;}
+export const EDIBLE=['flour','wheat','soy','millet','rice','milledRice','adzuki','mallow','mustard','pickles','mushroom','yam'];
+export interface CropSeason {sowTerm:string;harvestTerm:string;yearOffset:number;}
+export interface CropSpec {seasons?:CropSeason[];name:string;seed:string;duration:number;yield:number;straw:number;level:number;waterNeed?:number;floodTolerant?:boolean;lateRate?:number;legume?:boolean;}
 export const CROPS:Record<Crop,CropSpec>={
   wheat:{name:'小麦',seed:'seedWheat',duration:2,yield:6,straw:2,level:1},soy:{name:'大豆',seed:'seedSoy',duration:2,yield:4,straw:1,level:2,legume:true},flax:{name:'亚麻',seed:'seedFlax',duration:3,yield:5,straw:1,level:2},
   rice:{name:'水稻',seed:'seedRice',duration:140,yield:7,straw:2,level:2,waterNeed:3,floodTolerant:true},
@@ -41,7 +43,7 @@ export const CROPS:Record<Crop,CropSpec>={
 };
 export interface ProductSpec {id:string;name:string;category:string;effect:string;requires:Partial<Record<Subject,number>>;inputs:Record<string,number>;from:string[];}
 export const PRODUCTS:ProductSpec[]=[
-  {id:'W01',name:'提水辘轳',category:'供水与排水',effect:'地块灌溉消耗1公共水恢复作物所需水分，提水辘轳使基础精力成本减半；每次扣1耐用度。',requires:{mechanics:1},inputs:{wood:3},from:[]},
+  {id:'W01',name:'提水辘轳',category:'供水与排水',effect:'地块灌溉消耗1公共水恢复作物所需水分，提水辘轳使基础压力成本减半；每次扣1耐用度。',requires:{mechanics:1},inputs:{wood:3},from:[]},
   {id:'W03',name:'活塞泵',category:'供水与排水',effect:'有作物且缺水时每季自动抽取1公共水灌溉，消耗1木材和1耐用度。',requires:{mechanics:5,materials:3},inputs:{iron:2,valve:1,seal:1},from:['W01']},
   {id:'P01',name:'手摇传动装置',category:'生产动力',effect:'纤维和绳索加工一次处理双份，原料产出均翻倍，每批扣1耐用度。',requires:{mechanics:2},inputs:{wood:3,shaft:1},from:[]},
   {id:'P03',name:'水轮动力装置',category:'生产动力',effect:'有公共水时，磨粮、脱粒、榨油可免个人行动；每季限一批，仍扣原料与耐用度。',requires:{mechanics:3},inputs:{wood:4,iron:1,shaft:1},from:['P01']},
@@ -81,6 +83,7 @@ export const PROCESSES:ProcessSpec[]=[
   {id:'mill',name:'磨粮',inputs:{wheat:2},outputs:{flour:3},requires:{mechanics:2},equipment:'U06',wait:0},
   {id:'hull',name:'碾米',inputs:{rice:2},outputs:{milledRice:3},requires:{mechanics:2},equipment:'U06',wait:0},
   {id:'pickles',name:'腌渍',inputs:{mustard:3,salt:1},outputs:{pickles:2},requires:{},wait:1},
+  {id:'retting',name:'沤麻',inputs:{flax:2},outputs:{fiber:1},requires:{},wait:1},
   {id:'compost',name:'腐熟堆肥',inputs:{straw:3},outputs:{compost:2},requires:{agronomy:3},equipment:'U09',wait:1},
 ];
 export const WORKER_NAMES:Record<WorkerKind,string>={laborer:'普通雇工',farmer:'熟练农工',artisan:'熟练工匠',manager:'生产负责人'};
@@ -92,14 +95,16 @@ export const ALL_PRODUCTS=[...PRODUCTS,...MODERN_PRODUCTS,...ELECTRIC_PRODUCTS];
 export const ALL_PROCESSES=[...PROCESSES,...MODERN_PROCESSES,...ELECTRIC_PROCESSES];
 export const ALL_JOB_NAMES:Record<string,string>={...JOB_NAMES,...Object.fromEntries(MODERN_PROCESSES.map(p=>[p.id,p.name]))};
 export const topicsFor=(s:GameState)=>s.economy?.branches?[]:s.economy?.modern?ALL_TOPICS:TOPICS;
-export const productsFor=(s:GameState)=>s.economy?.branches?ALL_PRODUCTS.filter(p=>BRANCH_PRODUCTS[p.id]||s.electric&&ELECTRIC_KNOWLEDGE[p.id]).map(p=>({...p,requires:{},...(s.electric&&p.id==='E01'?{effect:`每季手动供能最多一次，消耗1公共水和1耐用；旱季发${s.electric.rules.dryHydroPower}电，其余季发6电。`}:{}),...(s.electric&&p.id==='E04'?{effect:'启用后季末存入最多6份余电，充电扣1耐用；次季手动供能时放电，每季最多一次。不自动发电或放电。'}:{}),...(s.electric&&p.id==='LAMP'?{effect:`手动供能时本季首次点灯耗${s.electric.rules.servicePower}电、1耐用，工作精力成本降至${s.life?.calendar?.rules.lampEnergyPercent??100}%，日历不会凭空多出天数。`}:{}),...(s.electric&&p.id==='TELEGRAPH'?{effect:`手动供能时每季耗${s.electric.rules.servicePower}电、1耐用，本季新订货即时交付；库存、运输、价款照常，不加速维修。`}:{})})):s.economy?.modern?[...PRODUCTS,...MODERN_PRODUCTS]:PRODUCTS;
+export const productsFor=(s:GameState)=>s.economy?.branches?ALL_PRODUCTS.filter(p=>BRANCH_PRODUCTS[p.id]||s.electric&&ELECTRIC_KNOWLEDGE[p.id]).map(p=>({...p,requires:{},...(s.electric&&p.id==='E01'?{effect:`每季手动供能最多一次，消耗1公共水和1耐用；旱季发${s.electric.rules.dryHydroPower}电，其余季发6电。`}:{}),...(s.electric&&p.id==='E04'?{effect:'启用后季末存入最多6份余电，充电扣1耐用；次季手动供能时放电，每季最多一次。不自动发电或放电。'}:{}),...(s.electric&&p.id==='LAMP'?{effect:`手动供能时本季首次点灯耗${s.electric.rules.servicePower}电、1耐用，工作压力成本降至${s.life?.calendar?.rules.lampEnergyPercent??100}%，日历不会凭空多出天数。`}:{}),...(s.electric&&p.id==='TELEGRAPH'?{effect:`手动供能时每季耗${s.electric.rules.servicePower}电、1耐用，本季新订货即时交付；库存、运输、价款照常，不加速维修。`}:{})})):s.economy?.modern?[...PRODUCTS,...MODERN_PRODUCTS]:PRODUCTS;
 export const processesFor=(s:GameState)=>s.economy?.branches?ALL_PROCESSES.filter(p=>BRANCH_PROCESSES[p.id]||s.electric&&ELECTRIC_KNOWLEDGE[p.id]).map(p=>({...p,requires:{}})):s.economy?.modern?[...PROCESSES,...MODERN_PROCESSES]:PROCESSES;
 export const goodsFor=(s:GameState)=>s.electric?ALL_GOODS:s.economy?.modern?{...GOODS,...MODERN_GOODS}:GOODS;
 
+export const LANDSCAPE_INPUTS={build:{wood:0,clay:0},upgrade:{wood:0,clay:0},tea:{food:0}};
 export interface CatalogOverlay {
+  landscapes:typeof LANDSCAPE_INPUTS;
   cooking: Record<string,{inputs:Record<string,number>;food:number;time:number;energy:number}>;
   goods: Record<string, { price: number; food: number }>;
-  crops: Record<string, { duration: number; yield: number; straw: number; level: number; waterNeed?: number; floodTolerant?: boolean; lateRate?: number; legume?: boolean }>;
+  crops: Record<string, { seasons:CropSeason[]; duration: number; yield: number; straw: number; level: number; waterNeed?: number; floodTolerant?: boolean; lateRate?: number; legume?: boolean }>;
   products: Record<string, { inputs: Record<string, number> }>;
   processes: Record<string, { inputs: Record<string, number>; outputs: Record<string, number>; wait: number; power?: number }>;
 }
@@ -112,6 +117,11 @@ function integerMap(value: Record<string, number>, allowZero = true): void {
 
 /** JSON 是数字来源；TypeScript 目录只保留名称、效果和结构。 */
 export function applyCatalogOverlay(overlay: CatalogOverlay): void {
+  const landscapes=overlay.landscapes;
+  if(!landscapes||Object.keys(landscapes).sort().join()!=='build,tea,upgrade')throw new Error('缺少景观投入目录，请新开游戏');
+  for(const kind of ['build','upgrade'] as const){const inputs=landscapes[kind];if(!inputs||Object.keys(inputs).sort().join()!=='clay,wood'||Object.values(inputs).some(n=>!Number.isInteger(n)||n<1||n>12))throw new Error('景观材料数值无效');}
+  if(!landscapes.tea||Object.keys(landscapes.tea).join()!=='food'||!Number.isFinite(landscapes.tea.food)||landscapes.tea.food<0.001||landscapes.tea.food>1)throw new Error('品茶投入无效');
+  Object.assign(LANDSCAPE_INPUTS,structuredClone(landscapes));
   if(!overlay.cooking||Object.keys(overlay.cooking).length!==COOKING.length)throw new Error('存档缺少当前烹饪目录，请新开游戏；原档不修改');
   for(const recipe of COOKING){
     const n=overlay.cooking[recipe.id];
@@ -133,6 +143,9 @@ export function applyCatalogOverlay(overlay: CatalogOverlay): void {
     if (n.floodTolerant !== undefined && typeof n.floodTolerant !== 'boolean') throw new Error('作物耐涝标记无效：' + id);
     if (n.lateRate !== undefined && (!Number.isFinite(n.lateRate) || n.lateRate < 1 || n.lateRate > 9)) throw new Error('作物迟收倍率无效：' + id);
     if (n.legume !== undefined && typeof n.legume !== 'boolean') throw new Error('作物豆科标记无效：' + id);
+    const terms=['立春','雨水','惊蛰','春分','清明','谷雨','立夏','小满','芒种','夏至','小暑','大暑','立秋','处暑','白露','秋分','寒露','霜降','立冬','小雪','大雪','冬至','小寒','大寒'];
+    if(!Array.isArray(n.seasons)||!n.seasons.length||n.seasons.length>2||n.seasons.some(v=>!terms.includes(v.sowTerm)||!terms.includes(v.harvestTerm)||![0,1].includes(v.yearOffset)))throw new Error('缺少有效固定农时，请新开游戏：'+id);
+    crop.seasons=structuredClone(n.seasons);
     crop.duration = n.duration;
     crop.yield = n.yield;
     crop.straw = n.straw;

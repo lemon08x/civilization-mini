@@ -86,7 +86,7 @@ export function validateRuleset(value: unknown): Ruleset {
   if(!isRecord(value.calendar)||Object.keys(value.calendar).length!==Object.keys(CALENDAR_BOUNDS).length||Object.entries(CALENDAR_BOUNDS).some(([k,[min,max]])=>typeof (value.calendar as Record<string,unknown>)[k]!=='number'||!Number.isFinite(Number((value.calendar as Record<string,unknown>)[k]))||Number((value.calendar as Record<string,unknown>)[k])<min||Number((value.calendar as Record<string,unknown>)[k])>max))throw new Error('此存档不含当前农历日历，请新开游戏；旧档不迁移');
   if(!Number.isInteger(value.calendar.referenceYear))throw new Error('农历参照年须为整数');
 
-  if(!isRecord(value.farm)||Object.keys(value.farm).length!==Object.keys(FARM_BOUNDS).length||Object.entries(FARM_BOUNDS).some(([key,[min,max]])=>!Number.isInteger((value.farm as Record<string,unknown>)[key])||Number((value.farm as Record<string,unknown>)[key])<min||Number((value.farm as Record<string,unknown>)[key])>max))throw new Error('缺少有效的地块与同门规则，请新开游戏；旧档不迁移');
+  if(!isRecord(value.farm)||Object.keys(value.farm).length!==Object.keys(FARM_BOUNDS).length||Object.entries(FARM_BOUNDS).some(([key,[min,max]])=>!Number.isInteger(Number((value.farm as Record<string,unknown>)[key])*(key==='mushroomGatherTime'?2:1))||Number((value.farm as Record<string,unknown>)[key])<min||Number((value.farm as Record<string,unknown>)[key])>max))throw new Error('缺少有效的地块与同门规则，请新开游戏；旧档不迁移');
   if (!isRecord(value.production)) throw new Error('必须提供完整生产配置');
   if (['0.3.0', '0.4.0', '0.5.0', '0.6.0', '0.7.0', '0.8.0', '0.9.0', '0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0','0.15.0','0.16.0','0.17.0','0.18.0','0.19.0','0.20.0','0.21.0','0.22.0','0.23.0','0.24.0','0.25.0','0.26.0','0.27.0'].includes(value.rulesVersion) !== (value.technologyFeedback !== undefined)) throw new Error('科技反馈机制与规则版本不匹配');
   if ((['0.4.0','0.5.0', '0.6.0', '0.7.0', '0.8.0', '0.9.0', '0.10.0', '0.11.0', '0.12.0','0.13.0','0.14.0','0.15.0','0.16.0','0.17.0','0.18.0','0.19.0','0.20.0','0.21.0','0.22.0','0.23.0','0.24.0','0.25.0','0.26.0','0.27.0'].includes(value.rulesVersion)) !== (value.socialInheritance !== undefined)) throw new Error('社会传承机制与规则版本不匹配');
@@ -144,6 +144,7 @@ export function validateRuleset(value: unknown): Ruleset {
   if(!isRecord(value.sect)||Object.keys(value.sect).length!==Object.keys(SECT_BOUNDS).length)throw new Error('缺少师徒与道术规则，请新开游戏；旧存档不修改');
   for(const [key,[min,max]] of Object.entries(SECT_BOUNDS)){const n=value.sect[key];if(!Number.isInteger(n)||(n as number)<min||(n as number)>max)throw new Error('道术参数越界：'+key);}
   if((value.sect.drawCost as number)>(value.sect.fortuneCap as number))throw new Error('气运抽取消耗不能超过储备上限');
+  if((value.sect.upkeepGain as number)>(value.sect.upkeepMax as number))throw new Error('日课补充天数不能超过功课储备上限');
   if(value.life!==undefined){
     if(!isRecord(value.life)||Object.keys(value.life).length!==Object.keys(LIFE_BOUNDS).length)throw new Error('人生参数不完整');
     for(const [key,[min,max]] of Object.entries(LIFE_BOUNDS)){const n=value.life[key];if(!Number.isInteger(n)||(n as number)<min||(n as number)>max)throw new Error('人生参数越界：'+key);}

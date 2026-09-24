@@ -5,7 +5,7 @@ import {createInitialState,getAvailableActions,transition} from '../src/game/gam
 import {parseActionId} from '../src/game/model/action.js';
 import {activePerson} from '../src/game/model/state.js';
 import {validateRuleset,resolveRuleset} from '../src/game/ruleset.js';
-import {settleLife,energyCeiling,healthCeiling} from '../src/game/systems/life.js';
+import {settleLife,pressureMultiplier,healthCeiling} from '../src/game/systems/life.js';
 import {reservedLabor} from '../src/game/systems/industry.js';
 import {ancestorKnows} from '../src/game/systems/ancestry.js';
 import {getObservation} from '../src/game/observation.js';
@@ -26,10 +26,10 @@ test('renewal parameters stay bounded',()=>{
 });
 test('partial feeding, grace and prolonged hunger have distinct effects',()=>{
  const half=fresh(),full=fresh();
- for(const s of [half,full]){s.household.hardship=1;activePerson(s).vitality!.energy=0;}
+ for(const s of [half,full]){s.household.hardship=1;activePerson(s).vitality!.pressure=0;}
  settleLife(half,1,[]);settleLife(full,2,[]);
  assert.equal(activePerson(half).vitality!.health,100);
- assert.ok(activePerson(half).vitality!.energy>activePerson(full).vitality!.energy);
+ assert.equal(activePerson(half).vitality!.pressure,activePerson(full).vitality!.pressure);
  half.household.hardship=2;full.household.hardship=2;
  settleLife(half,1,[]);settleLife(full,2,[]);
  assert.equal(activePerson(half).vitality!.health,96);assert.equal(activePerson(full).vitality!.health,92);
@@ -37,11 +37,11 @@ test('partial feeding, grace and prolonged hunger have distinct effects',()=>{
  for(let n=0;n<8;n++)settleLife(full,2,[]);
  assert.equal(activePerson(full).vitality!.alive,false);
 });
-test('refeeding restores health and normal energy even at low health; aging still caps health',()=>{
- const s=fresh(),v=activePerson(s).vitality!;v.health=45;v.energy=0;v.talent='scholar';
- settleLife(s,0,[]);assert.equal(v.health,50);assert.equal(v.energy,3);
+test('refeeding restores health without changing pressure; aging still caps health',()=>{
+ const s=fresh(),v=activePerson(s).vitality!;v.health=45;v.pressure=0;v.talent='scholar';
+ settleLife(s,0,[]);assert.equal(v.health,50);assert.equal(v.pressure,0);
  for(let n=0;n<10;n++)settleLife(s,0,[]);assert.equal(v.health,100);
- v.health=1;v.constitution=8;assert.equal(energyCeiling(v),4);
+ v.health=1;v.constitution=8;assert.equal(pressureMultiplier(v.pressure),1);
  v.ageSeasons=65*4;v.health=79;settleLife(s,0,[]);assert.equal(v.health,healthCeiling(v,s.life!.rules));
 });
 test('season settlement supplies the deficit streak and resets it when fed',()=>{

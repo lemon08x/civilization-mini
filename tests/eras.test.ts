@@ -53,7 +53,7 @@ test('actual harvest ending a season earns once, and reward settles before phase
 test('seasonal staffed production earns from one completed batch, not goods and process twice',()=>{
  const s=fresh();s.economy!.goods.wood=2;s.economy!.goods.iron=1;s.economy!.equipment.T03=12;
  s.economy!.industry!.products.shaft={source:'prototype',protocol:true};s.economy!.industry!.instances.shaft={id:'shaft',enabled:true,commissioned:true,operator:'self'};
- activePerson(s).vitality!.energy=10;
+ activePerson(s).vitality!.pressure=10;
  const n=act(s,'end:season');assert.equal(n.state.economy!.goods.shaft,2);assert.equal(n.state.era!.rewardEscrow,20);
  assert.equal(n.events.filter(e=>e.type==='era'&&e.operation==='earned').length,1);
 });
@@ -80,7 +80,7 @@ test('organization specializations add one production bonus and do not stack',()
  know(s,'O4');s.era!.rewardEscrow=0;recordEraProduction(s,[],[produced]);assert.equal(s.era!.rewardEscrow,75);
 });
 test('well costs real materials, survives stage change, uses finite groundwater instead of public water',()=>{
- let s=fresh();know(s,'A1','A2');s.economy!.goods.wood=4;s.economy!.goods.clay=2;activePerson(s).vitality!.energy=10;
+ let s=fresh();know(s,'A1','A2');s.economy!.goods.wood=4;s.economy!.goods.clay=2;activePerson(s).vitality!.pressure=10;
  s=structuredClone(act(s,'sysbuild:well').state);assert.equal(s.economy!.goods.wood,0);assert.equal(s.life!.timeRemaining,6);
  s=structuredClone(act(s,'syscommission:well').state);assert.equal(s.era!.groundwater,0);
  s=structuredClone(act(s,'end:season').state);s.era!.index=1;s.location.rain=0;s.location.water=0;s.economy!.field={...s.economy!.field,crop:'wheat',growth:0,duration:2};

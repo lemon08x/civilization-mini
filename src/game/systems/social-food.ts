@@ -1,6 +1,6 @@
 import {availableDays} from './calendar.js';
 import {activePerson} from '../model/state.js';
-import {energyCeiling,canSucceed} from './life.js';
+import {canSucceed,relaxationRate} from './life.js';
 import type {GameState} from '../model/state.js';
 import type {GameEvent} from '../model/events.js';
 import {publicWaterFee} from './eras.js';
@@ -69,7 +69,7 @@ export function dietView(s:GameState){
  const daily=dailyFoodNeed(s),grainDays=grain/daily,woodDays=amount(s,'wood')/c.rules.woodPerDay;
  return {mode:c.diet,name:c.diet==='hearty'?'丰足饮食':'简单饮食',dailyGrain:daily,dailyWood:c.rules.woodPerDay,
   days:Math.floor((dry/daily+Math.min(grainDays,woodDays))*2+1e-8)/2,grainDays:Math.floor(grainDays),woodDays:Math.floor(woodDays),
-  mealDays:c.mealDays,recovery:c.rules.dailyRecovery+(c.diet==='hearty'?c.rules.heartyRecovery:0)+(c.mealDays>0?c.rules.mealRecovery:0),
+  mealDays:c.mealDays,recovery:relaxationRate(s),
   description:'库存按批量干粮／食材计；每天自动取粮、生火做饭，现做现吃。种子不会被食用。'};
 }
 /** Daily meals have one consumption authority; seasonal settlement must not eat again. */
@@ -89,8 +89,7 @@ export function feedCalendar(s:GameState,days:number,events:GameEvent[]):boolean
  const dry=Math.min(s.household.food,remaining);s.household.food=round(s.household.food-dry);remaining=round(remaining-dry);
  c.consumed=round(c.consumed+need-remaining);c.missing=round(c.missing+remaining);
  const fed=remaining<=0,v=activePerson(s).vitality!;
- if(fed)v.energy=Math.min(energyCeiling(v),round(v.energy+days*(r.dailyRecovery+(c.diet==='hearty'?r.heartyRecovery:0)+(c.mealDays>0?r.mealRecovery:0))));
- else {v.health=Math.max(0,round(v.health-r.hungerDamagePerDay*days));if(v.health===0){v.alive=false;s.status=canSucceed(s)?'handover':'ended';events.push({type:'life',personId:s.household.activePersonId,operation:'death',detail:'饮食长期不足，健康耗尽；'+(s.status==='handover'?'成年弟子可接续':'无人可接续')});}}
+ if(!fed) {v.health=Math.max(0,round(v.health-r.hungerDamagePerDay*days));if(v.health===0){v.alive=false;s.status=canSucceed(s)?'handover':'ended';events.push({type:'life',personId:s.household.activePersonId,operation:'death',detail:'饮食长期不足，健康耗尽；'+(s.status==='handover'?'成年弟子可接续':'无人可接续')});}}
  c.mealDays=Math.max(0,round(c.mealDays-days));
  return fed;
 }

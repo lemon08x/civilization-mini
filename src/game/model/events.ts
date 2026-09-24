@@ -15,6 +15,7 @@ export interface GenerationFacts {
   production?: ProductionState;
 }
 export type GameEvent =
+  | {type:'story-fact';topic:string;subjectId:string;actorId:string;values:Record<string,import('../narrative/index.js').Value>}
   | {type:'era';operation:string;stage:number;card:string;amount:number;money:number;detail:string}
   | {type:'industry';operation:string;target:string;actor:string;time:number;energy:number;money:number;detail:string}
   | {type:'branch';operation:string;node:string;detail:string}

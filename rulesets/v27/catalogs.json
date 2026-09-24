@@ -1,4 +1,5 @@
 {
+  "landscapes": {"build": {"wood": 2, "clay": 1}, "upgrade": {"wood": 3, "clay": 2}, "tea": {"food": 0.025}},
   "cooking": {
     "porridge": {
       "inputs": {
@@ -66,6 +67,8 @@
     }
   },
   "goods": {
+    "mushroom": {"price": 1, "food": 1},
+    "yam": {"price": 1, "food": 1},
     "wood": {
       "price": 1,
       "food": 0
@@ -281,12 +284,14 @@
   },
   "crops": {
     "wheat": {
+      "seasons": [{"sowTerm": "惊蛰", "harvestTerm": "小暑", "yearOffset": 0}, {"sowTerm": "寒露", "harvestTerm": "芒种", "yearOffset": 1}],
       "duration": 126,
       "yield": 6,
       "straw": 2,
       "level": 1
     },
     "soy": {
+      "seasons": [{"sowTerm": "清明", "harvestTerm": "立秋", "yearOffset": 0}, {"sowTerm": "芒种", "harvestTerm": "寒露", "yearOffset": 0}],
       "duration": 112,
       "yield": 4,
       "straw": 1,
@@ -294,12 +299,14 @@
       "legume": true
     },
     "flax": {
+      "seasons": [{"sowTerm": "春分", "harvestTerm": "夏至", "yearOffset": 0}],
       "duration": 91,
       "yield": 5,
       "straw": 1,
       "level": 2
     },
     "rice": {
+      "seasons": [{"sowTerm": "谷雨", "harvestTerm": "秋分", "yearOffset": 0}],
       "duration": 140,
       "yield": 7,
       "straw": 2,
@@ -308,6 +315,7 @@
       "floodTolerant": true
     },
     "millet": {
+      "seasons": [{"sowTerm": "清明", "harvestTerm": "处暑", "yearOffset": 0}],
       "duration": 98,
       "yield": 5,
       "straw": 2,
@@ -315,6 +323,7 @@
       "waterNeed": 1
     },
     "adzuki": {
+      "seasons": [{"sowTerm": "芒种", "harvestTerm": "白露", "yearOffset": 0}],
       "duration": 84,
       "yield": 3,
       "straw": 1,
@@ -323,12 +332,14 @@
       "legume": true
     },
     "mallow": {
+      "seasons": [{"sowTerm": "白露", "harvestTerm": "立冬", "yearOffset": 0}],
       "duration": 63,
       "yield": 3,
       "straw": 0,
       "level": 1
     },
     "mustard": {
+      "seasons": [{"sowTerm": "秋分", "harvestTerm": "大雪", "yearOffset": 0}],
       "duration": 70,
       "yield": 4,
       "straw": 0,
@@ -729,6 +740,15 @@
       },
       "outputs": {
         "pickles": 2
+      },
+      "wait": 1
+    },
+    "retting": {
+      "inputs": {
+        "flax": 2
+      },
+      "outputs": {
+        "fiber": 1
       },
       "wait": 1
     },

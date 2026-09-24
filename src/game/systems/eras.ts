@@ -1,3 +1,5 @@
+import {cropBatches,plannedField,harvestDates} from './farm-calendar.js';
+import {plotField,fieldYield} from './agriculture.js';
 import {fieldNeedsWater,irrigateField} from './agriculture.js';
 import {calendarMonthDays,availableDays} from './calendar.js';
 import {electricRewardPercent} from '../model/electric.js';
@@ -93,37 +95,37 @@ export function runnableSystems(s:GameState):Set<string>{
   const inst=x.instances[id];if(!inst?.commissioned)continue;
   const operator=inst.enabled&&inst.operator?inst.operator:!inst.operator?'self':null;
   if(!operator)continue;
-  const labor=systemLabor(s,id),b=budgets[operator];if(!b||b.time<labor.time||b.energy<labor.energy)continue;
-  b.time-=labor.time;b.energy-=labor.energy;run.add(id);
+  const labor=systemLabor(s,id),b=budgets[operator];if(!b||b.time<labor.time)continue;
+  b.time-=labor.time;b.energy+=labor.energy;run.add(id);
  }
  return run;
 }
 // Historical capacity estimate only; never credited by stage settlement.
-export function projectEraRemainder(s:GameState,rules:Ruleset,remaining:number){
+export function projectEraRemainder(s:GameState,_rules:Ruleset,remaining:number){
  const empty={remaining:0,harvests:0,harvestUnits:0,shaftBatches:0,craftUnits:0,claims:0,waterSecured:false,notes:[] as string[]};
  if(!s.era||remaining<=0)return empty;
  const notes:string[]=[],run=runnableSystems(s);
  const tap=s.era.index===3&&s.era.tap&&s.household.money>=1;
  const publicWell=stageOf(s).publicWell;
  const waterSecured=run.has('well')||run.has('pump')||tap||publicWell;
- if(s.economy?.farm)notes.push('田间推算只覆盖起始田；扩展田以实际收获计入凭证，不预兑未来收成');
+
  notes.push(waterSecured?(run.has('well')?'井水保障剩余旱季灌溉':run.has('pump')?'机械供水保障剩余旱季灌溉':tap?'公共自来水保障剩余旱季灌溉':'公井保障剩余旱季灌溉'):'无公共供水也无已安排的井泵，旱季收成按当地气候折减');
  const f=s.economy!.field,goods=s.economy!.goods;
  const cropId=f.crop??((f.lastCrop&&(goods[CROPS[f.lastCrop].seed]??0)>0)?f.lastCrop:null)??((goods.seedWheat??0)>0||f.crop?'wheat':null);
  let harvests=0,harvestUnits=0;
- if(cropId){
-  const spec=CROPS[cropId],duration=f.crop?f.duration:spec.duration;
-  const first=!f.crop?duration:f.growth>=duration?0:duration-f.growth;
-  harvests=first===0?1+Math.floor(remaining/duration):first>remaining?0:1+Math.floor((remaining-first)/duration);
-  const drought=rules.scenarios[s.location.id].drought;
-  const success=waterSecured?harvests:Math.floor(harvests*(100-drought)/100);
-  let fertility=f.fertility;const bonus=f.crop?f.bonus:0,modern=s.economy!.modern?.cropBonus??0;
-  for(let i=0;i<success;i++){
-   harvestUnits+=Math.max(1,spec.yield+bonus+modern+Math.min(1,fertility)-(i===0&&f.crop?f.stress:0));
-   fertility=Math.max(0,Math.min(3,fertility+(cropId==='soy'?1:-1)));
+ if(s.economy?.farm&&s.life?.calendar){
+  const now=s.life.calendar.absoluteDay;
+  for(const p of Object.values(s.economy.farm.plots)){
+   const field=plotField(s,p.id);
+   if(field?.crop){const dates=harvestDates(s,p,field);if(dates.mature<=now+remaining&&dates.deadline>now){harvests++;harvestUnits+=fieldYield(s,field);}}
+   for(const plan of p.plans??[]){if(plan.sown||plan.failed||plan.harvested)continue;const projected=plannedField(s,p,plan);const batch=cropBatches(s,plan.year).find(b=>b.id===plan.batchId);if(projected&&batch&&batch.end>now&&plan.harvestDay<=now+remaining){harvests++;harvestUnits+=Math.max(0,Math.floor((CROPS[projected.crop!].yield+Math.min(1,projected.fertility))*projected.batch!.lateFactor));}}
   }
-  notes.push(`田间推算收获${success}次、${harvestUnits}份（${waterSecured?'供水已保障':`当地干旱${drought}%，按可预期非旱季折减`}）`);
- }else notes.push('无在耕作物或可续种的种子，不推算田间收获');
+  notes.push('仅按在田作物与已规划批次预估；假定按时劳动并备妥种子、水土与知识，不兑现未来收成，不自动续种。');
+ }else if(cropId){
+  const duration=f.crop?f.duration:CROPS[cropId].duration;
+  if((f.crop?Math.max(0,duration-f.growth):duration)<=remaining){harvests=1;harvestUnits=fieldYield(s,f);}
+ }
+
  let shaftBatches=0,craftUnits=0;
  if(run.has('shaft')){shaftBatches=remaining;craftUnits=shaftBatches*2;notes.push(`轴加工工位按人员安排推算${shaftBatches}批、${craftUnits}份；假定市场可维持耗材与常规维护`);}
  else if(xHasShaft(s))notes.push('轴加工已建但已暂停或人员时间不足，不计入推算');
